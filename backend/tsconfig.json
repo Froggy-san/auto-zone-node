@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    /* Basic Options */
+    "target": "ES2022" /* Modern Node support */,
+    "module": "NodeNext" /* Standard for modern Node */,
+    "moduleResolution": "NodeNext",
+    "rootDir": "./src" /* Where your .ts files live */,
+    "outDir": "./dist" /* Where compiled .js goes */,
+    "sourceMap": true /* Helpful for debugging */,
+
+    /* Strictness */
+    "strict": true /* Enables all strict type-checking */,
+    "noUncheckedIndexedAccess": true /* From your snippet - very good practice */,
+    "skipLibCheck": true /* Speeds up compilation */,
+    "forceConsistentCasingInFileNames": true,
+
+    /* Interop */
+    "esModuleInterop": true /* Allows 'import express from "express"' */,
+    "isolatedModules": true,
+
+    /* Style */
+    "noImplicitAny": true,
+    "noUnusedLocals": true /* Cleans up your code */,
+    "noUnusedParameters": true
+  },
+  "include": ["src/**/*"] /* Only compile files in src */,
+  "exclude": ["node_modules", "dist"] /* Don't look here */
+}
