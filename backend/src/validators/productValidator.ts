@@ -1,5 +1,4 @@
 import { z } from "zod";
-import mongoose from "mongoose";
 import { objectIdSchema } from "./commen";
 
 // 1. Define the sub-schema for the "Table" inside MoreDetails
@@ -14,7 +13,6 @@ const moreDetailSchema = z.object({
   description: z.string().default(""),
   table: z.array(detailTableSchema).default([]),
 });
-
 
 // body: z.object({}) here we are telling that the createProductSchema is an object that contains the body object in it
 export const createProductSchema = z.object({
