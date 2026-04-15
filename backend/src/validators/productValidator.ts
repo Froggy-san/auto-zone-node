@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { objectIdSchema } from "./commen";
+import { updateProduct } from "../controllers/productController";
 
 // 1. Define the sub-schema for the "Table" inside MoreDetails
 const detailTableSchema = z.object({
@@ -49,5 +50,11 @@ export const createProductSchema = z.object({
     // we discussed earlier. If you renamed it to carModel in the
     // Mongoose schema, change it here too!
     carModel: objectIdSchema.optional(),
+  }),
+});
+
+export const updateProductSchema = createProductSchema.partial().extend({
+  body: createProductSchema.shape.body.partial().extend({
+    imagesToDelete: z.array(z.string()).optional(),
   }),
 });

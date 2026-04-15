@@ -4,7 +4,9 @@ import { catchAsync } from "../utils/catchAsync";
 import multer, { Multer } from "multer";
 import { AppError } from "../utils/appError";
 import sharp from "sharp";
-
+import path from "path";
+import fs from "fs";
+import { ProductImage } from "../@types";
 export const getProducts = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     // 1. Filtering Logic
@@ -170,6 +172,79 @@ export const createProduct = catchAsync(
       data: {
         product: createdProduct,
       },
+    });
+  },
+);
+
+export const getProduct = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const product = await Product.findById(req.params.id);
+    if (!product) {
+      return next(new AppError("No product found with that ID", 404));
+    }
+    res.status(200).json({
+      status: "success",
+      data: {
+        product,
+      },
+    });
+  },
+);
+
+export const updateProduct = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const id = req.params.id;
+    const productBeingUpdated = await Product.findById(id);
+    if (!productBeingUpdated)
+      return next(
+        new AppError(`Failed to grab the associated product ${id}`, 404),
+      );
+
+    const imagesToDelete = req.body.imagesToDelete as string[] | undefined;
+    let imagesToUpload = req.body.productImages as ProductImage[] | undefined;
+
+    if (imagesToDelete && imagesToDelete.length > 0) {
+      // imgUrl is likely "/uploads/products/image-123.jpeg"
+      imagesToDelete.forEach((imgUrl) => {
+        const filePath = path.join(__dirname, "../../public", imgUrl);
+        fs.unlink(filePath, (err) => {
+          if (err) console.error(`Could not delete file: ${filePath}`);
+        });
+      });
+    }
+
+    if (imagesToUpload && imagesToUpload.length) {
+      imagesToUpload = productBeingUpdated.productImages?.push(imagesToUpload);
+    }
+    const updatedProduct = await Product.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      {
+        new: true,
+        runValidators: true,
+      },
+    );
+    if (!updatedProduct) {
+      return next(new AppError("No product found with that ID", 404));
+    }
+    res.status(200).json({
+      status: "success",
+      data: {
+        product: updatedProduct,
+      },
+    });
+  },
+);
+
+export const deleteProduct = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const deletedProduct = await Product.findByIdAndDelete(req.params.id);
+    if (!deletedProduct) {
+      return next(new AppError("No product found with that ID", 404));
+    }
+    res.status(204).json({
+      status: "success",
+      data: null,
     });
   },
 );
