@@ -35,4 +35,4 @@ export const carModelSchema = new Schema(
   },
 );
 
-export const carModel = model<ICarModel>("carModels", carModelSchema);
+export const CarModel = model<ICarModel>("carModels", carModelSchema);

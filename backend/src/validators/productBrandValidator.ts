@@ -1,6 +1,6 @@
 import z from "zod";
 
-export const createProductBrand = z.object({
+export const createProductBrandSchema = z.object({
   body: z.object({
     name: z
       .string()

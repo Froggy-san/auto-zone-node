@@ -5,7 +5,15 @@ import cors from "cors";
 import expressRateLimit from "express-rate-limit";
 import helmet from "helmet";
 import ExpressMongoSanitize from "express-mongo-sanitize";
+import { globalErrorHandler } from "./controllers/errorController";
 
+import productRouter from "./routes/productRoutes";
+
+import productBrandRouter from "./routes/productBrandRoutes";
+import productTypeRouter from "./routes/productTypeRoutes";
+import carMakerRouter from "./routes/carMakerRoutes";
+import carModelRouter from "./routes/carModelRoutes";
+import categoryRouter from "./routes/categoryRoutes";
 const app = express();
 
 // Middlewares
@@ -20,9 +28,8 @@ const limiter = expressRateLimit({
 app.use("/api", limiter);
 app.use(cors()); // Crucial for your React frontend!
 app.use(express.json({ limit: "10kb" })); // Body parser
-// Body parser
-app.use(express.json({ limit: "10kb" }));
-app.use(ExpressMongoSanitize());
+
+// app.use(ExpressMongoSanitize());
 
 // 2) HEALTH CHECK ROUTE
 app.get("/health", (req: Request, res: Response) => {
@@ -35,4 +42,11 @@ if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
 }
 
+app.use("/api/v1/products", productRouter);
+app.use("/api/v1/productBrands", productBrandRouter);
+app.use("/api/v1/productTypes", productTypeRouter);
+app.use("/api/v1/categories", categoryRouter);
+app.use("/api/v1/carMakers", carMakerRouter);
+app.use("/api/v1/carModels", carModelRouter);
+app.use(globalErrorHandler);
 export default app;
