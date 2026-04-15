@@ -32,8 +32,16 @@ export const createProductSchema = z.object({
     productType: objectIdSchema,
     productBrand: objectIdSchema,
     category: objectIdSchema,
-
-    maker: objectIdSchema.optional(),
+    productImages: z
+      .array(
+        z.object({
+          imageUrl: z.string().url(),
+          filename: z.string(),
+          isMain: z.boolean().optional(),
+        }),
+      )
+      .optional(),
+    carMaker: objectIdSchema.optional(),
     // Keep 'model' here if you want, but remember our 'carModel' clash
     // we discussed earlier. If you renamed it to carModel in the
     // Mongoose schema, change it here too!

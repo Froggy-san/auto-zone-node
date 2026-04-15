@@ -14,6 +14,7 @@ import productTypeRouter from "./routes/productTypeRoutes";
 import carMakerRouter from "./routes/carMakerRoutes";
 import carModelRouter from "./routes/carModelRoutes";
 import categoryRouter from "./routes/categoryRoutes";
+import path from "path";
 const app = express();
 
 // Middlewares
@@ -41,7 +42,8 @@ app.get("/health", (req: Request, res: Response) => {
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
 }
-
+// This line tells Express: "If someone asks for /uploads, look inside the public/uploads folder"
+app.use("/uploads", express.static(path.join(__dirname, "../public/uploads")));
 app.use("/api/v1/products", productRouter);
 app.use("/api/v1/productBrands", productBrandRouter);
 app.use("/api/v1/productTypes", productTypeRouter);

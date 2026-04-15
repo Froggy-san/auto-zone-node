@@ -1,5 +1,5 @@
 import mongoose, { Schema, model, Document } from "mongoose";
-import { MoreDetail } from "../@types";
+import { MoreDetail, ProductImage } from "../@types";
 
 export interface IProduct extends Document {
   name: string;
@@ -13,8 +13,9 @@ export interface IProduct extends Document {
   category: mongoose.Types.ObjectId;
   productType: mongoose.Types.ObjectId;
   productBrand: mongoose.Types.ObjectId;
-  maker: mongoose.Types.ObjectId;
+  carMaker: mongoose.Types.ObjectId;
   carModel: mongoose.Types.ObjectId;
+  productImages?: ProductImage[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -32,6 +33,12 @@ const moreDetailSchema = new Schema(
   },
   { _id: false },
 ); // <--- IMPORTANT: Prevents Mongoose from giving every detail a random ID
+
+const productImageSchema = new Schema({
+  imageUrl: { type: String, required: true },
+  filename: { type: String, required: true },
+  isMain: { type: Boolean, default: false },
+});
 
 const productSchema = new Schema<IProduct>(
   {
@@ -91,7 +98,7 @@ const productSchema = new Schema<IProduct>(
       type: Schema.Types.ObjectId,
       ref: "productBrands",
     },
-    maker: {
+    carMaker: {
       type: Schema.Types.ObjectId,
       ref: "carMakers",
     },
@@ -99,6 +106,7 @@ const productSchema = new Schema<IProduct>(
       type: Schema.Types.ObjectId,
       ref: "carModels",
     },
+    productImages: [productImageSchema], // This is an array of subdocuments, not references
   },
   {
     timestamps: true, // This automatically creates 'createdAt' and 'updatedAt'
