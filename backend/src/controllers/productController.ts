@@ -4,14 +4,74 @@ import { catchAsync } from "../utils/catchAsync";
 import multer, { Multer } from "multer";
 import { AppError } from "../utils/appError";
 import sharp from "sharp";
-import is from "zod/v4/locales/is.js";
 
 export const getProducts = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const productsQuery = await Product.find();
+    // 1. Filtering Logic
+    const queryObj = { ...req.query };
+    const excludedFields = ["page", "sort", "limit", "fields"];
+    excludedFields.forEach((el) => delete queryObj[el]);
+
+    // 2. Advanced Filtering (gte, gt, etc.)
+    let queryStr = JSON.stringify(queryObj);
+    queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
+
+    const filtersObj = JSON.parse(queryStr);
+
+    // 3. IMPROVEMENT: Make string filters case-insensitive (Regex)
+    // This allows searching 'bosch' to find 'Bosch'
+    Object.keys(filtersObj).forEach((key) => {
+      if (typeof filtersObj[key] === "string") {
+        filtersObj[key] = { $regex: filtersObj[key], $options: "i" };
+      }
+    });
+
+    let query = Product.find(filtersObj);
+
+    // 4. Sorting
+    if (req.query.sort && typeof req.query.sort === "string") {
+      const sortBy = req.query.sort.split(",").join(" ");
+      query = query.sort(sortBy);
+    } else {
+      query = query.sort("-createdAt");
+    }
+
+    // 5. Field Limiting
+    if (req.query.fields && typeof req.query.fields === "string") {
+      const selectFields = req.query.fields.split(",").join(" ");
+      query = query.select(selectFields);
+    } else {
+      query = query.select("-__v");
+    }
+
+    // 6. Pagination
+    const pageNum = parseInt(req.query.page as string, 10) || 1;
+    const limitNum = parseInt(req.query.limit as string, 10) || 100; // Default to 100 for better performance
+    const skip = (pageNum - 1) * limitNum;
+
+    query = query.skip(skip).limit(limitNum);
+
+    // 7. Execution & Meta Data
+    const products = await query;
+    const totalCount = await Product.countDocuments(filtersObj);
+    const totalPages = Math.ceil(totalCount / limitNum);
+
+    // After you calculate totalPages
+    if (pageNum > totalPages && totalCount > 0) {
+      return next(new AppError("This page does not exist", 404));
+    }
     res.status(200).json({
       status: "success",
-      data: { data: productsQuery },
+      results: products.length,
+      data: {
+        data: products,
+        pagination: {
+          totalCount,
+          totalPages,
+          currentPage: pageNum,
+          limit: limitNum,
+        },
+      },
     });
   },
 );
@@ -59,6 +119,7 @@ const multerFilter = (req: Request, file: Express.Multer.File, cb: any) => {
 const upload = multer({
   storage: multerStorage,
   fileFilter: multerFilter,
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB safety limit
   // dest: "uploads/products", // This is where multer will temporarily store the uploaded files
 });
 
@@ -71,7 +132,7 @@ export const convertProductImages = catchAsync(
     const files = req.files as Express.Multer.File[];
     if (!files || files.length === 0) return next();
 
-    req.body.images = [];
+    req.body.productImages = [];
 
     // 2. Process images
     await Promise.all(
@@ -79,21 +140,16 @@ export const convertProductImages = catchAsync(
         const imageName = `product-${Date.now()}-${Math.round(Math.random() * 1e9)}.jpeg`;
 
         await sharp(file.buffer)
-          .resize(800, 800) // Recommended to keep your garage catalog looking uniform
+          // .resize(800, 800) // Recommended to keep your garage catalog looking uniform
           .toFormat("jpeg")
-          .jpeg({ quality: 90 })
+          // .jpeg({ quality: 90 })
           .toFile(`public/uploads/products/${imageName}`);
 
         // 3. Robust isMain logic
         // It's main if: it matches the name OR if it's the first image and no name was provided
         let isMain = file.originalname === req.body.mainImageName;
 
-        // Fallback: If no mainImageName was sent, make the first image the main one
-        if (!req.body.mainImageName && i === 0) {
-          isMain = true;
-        }
-
-        req.body.images.push({
+        req.body.productImages.push({
           imageUrl: `/uploads/products/${imageName}`,
           filename: file.originalname,
           isMain: isMain,
@@ -106,6 +162,7 @@ export const convertProductImages = catchAsync(
 );
 export const createProduct = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
+    console.log(req.body);
     const createdProduct = await Product.create(req.body);
     console.log(createdProduct, "PRODUCT CREATED");
     res.status(201).json({

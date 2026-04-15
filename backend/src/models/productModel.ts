@@ -16,6 +16,7 @@ export interface IProduct extends Document {
   carMaker: mongoose.Types.ObjectId;
   carModel: mongoose.Types.ObjectId;
   productImages?: ProductImage[];
+  mainImageName?: string; // This is only used during creation, not stored in DB
   createdAt: Date;
   updatedAt: Date;
 }
@@ -107,6 +108,10 @@ const productSchema = new Schema<IProduct>(
       ref: "carModels",
     },
     productImages: [productImageSchema], // This is an array of subdocuments, not references
+    mainImageName: {
+      type: String,
+      select: false, // This field is only used during creation, not stored in DB
+    },
   },
   {
     timestamps: true, // This automatically creates 'createdAt' and 'updatedAt'

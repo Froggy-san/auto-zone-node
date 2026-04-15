@@ -18,10 +18,10 @@ const moreDetailSchema = z.object({
 export const createProductSchema = z.object({
   body: z.object({
     name: z.string().min(3).max(100),
-    listPrice: z.number().positive(),
-    salePrice: z.number().positive(),
-    stock: z.number().int().nonnegative().optional(),
-    isAvailable: z.boolean().optional(),
+    listPrice: z.coerce.number().positive(),
+    salePrice: z.coerce.number().positive(),
+    stock: z.coerce.number().int().nonnegative().optional(),
+    isAvailable: z.coerce.boolean().optional(),
 
     // Now expecting an array of string IDs, not numbers
     generations: z.array(objectIdSchema).optional(),
@@ -35,12 +35,15 @@ export const createProductSchema = z.object({
     productImages: z
       .array(
         z.object({
-          imageUrl: z.string().url(),
+          imageUrl: z.string(),
+          // .url(),
           filename: z.string(),
           isMain: z.boolean().optional(),
         }),
       )
       .optional(),
+    mainImageName: z.string().optional().default(""),
+
     carMaker: objectIdSchema.optional(),
     // Keep 'model' here if you want, but remember our 'carModel' clash
     // we discussed earlier. If you renamed it to carModel in the
