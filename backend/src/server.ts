@@ -33,9 +33,7 @@ mongoose
     console.error("❌ DB connection error:", err);
   });
 
-
-app.set('query parser', 'extended'); // extends the queries
-
+app.set("query parser", "extended"); // extends the queries
 
 const port = process.env.PORT || 3000;
 

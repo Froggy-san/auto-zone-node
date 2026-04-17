@@ -53,8 +53,14 @@ export const createProductSchema = z.object({
   }),
 });
 
+// ! Here we are showing you how to tell zod to convert the imagesToDelete value into an array incase it's a single string.
+// ! We are not using it becasue we are using a middleware caleld 'ensureArray' instead but make note of how we used the 'z.preprocess'
 export const updateProductSchema = createProductSchema.partial().extend({
   body: createProductSchema.shape.body.partial().extend({
+    //     imagesToDelete: z.preprocess((val) => {
+    //   if (typeof val === 'string') return [val];
+    //   return val;
+    // }, z.array(z.string())).optional(),
     imagesToDelete: z.array(z.string()).optional(),
   }),
 });

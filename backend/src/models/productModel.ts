@@ -15,7 +15,7 @@ export interface IProduct extends Document {
   productBrand: mongoose.Types.ObjectId;
   carMaker: mongoose.Types.ObjectId;
   carModel: mongoose.Types.ObjectId;
-  productImages?: ProductImage[];
+  productImages: ProductImage[];
   mainImageName?: string; // This is only used during creation, not stored in DB
   createdAt: Date;
   updatedAt: Date;

@@ -7,6 +7,8 @@ import sharp from "sharp";
 import path from "path";
 import fs from "fs";
 import { ProductImage } from "../@types";
+import { deleteFiles } from "../utils/helper";
+
 export const getProducts = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     // 1. Filtering Logic
@@ -112,7 +114,11 @@ const multerStorage = multer.memoryStorage();
 
 const multerFilter = (req: Request, file: Express.Multer.File, cb: any) => {
   // Check for "image/" (e.g., image/png, image/jpeg)
-  if (file.mimetype.startsWith("image")) {
+
+  if (
+    file.mimetype.startsWith("image") ||
+    file.mimetype === "application/octet-stream"
+  ) {
     cb(null, true);
   } else {
     cb(new AppError("Not an image! Please upload only images.", 400), false);
@@ -193,55 +199,115 @@ export const getProduct = catchAsync(
 
 export const updateProduct = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const id = req.params.id;
+    const { id } = req.params;
+
+    // 1) Get the current product
     const productBeingUpdated = await Product.findById(id);
-    if (!productBeingUpdated)
-      return next(
-        new AppError(`Failed to grab the associated product ${id}`, 404),
-      );
-
-    const imagesToDelete = req.body.imagesToDelete as string[] | undefined;
-    let imagesToUpload = req.body.productImages as ProductImage[] | undefined;
-
-    if (imagesToDelete && imagesToDelete.length > 0) {
-      // imgUrl is likely "/uploads/products/image-123.jpeg"
-      imagesToDelete.forEach((imgUrl) => {
-        const filePath = path.join(__dirname, "../../public", imgUrl);
-        fs.unlink(filePath, (err) => {
-          if (err) console.error(`Could not delete file: ${filePath}`);
-        });
-      });
+    if (!productBeingUpdated) {
+      return next(new AppError(`No product found with ID: ${id}`, 404));
     }
 
-    if (imagesToUpload && imagesToUpload.length) {
-      imagesToUpload = productBeingUpdated.productImages?.push(imagesToUpload);
+    // 2) Handle imagesToDelete (Safe Parse)
+    let imagesToDelete: string[] = [];
+    if (typeof req.body.imagesToDelete === "string") {
+      imagesToDelete = JSON.parse(req.body.imagesToDelete);
+    } else if (Array.isArray(req.body.imagesToDelete)) {
+      imagesToDelete = req.body.imagesToDelete;
     }
-    const updatedProduct = await Product.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      {
-        new: true,
-        runValidators: true,
-      },
+
+    // 3) Calculate the merged image array
+    const newImages = (req.body.productImages as ProductImage[]) || [];
+
+    const remainingImages = (productBeingUpdated.productImages || []).filter(
+      (img) => !imagesToDelete.includes(img.imageUrl),
     );
+
+    // Overwrite the body with the final merged list
+    req.body.productImages = [...remainingImages, ...newImages];
+
+    // 4) Update the product
+    const updatedProduct = await Product.findByIdAndUpdate(id, req.body, {
+      new: true,
+      runValidators: true,
+    });
+
+    // 5) FAILSAFE: If update fails, only delete the NEWLY uploaded files
     if (!updatedProduct) {
+      deleteFiles(newImages.map((m) => m.imageUrl));
+      // newImages.forEach((img: ProductImage) => {
+      //   const filePath = path.join(__dirname, "../../public", img.imageUrl);
+      //   fs.unlink(filePath, () => {});
+      // });
       return next(new AppError("No product found with that ID", 404));
     }
+
+    // 6) SUCCESS: Now delete the files the user specifically marked for removal
+    if (imagesToDelete.length > 0) {
+      deleteFiles(imagesToDelete);
+      // imagesToDelete.forEach((imgUrl) => {
+      //   const filePath = path.join(__dirname, "../../public", imgUrl);
+      //   fs.unlink(filePath, (err) => {
+      //     if (err) console.error(`Could not delete file: ${filePath}`);
+      //   });
+      // });
+    }
+
     res.status(200).json({
       status: "success",
-      data: {
-        product: updatedProduct,
-      },
+      data: { product: updatedProduct },
     });
   },
 );
 
 export const deleteProduct = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const deletedProduct = await Product.findByIdAndDelete(req.params.id);
-    if (!deletedProduct) {
-      return next(new AppError("No product found with that ID", 404));
+    const { id } = req.params;
+
+    const product = await Product.findById(id);
+
+    if (!product) return next(new AppError(`Failed to find Id ${id}`, 404));
+
+    if (product.productImages?.length) {
+      const imagesToDelete = product.productImages?.map((img) => img.imageUrl);
+      deleteFiles(imagesToDelete);
     }
+
+    await Product.findByIdAndDelete(req.params.id);
+
+    res.status(204).json({
+      status: "success",
+      data: null,
+    });
+  },
+);
+
+export const deleteMultipleProducts = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { ids } = req.body; // Expecting ['id1', 'id2', ...]
+
+    // 1. Find all products to get their image paths before they are gone
+    const productsToDelete = await Product.find({
+      _id: { $in: ids },
+    });
+
+    if (!productsToDelete.length) {
+      return next(new AppError("No products found with those IDs", 404));
+    }
+
+    // 2. Extract all image URLs safely
+    // .flatMap handles the nested arrays, .map grabs the specific string
+    const allImgs = productsToDelete.flatMap((product) =>
+      product.productImages.map((img) => img.imageUrl),
+    );
+
+    // 3. Delete physical files
+    if (allImgs.length > 0) {
+      deleteFiles(allImgs);
+    }
+
+    // 4. Delete from Database
+    await Product.deleteMany({ _id: { $in: ids } });
+
     res.status(204).json({
       status: "success",
       data: null,
