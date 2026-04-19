@@ -27,7 +27,13 @@ const limiter = expressRateLimit({
 });
 
 app.use("/api", limiter);
-app.use(cors()); // Crucial for your React frontend!
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URLs, // Your React URL
+    credentials: true, // The backend must also say "Yes, I allow cookies"
+  }),
+); // Crucial for your React frontend!
+
 app.use(express.json({ limit: "10kb" })); // Body parser
 
 // app.use(ExpressMongoSanitize());

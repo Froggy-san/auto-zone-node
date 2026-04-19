@@ -68,7 +68,7 @@ export const getProducts = catchAsync(
       status: "success",
       results: products.length,
       data: {
-        data: products,
+        products,
         pagination: {
           totalCount,
           totalPages,
