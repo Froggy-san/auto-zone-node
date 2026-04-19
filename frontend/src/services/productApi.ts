@@ -13,7 +13,7 @@ interface Filters {
   productBrand?: string
   isAvailable?: boolean
   name?: string
-  page?: string
+  page?: number
   limit?: number
 }
 
