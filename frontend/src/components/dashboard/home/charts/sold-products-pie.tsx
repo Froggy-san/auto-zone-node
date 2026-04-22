@@ -76,58 +76,73 @@ const colors = [
   "var(--dashboard-orange)",
 ];
 
+interface ProductPie {
+  id: number;
+  productName: string;
+  productImage: string;
+  pricePerUnit: number;
+  totalCount: number;
+  totalDiscount: number;
+  totalPriceAfterDiscount: number;
+}
+
 interface Props {
-  salesData: Service[][];
+  productsPieData: ProductPie[];
   date: (string | Date | undefined)[];
   description: string;
 }
-export function SoldProductsPie({ salesData, date, description }: Props) {
+export function SoldProductsPie({ productsPieData, date, description }: Props) {
   const [sortDataBy, setSortDataBy] = React.useState<
     "totalPriceAfterDiscount" | "totalCount"
   >("totalCount");
   const isBigScreen = useMediaQuery("(min-width: 768px)");
   const router = useRouter();
-  const flatData = salesData.flat();
-  const products = flatData.map((item) => item.productsToSell).flat();
+  // const flatData = salesData.flat();
+  // const products = flatData.map((item) => item.productsToSell).flat();
 
-  const productIds = Array.from(new Set(products.map((pro) => pro.product.id)));
+  // const productIds = Array.from(new Set(products.map((pro) => pro.product.id)));
 
-  const productsPie = React.useMemo(() => {
-    return productIds
-      .map((id, index) => {
-        const pro = products.find((item) => item.product.id === id);
-        const proImages = pro?.product.productImages;
-        const image: string | null = proImages?.length
-          ? proImages?.find((img) => img.isMain)?.imageUrl ||
-            proImages[0].imageUrl
-          : null;
-        return products
-          .filter((pro) => pro.product.id === id)
-          .reduce(
-            (acc, currItem) => {
-              acc.totalCount += currItem.count;
-              acc.totalDiscount += currItem.discount * currItem.count;
-              acc.totalPriceAfterDiscount += currItem.totalPriceAfterDiscount;
-              return acc;
-            },
-            {
-              id: id,
-              productName: pro?.product.name,
-              productImage: image,
-              pricePerUnit: pro?.pricePerUnit,
-              totalCount: 0,
-              totalDiscount: 0,
-              // fill: colors[index],
-              totalPriceAfterDiscount: 0,
-            }
-          );
-      })
-      .sort((a, b) => b[sortDataBy] - a[sortDataBy])
-      .map((item, index) => {
-        return { ...item, fill: colors[index] || "hsl(0deg 0% 50.2%)" };
-      });
-  }, [flatData]);
+  // const productsPie = React.useMemo(() => {
+  //   return productIds
+  //     .map((id, index) => {
+  //       const pro = products.find((item) => item.product.id === id);
+  //       const proImages = pro?.product.productImages;
+  //       const image: string | null = proImages?.length
+  //         ? proImages?.find((img) => img.isMain)?.imageUrl ||
+  //           proImages[0].imageUrl
+  //         : null;
+  //       return products
+  //         .filter((pro) => pro.product.id === id)
+  //         .reduce(
+  //           (acc, currItem) => {
+  //             acc.totalCount += currItem.count;
+  //             acc.totalDiscount += currItem.discount * currItem.count;
+  //             acc.totalPriceAfterDiscount += currItem.totalPriceAfterDiscount;
+  //             return acc;
+  //           },
+  //           {
+  //             id: id,
+  //             productName: pro?.product.name,
+  //             productImage: image,
+  //             pricePerUnit: pro?.pricePerUnit,
+  //             totalCount: 0,
+  //             totalDiscount: 0,
+  //             // fill: colors[index],
+  //             totalPriceAfterDiscount: 0,
+  //           },
+  //         );
+  //     })
+  //     .sort((a, b) => b[sortDataBy] - a[sortDataBy])
+  //     .map((item, index) => {
+  //       return { ...item, fill: colors[index] || "hsl(0deg 0% 50.2%)" };
+  //     });
+  // }, [flatData]);
 
+  const productsPie = productsPieData
+    .sort((a, b) => b[sortDataBy] - a[sortDataBy])
+    .map((item, index) => {
+      return { ...item, fill: colors[index] || "hsl(0deg 0% 50.2%)" };
+    });
   // If there is more than 6 items we want to grop the rest into the others group.
   const productMoreThanSix = React.useMemo(() => {
     if (productsPie.length > 6) {
@@ -150,7 +165,7 @@ export function SoldProductsPie({ salesData, date, description }: Props) {
           totalCount: 0,
           totalDiscount: 0,
           totalPriceAfterDiscount: 0,
-        }
+        },
       );
       return [...firstSix, theTotalsFromSix];
     } else return [];
@@ -168,7 +183,7 @@ export function SoldProductsPie({ salesData, date, description }: Props) {
 
         return acc;
       },
-      { totalCount: 0, totalPriceAfterDiscount: 0 }
+      { totalCount: 0, totalPriceAfterDiscount: 0 },
     );
   }, [productsSoldData]);
   // const config : any = {
@@ -329,10 +344,10 @@ const ProductSoldTooltip: React.FC<ChartTooltipContentProps> = ({
   return (
     <div className=" grid min-w-[8rem] items-start gap-1.5 rounded-lg border border-border/50 bg-background px-2.5 py-1.5 text-xs shadow-xl">
       {" "}
-      <div className=" flex items-center  break-all gap-1">
+      <div className=" flex items-start  break-all gap-1">
         <div
           className={cn(
-            `shrink-0 rounded-[2px] border-[--color-border]  h-2.5 w-2.5`
+            `shrink-0 rounded-[2px] border-[--color-border]  mt-[3.2px] h-2.5 w-2.5`,
           )}
           style={{ backgroundColor: `${data.fill} ` }}
         />
@@ -350,7 +365,7 @@ const ProductSoldTooltip: React.FC<ChartTooltipContentProps> = ({
       {data.productName !== "Other" && (
         <div
           className={cn(
-            "flex flex-1 gap-1 justify-between leading-none items-center"
+            "flex flex-1 gap-1 justify-between leading-none items-center",
           )}
         >
           <div className="grid gap-1.5">
@@ -364,7 +379,7 @@ const ProductSoldTooltip: React.FC<ChartTooltipContentProps> = ({
       )}
       <div
         className={cn(
-          "flex flex-1 gap-1 justify-between leading-none items-center"
+          "flex flex-1 gap-1 justify-between leading-none items-center",
         )}
       >
         <span className="text-muted-foreground">Total count:</span>
@@ -375,7 +390,7 @@ const ProductSoldTooltip: React.FC<ChartTooltipContentProps> = ({
       </div>
       <div
         className={cn(
-          "flex flex-1 gap-1 justify-between leading-none items-center"
+          "flex flex-1 gap-1 justify-between leading-none items-center",
         )}
       >
         <span className="text-muted-foreground">Total Discount:</span>
@@ -386,7 +401,7 @@ const ProductSoldTooltip: React.FC<ChartTooltipContentProps> = ({
       </div>
       <div
         className={cn(
-          "flex flex-1 gap-1 justify-between leading-none items-center"
+          "flex flex-1 gap-1 justify-between leading-none items-center",
         )}
       >
         <span className="text-muted-foreground">Net:</span>

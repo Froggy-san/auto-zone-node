@@ -1,5 +1,5 @@
 import { getCarsAction } from "@lib/actions/carsAction";
-import { CarItem as CarItemProps } from "@lib/types";
+import { CarItem as CarItemProps, ClientWithPhoneNumbers } from "@lib/types";
 import React from "react";
 import CarItem from "./car-item";
 import { Car } from "lucide-react";
@@ -20,8 +20,9 @@ import ErrorMessage from "@components/error-message";
 interface CarsListProps {
   cars: CarItemProps[] | undefined;
   error: string;
+  clients: ClientWithPhoneNumbers[];
 }
-const CarsList = ({ cars, error }: CarsListProps) => {
+const CarsList = ({ cars, clients, error }: CarsListProps) => {
   if (error) return <ErrorMessage>{error}</ErrorMessage>;
   if (!cars) return <p>Something went wrong</p>;
   if (!cars.length)
@@ -35,7 +36,12 @@ const CarsList = ({ cars, error }: CarsListProps) => {
     <ul className="  gap-3 border-t  px-2 pt-2 grid grid-cols-1">
       {cars &&
         cars.map((car) => (
-          <CarItem pageSize={cars.length} key={car.id} car={car} />
+          <CarItem
+            pageSize={cars.length}
+            key={car.id}
+            car={car}
+            client={clients.find((client) => client.id === car.clientId)}
+          />
         ))}
     </ul>
   );

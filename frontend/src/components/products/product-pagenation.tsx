@@ -1,12 +1,14 @@
-"use client";
-import { PAGE_SIZE } from "@lib/constants";
-import * as React from "react";
-import usePagination from "@mui/material/usePagination/usePagination";
-import { Button } from "@components/ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useMediaQuery } from "@mui/material";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useIntersectionProvidor } from "./intersection-providor";
+"use client"
+import { PAGE_SIZE } from "@/lib/constants"
+import * as React from "react"
+import usePagination from "@mui/material/usePagination"
+
+import { Button } from "@/components/ui/button"
+import { ChevronLeft, ChevronRight } from "lucide-react"
+import { useMediaQuery } from "@mui/material"
+
+import { useIntersectionProvidor } from "./intersection-providor"
+import { useLocation, useNavigate, useSearchParams } from "react-router"
 
 interface ProductsListProps {
   // name?: string;
@@ -14,19 +16,19 @@ interface ProductsListProps {
   // productTypeId?: string;
   // productBrandId?: string;
   // isAvailable?: string;
-  count: number;
+  count: number
 }
 const ProductPagenation: React.FC<ProductsListProps> = ({ count }) => {
-  const { ref } = useIntersectionProvidor();
+  const { ref } = useIntersectionProvidor()
 
-  const searchParam = useSearchParams();
-  const router = useRouter();
-  const pathname = usePathname();
+  const [searchParam] = useSearchParams()
+  const navigate = useNavigate()
+  const pathname = useLocation().pathname
 
-  const defaultValue = searchParam.get("page") ?? "1";
-  const numberOfPages = Math.ceil(count / PAGE_SIZE);
+  const defaultValue = searchParam.get("page") ?? "1"
+  const numberOfPages = Math.ceil(count / PAGE_SIZE)
 
-  const isSmallScreen = useMediaQuery("(max-width:600px)");
+  const isSmallScreen = useMediaQuery("(max-width:600px)")
 
   const { items } = usePagination({
     // defaultPage: Number(defaultValue),
@@ -34,36 +36,36 @@ const ProductPagenation: React.FC<ProductsListProps> = ({ count }) => {
     siblingCount: isSmallScreen ? 0 : 1, // No sibling buttons on small screens
     boundaryCount: 1, // Only 1 boundary button on small screens
     onChange: (event: React.ChangeEvent<unknown>, page: number) => {
-      if (page > numberOfPages || page < 1) return;
-      const params = new URLSearchParams(searchParam);
-      params.set("page", String(page));
-      router.push(`${pathname}?${params.toString()}`);
+      if (page > numberOfPages || page < 1) return
+      const params = new URLSearchParams(searchParam)
+      params.set("page", String(page))
+      navigate(`${pathname}?${params.toString()}`)
     },
-  });
+  })
 
-  React.useEffect(() => {
-    const currentPage = Number(defaultValue);
-    const prefechParams = new URLSearchParams(searchParam);
-    if (currentPage < numberOfPages) {
-      prefechParams.set("page", String(currentPage + 1));
-      router.prefetch(`${pathname}?${prefechParams.toString()}`);
-    }
+  // React.useEffect(() => {
+  //   const currentPage = Number(defaultValue);
+  //   const prefechParams = new URLSearchParams(searchParam);
+  //   if (currentPage < numberOfPages) {
+  //     prefechParams.set("page", String(currentPage + 1));
+  //     navigate.prefetch(`${pathname}?${prefechParams.toString()}`);
+  //   }
 
-    if (currentPage > 1) {
-      prefechParams.set("page", String(currentPage - 1));
-      router.prefetch(`${pathname}?${prefechParams.toString()}`);
-    }
-  }, [defaultValue, searchParam, pathname, numberOfPages, router]);
-  if (!count) return null;
+  //   if (currentPage > 1) {
+  //     prefechParams.set("page", String(currentPage - 1));
+  //     navigate.prefetch(`${pathname}?${prefechParams.toString()}`);
+  //   }
+  // }, [defaultValue, searchParam, pathname, numberOfPages, navigate]);
+  if (!count) return null
   return (
-    <nav ref={ref} className=" w-full my-4">
-      <ul className="  flex gap-3  w-full justify-center">
+    <nav ref={ref} className="my-4 w-full">
+      <ul className="flex w-full justify-center gap-3">
         {/* eslint-disable-next-line @typescript-eslint/no-unused-vars */}
         {items.map(({ page, type, disabled, ...item }, index) => {
-          let children = null;
+          let children = null
 
           if (type === "start-ellipsis" || type === "end-ellipsis") {
-            children = "…";
+            children = "…"
           } else if (type === "page") {
             children = (
               <Button
@@ -79,7 +81,7 @@ const ProductPagenation: React.FC<ProductsListProps> = ({ count }) => {
               >
                 {page}
               </Button>
-            );
+            )
           } else {
             children = (
               <Button
@@ -103,14 +105,14 @@ const ProductPagenation: React.FC<ProductsListProps> = ({ count }) => {
                   </>
                 )}
               </Button>
-            );
+            )
           }
 
-          return <li key={index}>{children}</li>;
+          return <li key={index}>{children}</li>
         })}
       </ul>
     </nav>
-  );
-};
+  )
+}
 
-export default ProductPagenation;
+export default ProductPagenation

@@ -43,6 +43,7 @@ export const ProductsComboBox: React.FC<ComboBoxProps> = ({
   productToSell,
 }) => {
   const [open, setOpen] = React.useState(false);
+
   // const [value, setValue] = React.useState(0);
   const selected = options.find((option) => option.id === value);
   const seletedImg = selected?.productImages.length
@@ -93,14 +94,14 @@ export const ProductsComboBox: React.FC<ComboBoxProps> = ({
 
                 const isSelected = productToSell?.some(
                   (item) =>
-                    item.productId === option.id && selected?.id !== option.id
+                    item.productId === option.id && selected?.id !== option.id,
                 );
 
                 return (
                   <CommandItem
                     key={option.id}
                     value={
-                      option.name + option.categories.name + String(option.id)
+                      option.name + option?.categories?.name + String(option.id)
                     } // to avoid selecting two or more items that has the same name proprty.
                     disabled={
                       !option.isAvailable || !option.stock || isSelected
@@ -117,7 +118,7 @@ export const ProductsComboBox: React.FC<ComboBoxProps> = ({
                         <Check
                           className={cn(
                             " h-4 w-4 shrink-0",
-                            value === option.id ? "opacity-100" : "opacity-0"
+                            value === option.id ? "opacity-100" : "opacity-0",
                           )}
                         />
                       )}
@@ -127,7 +128,7 @@ export const ProductsComboBox: React.FC<ComboBoxProps> = ({
                       )}
                       <p className=" text-wrap  text-left ">
                         Name: {option.name} / Category :{" "}
-                        {option.categories.name}{" "}
+                        {option.categories?.name}{" "}
                         <span className=" text-xs  text-muted-foreground text-nowrap ">
                           Stock: {option.stock}
                         </span>

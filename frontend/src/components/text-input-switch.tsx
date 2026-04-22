@@ -21,7 +21,7 @@ export default function TextInputSwitch({
   isLoading,
 }: {
   setLoading: React.Dispatch<SetStateAction<boolean>>;
-  item: Category;
+  item: { id: number; name: string };
   ItemType: ItemType;
   isLoading: boolean;
 }) {

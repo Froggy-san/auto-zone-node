@@ -29,7 +29,16 @@ import { deleteServiceStatus } from "@lib/actions/serviceStatusAction";
 import Spinner from "@components/Spinner";
 import { Cross2Icon } from "@radix-ui/react-icons";
 import StatusFormDialog from "./insert-data/status-form-dialog";
+import { RiCircleLine, RiProgress3Line, RiProgress4Line } from "react-icons/ri";
+
 import { useTheme } from "next-themes";
+import {
+  CircleCheck,
+  CircleCheckBig,
+  CircleDashed,
+  Clock4,
+  ClockAlert,
+} from "lucide-react";
 type Status =
   | "Pending"
   | "InProgress"
@@ -83,12 +92,12 @@ const StatusBadge = ({
                   if (controls) setisEditing((is) => !is);
                 }}
                 className={cn(
-                  "text-xs select-none w-fit font-semibold flex items-center justify-center gap-1  px-2 py-1  whitespace-nowrap text-center rounded-lg bg-primary text-primary-foreground  transition-all",
+                  "text-xs select-none w-fit font-semibold flex items-center justify-center gap-1  px-2.5 py-[0.15rem]  whitespace-nowrap text-center rounded-full bg-primary text-primary-foreground  transition-all",
 
                   {
-                    "bg-dashboard-orange text-dashboard-text-orange":
-                      status.name.toLowerCase() === "pending",
                     "bg-dashboard-blue text-dashboard-text-blue":
+                      status.name.toLowerCase() === "pending",
+                    "  bg-dashboard-orange text-dashboard-text-orange ":
                       status.name.toLowerCase() === "in progress",
                     " text-red-800  dark:text-red-200  bg-destructive/70":
                       status.name.toLowerCase() === "canceled",
@@ -117,6 +126,19 @@ const StatusBadge = ({
                       : "  primary-foreground",
                 }}
               >
+                {status.name.toLocaleLowerCase() == "in progress" && (
+                  <RiProgress4Line className=" w-4 h-4" />
+                )}
+                {status.name.toLocaleLowerCase() == "pending" && (
+                  <Clock4 className=" w-4 h-4" />
+                )}
+                {status.name.toLocaleLowerCase() == "canceled" && (
+                  <RiCircleLine className=" w-4 h-4" />
+                )}
+                {status.name.toLocaleLowerCase() == "done" && (
+                  // <CircleCheckBig className=" w-4 h-4" />
+                  <CircleCheck className=" w-4 h-4" />
+                )}
                 {status.name}
                 {controls ? (
                   <DeleteBtn

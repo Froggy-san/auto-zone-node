@@ -1,28 +1,18 @@
-import { Request, Response, NextFunction } from "express";
-
-import { catchAsync } from "../utils/catchAsync";
 import { ProductBrand } from "../models/productBrand";
 
-export const getProducts = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {
-    const productsQuery = await ProductBrand.find();
+import {
+  createOne,
+  deleteOne,
+  getAll,
+  getOne,
+  updateOne,
+} from "../utils/controllerFactory";
 
-    res.status(200).json({
-      status: "success",
-      data: { data: productsQuery },
-    });
-  },
-);
+export const createProductBrand = createOne(ProductBrand);
 
-export const createProductBrand = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {
-    const createdProduct = await ProductBrand.create(req.body);
-    console.log(createdProduct, "PRODUCT CREATED");
-    res.status(201).json({
-      status: "success",
-      data: {
-        product: createdProduct,
-      },
-    });
-  },
-);
+export const getProductBrands = getAll(ProductBrand);
+
+export const getProductBrand = getOne(ProductBrand);
+
+export const updateProductBrand = updateOne(ProductBrand);
+export const deleteProductBrand = deleteOne(ProductBrand);

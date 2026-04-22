@@ -5,6 +5,7 @@ import {
   CarGenerationProps,
   CarItem,
   CarMaker,
+  CarMakersData,
   CarModelProps,
   ClientWithPhoneNumbers,
 } from "@lib/types";
@@ -15,7 +16,7 @@ const CarManagement = async ({
   useParams,
   className,
   clients,
-  carGenerations,
+  // carGenerations,
   carMakers,
   clientId,
 }: {
@@ -23,8 +24,8 @@ const CarManagement = async ({
   carToEdit?: CarItem;
   className?: string;
   clientId?: number;
-  carMakers: CarMaker[] | null;
-  carGenerations: CarGenerationProps[] | null;
+  carMakers: CarMakersData[];
+  // carGenerations: CarGenerationProps[] | null;
   clients?: ClientWithPhoneNumbers[] | null;
 }) => {
   // const [carInfos, clients] = await Promise.all([
@@ -54,10 +55,9 @@ const CarManagement = async ({
         <CarForm
           useParams={useParams}
           carToEdit={carToEdit}
-          carMakers={carMakers || []}
+          carMakers={carMakers}
           clientId={clientId}
           clients={clients || []}
-          carGenerations={carGenerations || []}
         />
       </div>
     </div>

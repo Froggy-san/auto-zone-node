@@ -1,14 +1,14 @@
-import ProductForm from "@components/products/products-form";
+import ProductForm from "@/components/products/products-form"
 
-import {
+import { cn } from "@/lib/utils"
+import type {
   Category,
   ProductBrand,
-  ProductById,
   ProductImage,
-  ProductType,
-} from "@lib/types";
-import { cn } from "@lib/utils";
-import React from "react";
+  ProductWithDetails,
+} from "@/types"
+import type { CarMaker } from "@/types/carMaker"
+import React from "react"
 
 const ProductManagement = async ({
   productToEdit,
@@ -16,15 +16,15 @@ const ProductManagement = async ({
   className,
   categories,
   productBrands,
-  productTypes,
+  carMakers,
 }: {
-  productToEdit?: ProductById;
-  productToEditImages?: ProductImage[];
-  categories: Category[];
-  productTypes: ProductType[];
-  productBrands: ProductBrand[];
-  className?: string;
-  useParams?: boolean;
+  productToEdit?: ProductWithDetails
+  productToEditImages?: ProductImage[]
+  categories: Category[]
+  productBrands: ProductBrand[]
+  className?: string
+  useParams?: boolean
+  carMakers: CarMaker[]
 }) => {
   // const [categories, carInfos, productBrands, brandTypes] = await Promise.all([
   //   getAllCategoriesAction(),
@@ -46,27 +46,27 @@ const ProductManagement = async ({
   return (
     <div
       className={cn(
-        "flex  flex-col  gap-y-2 xs:flex-row xs:items-center justify-between rounded-lg border p-3 shadow-sm gap-x-7",
+        "xs:flex-row xs:items-center flex flex-col justify-between gap-x-7 gap-y-2 rounded-lg border p-3 shadow-sm",
         className
       )}
     >
-      <div className="space-y-0.5   ">
-        <label className=" font-semibold">Products</label>
-        <p className=" text-muted-foreground text-sm">
+      <div className="space-y-0.5 text-center sm:text-left">
+        <label className="font-semibold">Products</label>
+        <p className="text-sm text-muted-foreground">
           {productToEdit ? "Edit product." : "Add product."}
         </p>
       </div>
-      <div className=" sm:pr-2">
+      <div className="sm:pr-2">
         <ProductForm
           useParams={useParams}
           productToEdit={productToEdit}
           categories={categories || []}
+          carMakers={carMakers}
           productBrand={productBrands || []}
-          productTypes={productTypes || []}
         />
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default ProductManagement;
+export default ProductManagement

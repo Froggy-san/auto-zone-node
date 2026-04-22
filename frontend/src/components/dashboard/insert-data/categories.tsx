@@ -1,22 +1,17 @@
-import React from "react";
-import CategroyForm from "../category-from";
-import { getAllCategoriesAction } from "@lib/actions/categoriesAction";
-import ErrorMessage from "@components/error-message";
+import CategoryManagement from "./category-management";
+import CategoryList from "./category-section";
 
-import PillList from "./pill-list";
+const Categories = () => {
+  // const { data, error } = await getAllCategoriesAction();
 
-const Categories = async () => {
-  const { data, error } = await getAllCategoriesAction();
-
-  if (error) return <ErrorMessage>{error}</ErrorMessage>;
+  // if (error) return <ErrorMessage>{error}</ErrorMessage>;
   return (
     <section className=" space-y-2">
-      <CategroyForm />
-      {error ? (
-        <ErrorMessage>{error}</ErrorMessage>
-      ) : (
-        <PillList itemType="category" items={data || []} />
-      )}
+      {/* <CategroyForm /> */}
+      <CategoryManagement />
+
+      <CategoryList />
+
       {/* <CategoriesManagement /> */}
     </section>
   );

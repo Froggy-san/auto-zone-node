@@ -22,6 +22,7 @@ import {
   CarImage,
   CarItem,
   CarMaker,
+  CarMakersData,
   CarModelProps,
   ClientWithPhoneNumbers,
   CreateCar,
@@ -42,12 +43,13 @@ import { MakerCombobox } from "@components/maker-combobox";
 import { ModelCombobox } from "@components/model-combobox";
 import { SUPABASE_URL } from "@lib/constants";
 import { createCar, editCar } from "@lib/services/car-services";
+import CurrencyInput from "react-currency-input-field";
 
 const CarForm = ({
   useParams,
   carToEdit,
   clientId,
-  carGenerations,
+
   clients,
   carMakers,
   open,
@@ -56,8 +58,7 @@ const CarForm = ({
   useParams?: boolean;
   carToEdit?: CarItem;
   clientId?: number;
-  carGenerations: CarGenerationProps[];
-  carMakers: CarMaker[];
+  carMakers: CarMakersData[];
   clients: ClientWithPhoneNumbers[];
   open?: boolean;
   handleClose?: () => void;
@@ -92,6 +93,7 @@ const CarForm = ({
     plateNumber: carToEdit?.plateNumber || "",
     chassisNumber: carToEdit?.chassisNumber || "",
     motorNumber: carToEdit?.motorNumber || "",
+    odometer: carToEdit?.odometer || "",
     notes: carToEdit?.notes || "",
     clientId: clientId || 0,
     carGenerationId: carInfo?.id || 0,
@@ -109,16 +111,21 @@ const CarForm = ({
 
   const isLoading = form.formState.isSubmitting;
 
-  const models: CarModelProps[] = (
-    carMakerId && carMakers.length
-      ? carMakers.find((maker) => maker.id === carMakerId)?.carModels
-      : []
-  ) as CarModelProps[];
-
+  const models =
+    carMakers.find((maker) => maker.id === carMakerId)?.carModels || [];
   const generations =
-    carModelId && carGenerations.length
-      ? carGenerations.filter((gen) => gen.carModelId === carModelId)
-      : [];
+    models.find((model) => model.id === carModelId)?.carGenerations || [];
+
+  // const models: CarModelProps[] = (
+  //   carMakerId && carMakers.length
+  //     ? carMakers.find((maker) => maker.id === carMakerId)?.carModels
+  //     : []
+  // ) as CarModelProps[];
+
+  // const generations =
+  //   carModelId && carGenerations.length
+  //     ? carGenerations.filter((gen) => gen.carModelId === carModelId)
+  //     : [];
   const params = new URLSearchParams(searchParam);
   function handleOpen() {
     setIsOpen(true);
@@ -152,6 +159,7 @@ const CarForm = ({
     plateNumber,
     chassisNumber,
     motorNumber,
+    odometer,
     clientId,
     carGenerationId,
     notes,
@@ -173,11 +181,13 @@ const CarForm = ({
         color,
         plateNumber,
         motorNumber,
+        odometer,
         clientId,
         carGenerationId,
         notes,
         chassisNumber,
       };
+
       if (carToEdit) {
         await editCar({
           car,
@@ -236,26 +246,94 @@ const CarForm = ({
           </DialogComponent.Description> */}
         </DialogComponent.Header>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 ">
-            <div className=" flex flex-col sm:flex-row  gap-2 space-y-4 sm:space-y-0">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 ">
+            <div className=" flex  flex-wrap items-start  justify-between gap-x-2  gap-y-6">
+              <FormItem className="w-[48.5%] sm:w-[32%]  mb-auto">
+                <FormLabel>Car maker</FormLabel>
+                <FormControl>
+                  <MakerCombobox
+                    disabled={isLoading}
+                    value={carMakerId}
+                    setValue={(value) => {
+                      setCarMakerId(value);
+                      setCarModelId(0);
+                      form.setValue("carGenerationId", 0);
+                    }}
+                    options={carMakers}
+                  />
+                </FormControl>
+                <FormDescription>Enter car maker.</FormDescription>
+                <FormMessage />
+              </FormItem>
+
+              <FormItem className=" w-[48.5%] sm:w-[32%] mb-auto">
+                <FormLabel>Car model</FormLabel>
+                <FormControl>
+                  <ModelCombobox
+                    disabled={isLoading || !carMakerId}
+                    value={carModelId}
+                    setValue={(value) => {
+                      setCarModelId(value);
+                      form.setValue("carGenerationId", 0);
+                    }}
+                    options={models}
+                  />
+                </FormControl>
+                <FormDescription>Enter car model.</FormDescription>
+                <FormMessage />
+              </FormItem>
+
               <FormField
                 disabled={isLoading}
                 control={form.control}
-                name="color"
+                name="carGenerationId"
                 render={({ field }) => (
-                  <FormItem className=" w-full  mb-auto">
-                    <FormLabel>Color</FormLabel>
+                  <FormItem className=" w-full sm:w-[32%] mb-auto">
+                    <FormLabel>Car generation</FormLabel>
                     <FormControl>
-                      <input
-                        type="color"
-                        disabled={isLoading}
-                        placeholder="Car color"
-                        {...field}
-                        className="  w-full h-9 rounded-md border"
+                      <ComboBox
+                        disabled={isLoading || !carModelId}
+                        options={generations}
+                        setValue={field.onChange}
+                        value={field.value}
                       />
                     </FormControl>
+                    <FormDescription>Enter car generation.</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
-                    <FormDescription>Enter car&apos;s color.</FormDescription>
+            <div className=" flex flex-col xs:flex-row  gap-2 gap-y-6">
+              <FormField
+                disabled={isLoading}
+                control={form.control}
+                name="odometer"
+                render={({ field }) => (
+                  <FormItem className=" w-full mb-auto">
+                    <FormLabel>Odometer</FormLabel>
+                    <FormControl>
+                      <CurrencyInput
+                        id="odometer"
+                        name="odometer"
+                        placeholder="Odometer reading..."
+                        decimalsLimit={2} // Max number of decimal places
+                        prefix="KM " // Currency symbol (e.g., Egyptian Pound)
+                        decimalSeparator="." // Use dot for decimal
+                        groupSeparator="," // Use comma for thousands
+                        value={field.value || ""}
+                        onValueChange={(formattedValue, name, value) => {
+                          // setFormattedListing(formattedValue || "");
+
+                          field.onChange(formattedValue);
+                        }}
+                        className="input-field "
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Enter car&apos;s odometer reading.
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -285,7 +363,27 @@ const CarForm = ({
               />
             </div>
 
-            <div className=" flex flex-col sm:flex-row  gap-2 space-y-4 sm:space-y-0">
+            <div className=" flex flex-col xs:flex-row  gap-2 gap-y-6">
+              <FormField
+                disabled={isLoading}
+                control={form.control}
+                name="motorNumber"
+                render={({ field }) => (
+                  <FormItem className=" w-full mb-auto">
+                    <FormLabel htmlFor="motor">Motor number</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="text"
+                        disabled={isLoading}
+                        placeholder="Motor number..."
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>Enter car&apos;s motor.</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <FormField
                 disabled={isLoading}
                 control={form.control}
@@ -295,8 +393,9 @@ const CarForm = ({
                     <FormLabel>Chassis number</FormLabel>
                     <FormControl>
                       <Input
+                        type="text"
                         disabled={isLoading}
-                        placeholder="Chassis Number..."
+                        placeholder="Chassis..."
                         {...field}
                       />
                     </FormControl>
@@ -307,88 +406,9 @@ const CarForm = ({
                   </FormItem>
                 )}
               />
-
-              <FormField
-                disabled={isLoading}
-                control={form.control}
-                name="motorNumber"
-                render={({ field }) => (
-                  <FormItem className=" w-full mb-auto">
-                    <FormLabel>Motor number</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="text"
-                        disabled={isLoading}
-                        placeholder="Motor number"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormDescription>Enter car&apos;s motor.</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
             </div>
 
-            <div className=" flex flex-col sm:flex-row  gap-2 space-y-4 sm:space-y-0">
-              <FormItem className=" w-full mb-auto">
-                <FormLabel>Car maker</FormLabel>
-                <FormControl>
-                  <MakerCombobox
-                    disabled={isLoading}
-                    value={carMakerId}
-                    setValue={(value) => {
-                      setCarMakerId(value);
-                      setCarModelId(0);
-                      form.setValue("carGenerationId", 0);
-                    }}
-                    options={carMakers}
-                  />
-                </FormControl>
-                <FormDescription>Enter car maker.</FormDescription>
-                <FormMessage />
-              </FormItem>
-
-              <FormItem className=" w-full mb-auto">
-                <FormLabel>Car model</FormLabel>
-                <FormControl>
-                  <ModelCombobox
-                    disabled={isLoading || !carMakerId}
-                    value={carModelId}
-                    setValue={(value) => {
-                      setCarModelId(value);
-                      form.setValue("carGenerationId", 0);
-                    }}
-                    options={models}
-                  />
-                </FormControl>
-                <FormDescription>Enter car model.</FormDescription>
-                <FormMessage />
-              </FormItem>
-            </div>
-
-            <div className=" flex flex-col sm:flex-row  gap-2 space-y-4 sm:space-y-0">
-              <FormField
-                disabled={isLoading}
-                control={form.control}
-                name="carGenerationId"
-                render={({ field }) => (
-                  <FormItem className=" w-full mb-auto">
-                    <FormLabel>Car generation</FormLabel>
-                    <FormControl>
-                      <ComboBox
-                        disabled={isLoading || !carModelId}
-                        options={generations}
-                        setValue={field.onChange}
-                        value={field.value}
-                      />
-                    </FormControl>
-                    <FormDescription>Enter car generation.</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
+            <div className=" flex flex-col xs:flex-row   gap-2  gap-y-6">
               {!carToEdit && (
                 <FormField
                   disabled={isLoading}
@@ -413,6 +433,28 @@ const CarForm = ({
                   )}
                 />
               )}
+              <FormField
+                disabled={isLoading}
+                control={form.control}
+                name="color"
+                render={({ field }) => (
+                  <FormItem className=" w-full  mb-auto">
+                    <FormLabel>Color</FormLabel>
+                    <FormControl>
+                      <input
+                        type="color"
+                        disabled={isLoading}
+                        placeholder="Car color"
+                        {...field}
+                        className="  w-full h-9 rounded-md border"
+                      />
+                    </FormControl>
+
+                    <FormDescription>Enter car&apos;s color.</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
 
             <FormField

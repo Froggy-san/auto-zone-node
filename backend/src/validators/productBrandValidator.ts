@@ -1,3 +1,4 @@
+import { create } from "node:domain";
 import z from "zod";
 
 export const createProductBrandSchema = z.object({
@@ -12,3 +13,9 @@ export const createProductBrandSchema = z.object({
       }),
   }),
 });
+
+export const updateProductBrandSchema = createProductBrandSchema
+  .partial()
+  .extend({
+    body: createProductBrandSchema.shape.body.partial(),
+  });

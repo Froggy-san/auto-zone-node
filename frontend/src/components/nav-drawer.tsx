@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/drawer";
 import { Button } from "./ui/button";
 import {
+  AppWindow,
   Barcode,
   Car,
   Grid2x2Plus,
@@ -20,14 +21,154 @@ import {
   LogOut,
   Package,
   PersonStanding,
+  Ticket,
 } from "lucide-react";
 import Link from "next/link";
 import { GiMechanicGarage, GiTowTruck } from "react-icons/gi";
 import { MdOutlineCarRepair } from "react-icons/md";
 import { logoutUser } from "@lib/actions/authActions";
+import UserUi from "./user-ui";
+import useCurrUser from "@lib/queries/useCurrUser";
+import Spinner from "./Spinner";
+import { TbMessageReport } from "react-icons/tb";
 const NavDrawer = () => {
   const [open, setOpen] = useState(false);
+  const { user, isLoading } = useCurrUser();
+  const userBtns = (
+    <>
+      <div className=" h-[1px] w-[90%] bg-muted-foreground/55 my-3 mx-auto" />
+      <Button
+        asChild
+        className=" justify-start gap-1"
+        variant="ghost"
+        size="sm"
+        onClick={() => setOpen(false)}
+      >
+        <Link href={`/user/${user?.id}`}>
+          <AppWindow className=" w-4 h-4" /> Your Activity
+        </Link>
+      </Button>
+      <Button
+        asChild
+        className=" justify-start gap-1"
+        variant="ghost"
+        size="sm"
+        onClick={() => setOpen(false)}
+      >
+        <Link href={`/user/${user?.id}/settings`}>
+          <PersonStanding className=" w-4 h-4" /> Personal details
+        </Link>
+      </Button>
+      <Button
+        asChild
+        className=" justify-start gap-1"
+        variant="ghost"
+        size="sm"
+        onClick={() => setOpen(false)}
+      >
+        <Link href={`/user/${user?.id}/complaints`}>
+          <TbMessageReport className=" w-4 h-4" /> Your Complaints
+        </Link>
+      </Button>
+    </>
+  );
+  const isAdmin = user?.user_metadata.role.toLowerCase() === "admin";
+  const adminBtn = isAdmin ? (
+    <>
+      <Button
+        asChild
+        className=" justify-start gap-1"
+        variant="ghost"
+        size="sm"
+        onClick={() => setOpen(false)}
+      >
+        <Link href="/garage">
+          <GiMechanicGarage className=" w-5 h-5" /> Garage
+        </Link>
+      </Button>
+      <div className=" relative group z-10">
+        <Button
+          asChild
+          className="  justify-start w-full  "
+          variant="ghost"
+          size="sm"
+          onClick={() => setOpen(false)}
+        >
+          <Link href="/dashboard" className=" gap-1" prefetch={false}>
+            <LayoutDashboard className=" w-4 h-4" /> Dashboard
+          </Link>
+        </Button>
 
+        <div className=" sm:absolute sm:invisible sm:opacity-0 sm:-right-20 bg-background sm:top-6 sm:rounded-lg  sm:border  pl-5 sm:shadow-md  sm:group-hover:visible  sm:group-hover:top-2 sm:group-hover:opacity-100 sm:transition-all sm:w-40 sm:p-1">
+          <Button
+            asChild
+            className=" justify-start gap-1  z-50 w-full"
+            size="sm"
+            variant="ghost"
+            onClick={() => setOpen(false)}
+          >
+            <Link href="/dashboard/inventory" prefetch={false}>
+              {" "}
+              <Package className=" h-4 w-4" /> Inventory
+            </Link>
+          </Button>
+
+          <Button
+            asChild
+            className=" justify-start  z-50 w-full gap-1"
+            size="sm"
+            variant="ghost"
+            onClick={() => setOpen(false)}
+          >
+            <Link href="/dashboard/customers" prefetch={false}>
+              <PersonStanding className=" w-4 h-4" /> Clients
+            </Link>
+          </Button>
+
+          <Button
+            asChild
+            className=" justify-start  z-50 w-full gap-1"
+            size="sm"
+            variant="ghost"
+            onClick={() => setOpen(false)}
+          >
+            <Link href="/dashboard/cars-data" prefetch={false}>
+              <Car className=" w-4 h-4" /> Cars Data
+            </Link>
+          </Button>
+
+          <Button
+            asChild
+            className=" justify-start  z-50 w-full gap-1"
+            size="sm"
+            variant="ghost"
+            onClick={() => setOpen(false)}
+          >
+            <Link href="/dashboard/insert-data">
+              <Grid2x2Plus className=" w-4 h-4" />
+              Products Data
+            </Link>
+          </Button>
+
+          <Button
+            asChild
+            className=" justify-start  z-50 w-full gap-1"
+            size="sm"
+            variant="ghost"
+            onClick={() => setOpen(false)}
+          >
+            <Link href="/dashboard/tickets">
+              <Ticket className=" w-4 h-4" />
+              Tickets
+            </Link>
+          </Button>
+        </div>
+      </div>
+      {userBtns}
+    </>
+  ) : (
+    userBtns
+  );
   return (
     <Drawer direction="left" open={open} onOpenChange={setOpen}>
       <DrawerTrigger className=" rounded-full" asChild>
@@ -68,83 +209,14 @@ const NavDrawer = () => {
                 Products
               </Link>
             </Button>
-            <Button
-              asChild
-              className=" justify-start gap-1"
-              variant="ghost"
-              size="sm"
-              onClick={() => setOpen(false)}
-            >
-              <Link href="/garage">
-                <GiMechanicGarage className=" w-5 h-5" /> Garage
-              </Link>
-            </Button>
-            <div className=" relative group z-10">
-              <Button
-                asChild
-                className="  justify-start w-full  "
-                variant="ghost"
-                size="sm"
-                onClick={() => setOpen(false)}
-              >
-                <Link href="/dashboard" className=" gap-1" prefetch={false}>
-                  <LayoutDashboard className=" w-4 h-4" /> Dashboard
-                </Link>
-              </Button>
-
-              <div className=" sm:absolute sm:invisible sm:opacity-0 sm:-right-20 bg-background sm:top-6 sm:rounded-lg  sm:border  pl-5 sm:shadow-md  sm:group-hover:visible  sm:group-hover:top-2 sm:group-hover:opacity-100 sm:transition-all sm:w-40 sm:p-1">
-                <Button
-                  asChild
-                  className=" justify-start gap-1  z-50 w-full"
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => setOpen(false)}
-                >
-                  <Link href="/dashboard/inventory" prefetch={false}>
-                    {" "}
-                    <Package className=" h-4 w-4" /> Inventory
-                  </Link>
-                </Button>
-
-                <Button
-                  asChild
-                  className=" justify-start  z-50 w-full gap-1"
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => setOpen(false)}
-                >
-                  <Link href="/dashboard/customers" prefetch={false}>
-                    <PersonStanding className=" w-4 h-4" /> Clients
-                  </Link>
-                </Button>
-
-                <Button
-                  asChild
-                  className=" justify-start  z-50 w-full gap-1"
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => setOpen(false)}
-                >
-                  <Link href="/dashboard/cars-data" prefetch={false}>
-                    <Car className=" w-4 h-4" /> Cars Data
-                  </Link>
-                </Button>
-
-                <Button
-                  asChild
-                  className=" justify-start  z-50 w-full gap-1"
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => setOpen(false)}
-                >
-                  <Link href="/dashboard/insert-data">
-                    <Grid2x2Plus className=" w-4 h-4" />
-                    Products Data
-                  </Link>
-                </Button>
-              </div>
-            </div>
+            {isLoading ? (
+              <Spinner className=" static w-7 h-7 mx-auto" />
+            ) : !user ? null : (
+              adminBtn
+            )}
           </div>
+
+          {/* <UserUi showName /> */}
           <Button
             className=" justify-start    z-50  w-full gap-1"
             size="sm"

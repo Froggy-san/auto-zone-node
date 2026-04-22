@@ -83,10 +83,10 @@ const ImageView = ({
                 <motion.img
                   src={image}
                   key="image"
-                  initial={{ scale: 0.9, opacity: 0 }}
+                  initial={{ scale: 1.1, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
-                  exit={{ scale: 0.9, opacity: 0 }}
-                  transition={{ duration: 0.2, type: "spring" }}
+                  exit={{ scale: 1.1, opacity: 0 }}
+                  transition={{ duration: 0.1, ease: "linear" }}
                   alt="Enlarged view"
                   className="max-w-[100%] max-h-[90%] sm:max-h-[100%] object-contain   "
                 />

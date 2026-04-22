@@ -30,10 +30,11 @@ const ClientDialog = ({ service }: { service: Service }) => {
   return (
     <TooltipProvider delayDuration={500}>
       <Tooltip>
-        <TooltipTrigger>
+        <TooltipTrigger onClick={(e) => e.stopPropagation()}>
           <Link
             prefetch={false}
             href={`/dashboard/customers?name=${client.name}`}
+            className="   text-nowrap w-fit"
           >
             {client.name}
           </Link>

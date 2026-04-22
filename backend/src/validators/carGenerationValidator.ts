@@ -10,7 +10,13 @@ export const createCarGenerationSchema = z.object({
       })
       .max(50, "Car generation name must be less than 50 characters"),
     notes: z.string().optional().default(""),
-    logo: z.string().optional().default(""),
+    image: z.string().optional().default(""),
     carModel: objectIdSchema,
   }),
 });
+
+export const updateCarGenerationSchema = createCarGenerationSchema
+  .partial()
+  .extend({
+    body: createCarGenerationSchema.shape.body.partial(),
+  });

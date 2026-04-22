@@ -1,6 +1,7 @@
 "use client";
 import { Button } from "@components/ui/button";
 import { PAGE_SIZE } from "@lib/constants";
+import { cn } from "@lib/utils";
 import { MoveLeft, MoveRight } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect } from "react";
@@ -8,9 +9,14 @@ import React, { useEffect } from "react";
 interface PaginationControlProps {
   currPage: string;
   count: number | string;
+  className?: string;
 }
 
-const PaginationControl = ({ count, currPage }: PaginationControlProps) => {
+const PaginationControl = ({
+  count,
+  currPage,
+  className,
+}: PaginationControlProps) => {
   const page = Number(currPage);
   const pageCount = Math.ceil(Number(count) / PAGE_SIZE);
   const searchParam = useSearchParams();
@@ -45,7 +51,7 @@ const PaginationControl = ({ count, currPage }: PaginationControlProps) => {
   }, [page, searchParam, pathname, pageCount, router]);
 
   return (
-    <div className=" flex items-center justify-between px-4">
+    <div className={cn(" flex items-center justify-between px-4", className)}>
       {/* <div className=" text-xs  text-muted-foreground">{`${currPage} / ${pageCount}`}</div>
        */}
       <p className=" text-xs   mt-2 text-muted-foreground">

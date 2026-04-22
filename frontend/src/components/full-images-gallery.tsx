@@ -65,34 +65,65 @@ const FullImagesGallery = ({
             className
           )}
         >
-          {images.map((url, i) => (
-            <div
-              key={i}
-              className={cn(
-                " max-w-full  max-h-full flex items-center justify-center object-contain absolute inset-0 transition-all",
-                {
-                  "opacity-0": viewedImage !== i,
-                  "opacity-100": viewedImage === i,
-                }
-              )}
-            >
-              <img
-                src={url}
-                className=" w-full h-full object-cover absolute inset-0 origin-top  z-10  blur-lg"
-              />
-              <img
-                src={url}
+          {images.map((url, i) =>
+            url.includes("mp4") ? (
+              <div
                 key={i}
-                className={cn(" max-w-full  max-h-full object-contain z-30")}
-              />
-            </div>
-          ))}
+                className={cn(
+                  " max-w-full  max-h-full flex items-center justify-center object-contain absolute inset-0 transition-all",
+                  {
+                    "opacity-0": viewedImage !== i,
+                    "opacity-100": viewedImage === i,
+                  }
+                )}
+              >
+                {" "}
+                <video
+                  playsInline
+                  src={url.startsWith("blob") ? url.split(" ")[0] : url}
+                  className=" w-full h-full object-cover absolute inset-0 origin-top  z-10  blur-lg"
+                >
+                  <source src={url} />
+                </video>
+                <video
+                  controls={false}
+                  playsInline
+                  src={url.startsWith("blob") ? url.split(" ")[0] : url}
+                  className={cn(" max-w-full  max-h-full object-contain z-30")}
+                >
+                  <source src={url} />
+                </video>
+              </div>
+            ) : (
+              <div
+                key={i}
+                className={cn(
+                  " max-w-full  max-h-full flex items-center justify-center object-contain absolute inset-0 transition-all",
+                  {
+                    "opacity-0": viewedImage !== i,
+                    "opacity-100": viewedImage === i,
+                  }
+                )}
+              >
+                <img
+                  loading="lazy"
+                  src={url}
+                  className=" w-full h-full object-cover absolute inset-0 origin-top  z-10  blur-lg"
+                />
+                <img
+                  loading="lazy"
+                  src={url}
+                  className={cn(" max-w-full  max-h-full object-contain z-30")}
+                />
+              </div>
+            )
+          )}
           <div className=" absolute  flex inset-0 w-full h-full">
             {images.map((image, i) => (
               <div
+                key={i}
                 onClick={() => setViewedIndex(i)}
                 onMouseOver={() => setViewedImage(i)}
-                key={i}
                 //  border bg-red-300/20
                 className=" h-full cursor-pointer   z-50"
                 style={{ width: `calc( 100% / ${images.length})` }}

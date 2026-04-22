@@ -1,60 +1,64 @@
-import { getProductsImageAction } from "@lib/actions/productsActions";
-import { Product, ProductImage, ProductWithCategory, User } from "@lib/types";
-import { cn } from "@lib/utils";
-import React, { useMemo } from "react";
-import FullImagesGallery from "./product-images";
-import { formatCurrency } from "@lib/helper";
-import { ProdcutAction } from "./product-actions";
-import Link from "next/link";
-import { ImageOff } from "lucide-react";
+import { cn } from "@/lib/utils"
+import React, { useMemo } from "react"
+import FullImagesGallery from "./product-images"
 
-const ProductItem = async ({
+import { ProdcutAction } from "./product-actions"
+
+import { ImageOff } from "lucide-react"
+import ProductPrices from "./product-prices"
+import type { Product } from "@/types"
+import { Link } from "react-router"
+
+const ProductItem = ({
   user,
   product,
   pageSize,
   currPage,
+  appliedFilters,
 }: {
-  user: User | null;
-  pageSize: number;
-  currPage: string;
-  product: Product;
+  user: any | null
+  pageSize: number
+  currPage: string
+  product: Product
+  appliedFilters: string
 }) => {
-  const viewedImages = product.productImages?.map((imgObj) => imgObj.imageUrl);
-
+  const viewedImages = product.productImages?.map((imgObj) => imgObj.imageUrl)
+  const isAdmin = user?.user_metadata.role === "Admin"
   return (
     <li
-      className={`${(!product.isAvailable || !product.stock) && "opacity-50 "}`}
+      className={`${(!product.isAvailable || !product.stock) && "opacity-50"}`}
     >
       <Link
-        prefetch={false}
-        href={`/products/${product.id}?size=${pageSize}&page=${currPage}`}
-        className="space-y-1 flex flex-col"
+        to={`/products/${product._id}?size=${pageSize}&page=${currPage}&filters=${appliedFilters}`}
+        className="flex flex-col space-y-1"
         // prefetch={false}
       >
         <>
           {viewedImages?.length ? (
             <FullImagesGallery
               imageUrls={viewedImages}
-              productId={product.id}
-              className="h-[250px] 3xl:h-[330px] 4xl:h-[400px]  relative rounded-lg overflow-hidden"
+              productId={product._id}
+              className="3xl:h-[330px] 4xl:h-[400px] relative h-[250px] overflow-hidden rounded-lg select-none"
             />
           ) : (
-            <div className=" h-[250px] 3xl:h-[330px] 4xl:h-[400px]  flex items-center justify-center  bg-foreground/10 rounded-lg">
-              <ImageOff className=" w-20 h-20" />
+            <div className="3xl:h-[330px] 4xl:h-[400px] flex h-[250px] items-center justify-center rounded-lg bg-foreground/10">
+              <ImageOff className="h-20 w-20" />
             </div>
           )}
         </>
 
         {/* {product.category} */}
-        <div className="    flex-1  space-y-1  flex flex-col ">
-          <h1 className=" line-clamp-1 text-xl font-semibold">
-            {product.name}
-          </h1>
-          <h2 className=" text-sm text-muted-foreground break-words line-clamp-2">
+        <div className="flex flex-1 flex-col space-y-1">
+          <h1 className="line-clamp-1 text-xl font-semibold">{product.name}</h1>
+          <h2
+            title={product.description}
+            className="line-clamp-2 text-sm break-words text-muted-foreground"
+          >
             {product.description}
           </h2>
-          <div className=" flex justify-between  items-center text-xs">
-            {product.salePrice ? (
+          <div className="flex items-center justify-between text-xs">
+            <ProductPrices product={product} />
+            {/* {product.salePrice ? (
               <span className=" text-green-500 dark:text-green-600">
                 {formatCurrency(product.salePrice)}
               </span>
@@ -62,8 +66,8 @@ const ProductItem = async ({
               <span className="text-muted-foreground">
                 {formatCurrency(product.listPrice)}
               </span>
-            )}
-            <div className=" flex gap-3 items-center">
+            )} */}
+            <div className="flex items-center gap-3">
               <span
                 className={cn("text-muted-foreground", {
                   "text-green-500 dark:text-green-600":
@@ -74,20 +78,20 @@ const ProductItem = async ({
                   ? "In stock"
                   : "Out of stock"}
               </span>
-              {!user ? null : (
-                <ProdcutAction
-                  imagesToDelete={viewedImages}
-                  currPage={currPage}
-                  pageSize={pageSize}
-                  productId={product.id}
-                />
-              )}
+              {/* {user && isAdmin && ( */}
+              <ProdcutAction
+                imagesToDelete={viewedImages}
+                currPage={currPage}
+                pageSize={pageSize}
+                productId={product._id}
+              />
+              {/* )} */}
             </div>
           </div>
         </div>
       </Link>
     </li>
-  );
-};
+  )
+}
 
-export default ProductItem;
+export default ProductItem

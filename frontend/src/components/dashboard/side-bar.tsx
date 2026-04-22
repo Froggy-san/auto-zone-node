@@ -29,6 +29,7 @@ import React, { useEffect, useState } from "react";
 import { useToast } from "@hooks/use-toast";
 import { ErorrToastDescription } from "@components/toast-items";
 import UserUi from "@components/user-ui";
+import useCurrUser from "@lib/queries/useCurrUser";
 
 <ArrowLeftToLine />;
 <ArrowRightToLine />;
@@ -46,7 +47,7 @@ const SideBar = ({ links }: Props) => {
   const [lock, setLock] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const pathname = usePathname();
-
+  const { user, error } = useCurrUser();
   // useEffect(() => {
   //   const body = document.querySelector("body");
   //   if (!menuOpen && !collapse && !lock) setCollapse(true);
@@ -67,7 +68,7 @@ const SideBar = ({ links }: Props) => {
       transition={{ duration: 0.5, type: "spring" }}
       className={cn(
         "w-[200px] px-1  relative hidden sm:flex flex-col justify-between pb-2  border-r ",
-        { "w-fit": collapse }
+        { "w-fit": collapse },
       )}
     >
       <div className="absolute -right-[14px] top-1/2 -translate-y-1/2 flex flex-col gap-2">
@@ -113,7 +114,7 @@ const SideBar = ({ links }: Props) => {
                       {
                         "w-fit": collapse,
                       },
-                      { "bg-accent dark:bg-card": pathname === link.herf }
+                      { "bg-accent dark:bg-card": pathname === link.herf },
                     )}
                     asChild
                   >

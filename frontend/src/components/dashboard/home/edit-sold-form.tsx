@@ -44,6 +44,9 @@ import {
 import { ProductsComboBox } from "@components/proudcts-combo-box";
 import { formatCurrency } from "@lib/client-helpers";
 import { cn } from "@lib/utils";
+import { adjustProductsStockAction } from "@lib/actions/productsActions";
+import CurrencyInput from "react-currency-input-field";
+import supabase from "@utils/supabase";
 
 interface ProById extends ProductSold {
   id: number;
@@ -63,10 +66,13 @@ const EditSoldForm = ({
   products: ProductWithCategory[];
   service: { id: number; totalPrice: number } | null;
 }) => {
+  const [maxAmount, setMaxAmount] = useState<number>(0);
+  const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+
   const defaultValues = {
     pricePerUnit: proSold?.pricePerUnit || 0,
     discount: proSold?.discount || 0,
@@ -89,6 +95,23 @@ const EditSoldForm = ({
       form.clearErrors("discount");
     }
   }, [pricePerUnit, count, discount, form]);
+
+  useEffect(() => {
+    const getStock = async () => {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from("product")
+        .select("stock")
+        .eq("id", proSold?.productId)
+        .single();
+
+      setMaxAmount((data?.stock || 0) + (proSold?.count || 0));
+
+      setLoading(false);
+    };
+
+    getStock();
+  }, [proSold]);
 
   useEffect(() => {
     form.reset(defaultValues);
@@ -138,17 +161,17 @@ const EditSoldForm = ({
 
         if (!chosenProduct)
           throw new Error(`There was a problem with picking the product sold.`);
+
         const { categories, productImages, ...product } = chosenProduct;
         const proToUpdate = product as Product;
         const newSerivceAmount = service.totalPrice + totalPriceAfterDiscount;
-        const stockUpdates = {
-          ...proToUpdate,
-          stock: proToUpdate.stock - count,
-        }; // Calc the the new stock number.
+        //   const stockUpdates = {
+        // id:proToUpdate.id,
+        //     quantity: proToUpdate.stock - count,
+        //   }; // Calc the the new stock number.
         const { error } = await createProductToSellAction(
           addSoldProduct,
           newSerivceAmount,
-          stockUpdates
         );
         if (error) throw new Error(error);
       }
@@ -175,9 +198,23 @@ const EditSoldForm = ({
             id: proSold.id,
           },
           { id: service.id, totalPrice: newSerivceAmount, isEqual },
-          stockUpdates
+          stockUpdates,
         );
         if (error) throw new Error(error);
+        // Track if ther user changed the is returned value, and adjust the stock number accordingly.
+        const previousIsReturned = proSold.isReturned;
+        const currentIsReturned = isReturned;
+        if (previousIsReturned !== currentIsReturned) {
+          const { error } = await adjustProductsStockAction(
+            isReturned ? "increment" : "decrement",
+            [{ id: proSold.productId, quantity: count }],
+          );
+
+          if (error)
+            throw new Error(
+              `Failed to update the stock of the product #${proSold.productId} : ${error}`,
+            );
+        }
       }
       handleClose();
       toast({
@@ -244,13 +281,18 @@ const EditSoldForm = ({
                         value={field.value}
                         setValue={(value) => {
                           const product = products.find(
-                            (pro) => pro.id === value
+                            (pro) => pro.id === value,
                           );
+
                           field.onChange(value);
 
                           if (product) {
-                            form.setValue("pricePerUnit", product.salePrice);
-                            form.setValue("discount", product.listPrice);
+                            setMaxAmount(product.stock);
+                            form.setValue("pricePerUnit", product.listPrice);
+                            form.setValue(
+                              "discount",
+                              product.listPrice - product.salePrice,
+                            );
                           }
                         }}
                         options={products}
@@ -272,20 +314,25 @@ const EditSoldForm = ({
                 name="pricePerUnit"
                 render={({ field }) => (
                   <FormItem className=" w-full mb-auto">
-                    <FormLabel>Price per unit</FormLabel>
+                    <FormLabel htmlFor="price-per-unit">
+                      Price per unit
+                    </FormLabel>
                     <FormControl>
-                      <Input
-                        type="text"
-                        disabled={isLoading}
-                        value={field.value}
-                        onChange={(e) => {
-                          const inputValue = e.target.value;
-                          if (/^\d*$/.test(inputValue)) {
-                            field.onChange(Number(inputValue));
-                          }
+                      <CurrencyInput
+                        id="price-per-unit"
+                        name="price-per-unit"
+                        placeholder="Price-per-unit"
+                        decimalsLimit={2} // Max number of decimal places
+                        prefix="EGP " // Currency symbol (e.g., Egyptian Pound)
+                        decimalSeparator="." // Use dot for decimal
+                        groupSeparator="," // Use comma for thousands
+                        value={field.value || ""}
+                        onValueChange={(formattedValue, name, value) => {
+                          // setFormattedListing(formattedValue || "");
+
+                          field.onChange(Number(value?.value) || 0);
                         }}
-                        placeholder="Additional notes..."
-                        // {...field}
+                        className="input-field "
                       />
                     </FormControl>
 
@@ -300,20 +347,25 @@ const EditSoldForm = ({
                 name="discount"
                 render={({ field }) => (
                   <FormItem className=" w-full mb-auto">
-                    <FormLabel>Discount per unit</FormLabel>
+                    <FormLabel htmlFor="discount-per-unit">
+                      Discount per unit
+                    </FormLabel>
                     <FormControl>
-                      <Input
-                        type="text"
-                        disabled={isLoading}
-                        value={field.value}
-                        onChange={(e) => {
-                          const inputValue = e.target.value;
-                          if (/^\d*$/.test(inputValue)) {
-                            field.onChange(Number(inputValue));
-                          }
+                      <CurrencyInput
+                        id="discount-per-unit"
+                        name="Discount-per-unit"
+                        placeholder="Discount-per-unit"
+                        decimalsLimit={2} // Max number of decimal places
+                        prefix="EGP " // Currency symbol (e.g., Egyptian Pound)
+                        decimalSeparator="." // Use dot for decimal
+                        groupSeparator="," // Use comma for thousands
+                        value={field.value || ""}
+                        onValueChange={(formattedValue, name, value) => {
+                          // setFormattedListing(formattedValue || "");
+
+                          field.onChange(Number(value?.value) || 0);
                         }}
-                        placeholder=""
-                        // {...field}
+                        className="input-field "
                       />
                     </FormControl>
 
@@ -330,18 +382,32 @@ const EditSoldForm = ({
                   <FormItem className=" w-full mb-auto">
                     <FormLabel>Count</FormLabel>
                     <FormControl>
-                      <Input
-                        type="text"
-                        disabled={isLoading}
-                        value={field.value}
-                        onChange={(e) => {
-                          const inputValue = e.target.value;
-                          if (/^\d*$/.test(inputValue)) {
-                            field.onChange(Number(inputValue));
+                      <CurrencyInput
+                        id="stockInput"
+                        name="price"
+                        placeholder="Available Stock"
+                        decimalsLimit={2} // Max number of decimal places
+                        prefix="UNITS " // Currency symbol (e.g., Egyptian Pound)
+                        decimalSeparator="." // Use dot for decimal
+                        groupSeparator="," // Use comma for thousands
+                        value={field.value || ""}
+                        onValueChange={(formattedValue, name, value) => {
+                          const newValue = value ? Number(value.value) : 0;
+                          const isMaxAmount = newValue > maxAmount;
+                          field.onChange(isMaxAmount ? maxAmount : newValue);
+                          if (isMaxAmount) {
+                            toast({
+                              variant: "destructive",
+                              title: "Maximum amount.",
+                              description: (
+                                <ErorrToastDescription
+                                  error={`Count number must be lower than ${maxAmount}`}
+                                />
+                              ),
+                            });
                           }
                         }}
-                        placeholder=""
-                        // {...field}
+                        className="input-field  "
                       />
                     </FormControl>
 

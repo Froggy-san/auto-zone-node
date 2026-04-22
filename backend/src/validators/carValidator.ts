@@ -1,6 +1,11 @@
 import { z } from "zod";
 import { objectIdSchema } from "./commen";
 
+export const carImageSchema = z.object({
+  imagePath: z.string(),
+  isMian: z.boolean().default(false).optional(),
+});
+
 export const createCarSchema = z.object({
   body: z.object({
     plateNumber: z.string().min(3, "Invalid plate number"),
@@ -9,18 +14,17 @@ export const createCarSchema = z.object({
     color: z.string().optional(),
     odometer: z.string().optional(),
     notes: z.string().optional(),
+    carImages: z.array(carImageSchema),
+    mainImageName: z.string().optional().default(""),
     // References
     client: objectIdSchema,
     carGeneration: objectIdSchema,
   }),
 });
 
-export const updateCarSchema = z.object({
-  body: z.object({
-    plateNumber: z.string().optional(),
-    color: z.string().optional(),
-    odometer: z.string().optional(),
-    notes: z.string().optional(),
+export const updateCarSchema = createCarSchema.partial().extend({
+  body: createCarSchema.shape.body.partial().extend({
+    imagesToDelete: z.array(z.string()).optional(),
   }),
 });
 

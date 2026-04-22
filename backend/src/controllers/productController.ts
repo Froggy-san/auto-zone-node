@@ -8,56 +8,98 @@ import path from "path";
 import fs from "fs";
 import { ProductImage } from "../@types";
 import { deleteFiles } from "../utils/helper";
+import APIFeatures from "../utils/apiFeatures";
+
+// export const getProducts = catchAsync(
+//   async (req: Request, res: Response, next: NextFunction) => {
+//     // 1. Filtering Logic
+
+//     const queryObj = { ...req.query };
+
+//     const excludedFields = ["page", "sort", "limit", "fields"];
+//     excludedFields.forEach((el) => delete queryObj[el]);
+
+//     // 2. Advanced Filtering (gte, gt, etc.)
+//     let queryStr = JSON.stringify(queryObj);
+//     queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
+
+//     const filtersObj = JSON.parse(queryStr);
+
+//     // 3. IMPROVEMENT: Make string filters case-insensitive (Regex)
+//     // This allows searching 'bosch' to find 'Bosch'
+//     Object.keys(filtersObj).forEach((key) => {
+//       if (typeof filtersObj[key] === "string") {
+//         filtersObj[key] = { $regex: filtersObj[key], $options: "i" };
+//       }
+//     });
+
+//     let query = Product.find(filtersObj);
+
+//     // 4. Sorting
+//     if (req.query.sort && typeof req.query.sort === "string") {
+//       const sortBy = req.query.sort.split(",").join(" ");
+//       query = query.sort(sortBy);
+//     } else {
+//       query = query.sort("-createdAt");
+//     }
+
+//     // 5. Field Limiting
+//     if (req.query.fields && typeof req.query.fields === "string") {
+//       const selectFields = req.query.fields.split(",").join(" ");
+//       query = query.select(selectFields);
+//     } else {
+//       query = query.select("-__v");
+//     }
+
+//     // 6. Pagination
+//     const pageNum = parseInt(req.query.page as string, 10) || 1;
+//     const limitNum = parseInt(req.query.limit as string, 10) || 100; // Default to 100 for better performance
+//     const skip = (pageNum - 1) * limitNum;
+
+//     query = query.skip(skip).limit(limitNum);
+
+//     // 7. Execution & Meta Data
+//     const products = await query;
+//     const totalCount = await Product.countDocuments(filtersObj);
+//     const totalPages = Math.ceil(totalCount / limitNum);
+
+//     // After you calculate totalPages
+//     if (pageNum > totalPages && totalCount > 0) {
+//       return next(new AppError("This page does not exist", 404));
+//     }
+//     res.status(200).json({
+//       status: "success",
+//       results: products.length,
+//       data: {
+//         products,
+//         pagination: {
+//           totalCount,
+//           totalPages,
+//           currentPage: pageNum,
+//           limit: limitNum,
+//         },
+//       },
+//     });
+//   },
+// );
 
 export const getProducts = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     // 1. Filtering Logic
-    const queryObj = { ...req.query };
-    const excludedFields = ["page", "sort", "limit", "fields"];
-    excludedFields.forEach((el) => delete queryObj[el]);
 
-    // 2. Advanced Filtering (gte, gt, etc.)
-    let queryStr = JSON.stringify(queryObj);
-    queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
-
-    const filtersObj = JSON.parse(queryStr);
-
-    // 3. IMPROVEMENT: Make string filters case-insensitive (Regex)
-    // This allows searching 'bosch' to find 'Bosch'
-    Object.keys(filtersObj).forEach((key) => {
-      if (typeof filtersObj[key] === "string") {
-        filtersObj[key] = { $regex: filtersObj[key], $options: "i" };
-      }
-    });
-
-    let query = Product.find(filtersObj);
-
-    // 4. Sorting
-    if (req.query.sort && typeof req.query.sort === "string") {
-      const sortBy = req.query.sort.split(",").join(" ");
-      query = query.sort(sortBy);
-    } else {
-      query = query.sort("-createdAt");
-    }
-
-    // 5. Field Limiting
-    if (req.query.fields && typeof req.query.fields === "string") {
-      const selectFields = req.query.fields.split(",").join(" ");
-      query = query.select(selectFields);
-    } else {
-      query = query.select("-__v");
-    }
+    const features = new APIFeatures(Product.find(), req.query)
+      .filter()
+      .sort()
+      .limitFields()
+      .paginate();
 
     // 6. Pagination
-    const pageNum = parseInt(req.query.page as string, 10) || 1;
-    const limitNum = parseInt(req.query.limit as string, 10) || 100; // Default to 100 for better performance
-    const skip = (pageNum - 1) * limitNum;
-
-    query = query.skip(skip).limit(limitNum);
+    const pageNum = parseInt(req.query.page as string, 1) || 1;
+    const limitNum = parseInt(req.query.limit as string, 100) || 100; // Default to 100 for better performance
 
     // 7. Execution & Meta Data
-    const products = await query;
-    const totalCount = await Product.countDocuments(filtersObj);
+    const products = await features.query;
+    const totalCount = await Product.countDocuments(features.filtersObj);
     const totalPages = Math.ceil(totalCount / limitNum);
 
     // After you calculate totalPages
@@ -68,7 +110,7 @@ export const getProducts = catchAsync(
       status: "success",
       results: products.length,
       data: {
-        products,
+        data: products,
         pagination: {
           totalCount,
           totalPages,
@@ -79,6 +121,7 @@ export const getProducts = catchAsync(
     });
   },
 );
+
 // !---------- If we are not processing the image before uploading it we would store the image in the memeory instead of the storage but here we are not procesing it thus we are storing it on desk
 // // 1. Define where and how to store the files
 // const storage = multer.diskStorage({
@@ -170,13 +213,27 @@ export const convertProductImages = catchAsync(
 );
 export const createProduct = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    console.log(req.body);
     const createdProduct = await Product.create(req.body);
-    console.log(createdProduct, "PRODUCT CREATED");
+
+    if (!createdProduct) {
+      // If creation failed, delete any uploaded images to prevent orphan files
+      if (req.body.productImages) {
+        const imagesToDelete = (req.body.productImages as ProductImage[]).map(
+          (img) => img.imageUrl,
+        );
+        deleteFiles(imagesToDelete);
+      }
+      res.status(500).json({
+        status: "error",
+        message: "Failed to create product",
+      });
+      return;
+    }
+
     res.status(201).json({
       status: "success",
       data: {
-        product: createdProduct,
+        data: createdProduct,
       },
     });
   },
@@ -238,7 +295,7 @@ export const updateProduct = catchAsync(
       //   const filePath = path.join(__dirname, "../../public", img.imageUrl);
       //   fs.unlink(filePath, () => {});
       // });
-      return next(new AppError("No product found with that ID", 404));
+      return next(new AppError("No product found with that ID", 500));
     }
 
     // 6) SUCCESS: Now delete the files the user specifically marked for removal
@@ -254,7 +311,7 @@ export const updateProduct = catchAsync(
 
     res.status(200).json({
       status: "success",
-      data: { product: updatedProduct },
+      data: { data: updatedProduct },
     });
   },
 );

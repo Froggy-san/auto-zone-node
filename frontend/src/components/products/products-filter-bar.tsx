@@ -1,47 +1,59 @@
-import { getAllCategoriesAction } from "@lib/actions/categoriesAction";
-import { getAllProductBrandsAction } from "@lib/actions/productBrandsActions";
-import { getAllProductTypesAction } from "@lib/actions/productTypeActions";
-import React from "react";
-import ProductsFilterContent from "./product-filter-content";
-import { Category, ProductBrand, ProductType } from "@lib/types";
+import React from "react"
+import ProductsFilterContent from "./product-filter-content"
+import type { Category, ProductBrand } from "@/types"
+import type { CarMaker } from "@/types/carMaker"
+import useProducts from "@/features/products/useProducts"
 
 interface Props {
-  name: string;
-  categoryId: string;
-  productTypeId?: string;
-  productBrandId: string;
-  isAvailable: string;
-  categories: Category[];
-  productTypes: ProductType[];
-  productBrands: ProductBrand[];
-  count: number;
+  name: string
+  category: string
+  productType?: string
+  productBrand: string
+  maker: string
+  model: string
+  generation: string
+  isAvailable: string
+  categories: Category[]
+  carMakers: CarMaker[]
+  productBrands: ProductBrand[]
+  carBrand?: string
+  // count: number
 }
 const ProductsFilterBar: React.FC<Props> = async ({
-  categoryId,
-  productTypeId,
+  category,
+  productType,
   isAvailable,
   name,
-  productBrandId,
+  productBrand,
   categories,
   productBrands,
-  productTypes,
-  count,
+  // count,
+  maker,
+  model,
+  generation,
+  carBrand,
+  carMakers,
 }) => {
+  const { pagination } = useProducts()
   return (
-    <aside className={`sm:w-[200px]  sm:p-2  sm:border-r `}>
+    <aside className={`3xl:w-[260px] sm:w-[210px] sm:border-r`}>
       <ProductsFilterContent
         name={name}
-        count={count || 0}
-        categoryId={categoryId}
-        productTypeId={productTypeId}
-        productBrandId={productBrandId}
+        count={pagination?.totalCount || 0}
+        category={category}
+        productType={productType}
+        productBrand={productBrand}
         isAvailable={isAvailable}
         categories={categories || []}
         productBrands={productBrands || []}
-        productTypes={productTypes || []}
+        carMakers={carMakers}
+        maker={maker}
+        model={model}
+        generation={generation}
+        carBrand={carBrand}
       />
     </aside>
-  );
-};
+  )
+}
 
-export default ProductsFilterBar;
+export default ProductsFilterBar

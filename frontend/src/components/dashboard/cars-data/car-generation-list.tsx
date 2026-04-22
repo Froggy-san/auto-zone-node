@@ -52,13 +52,14 @@ const CarGenerationList = () => {
               <p>No car generation data has been posted yet!</p>
             ) : (
               <ul className=" flex flex-wrap gap-2 p-4 max-h-[45vh] overflow-y-auto  ">
-                {carGenerationData.map((item) => (
+                {/* {carGenerationData.map((item) => (
                   <GenerationItem
                     key={item.id}
+                    
                     handleResetPage={handleResetPage}
                     item={item}
                   />
-                ))}
+                ))} */}
               </ul>
             )}
 

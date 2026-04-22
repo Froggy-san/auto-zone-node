@@ -1,5 +1,5 @@
-"use client";
-import { Button } from "@/components/ui/button";
+"use client"
+import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -8,17 +8,18 @@ import {
   DropdownMenuLabel,
   DropdownMenuShortcut,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@/components/ui/dropdown-menu"
 import {
   Ellipsis,
   FilePenLine,
   Fullscreen,
   LoaderCircle,
   PackageMinus,
-} from "lucide-react";
-import Link from "next/link";
-import { useState } from "react";
-import DeleteProductDialog from "./delete-product-dialog";
+} from "lucide-react"
+
+import { useState } from "react"
+import DeleteProductDialog from "./delete-product-dialog"
+import { Link } from "react-router"
 
 export function ProdcutAction({
   imagesToDelete,
@@ -26,20 +27,20 @@ export function ProdcutAction({
   currPage,
   pageSize,
 }: {
-  imagesToDelete: string[];
-  pageSize: number;
-  currPage: string;
-  productId: number;
+  imagesToDelete: string[]
+  pageSize: number
+  currPage: string
+  productId: string
 }) {
-  const [open, setOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [open, setOpen] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
 
-  if (isLoading) return <LoaderCircle size={12} className=" animate-spin" />;
+  if (isLoading) return <LoaderCircle size={12} className="animate-spin" />
   return (
     <div onClick={(e) => e.preventDefault()}>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" className=" w-7 h-7  ">
+          <Button variant="ghost" size="icon" className="h-7 w-7">
             <Ellipsis size={15} />
             {/* <EllipsisVertical size={15} /> */}
           </Button>
@@ -49,16 +50,16 @@ export function ProdcutAction({
           {/* <DropdownMenuSeparator /> */}
           <DropdownMenuGroup>
             <Link
-              href={`products/${productId}?size=${pageSize}&page=${currPage}`}
+              to={`products/${productId}?size=${pageSize}&page=${currPage}`}
             >
-              <DropdownMenuItem>
+              {/* <DropdownMenuItem>
                 View
                 <DropdownMenuShortcut>
                   <Fullscreen size={18} />
                 </DropdownMenuShortcut>
-              </DropdownMenuItem>
+              </DropdownMenuItem> */}
             </Link>
-            <Link href={`/products/${productId}?edit=open`}>
+            <Link to={`/products/${productId}?edit=open`}>
               <DropdownMenuItem>
                 Edit
                 <DropdownMenuShortcut>
@@ -67,9 +68,9 @@ export function ProdcutAction({
               </DropdownMenuItem>
             </Link>
             <DropdownMenuItem
-              className=" text-red-700 hover:!text-red-700"
+              className="text-red-700 hover:!text-red-700"
               onClick={() => {
-                setOpen(true);
+                setOpen(true)
                 // const body = document.querySelector("body");
                 // if (body) {
                 //   body.style.pointerEvents = "auto";
@@ -95,5 +96,5 @@ export function ProdcutAction({
         productId={productId}
       />
     </div>
-  );
+  )
 }

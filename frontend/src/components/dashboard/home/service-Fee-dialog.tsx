@@ -1,4 +1,4 @@
-import { Category, Service, ServiceFee } from "@lib/types";
+import { Category, CategoryProps, Service, ServiceFee } from "@lib/types";
 import React, { useMemo, useReducer, useState } from "react";
 import {
   Dialog,
@@ -149,7 +149,7 @@ function ServiceFeesDialog({
 }: {
   isAdmin: boolean;
   service: Service;
-  categories: Category[];
+  categories: CategoryProps[];
   total: number;
 }) {
   const [
@@ -247,7 +247,7 @@ function ServiceFeesDialog({
     );
 
   return (
-    <>
+    <div onClick={(e) => e.stopPropagation()} className=" w-fit">
       <Dialog open={open} onOpenChange={handleOpenChange}>
         <Button
           onClick={handleOpenChange}
@@ -469,7 +469,7 @@ function ServiceFeesDialog({
           dispatch({ type: "open" });
         }}
       />
-    </>
+    </div>
   );
 }
 

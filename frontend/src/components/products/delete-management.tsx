@@ -27,7 +27,7 @@ const DeleteManagement = ({
           className
         )}
       >
-        <div className="space-y-0.5   ">
+        <div className="space-y-0.5 text-center  xs:text-left ">
           <label className=" font-semibold">Delete</label>
           <p className=" text-muted-foreground text-sm">
             Delete this product along side all it&apos;s associated data.

@@ -21,7 +21,6 @@ const InventoryManagement = async ({
   if (edit) {
     const { data, error } = await getProductBoughtByIdAction(edit);
     productToEdit = { data, error };
-    console.log("DDDDD", data);
   }
 
   const { data: products, error } = productsData;

@@ -1,10 +1,10 @@
-"use client";
+"use client"
 
-import * as React from "react";
-import { Check, ChevronsUpDown } from "lucide-react";
+import * as React from "react"
+import { Check, ChevronsUpDown } from "lucide-react"
 
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
 import {
   Command,
   CommandEmpty,
@@ -12,19 +12,20 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "@/components/ui/command";
+} from "@/components/ui/command"
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
-import { CarModelProps } from "@lib/types";
+} from "@/components/ui/popover"
+import type { CarModel } from "@/types"
 
 interface CarModelComboBoxProps {
-  setValue: (carModel: number) => void;
-  value: number;
-  disabled?: boolean;
-  options: CarModelProps[];
+  setValue: (carModel: string) => void
+  value: string | null
+  disabled?: boolean
+  options: CarModel[]
+  className?: string
 }
 
 export const ModelCombobox: React.FC<CarModelComboBoxProps> = ({
@@ -32,11 +33,12 @@ export const ModelCombobox: React.FC<CarModelComboBoxProps> = ({
   value,
   disabled,
   options,
+  className,
 }) => {
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = React.useState(false)
   // const [value, setValue] = React.useState(0);
 
-  const selectedItem = options?.find((option) => option.id === value);
+  const selectedItem = options?.find((option) => option._id === value)
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -46,41 +48,57 @@ export const ModelCombobox: React.FC<CarModelComboBoxProps> = ({
           variant="outline"
           role="CarModelComboBox"
           aria-expanded={open}
-          className=" w-full justify-between  h-fit"
+          className={cn("h-fit w-full justify-between select-none", className)}
         >
           {selectedItem ? (
-            <p className=" text-wrap break-all text-left">
-              Model name: {selectedItem.name}
-            </p>
+            <div className="flex items-center gap-2 text-left text-wrap break-all">
+              {selectedItem.image ? (
+                <img
+                  loading="lazy"
+                  src={selectedItem.image}
+                  className="3xl:max-w-16 3xl:h-11 h-7 max-w-12 object-contain"
+                  alt="Car image"
+                />
+              ) : null}
+              <span className="3xl:text-lg"> {selectedItem.name}</span>
+            </div>
           ) : (
-            "Select option..."
+            "Select model..."
           )}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="    p-0">
-        <Command className=" max-h-[30vh] sm:max-h-[500px]">
-          <CommandInput placeholder="Search option..." />
+      <PopoverContent className="p-0">
+        <Command className="h-[30vh] w-[300px] sm:h-[unset] sm:w-[400px]">
+          <CommandInput className="3xl:h-16" placeholder="Search option..." />
           <CommandList>
             <CommandEmpty>No option found.</CommandEmpty>
             <CommandGroup>
               {options?.map((option) => (
                 <CommandItem
-                  key={option.id}
-                  value={option.name + String(option.id)} // to avoid selecting two or more items that has the same name proprty.
+                  key={option._id}
+                  value={option.name + String(option._id)} // to avoid selecting two or more items that has the same name proprty.
                   onSelect={() => {
-                    setValue(option.id === value ? 0 : option.id);
-                    setOpen(false);
+                    setValue(option._id === value ? "" : option._id)
+                    setOpen(false)
                   }}
                 >
                   <Check
                     className={cn(
-                      "mr-2 h-4 w-4",
-                      value === option.id ? "opacity-100" : "opacity-0"
+                      "mr-2 h-4 w-4 shrink-0",
+                      value === option._id ? "opacity-100" : "opacity-0"
                     )}
                   />
-                  <span className=" break-all flex-1">
-                    Model name: {option.name}
+                  {option.image ? (
+                    <img
+                      loading="lazy"
+                      src={option.image}
+                      className="3xl:max-w-16 3xl:h-11 mr-2 h-7 max-w-12 object-contain"
+                      alt="Car image"
+                    />
+                  ) : null}
+                  <span className="3xl:text-lg flex-1 break-all">
+                    {option.name}
                   </span>{" "}
                 </CommandItem>
               ))}
@@ -89,5 +107,5 @@ export const ModelCombobox: React.FC<CarModelComboBoxProps> = ({
         </Command>
       </PopoverContent>
     </Popover>
-  );
-};
+  )
+}

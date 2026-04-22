@@ -65,13 +65,13 @@ const CarModelsList = ({
                 <p>No car generation data has been posted yet!</p>
               ) : (
                 <ul className=" flex flex-wrap gap-2 p-4 max-h-[45vh] overflow-y-auto  ">
-                  {result.map((item, index) => (
+                  {/* {result.map((item, index) => (
                     <ModelItem
                       key={item.id}
                       item={item}
                       handleResetPage={handleResetPage}
                     />
-                  ))}
+                  ))} */}
                 </ul>
               )}
 

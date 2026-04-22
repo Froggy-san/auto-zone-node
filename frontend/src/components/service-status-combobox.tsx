@@ -18,13 +18,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  CarInfoProps,
-  Product,
-  ProductWithCategory,
-  RestockingBill,
-  ServiceStatus,
-} from "@lib/types";
+import { ServiceStatus } from "@lib/types";
 import { DEFAULT_CAR_LOGO } from "@lib/constants";
 import StatusBadge from "./dashboard/status-badge";
 
@@ -118,7 +112,6 @@ export const ServiceStatusCombobox: React.FC<ComboBoxProps> = ({
                     )}
                   />
                   <div className="  flex items-center gap-2 ">
-                    Status:{" "}
                     <StatusBadge status={option} className=" py-[.1rem]" />
                   </div>
                 </CommandItem>

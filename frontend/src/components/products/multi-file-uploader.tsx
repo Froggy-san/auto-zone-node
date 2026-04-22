@@ -1,6 +1,6 @@
 import { Button } from "@components/ui/button";
 import { Checkbox } from "@components/ui/checkbox";
-import { FilesWithPreview, ProductImage } from "@lib/types";
+import { FileWithPreview, ProductImage } from "@lib/types";
 import { cn } from "@lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { ImageUp, X } from "lucide-react";
@@ -24,7 +24,7 @@ interface MultiFileUploaderProps {
   isMainImage: ProductImage | number | null;
   setIsMainImage: React.Dispatch<SetStateAction<ProductImage | number | null>>;
   fieldChange: React.Dispatch<SetStateAction<File[]>>;
-  selectedFiles: FilesWithPreview[];
+  selectedFiles: FileWithPreview[];
   mediaUrl?: ProductImage[];
   disabled?: boolean;
   handleDeleteMedia: (image: ProductImage) => void;
@@ -63,7 +63,7 @@ export function MultiFileUploader({
   );
 
   // Handle deletion of selected images
-  function handleDeleteSelectedImages(viewedFile: FilesWithPreview) {
+  function handleDeleteSelectedImages(viewedFile: FileWithPreview) {
     URL.revokeObjectURL(viewedFile.preview); // Revoke the URL of the deleted file
     const newArr = selectedFiles.filter((file) => file !== viewedFile);
     fieldChange(newArr);
@@ -79,7 +79,7 @@ export function MultiFileUploader({
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     disabled: disabled,
-    accept: { "image/*": [] },
+    accept: { "image/*": [], "video/*": [] },
   });
 
   return (
@@ -121,11 +121,22 @@ export function MultiFileUploader({
                 >
                   <X size={15} />
                 </Button>
-                <img
-                  src={media.imageUrl}
-                  alt="Image selected"
-                  className=" max-h-[250px] sm:max-h-[120px]"
-                />
+                {media.imageUrl.includes("mp4") ? (
+                  <video
+                    key={media.id}
+                    src={media.imageUrl}
+                    className=" max-h-[250px] sm:max-h-[120px]"
+                  >
+                    <source src={media.imageUrl} />
+                  </video>
+                ) : (
+                  <img
+                    src={media.imageUrl}
+                    alt="Image selected"
+                    className=" max-h-[250px] sm:max-h-[120px]"
+                  />
+                )}
+
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -177,11 +188,21 @@ export function MultiFileUploader({
                 >
                   <X size={15} />
                 </Button>
-                <img
-                  src={file.preview}
-                  alt="Image selected"
-                  className="max-h-[250px] sm:max-h-[120px]"
-                />
+                {file.type.startsWith("video/") ? (
+                  <video
+                    key={i}
+                    src={file.preview}
+                    className="media-file      max-h-[250px] sm:max-h-[120px]"
+                  >
+                    <source src={file.preview} type={file.type} />
+                  </video>
+                ) : (
+                  <img
+                    src={file.preview}
+                    alt="Image selected"
+                    className="max-h-[250px] sm:max-h-[120px]"
+                  />
+                )}
 
                 <TooltipProvider>
                   <Tooltip>

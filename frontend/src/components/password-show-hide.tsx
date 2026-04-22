@@ -60,6 +60,7 @@ const PasswordShowHide = <TFieldValues extends FieldValues>({
               <FormControl>
                 <div className=" relative ">
                   <Input
+                    autoComplete="current-password"
                     className=" pr-10"
                     disabled={disabled}
                     type="password"
@@ -95,6 +96,7 @@ const PasswordShowHide = <TFieldValues extends FieldValues>({
               <FormControl>
                 <div className=" relative ">
                   <Input
+                    autoComplete="current-password"
                     className=" pr-10"
                     disabled={disabled}
                     type="text"

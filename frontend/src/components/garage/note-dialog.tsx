@@ -19,7 +19,7 @@ import {
 import { NotepadTextDashed } from "lucide-react";
 import { Button } from "@components/ui/button";
 import { cn } from "@lib/utils";
-
+import { AnimatePresence, motion } from "framer-motion";
 function NoteDialog({
   title,
   description,
@@ -75,9 +75,20 @@ function NoteDialog({
             {description ? description : null}
           </DialogDescription>
         </DialogHeader>
-        <div className="grid gap-4 py-4  indent-4  whitespace-pre-wrap   text-left break-all">
-          {content}
-        </div>
+
+        <AnimatePresence>
+          {content && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.1 }}
+              className="grid gap-4 py-4  indent-4  whitespace-pre-wrap   text-left break-all"
+            >
+              {content}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <DialogClose asChild>
           <Button size="sm" variant="secondary" className=" w-full">

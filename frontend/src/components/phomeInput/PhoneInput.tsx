@@ -92,7 +92,6 @@ export function PhoneInput({
   const [openCommand, setOpenCommand] = React.useState(false);
   const [countryCode, setCountryCode] =
     React.useState<CountryCode>(defaultCountry);
-
   const selectedCountry = countries.find(
     (country) => country.iso2 === countryCode
   );

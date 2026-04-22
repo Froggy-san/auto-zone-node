@@ -3,20 +3,24 @@ import React, {
   ReactNode,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
 import { EmblaOptionsType } from "embla-carousel";
 
 import useEmblaCarousel from "embla-carousel-react";
-import { Category } from "@lib/types";
+import { CategoryProps } from "@lib/types";
 import { setWith } from "lodash";
 import { Badge } from "@components/ui/badge";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { cn } from "@lib/utils";
+import { Button } from "@components/ui/button";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { usePrevNextButtons } from "@hooks/use-prev-next-buttons";
 
 type PropType = {
-  categories: Category[];
+  categories: CategoryProps[];
   slides?: number[];
   options?: EmblaOptionsType;
   asLinks?: boolean;
@@ -31,10 +35,15 @@ const CategoryCarousel: React.FC<PropType> = (props) => {
   const router = useRouter();
   const params = new URLSearchParams(searchParams);
   const currCategory = searchParams.get("categoryId") ?? "";
-  const handleNext = emblaApi?.scrollNext;
-  const handlePrev = emblaApi?.scrollPrev;
 
-  function handleCategoryClick(category: Category) {
+  const {
+    prevBtnDisabled,
+    nextBtnDisabled,
+    onPrevButtonClick,
+    onNextButtonClick,
+  } = usePrevNextButtons(emblaApi);
+
+  function handleCategoryClick(category: CategoryProps) {
     if (Number(currCategory) === category.id) {
       params.delete("categoryId");
     } else {
@@ -44,15 +53,28 @@ const CategoryCarousel: React.FC<PropType> = (props) => {
     router.push(`${pathname}?${params.toString()}`, { scroll: false });
   }
 
-  function handleNavTo(category: Category) {
-    router.push(`/products?${params.toString()}`, { scroll: false });
+  function handleNavTo(category: CategoryProps) {
+    router.push(`/products?categoryId=${category.id}`, { scroll: false });
   }
 
+  const selectedIndex = useMemo(() => {
+    return categories.findIndex((item) => item.id === Number(currCategory));
+  }, [categories, currCategory]);
+
+  // Makes sure that the selected tab is displayed on the screen.
+  useEffect(() => {
+    if (emblaApi && selectedIndex > -1) {
+      emblaApi.scrollTo(selectedIndex, true);
+    }
+  }, [emblaApi, selectedIndex]);
+
+  // Re-initializes the carousel mounting.
   useEffect(() => {
     if (emblaApi) {
       emblaApi.reInit();
+      // emblaApi.scrollTo(8, true);
     }
-  }, [categories, emblaApi]);
+  }, [emblaApi, categories]); // Note: The categories is added in the dependencies array because we want the carousel to re-initialize when ever the categories array changes.
 
   //   useEffect(() => {
   //     if (slidesRef.current && emblaApi) {
@@ -67,7 +89,27 @@ const CategoryCarousel: React.FC<PropType> = (props) => {
   //   }, [slidesRef.current, emblaApi]);
 
   return (
-    <section className="embla">
+    <section className="embla relative ">
+      {!prevBtnDisabled && (
+        <Button
+          onClick={onPrevButtonClick}
+          disabled={prevBtnDisabled}
+          size="icon"
+          className="  absolute left-0 top-1/2   -translate-y-1/2  z-40"
+        >
+          <ChevronLeft className=" h-4 w-4" />
+        </Button>
+      )}
+      {!nextBtnDisabled && (
+        <Button
+          size="icon"
+          onClick={onNextButtonClick}
+          disabled={nextBtnDisabled}
+          className="  absolute right-0 top-1/2    -translate-y-1/2  z-30"
+        >
+          <ChevronRight className=" h-4 w-4" />
+        </Button>
+      )}
       <div className="embla__viewport" ref={emblaRef}>
         <div className="embla__container">
           {categories.map((category, index) => (
@@ -81,7 +123,7 @@ const CategoryCarousel: React.FC<PropType> = (props) => {
                   className={cn(
                     "select-none px-2 py-1  text-xs  whitespace-nowrap  font-bold rounded-[.5rem] bg-secondary hover:bg-muted-foreground/20   dark:bg-card dark:hover:bg-accent  transition-colors duration-200",
                     {
-                      "bg-muted-foreground/20 dark:bg-accent":
+                      "bg-primary dark:bg-primary dark:hover:bg-primary/85  text-primary-foreground hover:bg-primary":
                         Number(currCategory) === category.id,
                     }
                   )}

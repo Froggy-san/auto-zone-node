@@ -18,7 +18,7 @@ interface Filters {
 }
 
 export async function getProducts(filters?: Filters): Promise<{
-  products: Product[]
+  data: Product[]
   pagination: {
     totalCount: number
     totalPages: number
@@ -50,12 +50,68 @@ export async function getProducts(filters?: Filters): Promise<{
 
   if (!response.ok) {
     const error = await response.json()
+
+    console.error("Error fetching products:", error || response.statusText)
     throw new Error(error.message || "Failed to get products")
   }
 
   const data = await response.json()
+
   return data.data
 }
+
+export async function createProduct(data: FormData): Promise<Product> {
+  const res = await fetch(`${BASE_URL}/products`, {
+    method: "POST",
+    credentials: "include",
+    body: data,
+  })
+
+  if (!res.ok) {
+    const error = await res.json()
+    throw new Error(error.message || "Failed to create Product")
+  }
+
+  const createdProduct = await res.json()
+  console.log("Created Product:", createdProduct.data)
+  return createdProduct.data
+}
+
+export async function updateProduct(
+  id: string,
+  data: FormData
+): Promise<Product> {
+  const res = await fetch(`${BASE_URL}/products/${id}`, {
+    method: "PATCH",
+    credentials: "include",
+    body: data,
+  })
+
+  if (!res.ok) {
+    const error = await res.json()
+    throw new Error(error.message || "Failed to update product")
+  }
+
+  const updatedProduct = await res.json()
+  console.log("Updated Product:", updatedProduct.data)
+  return updatedProduct.data
+}
+
+export async function getProductById(id: string) {
+  const res = await fetch(`${BASE_URL}/products/${id}`, {
+    credentials: "include",
+  })
+
+  if (!res.ok) {
+    const error = await res.json()
+    throw new Error(error.message || "Failed to get product")
+  }
+
+  const createdProduct = await res.json()
+  console.log("Product:", createdProduct.data)
+  return createdProduct.data
+}
+
 export const deleteMultipleProducts = async (ids: string[]) => {
   const response = await fetch(`${BASE_URL}/products/delete-multiple`, {
     method: "DELETE",

@@ -1,86 +1,108 @@
-import { Product, ProductWithCategory, User } from "@lib/types";
-import React from "react";
-import ProductItem from "./product-item";
-import { getProductsAction } from "@lib/actions/productsActions";
-import ErrorMessage from "@components/error-message";
-import { ShoppingBasket } from "lucide-react";
-import { redirect } from "next/navigation";
+import React from "react"
+import ProductItem from "./product-item"
+
+import { ShoppingBasket } from "lucide-react"
+import ErrorMessage from "../error-message"
+import ProductPagenation from "./product-pagenation"
+import useProducts from "@/features/products/useProducts"
 
 interface ProductsListProps {
-  pageNumber: string;
-  name?: string;
-  categoryId?: string;
-  productTypeId?: string;
-  productBrandId?: string;
-  isAvailable?: string;
-  user: User | null;
+  pageNumber: string
+  name?: string
+  category?: string
+  productType?: string
+  productBrand?: string
+  isAvailable?: string
+  maker?: string
+  model?: string
+  generation?: string
+  user: any | null
 }
 
 const ProductsList: React.FC<ProductsListProps> = async ({
   user,
   pageNumber,
   name,
-  categoryId,
-  productTypeId,
-  productBrandId,
+  category,
+  productType,
+  productBrand,
+  maker,
+  model,
+  generation,
   isAvailable,
 }) => {
-  const { data: products, error: productsError } = await getProductsAction({
-    pageNumber,
-    name,
-    categoryId,
-    productTypeId,
-    productBrandId,
-    isAvailable,
-  });
+  const { products, pagination, isError, isLoading, error } = useProducts()
+  console.log("Products data:", products)
 
-  if (productsError)
+  if (error)
     return (
       <ErrorMessage
-        icon={<ShoppingBasket className="  w-10 h-10" />}
-        className=" px-2 my-7 "
+        icon={<ShoppingBasket className="h-10 w-10" />}
+        className="my-7 px-2"
       >
         {" "}
-        {productsError}.
+        {error.message}.
       </ErrorMessage>
-    );
+    )
   if (!products)
     return (
       <ErrorMessage
-        icon={<ShoppingBasket className="  w-10 h-10" />}
-        className=" px-2 my-7"
+        icon={<ShoppingBasket className="h-10 w-10" />}
+        className="my-7 px-2"
       >
         {" "}
         Something went wrong while grabbing the products.
       </ErrorMessage>
-    );
+    )
   if (!products.length)
     return (
       <ErrorMessage
-        icon={<ShoppingBasket className="  w-10 h-10" />}
-        className=" px-2 my-7"
+        icon={<ShoppingBasket className="h-10 w-10" />}
+        className="my-7 px-2"
       >
         {" "}
         No products.
       </ErrorMessage>
-    );
+    )
+
+  const filters = {
+    name,
+    category,
+    productType,
+    productBrand,
+    isAvailable,
+    maker,
+    model,
+    generation,
+  }
+  const encondedFilters = encodeURIComponent(JSON.stringify(filters))
   return (
     <>
-      <ul className=" grid  grid-cols-1 xs:grid-cols-2  p-3   xl:grid-cols-3 gap-3">
+      <ul className="gr gr-cols-1 xs:gr-cols-2 xl:gr-cols-3 gap-3 p-3">
         {products && products.length
-          ? products.map((product: Product, i: number) => (
+          ? products.map((product, i: number) => (
               <ProductItem
                 user={user}
                 currPage={pageNumber}
                 pageSize={products.length}
                 product={product}
+                appliedFilters={encondedFilters}
                 key={i}
               />
             ))
           : null}
       </ul>
-    </>
-  );
-};
 
-export default ProductsList;
+      <ProductPagenation
+        count={pagination?.totalCount || 0}
+        // name={name}
+        // categoryId={categoryId}
+        // productTypeId={productTypeId}
+        // productBrandId={productBrandId}
+        // isAvailable={isAvailable}
+      />
+    </>
+  )
+}
+
+export default ProductsList

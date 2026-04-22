@@ -12,3 +12,7 @@ export const createCarModelSchema = z.object({
     carMaker: objectIdSchema,
   }),
 });
+
+export const updateCarModelSchema = createCarModelSchema.partial().extend({
+  body: createCarModelSchema.shape.body.partial(),
+});

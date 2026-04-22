@@ -1,6 +1,5 @@
 import { z } from "zod";
 import { objectIdSchema } from "./commen";
-import { updateProduct } from "../controllers/productController";
 
 // 1. Define the sub-schema for the "Table" inside MoreDetails
 const detailTableSchema = z.object({

@@ -31,7 +31,7 @@ const PillITem = ({
 }: {
   itemType: ItemType;
   handleResetPage: () => void;
-  item: Category;
+  item: { id: number; name: string };
 }) => {
   const [loading, setLoading] = useState(false);
   return (
@@ -70,7 +70,7 @@ function DeleteBtn({
   handleResetPage: () => void;
   isDeleting: boolean;
   setIsDeleting: React.Dispatch<SetStateAction<boolean>>;
-  item: Category;
+  item: { id: number; name: string };
 }) {
   const { toast } = useToast();
   // const { deleteCargeneration, isDeleting } = useDeleteCarGenerations();
@@ -79,16 +79,16 @@ function DeleteBtn({
 
   const handleDelete = useCallback(async () => {
     try {
-      setIsDeleting(true);
-      if (itemType === "category") {
-        const data = await deleteCategoryAction(item.id);
-        if (data?.error) throw new Error(data.error);
-      }
+      // setIsDeleting(true);
+      // if (itemType === "category") {
+      //   const data = await deleteCategoryAction(item.id);
+      //   if (data?.error) throw new Error(data.error);
+      // }
 
-      if (itemType === "productType") {
-        const data = await deleteProductTypeAction(item.id);
-        if (data?.error) throw new Error(data.error);
-      }
+      // if (itemType === "productType") {
+      //   const data = await deleteProductTypeAction(item.id);
+      //   if (data?.error) throw new Error(data.error);
+      // }
 
       if (itemType === "productBrand") {
         const data = await deleteProductBrandAction(item.id);

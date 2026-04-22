@@ -44,7 +44,7 @@ const CarCarousel = ({ cars, clientDetails, isAdmin }: Props) => {
   const showenCar = carId ? cars.find((car) => car.id === carId) : undefined;
 
   return (
-    <div className="mt-10  w-full max-w-[1000px] mx-auto  p-5 shadow-lg space-y-3  rounded-xl bg-card/30  border">
+    <div className="mt-10  w-full max-w-[1500px] mx-auto  p-5 shadow-lg space-y-3  rounded-3xl bg-card/30  ">
       <h2 className="text-xl font-semibold ">YOUR CARS</h2>
       <Carousel
         opts={{
@@ -54,7 +54,7 @@ const CarCarousel = ({ cars, clientDetails, isAdmin }: Props) => {
         className=" flex  items-center justify-between  w-full gap-3"
       >
         <div className=" flex-1 ">
-          <CarouselContent className="   -mt-1  h-[250px] py-1 gap-2  relative   ">
+          <CarouselContent className="   -mt-1   h-[250px] lg:h-[350px] py-1 gap-2  relative   ">
             {cars.map((car, index) => {
               const image = car.carImages[0]?.imagePath;
               return (
@@ -67,7 +67,7 @@ const CarCarousel = ({ cars, clientDetails, isAdmin }: Props) => {
                     <img
                       src={image}
                       alt={`image:${car.plateNumber}`}
-                      className="object-cover w-full h-full max-h-full hover:opacity-85 hover:contras-[190] hover:cursor-pointer transition-all "
+                      className="object-cover w-full h-full max-h-full hover:opacity-85  hover:cursor-pointer transition-all "
                     />
                   ) : (
                     <div className="flex items-center justify-center h-full">

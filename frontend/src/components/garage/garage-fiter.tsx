@@ -4,6 +4,7 @@ import { ComboBox } from "@components/combo-box";
 import {
   CarGenerationProps,
   CarMaker,
+  CarMakersData,
   CarModelProps,
   ClientWithPhoneNumbers,
 } from "@lib/types";
@@ -34,10 +35,8 @@ interface CarsListProps {
   carModelId: string;
   carGenerationId: string;
   pageNumber: string;
-  carGeneration: CarGenerationProps[];
   clients: ClientWithPhoneNumbers[];
-  carModels: CarModelProps[];
-  carMakers: CarMaker[];
+  carMakers: CarMakersData[];
   // We want the filter to disapear in the case of the page count i more than 3 pages and the pageSize i more than 2 cars in a single page.
   count: number;
 }
@@ -46,7 +45,6 @@ const GarageFilter: React.FC<CarsListProps> = ({
   carMakerId,
   carModelId,
   carMakers,
-  carModels,
   color,
   plateNumber,
   chassisNumber,
@@ -54,7 +52,6 @@ const GarageFilter: React.FC<CarsListProps> = ({
   clientId,
   carGenerationId,
   clients,
-  carGeneration,
   count,
 }) => {
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -78,13 +75,17 @@ const GarageFilter: React.FC<CarsListProps> = ({
   // Don't make the filter button disppear on the smaller devices when the page count is less than 3 and the page size is less than 2.
   const disapear = count > 2 && Math.ceil(count / PAGE_SIZE) > 3;
 
-  const models = chosenMaker
-    ? carModels.filter((item) => item.carMakerId === chosenMaker)
-    : carModels;
+  // const models = chosenMaker
+  //   ? carModels.filter((item) => item.carMakerId === chosenMaker)
+  //   : carModels;
 
-  const generations = chosenModel
-    ? carGeneration.filter((item) => item.carModelId === chosenModel)
-    : carGeneration;
+  const models =
+    carMakers.find((maker) => maker.id === chosenMaker)?.carModels || [];
+  const generations =
+    models.find((model) => model.id === chosenModel)?.carGenerations || [];
+  // const generations = chosenModel
+  //   ? carGeneration.filter((item) => item.carModelId === chosenModel)
+  //   : carGeneration;
 
   async function handleSubmit() {
     const params = new URLSearchParams(searchParams);
@@ -143,7 +144,7 @@ const GarageFilter: React.FC<CarsListProps> = ({
         <form
           action={handleSubmit}
           //   onSubmit={handleSubmit}
-          className=" space-y-4  sticky top-[10px]   sm:block "
+          className=" space-y-4  sticky top-[10px]  max-h-[100vh] overflow-y-auto pb-6 sm:px-2 pt-3  garage-scroll-bar sm:block "
         >
           <h1 className=" font-semibold text-2xl flex items-center ">
             Filters{" "}
@@ -168,6 +169,7 @@ const GarageFilter: React.FC<CarsListProps> = ({
               setValue={(value) => {
                 setchosenMaker(value);
                 setchosenModel(0);
+                setCarGenerationId(0);
               }}
             />
           </div>
@@ -186,6 +188,7 @@ const GarageFilter: React.FC<CarsListProps> = ({
           <div className=" space-y-2">
             <label className=" text-sm">Car generation</label>
             <ComboBox
+              placeholder="Select generation..."
               disabled={!chosenModel}
               value={chosenCarGenerationId}
               options={generations}

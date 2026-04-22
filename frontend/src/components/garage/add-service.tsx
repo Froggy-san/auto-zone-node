@@ -38,13 +38,13 @@ const ServiceManagement = async ({
   const { data: categoriesData, error: categoriesError } = categories;
   if (productError || serviceStatusError)
     return <p>{productError || serviceStatusError}</p>;
-  console.log(products);
+
   if (!products || !car || !client) return <p>Soemthng went wrong</p>;
   return (
     <div
       className={cn(
         "flex  flex-col   w-full gap-y-2 xs:flex-row xs:items-center justify-between rounded-lg border p-3 shadow-sm gap-x-7 ",
-        className
+        className,
       )}
     >
       <div className="space-y-0.5   ">
@@ -55,7 +55,7 @@ const ServiceManagement = async ({
       </div>
       <div className=" sm:pr-2">
         <ServicesForm
-          categories={categoriesData}
+          categories={categoriesData || []}
           client={client}
           car={car}
           products={products}

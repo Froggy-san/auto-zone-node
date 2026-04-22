@@ -1,30 +1,31 @@
-import { Input } from "@components/ui/input";
-import { debounce } from "lodash";
-import { usePathname, useSearchParams, useRouter } from "next/navigation";
-import React, { useCallback } from "react";
+import { Input } from "@/components/ui/input"
+import { debounce } from "lodash"
+
+import React, { useCallback } from "react"
+import { useLocation, useNavigate, useSearchParams } from "react-router"
 
 const ProductFilterInput = ({ name }: { name: string }) => {
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const pathname = usePathname();
-  const currPage = searchParams.get("page") ?? "1";
+  const [searchParams] = useSearchParams()
+  const navigate = useNavigate()
+  const pathname = useLocation().pathname
+  const currPage = searchParams.get("page") ?? "1"
 
-  const params = new URLSearchParams(searchParams);
+  const params = new URLSearchParams(searchParams)
   const handleSearch = useCallback(
     debounce((value) => {
       if (value === "") {
-        params.delete("name");
+        params.delete("name")
       } else {
-        params.set("name", value);
+        params.set("name", value)
       }
 
-      if (Number(currPage) > 1) params.set("page", "1");
-      router.replace(`${pathname}?${params.toString()}`, {
-        scroll: false,
-      });
+      if (Number(currPage) > 1) params.set("page", "1")
+      navigate(`${pathname}?${params.toString()}`, {
+        replace: false,
+      })
     }, 1000),
-    [searchParams, router, pathname]
-  );
+    [searchParams, navigate, pathname]
+  )
 
   return (
     <div className="space-y-2">
@@ -37,7 +38,7 @@ const ProductFilterInput = ({ name }: { name: string }) => {
         onChange={(e) => handleSearch(e.target.value)}
       />
     </div>
-  );
-};
+  )
+}
 
-export default ProductFilterInput;
+export default ProductFilterInput

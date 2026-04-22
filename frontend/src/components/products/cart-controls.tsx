@@ -32,8 +32,14 @@ const CartControls: FC<Props> = ({ product }) => {
   const { toast } = useToast();
   useInitializeCart();
   const relatedProduct = cart.find((pro) => pro.id === product.id);
+  const firstImage =
+    relatedProduct && relatedProduct.productImages.length
+      ? relatedProduct?.productImages?.[0]
+      : null;
 
+  const isNotInStock = !product.stock || !product.isAvailable;
   function handleAddItem() {
+    if (isNotInStock) return;
     dispatch(addItemToCart(product));
     toast({
       className:
@@ -62,7 +68,8 @@ const CartControls: FC<Props> = ({ product }) => {
   }
 
   return (
-    <motion.div className=" flex item-center justify-end gap-2 ">
+    <motion.div className=" flex  items-center justify-end gap-2  relative">
+  
       <motion.div layout>
         <AnimatePresence>
           {relatedProduct?.quantity ? (
@@ -103,11 +110,12 @@ const CartControls: FC<Props> = ({ product }) => {
             // </div>
             <motion.button
               onClick={handleAddItem}
+              disabled={isNotInStock}
               className={cn(
-                "inline-flex items-center justify-center whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-8 rounded-md px-3 text-xs "
+                "inline-flex items-center justify-center whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-8 rounded-md px-3   "
               )}
             >
-              Add to cart
+              {isNotInStock ? "Out Of Stock" : "Add To Cart"}
             </motion.button>
           )}
         </AnimatePresence>
@@ -121,9 +129,9 @@ const CartControls: FC<Props> = ({ product }) => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => dispatch(deleteCartItem(product.id))}
-            className=" inline-flex items-center justify-center whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-secondary text-secondary-foreground shadow hover:bg-secondary/90 h-8 rounded-md px-3 text-xs"
+            className=" inline-flex items-center justify-center whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-secondary text-secondary-foreground shadow hover:bg-secondary/90 h-8 rounded-md px-3  sm:h-9 text-xl sm:text-2xl "
           >
-            <BsCartDash size={19} />
+            <BsCartDash />
           </motion.button>
         )}
       </AnimatePresence>

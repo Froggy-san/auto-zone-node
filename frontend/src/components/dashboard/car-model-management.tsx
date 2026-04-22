@@ -13,9 +13,7 @@ const CarModelManagement = async () => {
         <label className=" font-semibold">Car models</label>
         <p className=" text-muted-foreground text-sm">Add car models.</p>
       </div>
-      <div className="  sm:pr-2">
-        <CarModelForm carMakers={data} />
-      </div>
+      <div className="  sm:pr-2">{/* <CarModelForm carMakers={data} /> */}</div>
     </div>
   );
 };

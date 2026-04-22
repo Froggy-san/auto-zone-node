@@ -29,7 +29,7 @@ const limiter = expressRateLimit({
 app.use("/api", limiter);
 app.use(
   cors({
-    origin: process.env.FRONTEND_URLs, // Your React URL
+    origin: process.env.FRONTEND_URL, // Your React URL
     credentials: true, // The backend must also say "Yes, I allow cookies"
   }),
 ); // Crucial for your React frontend!
@@ -38,13 +38,6 @@ app.use(express.json({ limit: "10kb" })); // Body parser
 
 // app.use(ExpressMongoSanitize());
 
-// 2) HEALTH CHECK ROUTE
-app.get("/health", (req: Request, res: Response) => {
-  res.status(200).json({
-    status: "success",
-    message: "Auto-Zone API is running smoothly",
-  });
-});
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
 }
@@ -56,5 +49,12 @@ app.use("/api/v1/productTypes", productTypeRouter);
 app.use("/api/v1/categories", categoryRouter);
 app.use("/api/v1/carMakers", carMakerRouter);
 app.use("/api/v1/carModels", carModelRouter);
+// 2) HEALTH CHECK ROUTE
+app.get("/health", (req: Request, res: Response) => {
+  res.status(200).json({
+    status: "success",
+    message: "Auto-Zone API is running smoothly",
+  });
+});
 app.use(globalErrorHandler);
 export default app;

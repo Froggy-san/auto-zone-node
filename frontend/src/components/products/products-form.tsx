@@ -1,274 +1,198 @@
-"use client";
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
+"use client"
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
+import { z } from "zod"
+import { Button } from "@/components/ui/button"
+
+import Spinner from "@/components/Spinner"
 import {
-  Control,
-  useFieldArray,
-  UseFieldArrayRemove,
-  useForm,
-} from "react-hook-form";
-import { z } from "zod";
-import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import {
-  CarInfoProps,
-  Category,
-  ProductBrand,
-  ProductById,
-  ProductImage,
-  ProductsSchema,
-  ProductType,
-} from "@lib/types";
-import { Textarea } from "@components/ui/textarea";
-import { Switch } from "@components/ui/switch";
-import Spinner from "@components/Spinner";
-import {
-  createProductAction,
-  editProductAction,
   revalidateProductById,
   revalidateProducts,
-} from "@lib/actions/productsActions";
-import { useToast } from "@hooks/use-toast";
+} from "@/lib/actions/productsActions"
+
 import SuccessToastDescription, {
   ErorrToastDescription,
-} from "@components/toast-items";
+} from "@/components/toast-items"
 
-import { ComboBox } from "@components/combo-box";
-import { MultiFileUploader } from "./multi-file-uploader";
-import useObjectCompare from "@hooks/use-compare-objs";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import DialogComponent from "@components/dialog-component";
-import {
-  ArrowBigLeft,
-  ArrowBigRight,
-  ImageOff,
-  Minus,
-  Plus,
-  Trash2,
-} from "lucide-react";
-import { createClient } from "@supabase/supabase-js";
-import { SUPABASE_URL } from "@lib/constants";
-import { createProduct, editProdcut } from "@lib/services/products-services";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+import useObjectCompare from "@/hooks/use-compare-objs"
+
+import DialogComponent from "@/components/dialog-component"
+import { ArrowBigLeft, ArrowBigRight } from "lucide-react"
+
+import { SUPABASE_URL } from "@/lib/constants"
+import { createProduct, editProdcut } from "@/lib/services/products-services"
+
 import {
   Progress,
   ProgressBarContainer,
   ProgressMeter,
-} from "@components/progress";
-import { Cross2Icon } from "@radix-ui/react-icons";
-import {
-  AnimatePresence,
-  motion,
-  useAnimate,
-  usePresence,
-} from "framer-motion";
-import StepTwo from "./product-step-two";
-import { duration } from "@mui/material";
-import FullImagesGallery from "@components/full-images-gallery";
-import ProdcutViewDetials from "./product-view-detials";
-import Collapse, {
-  CollapseButton,
-  CollapseContant,
-} from "@components/collapse";
-import { TbBoxModel2 } from "react-icons/tb";
-import { Card } from "@components/ui/card";
-import { VscTypeHierarchySuper } from "react-icons/vsc";
-import { MdCategory } from "react-icons/md";
-import { formatCurrency } from "@lib/client-helpers";
-import { BsCartDash } from "react-icons/bs";
-import MoreDetailsAccordion from "./more-details-accordion";
-import _ from "lodash";
-import { cn } from "@lib/utils";
+} from "@/components/progress"
+import { Cross2Icon } from "@radix-ui/react-icons"
+import { AnimatePresence, motion } from "framer-motion"
+import StepTwo from "./form-step-two"
 
-// Variants for slide transitions; "direction" is passed as a custom prop.
-const slideVariants = {
-  enter: (direction: number) => ({
-    x: direction > 0 ? 300 : -300, // Adjust these values as needed
-    opacity: 0,
-  }),
-  center: {
-    x: 0,
-    opacity: 1,
-  },
-  exit: (direction: number) => ({
-    x: direction > 0 ? -300 : 300,
-    opacity: 0,
-  }),
-};
+import _ from "lodash"
+import { cn } from "@//lib/utils"
+import StepOne from "./form-step-one"
+import StepThree from "./form-step-three"
+import type {
+  Category,
+  ProductBrand,
+  ProductImage,
+  ProductWithDetails,
+} from "@/types"
+
+import { ProductsSchema } from "@/lib/types"
+import { useLocation, useNavigate, useSearchParams } from "react-router"
+import { toast } from "sonner"
+import { FieldGroup } from "../ui/field"
+import type { CarMaker } from "@/types/carMaker"
 
 interface ProductFormProps {
-  categories: Category[];
-  productTypes: ProductType[];
-  productBrand: ProductBrand[];
-  productToEdit?: ProductById;
-  useParams?: boolean;
+  categories: Category[]
+  productBrand: ProductBrand[]
+  productToEdit?: ProductWithDetails
+  useParams?: boolean
+  carMakers: CarMaker[]
 }
 
-type FirstStepFiedls =
-  | "categoryId"
-  | "productTypeId"
-  | "productBrandId"
-  | "listPrice";
+type FirstStepFiedls = "category" | "productType" | "productBrand" | "listPrice"
 
 const firstStepFields: FirstStepFiedls[] = [
-  "categoryId",
-  "productTypeId",
-  "productBrandId",
+  "category",
+  "productType",
+  "productBrand",
   "listPrice",
-];
-// const secondStepFields
+]
 
 const ProductForm: React.FC<ProductFormProps> = ({
   categories,
-  productTypes,
+  carMakers,
   productBrand,
   productToEdit,
   useParams = false,
 }) => {
-  const searchParam = useSearchParams();
-  const edit = searchParam.get("edit") ?? "";
-  const [isOpen, setIsOpen] = useState(edit ? true : false);
+  const carMaker = productToEdit?.carMaker
+  const [searchParam] = useSearchParams()
+  const edit = searchParam.get("edit") ?? ""
+  const [isOpen, setIsOpen] = useState(edit ? true : false)
   const [isMainImage, setIsMainImage] = useState<ProductImage | null | number>(
     null
-  );
-  const [deletedDetails, setDeletedDetails] = useState<number[]>([]);
-  const [deletedMedia, setDeletedMedia] = useState<ProductImage[]>([]);
-  const [[step, direction], setStep] = useState([0, 1]);
+  )
 
-  const { toast } = useToast();
-  const router = useRouter();
-  const pathname = usePathname();
-  const formRef = useRef<HTMLFormElement>(null);
-  const maxNumOfSteps = 2;
+  const [deletedDetails, setDeletedDetails] = useState<number[]>([])
+  const [deletedMedia, setDeletedMedia] = useState<ProductImage[]>([])
+  const [[step, direction], setStep] = useState([0, 1])
+
+  const navigate = useNavigate()
+  const pathname = useLocation().pathname
+  const formRef = useRef<HTMLFormElement>(null)
+  const maxNumOfSteps = 2
 
   const handleNext = useCallback(
     (newStep: number) => {
       // Prevent overflow or underflow if needed:
-      if (newStep < 0 || newStep > maxNumOfSteps) return;
+      if (newStep < 0 || newStep > maxNumOfSteps) return
 
-      const newDirection = newStep > step ? 1 : -1;
+      const newDirection = newStep > step ? 1 : -1
 
-      setStep([newStep, newDirection]);
+      setStep([newStep, newDirection])
     },
     [step, setStep]
-  );
+  )
 
   const isMainChange =
-    productToEdit?.productImages.find((image) => image.isMain === true) || null;
+    productToEdit?.productImages.find((image) => image.isMain === true) || null
 
   const mediaUrls = useMemo(() => {
-    const deletedIds = deletedMedia.map((del) => del.id);
+    const deletedIds = deletedMedia.map((del) => del._id)
     const mediaArr = productToEdit
       ? productToEdit.productImages.filter(
-          (imageObj) => !deletedIds.includes(imageObj.id)
+          (imageObj) => !deletedIds.includes(imageObj._id)
         )
-      : [];
-    return mediaArr;
-  }, [deletedMedia, productToEdit]);
+      : []
+    return mediaArr
+  }, [deletedMedia, productToEdit])
 
-  const pro = {
-    name: productToEdit?.name,
-    categoryId: productToEdit?.categories.id,
-    productTypeId: productToEdit?.productTypes.id,
-    productBrandId: productToEdit?.productBrands.id,
-    description: productToEdit?.description,
-    listPrice: productToEdit?.listPrice,
-    carinfoId: 1, //! Removed from the back end
-    salePrice: productToEdit?.salePrice,
-    stock: productToEdit?.stock,
-    isAvailable: productToEdit?.isAvailable,
-    images: [],
-    moreDetails: productToEdit?.moreDetails,
-    isMain: false,
-  };
+  type ProductFormValues = z.infer<typeof ProductsSchema>
 
-  const defaultValues = {
-    name: pro.name || "",
-    categoryId: pro.categoryId || 0,
-    productTypeId: pro.productTypeId || 0,
-    productBrandId: pro.productBrandId || 0,
-    description: pro.description || "",
-    listPrice: pro.listPrice || 0,
-    carinfoId: 0, //! Removed from the back end
-    salePrice: pro.salePrice || 0,
-    stock: pro.stock || 0,
-    isAvailable: pro.isAvailable !== undefined ? pro.isAvailable : true,
+  const defaultValues: ProductFormValues = {
+    name: productToEdit?.name || "",
+    category: productToEdit?.category?._id || "",
+    productType: productToEdit?.productType?._id || "",
+    productBrand: productToEdit?.productBrand?._id || "",
+    description: productToEdit?.description || "",
+
+    carMaker: productToEdit?.carMaker?._id ?? null,
+    carModel: productToEdit?.carModel?._id ?? null,
+
+    generations: productToEdit?.generations?.map((gen) => gen._id) ?? [],
+
+    listPrice: productToEdit?.listPrice ?? 0,
+    salePrice: productToEdit?.salePrice ?? 0,
+    stock: productToEdit?.stock ?? 0,
+
+    isAvailable: productToEdit?.isAvailable ?? false,
+
     images: [],
-    moreDetails: pro.moreDetails || [],
-    isMain: false,
-  };
-  const form = useForm<z.infer<typeof ProductsSchema>>({
+
+    mainImageName:
+      productToEdit?.productImages?.find((img) => img.isMain)?.filename || "",
+
+    moreDetails: productToEdit?.moreDetails ?? [],
+  }
+  const form = useForm<ProductFormValues>({
     mode: "onChange",
     resolver: zodResolver(ProductsSchema),
-    defaultValues: defaultValues,
-    // shouldUnregister: true,
-  });
+    defaultValues,
+  })
 
-  const { images, moreDetails } = form.watch();
+  const { images, moreDetails } = form.watch()
 
-  const formValues = form.getValues();
-  const formErrors = form.formState.errors;
+  const formValues = form.getValues()
+  const formErrors = form.formState.errors
 
   const [isFirstVaild, isSecondVaild] = useMemo(() => {
-    let isFirstStepValid = true;
-    let isSecondStepVaild = true;
+    let isFirstStepValid = true
+    let isSecondStepVaild = true
 
-    if (form.formState.errors.salePrice) isFirstStepValid = false;
-    if (formErrors.name || formValues.name === "") isFirstStepValid = false;
+    if (form.formState.errors.salePrice) isFirstStepValid = false
+    if (formErrors.name || formValues.name === "") isFirstStepValid = false
     if (formValues.listPrice > formValues.salePrice && formErrors.salePrice)
-      form.clearErrors("salePrice");
+      form.clearErrors("salePrice")
 
     for (let i = 0; i < firstStepFields.length; i++) {
       if (
         formErrors[firstStepFields[i]] ||
         formValues[firstStepFields[i]] === 0
       ) {
-        isFirstStepValid = false;
-        break;
+        isFirstStepValid = false
+        break
       }
     }
 
     for (let i = 0; i < moreDetails.length; i++) {
-      let itemError = false;
-      const item = moreDetails[i];
+      let itemError = false
+      const item = moreDetails[i]
 
       item.table.forEach((item) => {
-        if (!item.title.length || !item.description.length) itemError = true;
-      });
+        if (!item.title.length || !item.description.length) itemError = true
+      })
 
       if (!item.title.length || itemError) {
-        isSecondStepVaild = false;
-        break;
+        isSecondStepVaild = false
+        break
       }
     }
 
-    if (formErrors.moreDetails) isSecondStepVaild = false;
+    if (formErrors.moreDetails) isSecondStepVaild = false
 
-    return [isFirstStepValid, isSecondStepVaild];
-  }, [formValues, form, formErrors]);
+    return [isFirstStepValid, isSecondStepVaild]
+  }, [formValues, form, formErrors])
 
   // checking if the user changet the forms data in order to enable the user to change it. if not we check if they deleted any images as shown below in the (disabled variable).
-  const isEqual = useObjectCompare(defaultValues, formValues);
+  const isEqual = useObjectCompare(defaultValues, formValues)
 
   // if the user didn't change the form's data nor did he delete any already uploaded images we want the submit button to be disabled to prevent any unnecessary api calls.
   const disabled =
@@ -277,93 +201,97 @@ const ProductForm: React.FC<ProductFormProps> = ({
     (step === 2 &&
       isMainChange === isMainImage &&
       isEqual &&
-      !deletedMedia.length);
+      !deletedMedia.length)
 
-  const isLoading = form.formState.isSubmitting;
+  const isLoading = form.formState.isSubmitting
 
   useEffect(() => {
     if (!productToEdit && images.length) {
-      setIsMainImage(0);
+      setIsMainImage(0)
     }
-  }, [images, productToEdit]);
+  }, [images, productToEdit])
 
   useEffect(() => {
-    images.forEach((file) => URL.revokeObjectURL(file.preview));
-    form.reset(defaultValues);
-    setStep([0, 1]);
-    setDeletedDetails([]);
+    images.forEach((file) => URL.revokeObjectURL(file.preview))
+    form.reset(defaultValues)
+    setStep([0, 1])
+    setDeletedDetails([])
     setIsMainImage(
       productToEdit?.productImages.find((image) => image.isMain === true) ||
         null
-    );
-    if (formRef.current) formRef.current.scrollTo(0, 0);
-  }, [isOpen, productToEdit?.productImages]);
+    )
+
+    if (formRef.current) formRef.current.scrollTo(0, 0)
+  }, [isOpen, productToEdit?.productImages])
 
   useEffect(() => {
-    if (formRef.current) formRef.current.scrollTo(0, 0);
-  }, [step]);
+    if (formRef.current) formRef.current.scrollTo(0, 0)
+  }, [step])
 
   function handleOpen() {
-    setIsOpen(true);
+    setIsOpen(true)
   }
 
   function handleClose() {
-    if (isLoading && productToEdit) return;
+    if (isLoading && productToEdit) return
     if (edit) {
-      const params = new URLSearchParams(searchParam);
-      params.delete("edit");
-      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+      const params = new URLSearchParams(searchParam)
+      params.delete("edit")
+      navigate(`${pathname}?${params.toString()}`, { replace: true })
     }
 
-    setIsOpen(false);
+    setIsOpen(false)
 
-    if (isLoading) return;
+    if (isLoading) return
 
     setIsMainImage(
       productToEdit?.productImages.find((image) => image.isMain === true) ||
         null
-    );
-    setDeletedMedia([]);
+    )
+    setDeletedMedia([])
   }
 
   function handleDeleteMedia(productImage?: ProductImage) {
-    if (productImage) setDeletedMedia((arr) => [...arr, productImage]);
+    if (productImage) setDeletedMedia((arr) => [...arr, productImage])
   }
 
   function handleSubmit() {
     if (formRef.current) {
-      formRef.current.requestSubmit();
+      formRef.current.requestSubmit()
     }
   }
 
   async function onSubmit({
     name,
-    categoryId,
-    productBrandId,
-    productTypeId,
+    category,
+    productBrand,
+    productType,
     description,
     listPrice,
-    carinfoId,
     salePrice,
     stock,
     isAvailable,
+    carMaker,
+    carModel,
+    generations,
+    mainImageName,
     // isMain,
     images,
     moreDetails,
   }: z.infer<typeof ProductsSchema>) {
     try {
-      const isMainEdited = isMainImage && typeof isMainImage !== "number";
+      const isMainEdited = isMainImage && typeof isMainImage !== "number"
       const imagesToUpload = images.map((img, i) => {
-        const name = `${Math.random()}-${img.name}`.replace(/\//g, "");
-        const path = `${SUPABASE_URL}/storage/v1/object/public/product/${name}`;
+        const name = `${Math.random()}-${img.name}`.replace(/\//g, "")
+        const path = `${SUPABASE_URL}/storage/v1/object/public/product/${name}`
 
         return {
           name,
           path,
           isMain: typeof isMainImage === "number" && isMainImage === i,
           file: img,
-        };
-      });
+        }
+      })
       if (productToEdit) {
         // const imagesToUpload = images.map((image, i) => {
         //   const formData = new FormData();
@@ -381,7 +309,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
         const isMoreDetailEqual = _.isEqual(
           productToEdit.moreDetails,
           moreDetails
-        );
+        )
 
         const productToEditData = {
           id: productToEdit.id,
@@ -394,9 +322,15 @@ const ProductForm: React.FC<ProductFormProps> = ({
           salePrice,
           stock,
           isAvailable,
-        };
+          makerId: makerId ? makerId : null,
+          modelId: modelId ? modelId : null,
+          generationsArr: generationsArr.length
+            ? JSON.stringify(generationsArr)
+            : null,
+        }
 
         // Edit the product.
+
         await editProdcut({
           productToEdit: productToEditData,
           imagesToUpload,
@@ -406,10 +340,10 @@ const ProductForm: React.FC<ProductFormProps> = ({
           isEqual,
           deletedDetails,
           moreDetails: !isMoreDetailEqual ? moreDetails : [],
-        });
+        })
 
-        await revalidateProducts();
-        await revalidateProductById(productToEdit.id);
+        await revalidateProductById(productToEdit.id)
+        // await revalidateProducts();
         // const { error } = await editProductAction({
         //   productToEdit: productToEditData,
         //   imagesToUpload,
@@ -418,8 +352,8 @@ const ProductForm: React.FC<ProductFormProps> = ({
         //   isEqual,
         // });
         // if (error) throw new Error(error);
-        handleClose();
-        setDeletedMedia([]);
+        handleClose()
+        setDeletedMedia([])
       } else {
         // const imagesToUpload = images.length
         //   ? images.map((image, i) => {
@@ -442,15 +376,17 @@ const ProductForm: React.FC<ProductFormProps> = ({
           productBrandId,
           description,
           listPrice,
-          carinfoId,
           salePrice,
           stock,
           isAvailable,
           images: imagesToUpload,
           moreDetails,
-        });
+          makerId,
+          modelId,
+          generationsArr,
+        })
 
-        await revalidateProducts();
+        await revalidateProducts()
 
         // const { error } = await createProductAction({
         //   name,
@@ -504,38 +440,39 @@ const ProductForm: React.FC<ProductFormProps> = ({
 
         // await Promise.all(uploadPromises);
 
-        handleClose();
+        handleClose()
       }
-
-      toast({
-        className: "bg-primary  text-primary-foreground",
-        title: `Done.`,
-        description: (
-          <SuccessToastDescription
-            message={`${
-              productToEdit
-                ? "Product has been updated"
-                : "Product has been created."
-            }`}
-          />
-        ),
-      });
+      toast.success("Product has been created")
+      // toast({
+      //   className: "bg-primary  text-primary-foreground",
+      //   title: `Done.`,
+      //   description: (
+      //     <SuccessToastDescription
+      //       message={`${
+      //         productToEdit
+      //           ? "Product has been updated"
+      //           : "Product has been created."
+      //       }`}
+      //     />
+      //   ),
+      // })
     } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Something went wrong.",
-        description: <ErorrToastDescription error={error.message} />,
-      });
+      toast.error(`${error.message}`)
+      // toast({
+      //   variant: "destructive",
+      //   title: "Something went wrong.",
+      //   description: <ErorrToastDescription error={error.message} />,
+      // })
     }
   }
   return (
     <DialogComponent open={isOpen} onOpenChange={handleClose}>
-      <Button onClick={handleOpen} size="sm" className=" w-full">
-        {productToEdit ? "Edit" : "Create"} a porduct
+      <Button onClick={handleOpen} size="sm" className="w-full">
+        {productToEdit ? "Edit" : "Create"} a product
       </Button>
       {/* sm:p-14 pb-0 sm:pb-0 */}
-      <DialogComponent.Content className="  max-h-[85vh] overflow-hidden max-w-[1050px] border border-transparent flex flex-col gap-1   p-0">
-        <DialogComponent.Header className="     border-b pb-2  px-6 pt-6 sm:px-14 sm:pt-8 sm:pb-4  bg-background ">
+      <DialogComponent.Content className="flex max-h-[85vh] max-w-[1050px] flex-col gap-1 overflow-hidden border border-transparent p-0 sm:rounded-none lg:rounded-lg">
+        <DialogComponent.Header className="border-b bg-background px-6 pt-6 pb-2 sm:px-14 sm:pt-8 sm:pb-4">
           <DialogComponent.Title>
             {" "}
             {productToEdit ? "Update" : "Add"} Product
@@ -571,7 +508,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
                 transition={{
                   ease: "backInOut",
                 }}
-                className="  text-center  sm:text-left"
+                className="text-center sm:text-left"
               >
                 {step === 0 &&
                   (productToEdit
@@ -587,25 +524,26 @@ const ProductForm: React.FC<ProductFormProps> = ({
             </AnimatePresence>
           </DialogComponent.Description>
         </DialogComponent.Header>
-        <Form {...form}>
-          <form
-            ref={formRef}
-            onSubmit={form.handleSubmit(onSubmit)}
-            className={cn(
-              "space-y-8  px-6 sm:px-14  relative  py-4 overflow-y-auto overflow-x-hidden",
-              {
-                " px-2 sm:px-6  ": step === maxNumOfSteps,
-              }
-            )}
-          >
+
+        <form
+          ref={formRef}
+          onSubmit={form.handleSubmit(onSubmit)}
+          className={cn(
+            "relative space-y-8 overflow-x-hidden overflow-y-auto overscroll-contain px-6 py-4 sm:px-6 md:px-14",
+            {
+              "px-2 sm:px-6": step === maxNumOfSteps,
+            }
+          )}
+        >
+          <FieldGroup>
             <AnimatePresence mode="wait">
               {step === 0 && (
                 <StepOne
+                  form={form}
                   control={form.control}
                   isLoading={isLoading}
                   currStep={[step, direction]}
                   categories={categories}
-                  productTypes={productTypes}
                   productBrand={productBrand}
                   isMainImage={isMainImage}
                   setIsMainImage={setIsMainImage}
@@ -613,6 +551,8 @@ const ProductForm: React.FC<ProductFormProps> = ({
                   mediaUrls={mediaUrls}
                   productToEdit={productToEdit}
                   setDeletedMedia={setDeletedMedia}
+                  carMaker={carMaker}
+                  carMakers={carMakers}
                 />
               )}
 
@@ -632,25 +572,24 @@ const ProductForm: React.FC<ProductFormProps> = ({
                   formValues={formValues}
                   mediaUrls={mediaUrls}
                   categoriesArr={categories}
-                  productTypesArr={productTypes}
                   productBrandsArr={productBrand}
                 />
               )}
             </AnimatePresence>
-          </form>
-        </Form>
+          </FieldGroup>
+        </form>
 
-        <DialogComponent.Footer className="  px-6 pt-2 pb-6 sm:px-14 sm:pb-8 sm:pt-4 border-t     bg-background bottom-0 z-50">
+        <DialogComponent.Footer className="bottom-0 z-50 border-t bg-background px-6 pt-2 pb-6 sm:px-14 sm:pt-4 sm:pb-8">
           {/* bg-muted-foreground/20 dark:bg-accent */}
-          <div className="flex justify-between gap-4 items-center w-full">
-            <div className="bg-muted-foreground/10  dark:bg-accent/20      rounded-md p-3 flex-1 ">
+          <div className="flex w-full items-center justify-between gap-4">
+            <div className="flex-1 rounded-md bg-muted-foreground/10 p-3 dark:bg-accent/20">
               <Progress value={step} maxValue={maxNumOfSteps}>
-                <ProgressBarContainer className=" flex-1 border border-secondary-foreground/20 dark:border-border ">
+                <ProgressBarContainer className="flex-1 border border-secondary-foreground/20 dark:border-border">
                   <ProgressMeter />
                 </ProgressBarContainer>
               </Progress>
             </div>
-            <div className=" flex items-center gap-2 w-fit">
+            <div className="flex w-fit items-center gap-2">
               {/* sm:w-[unset] */}
               <Button
                 onClick={() => handleNext(step - 1)}
@@ -658,24 +597,24 @@ const ProductForm: React.FC<ProductFormProps> = ({
                 variant="secondary"
                 size="sm"
                 disabled={isLoading || step === 0}
-                className=" w-full "
+                className="w-full"
               >
                 Back
               </Button>
               <Button
                 size="sm"
                 disabled={isLoading || disabled}
-                className=" w-full "
+                className="w-full"
                 onClick={() => {
                   if (step < maxNumOfSteps) {
-                    handleNext(step + 1);
+                    handleNext(step + 1)
                   } else {
-                    handleSubmit();
+                    handleSubmit()
                   }
                 }}
               >
                 {isLoading ? (
-                  <Spinner className=" h-full" />
+                  <Spinner className="h-full" />
                 ) : step < maxNumOfSteps ? (
                   "Next"
                 ) : productToEdit ? (
@@ -689,603 +628,36 @@ const ProductForm: React.FC<ProductFormProps> = ({
         </DialogComponent.Footer>
       </DialogComponent.Content>
     </DialogComponent>
-  );
-};
-
-/// Step one Products details. --------------------------------------
-
-export const transition = {
-  x: { type: "spring", stiffness: 300, damping: 26, duration: 4 },
-  opacity: { duration: 0.5 },
-};
-
-interface StepOneProps {
-  control: Control<z.infer<typeof ProductsSchema>>;
-  isLoading: boolean;
-  categories: Category[];
-  productTypes: ProductType[];
-  productBrand: ProductBrand[];
-  isMainImage: number | ProductImage | null;
-  mediaUrls: ProductImage[];
-  productToEdit?: ProductById;
-  currStep: number[];
-  handleDeleteMedia(productImage?: ProductImage): void;
-  setIsMainImage: React.Dispatch<
-    React.SetStateAction<number | ProductImage | null>
-  >;
-  setDeletedMedia: React.Dispatch<React.SetStateAction<ProductImage[]>>;
+  )
 }
-
-function StepOne({
-  currStep,
-  control,
-  isLoading,
-  categories,
-  productBrand,
-  productTypes,
-  isMainImage,
-  setIsMainImage,
-  handleDeleteMedia,
-  mediaUrls,
-  setDeletedMedia,
-  productToEdit,
-}: StepOneProps) {
-  const [step, direction] = currStep;
-  return (
-    <motion.div
-      custom={direction}
-      variants={slideVariants}
-      initial="enter"
-      animate="center"
-      exit="exit"
-      transition={transition}
-      className="  space-y-7"
-    >
-      <FormField
-        disabled={isLoading}
-        control={control}
-        name="name"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Name</FormLabel>
-            <FormControl>
-              <Input disabled={isLoading} placeholder="name" {...field} />
-            </FormControl>
-            <FormDescription>Enter the name of the product.</FormDescription>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      <div className=" flex  flex-col gap-2 sm:flex-row">
-        <FormField
-          disabled={isLoading}
-          control={control}
-          name="listPrice"
-          render={({ field }) => (
-            <FormItem className=" w-full">
-              <FormLabel>List price</FormLabel>
-              <FormControl>
-                <Input
-                  type="text"
-                  disabled={isLoading}
-                  value={field.value}
-                  onChange={(e) => {
-                    const inputValue = e.target.value;
-                    if (/^\d*$/.test(inputValue)) {
-                      field.onChange(Number(inputValue));
-                    }
-                  }}
-                  placeholder="List price..."
-                  // {...field}
-                />
-              </FormControl>
-              <FormDescription>Enter the listing price.</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          disabled={isLoading}
-          control={control}
-          name="salePrice"
-          render={({ field }) => (
-            <FormItem className=" w-full">
-              <FormLabel>Sale price</FormLabel>
-              <FormControl>
-                <Input
-                  type="text"
-                  disabled={isLoading}
-                  value={field.value}
-                  onChange={(e) => {
-                    const inputValue = e.target.value;
-                    if (/^\d*$/.test(inputValue)) {
-                      field.onChange(Number(inputValue));
-                    }
-                  }}
-                  placeholder="Sale price"
-                  // {...field}
-                />
-              </FormControl>
-              <FormDescription>Enter the discounted price.</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
-
-      <div className=" flex  flex-col gap-2 sm:flex-row">
-        <FormField
-          disabled={isLoading}
-          control={control}
-          name="stock"
-          render={({ field }) => (
-            <FormItem className=" w-full">
-              <FormLabel>Stock available</FormLabel>
-              <FormControl>
-                <Input
-                  type="text"
-                  disabled={isLoading}
-                  value={field.value}
-                  onChange={(e) => {
-                    const inputValue = e.target.value;
-                    if (/^\d*$/.test(inputValue)) {
-                      field.onChange(Number(inputValue));
-                    }
-                  }}
-                  placeholder="Stock"
-                  // {...field}
-                />
-              </FormControl>
-              <FormDescription>
-                Enter the amount of stock available.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          disabled={isLoading || !categories.length}
-          control={control}
-          name="categoryId"
-          render={({ field }) => (
-            <FormItem className=" w-full ">
-              <FormLabel>category</FormLabel>
-              <FormControl className=" ">
-                <ComboBox
-                  disabled={isLoading || !categories.length}
-                  options={categories}
-                  value={field.value}
-                  setValue={field.onChange}
-                />
-              </FormControl>
-              <FormDescription>
-                Enter what category does the product belong to.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
-
-      <div className=" flex  flex-col gap-2 sm:flex-row">
-        <FormField
-          disabled={isLoading || !productBrand.length}
-          control={control}
-          name="productBrandId"
-          render={({ field }) => (
-            <FormItem className=" w-full">
-              <FormLabel>Product brand</FormLabel>
-              <FormControl>
-                <ComboBox
-                  disabled={isLoading || !productBrand.length}
-                  options={productBrand}
-                  value={field.value}
-                  setValue={field.onChange}
-                />
-              </FormControl>
-              <FormDescription>Enter the brand of the product.</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          disabled={isLoading || !productTypes.length}
-          control={control}
-          name="productTypeId"
-          render={({ field }) => (
-            <FormItem className=" w-full">
-              <FormLabel>Product type</FormLabel>
-              <FormControl>
-                <ComboBox
-                  disabled={isLoading || !productTypes.length}
-                  options={productTypes}
-                  value={field.value}
-                  setValue={field.onChange}
-                />
-              </FormControl>
-              <FormDescription>
-                Enter what type of product it is.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
-      <FormField
-        disabled={isLoading}
-        control={control}
-        name="description"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Description</FormLabel>
-            <FormControl>
-              <Textarea
-                disabled={isLoading}
-                cols={6}
-                placeholder="Description"
-                {...field}
-              />
-            </FormControl>
-            <FormDescription>Describe the product.</FormDescription>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <FormField
-        disabled={isLoading}
-        control={control}
-        name="images"
-        render={({ field }) => (
-          <FormItem className=" w-full">
-            <FormLabel>Product images</FormLabel>
-            <FormControl>
-              <MultiFileUploader
-                isMainImage={isMainImage}
-                setIsMainImage={setIsMainImage}
-                disabled={isLoading}
-                handleDeleteMedia={handleDeleteMedia}
-                selectedFiles={field.value}
-                fieldChange={field.onChange}
-                mediaUrl={mediaUrls}
-              />
-            </FormControl>
-            <FormDescription className=" flex items-center justify-between">
-              <span> Add images related to the product.</span>{" "}
-              <div className=" flex items-center gap-2">
-                <span className=" text-xs ">
-                  Images: {field.value.length + mediaUrls?.length}
-                </span>
-                <Button
-                  disabled={
-                    (!field.value.length && !mediaUrls.length) || isLoading
-                  }
-                  onClick={() => {
-                    field.onChange([]);
-                    setIsMainImage(null);
-                    if (productToEdit)
-                      setDeletedMedia(productToEdit.productImages);
-                  }}
-                  type="button"
-                  variant="destructive"
-                  className=" p-0 w-6 h-6"
-                >
-                  {" "}
-                  <Trash2 className=" w-4 h-4 shrink-0" />
-                </Button>
-              </div>
-            </FormDescription>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      <FormField
-        disabled={isLoading}
-        control={control}
-        name="isAvailable"
-        render={({ field }) => (
-          <FormItem className="flex flex-row h-fit  items-center justify-between rounded-lg border p-3 shadow-sm w-full">
-            <div className="space-y-0.5 ">
-              <FormLabel>Availability</FormLabel>
-              <FormDescription>Is the product available?.</FormDescription>
-            </div>
-            <FormControl>
-              <Switch
-                disabled={isLoading}
-                checked={field.value}
-                onCheckedChange={field.onChange}
-                aria-readonly
-              />
-            </FormControl>
-          </FormItem>
-        )}
-      />
-    </motion.div>
-  );
-}
-
-/// Step 2 ---------------------------------------------------------------------------
-
-/// Step 3
-
-interface StepThreeProps {
-  currStep: number[];
-  isLoading: boolean;
-  mediaUrls: ProductImage[];
-  categoriesArr: Category[];
-  productTypesArr: ProductType[];
-  productBrandsArr: ProductBrand[];
-  formValues: z.infer<typeof ProductsSchema>;
-}
-
-function StepThree({
-  currStep,
-  formValues,
-  mediaUrls,
-  categoriesArr,
-  productBrandsArr,
-  productTypesArr,
-  isLoading,
-}: StepThreeProps) {
-  const [step, direction] = currStep;
-
-  const images = formValues.images.map((image) => image.preview);
-  const urls = mediaUrls.map((image) => image.imageUrl);
-  const viewedImages = [...urls, ...images];
-  const categories = categoriesArr.find(
-    (cat) => cat.id === formValues.categoryId
-  );
-  const productTypes = productTypesArr.find(
-    (type) => type.id === formValues.productTypeId
-  );
-  const productBrands = productBrandsArr.find(
-    (brand) => brand.id === formValues.productBrandId
-  );
-
-  // const date = new Date();
-
-  return (
-    <motion.div
-      custom={direction}
-      variants={slideVariants}
-      initial="enter"
-      animate="center"
-      exit="exit"
-      transition={transition}
-      // initial={{
-      //   opacity: 0,
-      //   x: direction < 0 ? -350 : 350,
-      // }}
-      // animate={{
-      //   opacity: 1,
-      //   x: 0,
-      // }}
-      // exit={{
-      //   opacity: 0,
-      //   x: direction < 0 ? -350 : 350,
-      // }}
-      className={` relative border-2 p-4  rounded-xl border-dashed ${
-        isLoading && "pointer-events-none"
-      }`}
-    >
-      {viewedImages.length ? (
-        <FullImagesGallery images={viewedImages} className="  !h-[50vh]" />
-      ) : (
-        <div className=" h-full flex items-center justify-center  bg-foreground/10  font-semibold text-xl py-5 gap-3">
-          <ImageOff className=" w-10 h-10" /> No images.
-        </div>
-      )}
-
-      <div className=" text-xs  text-muted-foreground my-4 text-right px-3">
-        {formValues.stock ? (
-          <i>
-            Stock: <span>{formValues.stock}</span>
-          </i>
-        ) : (
-          <i>Out of stock</i>
-        )}
-      </div>
-
-      <main className=" my-10">
-        <h1 className=" text-center text-3xl font-semibold tracking-wide">
-          {formValues.name}
-        </h1>
-        <section className=" mt-10 space-y-7 p-6">
-          <div className=" text-xs items-center  flex justify-between">
-            <div className="  flex  gap-3">
-              <span>
-                Listing price:{" "}
-                <span className=" text-red-400">
-                  {" "}
-                  {formatCurrency(formValues.listPrice)}
-                </span>
-              </span>
-
-              <span className=" ">
-                Sales price:{" "}
-                <span className=" text-green-400">
-                  {" "}
-                  {formatCurrency(formValues.salePrice)}
-                </span>
-              </span>
-            </div>
-          </div>
-          <CartDummy stock={formValues.stock} />
-
-          <div className=" space-y-14">
-            <h2 className=" text-xl font-semibold">Product information</h2>
-            <div className=" grid  gap-3 grid-cols-1 sm:grid-cols-2  md:grid-cols-3 ">
-              <Card className=" p-5 h-fit">
-                <div className=" flex items-center gap-2">
-                  <div className=" w-14 h-14 rounded-full    bg-dashboard-orange  text-dashboard-text-orange  flex items-center justify-center mb-3">
-                    <MdCategory size={30} />
-                  </div>
-                  <h2 className=" text-2xl font-semibold  text-dashboard-text-orange">
-                    {" "}
-                    Category
-                  </h2>
-                </div>
-                <p className="   decoration-clone  break-all">
-                  &bull; {categories?.name}
-                </p>
-              </Card>
-
-              <Card className=" p-5 h-fit">
-                <div className=" flex items-center gap-2">
-                  <div className=" w-14 h-14 rounded-full    bg-dashboard-indigo  text-dashboard-text-indigo  flex items-center justify-center mb-3">
-                    <VscTypeHierarchySuper size={30} />
-                  </div>
-                  <h2 className=" text-2xl font-semibold  text-dashboard-text-indigo">
-                    {" "}
-                    Type
-                  </h2>
-                </div>
-                <p className="   decoration-clone  break-all">
-                  &bull; {productTypes?.name}
-                </p>
-              </Card>
-
-              <Card className=" p-5 h-fit">
-                <div className=" flex items-center gap-2">
-                  <div className=" w-14 h-14 rounded-full    bg-dashboard-green  text-dashboard-text-green  flex items-center justify-center mb-3">
-                    <TbBoxModel2 size={30} />
-                  </div>
-                  <h2 className=" text-2xl font-semibold  text-dashboard-text-green">
-                    {" "}
-                    Brand
-                  </h2>
-                </div>
-                <p className="   decoration-clone  break-all">
-                  &bull; {productBrands?.name}
-                </p>
-              </Card>
-            </div>
-            {/* ---- */}
-            <div>
-              <h2 className=" text-xl font-semibold">Description</h2>
-              <Collapse textLenght={1200}>
-                <CollapseContant className="mt-16 text-lg ">
-                  {formValues.description}
-                </CollapseContant>
-                <CollapseButton arrowPositionX="right" />
-              </Collapse>
-            </div>
-          </div>
-          <MoreDetailsAccordion additionalDetails={formValues.moreDetails} />
-        </section>
-      </main>
-    </motion.div>
-  );
-}
-
-function CartDummy({ stock }: { stock: number }) {
-  const [value, setValue] = useState(0);
-  return (
-    <motion.div className=" flex item-center justify-end gap-2 ">
-      <motion.div layout>
-        <AnimatePresence>
-          {value ? (
-            <div className=" flex items-center  transition-opacity overflow-hidden duration-300   gap-2">
-              <Button
-                onClick={() => setValue((value) => value - 1)}
-                size="sm"
-                className="  p-2 h-fit "
-                type="button"
-              >
-                <Minus size={17} />
-              </Button>
-
-              <motion.span
-                key={value}
-                initial={{ opacity: 0, translateY: -7 }}
-                animate={{
-                  opacity: 1,
-                  translateY: 0,
-                }}
-                exit={{
-                  opacity: 0,
-                  translateY: 7,
-                }}
-              >
-                {value}
-              </motion.span>
-
-              <Button
-                disabled={value === stock}
-                onClick={() => setValue((value) => value + 1)}
-                size="sm"
-                className="  p-2 h-fit "
-                type="button"
-              >
-                <Plus size={17} />
-              </Button>
-            </div>
-          ) : (
-            <motion.button
-              onClick={() => setValue(1)}
-              className={
-                "inline-flex items-center justify-center whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-8 rounded-md px-3 text-xs "
-              }
-              type="button"
-            >
-              Add to cart
-            </motion.button>
-          )}
-        </AnimatePresence>
-      </motion.div>
-
-      <AnimatePresence mode="popLayout">
-        {value && (
-          <motion.button
-            layout
-            type="button"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setValue(0)}
-            className=" inline-flex items-center justify-center whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-secondary text-secondary-foreground shadow hover:bg-secondary/90 h-8 rounded-md px-3 text-xs"
-          >
-            <BsCartDash size={19} />
-          </motion.button>
-        )}
-      </AnimatePresence>
-    </motion.div>
-  );
-}
-
-// Progress bar
 
 interface ProgressBarProps {
-  currStep: number;
-  setcurrStep: React.Dispatch<React.SetStateAction<number>>;
+  currStep: number
+  setcurrStep: React.Dispatch<React.SetStateAction<number>>
 }
 
 function ProgressBar({ currStep, setcurrStep }: ProgressBarProps) {
-  const maxNumOfSteps = 3;
+  const maxNumOfSteps = 3
   const handleNext = useCallback(() => {
     if (currStep < maxNumOfSteps) {
-      setcurrStep((curStep) => curStep + 1);
+      setcurrStep((curStep) => curStep + 1)
     }
-  }, [currStep, setcurrStep]);
+  }, [currStep, setcurrStep])
 
   const handlePrev = useCallback(() => {
     if (currStep > 0) {
-      setcurrStep((curStep) => curStep - 1);
+      setcurrStep((curStep) => curStep - 1)
     }
-  }, [currStep, setcurrStep]);
+  }, [currStep, setcurrStep])
 
   return (
-    <div className=" flex items-center gap-5">
+    <div className="flex items-center gap-5">
       <Button size="sm" onClick={handlePrev} disabled={currStep === 0}>
         <ArrowBigLeft />
       </Button>
 
       <Progress value={currStep} maxValue={maxNumOfSteps}>
-        <ProgressBarContainer className=" flex-1">
+        <ProgressBarContainer className="flex-1">
           <ProgressMeter />
         </ProgressBarContainer>
       </Progress>
@@ -1298,7 +670,49 @@ function ProgressBar({ currStep, setcurrStep }: ProgressBarProps) {
         <ArrowBigRight />
       </Button>
     </div>
-  );
+  )
 }
 
-export default ProductForm;
+export default ProductForm
+/*
+function createCurrencyInputHandler(
+    setFormattedValueState: SetFormattedValueState,
+    numericPrefix: string
+  ) {
+    return useCallback(
+      (
+        formattedValue: string | undefined,
+        name?: string,
+        values?: CurrencyInputOnChangeValues,
+        onChange?: React.Dispatch<React.SetStateAction<number>>
+      ) => {
+        if (!formattedValue || (values && !values.value)) {
+          setFormattedValueState("");
+          onChange?.(0);
+          return;
+        }
+
+        if (values && values.value === "0") {
+          // You might also check if the formattedValue is just the prefix + '0' or '0.00'
+          const isJustZero =
+            formattedValue === `${numericPrefix} 0` ||
+            formattedValue === `${numericPrefix} 0.00`; // Adjust based on your actual prefix and decimal settings
+
+          if (isJustZero) {
+            setFormattedValueState("");
+            onChange?.(0);
+            return;
+          }
+        }
+
+        // Default behavior: update states normally
+        setFormattedValueState(formattedValue);
+        if (values) {
+          onChange?.(Number(values.value)); // Store the clean numeric string
+        }
+      },
+      [setFormattedValueState, numericPrefix]
+    );
+  }
+
+*/

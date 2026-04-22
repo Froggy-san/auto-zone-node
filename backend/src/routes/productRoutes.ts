@@ -4,6 +4,7 @@ import {
   createProduct,
   deleteMultipleProducts,
   deleteProduct,
+  getProduct,
   getProducts,
   updateProduct,
   uploadProductImages,
@@ -24,6 +25,7 @@ router
   .post(
     uploadProductImages,
     convertProductImages,
+    ensureArray(["productImages"]),
     validate(createProductSchema),
     createProduct,
   );
@@ -39,10 +41,11 @@ router
 
 router
   .route("/:id")
+  .get(validate(paramIdSchema), getProduct)
   .patch(
     uploadProductImages,
     convertProductImages,
-    ensureArray(["imagesToDelete"]),
+    ensureArray(["productImages", "imagesToDelete"]),
     validate(updateProductSchema),
     updateProduct,
   )

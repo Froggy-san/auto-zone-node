@@ -18,12 +18,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { CarMaker } from "@lib/types";
+import { CarMaker, CarMakersData } from "@lib/types";
 
 interface CarModelComboBoxProps {
   setValue: (carMaker: number) => void;
   value: number;
-  options: CarMaker[];
+  options: CarMakersData[];
   disabled?: boolean;
 }
 
@@ -52,14 +52,14 @@ export const MakerCombobox: React.FC<CarModelComboBoxProps> = ({
             <>
               <p className="text-wrap break-all text-left pr-2">
                 {" "}
-                Maker: {selectedItem.name}
+                {selectedItem.name}
               </p>
               <span className=" ml-auto">
                 {selectedItem.logo ? (
                   <img
                     src={selectedItem.logo}
                     alt="logo"
-                    className="   min-w-6 min-h-6   w-6 h-6 rounded-md   object-cover"
+                    className="    h-6   object-contain"
                   />
                 ) : (
                   "Logo"
@@ -93,13 +93,13 @@ export const MakerCombobox: React.FC<CarModelComboBoxProps> = ({
                       value === option.id ? "opacity-100" : "opacity-0"
                     )}
                   />
-                  <span>Maker: {option.name}</span>{" "}
+                  <span className=" font-semibold">{option.name}</span>{" "}
                   <span className=" ml-auto">
                     {option.logo ? (
                       <img
                         src={option.logo}
                         alt="logo"
-                        className=" w-6 h-6 rounded-md"
+                        className="   max-w-10 h-9 object-contain  "
                       />
                     ) : (
                       "Logo"

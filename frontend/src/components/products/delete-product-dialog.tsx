@@ -1,5 +1,5 @@
-import React, { SetStateAction, useCallback, useEffect } from "react";
-import { Button } from "@/components/ui/button";
+import React, { useCallback, useEffect, type SetStateAction } from "react"
+import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -7,16 +7,17 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from "@/components/ui/dialog"
 
-import Spinner from "@components/Spinner";
-import { deleteProductsByIdAction } from "@lib/actions/productsActions";
-import { useToast } from "@hooks/use-toast";
+import Spinner from "@/components/Spinner"
+import { deleteProductsByIdAction } from "@/lib/actions/productsActions"
+
 import SuccessToastDescription, {
   ErorrToastDescription,
-} from "@components/toast-items";
-import { useQueryClient } from "@tanstack/react-query";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+} from "@/components/toast-items"
+import { useQueryClient } from "@tanstack/react-query"
+import { useLocation, useNavigate, useSearchParams } from "react-router"
+import { toast } from "sonner"
 const DeleteProductDialog = ({
   navBack,
   open,
@@ -28,83 +29,86 @@ const DeleteProductDialog = ({
   pageSize,
   currPage,
 }: {
-  navBack?: boolean;
-  imagesToDelete: string[];
-  pageSize: number;
-  currPage: number;
-  productId: number | undefined;
-  setIsLoading?: React.Dispatch<SetStateAction<boolean>>;
-  isLoading?: boolean;
-  open: boolean;
-  setOpen: React.Dispatch<SetStateAction<boolean>>;
+  navBack?: boolean
+  imagesToDelete: string[]
+  pageSize: number
+  currPage: number
+  productId: string | undefined
+  setIsLoading?: React.Dispatch<SetStateAction<boolean>>
+  isLoading?: boolean
+  open: boolean
+  setOpen: React.Dispatch<SetStateAction<boolean>>
 }) => {
-  const { toast } = useToast();
-  const searchParam = useSearchParams();
-  const router = useRouter();
-  const pathname = usePathname();
+  const [searchParam] = useSearchParams()
+  const navigate = useNavigate()
+  const pathname = useLocation().pathname
 
   useEffect(() => {
     return () => {
-      const body = document.querySelector("body");
-      if (body) body.style.pointerEvents = "auto";
-    };
-  }, [open]);
+      const body = document.querySelector("body")
+      if (body) body.style.pointerEvents = "auto"
+    }
+  }, [open])
 
   const checkIfLastItem = useCallback(() => {
-    const params = new URLSearchParams(searchParam);
+    const params = new URLSearchParams(searchParam)
 
-    // if (navBack) router.back();
+    // if (navBack) navigate.back();
     if (pageSize === 1) {
       if (Number(currPage) === 1) {
-        params.delete("categoryId");
-        params.delete("productBrandId");
-        params.delete("productTypeId");
-        params.delete("name");
+        params.delete("categoryId")
+        params.delete("productBrandId")
+        params.delete("productTypeId")
+        params.delete("name")
       }
 
       if (Number(currPage) > 1) {
-        params.set("page", String(Number(currPage) - 1));
+        params.set("page", String(Number(currPage) - 1))
       }
     }
 
     if (navBack) {
-      params.delete("size");
-      router.replace(`/products?${params.toString()}`);
+      params.delete("size")
+      navigate(`/products?${params.toString()}`, { replace: true })
     } else {
-      router.push(`${pathname}?${params.toString()}`, { scroll: false });
+      navigate(`${pathname}?${params.toString()}`)
     }
-  }, [productId, pageSize, navBack, pathname, router, searchParam]);
+  }, [productId, pageSize, navBack, pathname, navigate, searchParam])
 
-  async function handleDelete() {
-    try {
-      setIsLoading?.(true);
-      const { error } = await deleteProductsByIdAction(
-        productId as number,
-        imagesToDelete
-      );
-      if (error) throw new Error(error);
-      setOpen(false);
-      checkIfLastItem();
-      toast({
-        className: "bg-primary  text-primary-foreground",
-        variant: "default",
-        title: "Data deleted!.",
-        description: <SuccessToastDescription message="Product deleted." />,
-      });
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Something went wrong.",
-        description: <ErorrToastDescription error={error.message} />,
-      });
-    } finally {
-      setIsLoading?.(false);
-    }
-  }
+  //   async function handleDelete() {
+  //     try {
+  //       setIsLoading?.(true);
+  //       const { error } = await deleteProductsByIdAction(
+  //         productId as number,
+  //         imagesToDelete
+  //       );
+  //       if (error) throw new Error(error);
+  //       setOpen(false);
+  //       checkIfLastItem();
+
+  // toast.success("Product deleted.")
+  //       // toast({
+  //       //   className: "bg-primary  text-primary-foreground",
+  //       //   variant: "default",
+  //       //   title: "Data deleted!.",
+  //       //   description: <SuccessToastDescription message="Product deleted." />,
+  //       // });
+  //     } catch (error: any) {
+
+  // toast.warning("Failed to delete product, Please try agian")
+  //       // toast({
+  //       //   variant: "destructive",
+  //       //   title: "Something went wrong.",
+  //       //   description: <ErorrToastDescription error={error.message} />,
+  //       // });
+  //     } finally {
+  //       setIsLoading?.(false);
+  //     }
+  //   }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="sm:max-w-[425px] border-none">
+      <DialogContent className="border-none sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Are you sure?</DialogTitle>
           <DialogDescription>
@@ -113,11 +117,11 @@ const DeleteProductDialog = ({
           </DialogDescription>
         </DialogHeader>
 
-        <div className=" flex items-center flex-col-reverse  sm:flex-row sm:justify-end gap-2">
+        <div className="flex flex-col-reverse items-center gap-2 sm:flex-row sm:justify-end">
           <Button
             onClick={() => setOpen(false)}
             type="reset"
-            className=" w-full sm:w-fit"
+            className="w-full sm:w-fit"
             variant="secondary"
             size="sm"
             disabled={isLoading}
@@ -126,8 +130,8 @@ const DeleteProductDialog = ({
           </Button>
           <Button
             variant="destructive"
-            className=" w-full sm:w-fit"
-            onClick={handleDelete}
+            className="w-full sm:w-fit"
+            // onClick={handleDelete}
             type="submit"
             size="sm"
             disabled={isLoading}
@@ -137,7 +141,7 @@ const DeleteProductDialog = ({
         </div>
       </DialogContent>
     </Dialog>
-  );
-};
+  )
+}
 
-export default DeleteProductDialog;
+export default DeleteProductDialog

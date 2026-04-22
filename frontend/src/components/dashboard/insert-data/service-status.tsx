@@ -19,8 +19,6 @@ const ServiceStatus = async () => {
       </ErrorMessage>
     );
 
-  console.log(data);
-
   return (
     <ul className=" flex flex-row gap-2  flex-wrap ">
       {data.map((status) => (

@@ -19,6 +19,7 @@ import {
   CarMaker,
   CarGenerationProps,
   CarInfoSchema,
+  CarMakersData,
 } from "@lib/types";
 
 import Spinner from "@components/Spinner";
@@ -31,14 +32,14 @@ import SuccessToastDescription, {
 
 import { MakerCombobox } from "@components/maker-combobox";
 import { ModelCombobox } from "@components/model-combobox";
-import { GenerationComboBox } from "@components/generation-combobox";
+
 import { createCarInfoAction } from "@lib/actions/carInfoActions";
 import useObjectCompare from "@hooks/use-compare-objs";
 import DialogComponent from "@components/dialog-component";
 
 interface CarInfoFormProps {
   carModels: CarModelProps[];
-  carMakers: CarMaker[];
+  carMakers: CarMakersData[];
   carGenerations: CarGenerationProps[];
 }
 
@@ -124,14 +125,14 @@ export const CarInfoForm: React.FC<CarInfoFormProps> = ({
                   <FormItem className=" w-full mb-auto">
                     <FormLabel>Car Maker</FormLabel>
                     <FormControl>
-                      <MakerCombobox
+                      {/* <MakerCombobox
                         value={field.value}
                         setValue={(id) => {
                           field.onChange(id);
                           form.setValue("carModelId", 0);
                         }}
                         options={carMakers}
-                      />
+                      /> */}
                     </FormControl>
                     <FormDescription>
                       Enter the name of the car maker.
@@ -167,7 +168,7 @@ export const CarInfoForm: React.FC<CarInfoFormProps> = ({
                 )}
               />
             </div>
-            <FormField
+            {/* <FormField
               control={form.control}
               name="carGenerationId"
               render={({ field }) => (
@@ -185,7 +186,7 @@ export const CarInfoForm: React.FC<CarInfoFormProps> = ({
                   <FormMessage />
                 </FormItem>
               )}
-            />
+            /> */}
 
             <DialogComponent.Footer>
               <Button

@@ -19,6 +19,7 @@ import {
   CarGenerationsSchema,
   CarMaker,
   CarGenerationProps,
+  CarMakersData,
 } from "@lib/types";
 import { Textarea } from "@components/ui/textarea";
 import Spinner from "@components/Spinner";
@@ -41,7 +42,7 @@ const CarGenerationForm = ({
 }: {
   generationToEdit?: CarGenerationProps;
   openBtn?: React.ReactElement;
-  carMakers: CarMaker[];
+  carMakers: CarMakersData[];
   carModels: CarModelProps[];
 }) => {
   const [open, setOpen] = useState(false);
@@ -143,14 +144,14 @@ const CarGenerationForm = ({
               <FormItem className=" w-full mb-auto">
                 <FormLabel>Car maker</FormLabel>
                 <FormControl>
-                  <MakerCombobox
+                  {/* <MakerCombobox
                     setValue={(value) => {
                       setCarMaker(value);
                       form.setValue("carModelId", 0);
                     }}
                     value={carMaker}
                     options={carMakers}
-                  />
+                  /> */}
                 </FormControl>
                 <FormDescription>
                   Enter the name of the product.

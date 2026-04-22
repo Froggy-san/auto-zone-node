@@ -62,7 +62,7 @@ const UserServices = async ({
 
   return (
     <div className=" mt-10">
-      <SearchDialog
+      {/* <SearchDialog
         isAdmin={isAdmin}
         cars={cars}
         clients={[client]}
@@ -75,7 +75,7 @@ const UserServices = async ({
         maxPrice={maxPrice}
         minPrice={minPrice}
         currPage={pageNumber}
-      />
+      /> */}
       {data?.data.length ? (
         <>
           <ServiceTable
@@ -86,6 +86,14 @@ const UserServices = async ({
             currPage={pageNumber}
             services={data?.data || []}
             status={status || []}
+            carId={carId}
+            clientId={clientId}
+            dateTo={dateTo}
+            dateFrom={dateFrom}
+            serviceStatusId={serviceStatusId}
+            maxPrice={maxPrice}
+            minPrice={minPrice}
+            pageNumber={pageNumber}
           />
           <PaginationControl
             count={data ? Number(data.count) : 0}

@@ -30,7 +30,7 @@ const CarInfoManagement = async () => {
       <div className="  sm:pr-2">
         <CarInfoForm
           carGenerations={carGenerationsData?.carGenerationsData}
-          carMakers={carMakersData}
+          carMakers={carMakersData || []}
           carModels={carModelsData?.models}
         />
       </div>

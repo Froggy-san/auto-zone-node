@@ -22,7 +22,7 @@ import {
   ChartContainer,
   ChartTooltip,
 } from "@/components/ui/chart";
-import { Category, Service } from "@lib/types";
+import { Category, CategoryProps, Service } from "@lib/types";
 import { formatCurrency } from "@lib/client-helpers";
 import { cn } from "@lib/utils";
 
@@ -74,14 +74,23 @@ const colors = [
   "var(--dashboard-orange)",
 ];
 
+interface ServiceFee {
+  id: number;
+  name: string | number;
+  totalPrice: number;
+  totalCount: number;
+  totalDiscount: number;
+  totalPriceAfterDiscount: number;
+}
+
 interface Props {
-  salesData: Service[][];
+  serviceFeesData: ServiceFee[];
   date: (string | Date | undefined)[];
   description: string;
-  categories: Category[];
+  categories: CategoryProps[];
 }
 export function ServicePie({
-  salesData,
+  serviceFeesData,
   date,
   description,
   categories,
@@ -89,43 +98,48 @@ export function ServicePie({
   const [sortDataBy, setSortDataBy] = React.useState<
     "totalPriceAfterDiscount" | "totalCount"
   >("totalCount");
-  const flatData = salesData.flat();
-  const services = flatData.map((item) => item.servicesFee).flat();
-  const productIds = Array.from(
-    new Set(services.map((serv) => serv.categoryId))
-  );
+  // const flatData = salesData.flat();
+  // const services = flatData.map((item) => item.servicesFee).flat();
+  // const productIds = Array.from(
+  //   new Set(services.map((serv) => serv.categoryId))
+  // );
 
-  const servicePie = React.useMemo(() => {
-    return productIds
-      .map((id, index) => {
-        // const ser = services.find((item) => item.categoryId === id);
-        return services
-          .filter((serv) => serv.categoryId === id)
-          .reduce(
-            (acc, currItem, index, arr) => {
-              acc.totalCount = arr.length;
-              acc.totalDiscount += currItem.discount;
-              acc.totalPrice += currItem.price;
-              acc.totalPriceAfterDiscount += currItem.totalPriceAfterDiscount;
-              return acc;
-            },
-            {
-              id: id,
-              name: categories.find((cat) => cat.id === id)?.name || id,
-              totalPrice: 0,
-              totalCount: 0,
-              totalDiscount: 0,
-              // fill: colors[index],
-              totalPriceAfterDiscount: 0,
-            }
-          );
-      })
-      .sort((a, b) => b[sortDataBy] - a[sortDataBy])
-      .map((fee, index) => {
-        return { ...fee, fill: colors[index] || "hsl(0deg 0% 50.2%)" };
-      });
-  }, [flatData]);
+  // const servicePie = React.useMemo(() => {
+  //   return productIds
+  //     .map((id, index) => {
+  //       // const ser = services.find((item) => item.categoryId === id);
+  //       return services
+  //         .filter((serv) => serv.categoryId === id)
+  //         .reduce(
+  //           (acc, currItem, index, arr) => {
+  //             acc.totalCount = arr.length;
+  //             acc.totalDiscount += currItem.discount;
+  //             acc.totalPrice += currItem.price;
+  //             acc.totalPriceAfterDiscount += currItem.totalPriceAfterDiscount;
+  //             return acc;
+  //           },
+  //           {
+  //             id: id,
+  //             name: categories.find((cat) => cat.id === id)?.name || id,
+  //             totalPrice: 0,
+  //             totalCount: 0,
+  //             totalDiscount: 0,
+  //             // fill: colors[index],
+  //             totalPriceAfterDiscount: 0,
+  //           }
+  //         );
+  //     })
+  //     .sort((a, b) => b[sortDataBy] - a[sortDataBy])
+  //     .map((fee, index) => {
+  //       return { ...fee, fill: colors[index] || "hsl(0deg 0% 50.2%)" };
+  //     });
+  // }, [flatData]);
 
+  const servicePie = serviceFeesData
+    .sort((a, b) => b[sortDataBy] - a[sortDataBy])
+    .map((fee, index) => {
+      return { ...fee, fill: colors[index] || "hsl(0deg 0% 50.2%)" };
+    });
   const servicesMoreThanSix = React.useMemo(() => {
     if (servicePie.length > 6) {
       const firstSix = servicePie.slice(0, 6).map((item, index) => {
@@ -148,7 +162,7 @@ export function ServicePie({
           totalCount: 0,
           totalDiscount: 0,
           totalPriceAfterDiscount: 0,
-        }
+        },
       );
       return [...firstSix, theTotalsFromSix];
     } else return [];
@@ -166,7 +180,7 @@ export function ServicePie({
 
         return acc;
       },
-      { totalCount: 0, totalPriceAfterDiscount: 0 }
+      { totalCount: 0, totalPriceAfterDiscount: 0 },
     );
   }, [servicesPreformed]);
 
@@ -308,7 +322,7 @@ const ServicesTooltip: React.FC<ChartTooltipContentProps> = ({
       <div className=" flex items-center gap-1">
         <div
           className={cn(
-            `shrink-0 rounded-[2px] border-[--color-border]  h-2.5 w-2.5`
+            `shrink-0 rounded-[2px] border-[--color-border]  h-2.5 w-2.5`,
           )}
           style={{ backgroundColor: `${data.fill} ` }}
         />
@@ -317,7 +331,7 @@ const ServicesTooltip: React.FC<ChartTooltipContentProps> = ({
       </div>{" "}
       <div
         className={cn(
-          "flex flex-1 gap-1 justify-between leading-none items-center"
+          "flex flex-1 gap-1 justify-between leading-none items-center",
         )}
       >
         <span className="text-muted-foreground">Total count:</span>
@@ -328,7 +342,7 @@ const ServicesTooltip: React.FC<ChartTooltipContentProps> = ({
       </div>
       <div
         className={cn(
-          "flex flex-1 gap-1 justify-between leading-none items-center"
+          "flex flex-1 gap-1 justify-between leading-none items-center",
         )}
       >
         <div className="grid gap-1.5">
@@ -341,7 +355,7 @@ const ServicesTooltip: React.FC<ChartTooltipContentProps> = ({
       </div>
       <div
         className={cn(
-          "flex flex-1 gap-1 justify-between leading-none items-center"
+          "flex flex-1 gap-1 justify-between leading-none items-center",
         )}
       >
         <span className="text-muted-foreground">Total Discount:</span>
@@ -352,7 +366,7 @@ const ServicesTooltip: React.FC<ChartTooltipContentProps> = ({
       </div>
       <div
         className={cn(
-          "flex flex-1 gap-1 justify-between leading-none items-center"
+          "flex flex-1 gap-1 justify-between leading-none items-center",
         )}
       >
         <span className="text-muted-foreground">Net:</span>

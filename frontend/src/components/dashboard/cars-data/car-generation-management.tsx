@@ -32,7 +32,7 @@ const CarGenAndModelManagement = async () => {
             <p className=" text-muted-foreground text-sm">Add car models.</p>
           </div>
           <div className="  sm:pr-2">
-            <CarModelForm carMakers={carMakersData} />
+            {/* <CarModelForm carMaker={carMakersData} /> */}
           </div>
         </div>
 
@@ -47,7 +47,10 @@ const CarGenAndModelManagement = async () => {
             </p>
           </div>
           <div className=" sm:pr-2">
-            <CarGenerationForm carMakers={carMakersData} carModels={models} />
+            <CarGenerationForm
+              carMakers={carMakersData || []}
+              carModels={models}
+            />
             {/* <CarInfoForm
           carGenerations={carGenerationsData}
           carMakers={carMakersData}

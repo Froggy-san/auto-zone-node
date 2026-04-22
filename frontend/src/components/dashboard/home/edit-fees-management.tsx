@@ -35,7 +35,7 @@ const EditFeesManagement = async ({
     <FeesForm
       open={fee?.data || addFeeId ? true : false}
       addFeeId={addFeeId}
-      categories={categories}
+      categories={categories || []}
       feesToEdit={fee?.data}
       service={service}
     />

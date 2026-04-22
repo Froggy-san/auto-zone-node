@@ -3,8 +3,8 @@ import mongoose, { Document, model, Schema } from "mongoose";
 interface ICarGeneration extends Document {
   name: string;
   notes: string;
-  logo: string;
-  carMaker: mongoose.Types.ObjectId;
+  image: string;
+  carModel: mongoose.Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -35,7 +35,7 @@ export const carGenerationSchema = new Schema(
   },
 );
 
-export const carGeneration = model<ICarGeneration>(
+export const CarGeneration = model<ICarGeneration>(
   "carGenerations",
   carGenerationSchema,
 );

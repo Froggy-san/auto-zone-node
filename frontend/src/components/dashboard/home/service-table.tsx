@@ -13,6 +13,7 @@ import {
 import {
   CarItem,
   Category,
+  CategoryProps,
   ClientWithPhoneNumbers,
   Service,
   ServiceStatus,
@@ -63,6 +64,7 @@ import SuccessToastDescription, {
   ErorrToastDescription,
 } from "@components/toast-items";
 import Spinner from "@components/Spinner";
+import { FaArrowUpWideShort } from "react-icons/fa6";
 
 import { deleteClientByIdAction } from "@lib/actions/clientActions";
 import {
@@ -89,24 +91,39 @@ import EditServiceForm from "./edit-service-form";
 import { formatCurrency } from "@lib/client-helpers";
 import NoteDialog from "@components/garage/note-dialog";
 import dynamic from "next/dynamic";
-import { cn } from "@lib/utils";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@components/ui/tooltip";
-
+import StatsRow from "./stats-row";
+import SearchDialog from "./search-dialog";
+import { AnimatePresence, motion } from "framer-motion";
+import downloadAsPdf from "@lib/services/download-pdf";
+import ServiceSelectControls from "./service-select-controls";
+import { useQueryClient } from "@tanstack/react-query";
+import { Priority } from "@components/priority-select";
+import { Checkbox } from "@components/ui/checkbox";
+import { Label } from "@components/ui/label";
 interface Props {
   isClientPage?: boolean;
   isAdmin: boolean;
-  categories: Category[];
+  categories: CategoryProps[];
   cars: CarItem[];
   clients: ClientWithPhoneNumbers[];
   status: ServiceStatus[];
   currPage: string;
   services: Service[];
   className?: string;
+  dateFrom: string;
+  dateTo: string;
+  clientId: string;
+  carId: string;
+  serviceStatusId: string;
+  minPrice: string;
+  maxPrice: string;
+  pageNumber: string;
 }
 
 const ServiceTable = ({
@@ -117,16 +134,33 @@ const ServiceTable = ({
   currPage,
   cars,
   clients,
+  dateFrom,
+  dateTo,
+  carId,
+  clientId,
+  serviceStatusId,
+  minPrice,
+  maxPrice,
   status,
+  pageNumber,
   className,
 }: Props) => {
+  const [loadingIds, setLoadingIds] = useState<number[]>([]);
+  const [selected, setSelected] = useState<number[]>([]);
   if (!services)
     return <p>Something went wrong while getting the services&apos;s data</p>;
-
   const currPageSize = services.length;
 
-  const fees = services.flatMap((service) => service.servicesFee);
-  const soldProducts = services.flatMap((service) => service.productsToSell);
+  const nonCanceledService = services.filter(
+    (serv) => serv.serviceStatuses.name != "Canceled",
+  );
+
+  const fees = nonCanceledService
+    .flatMap((service) => service.servicesFee)
+    .filter((fee) => !fee.isReturned);
+  const soldProducts = nonCanceledService
+    .flatMap((service) => service.productsToSell)
+    .filter((pro) => !pro.isReturned);
 
   const totalFees = fees.reduce((acc, item) => {
     acc += item.totalPriceAfterDiscount;
@@ -142,70 +176,114 @@ const ServiceTable = ({
 
   const totals = totalFees + totalSoldProducts;
   return (
-    <div className="mt-10 p-3 border rounded-3xl shadow-lg ">
-      <Table>
-        <TableCaption>
-          {services.length ? "A list of all service receipts." : "No receipts"}
-        </TableCaption>
-        <TableHeader>
-          <TableRow>
-            <TableHead className=" min-w-[20px]">ID</TableHead>
-            <TableHead>DATE</TableHead>
-            <TableHead>CLIENT</TableHead>
-            <TableHead>CAR</TableHead>
-            <TableHead>STATUS</TableHead>
-            <TableHead>FEES</TableHead>
-            <TableHead className=" whitespace-nowrap">SOLD PRODUCTS</TableHead>
-            {/* <TableHead className=""></TableHead> */}
-            <TableHead className="text-right" colSpan={2}>
-              TOTAL PRICE
-            </TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {services && services.length
-            ? services.map((service) => (
-                <Row
-                  key={service.id}
-                  isClientPage={isClientPage}
-                  isAdmin={isAdmin}
-                  categories={categories}
-                  status={status}
-                  service={service}
-                  cars={cars}
-                  clients={clients}
-                  currPage={currPage}
-                  currPageSize={currPageSize}
-                />
-              ))
-            : null}
-        </TableBody>
-        <TableFooter>
-          <TableRow>
-            <TableCell colSpan={5}>Total</TableCell>
+    <>
+      <div className=" flex    break-keep flex-col-reverse sm:flex-row gap-x-2 gap-y-5 items-center ">
+        <ServiceSelectControls
+          isAdmin={isAdmin}
+          selected={selected}
+          setSelected={setSelected}
+          currentPage={Number(currPage)}
+          pageSize={services.length}
+          setLoadingIds={setLoadingIds}
+        />
 
-            <TableCell className="   min-w-[100px] max-w-[120px]  break-all">
-              {formatCurrency(totalFees)}
-            </TableCell>
+        <SearchDialog
+          isAdmin={isAdmin}
+          cars={cars}
+          clients={clients}
+          status={status || []}
+          carId={carId}
+          clientId={clientId}
+          dateTo={dateTo}
+          dateFrom={dateFrom}
+          serviceStatusId={serviceStatusId}
+          maxPrice={maxPrice}
+          minPrice={minPrice}
+          currPage={pageNumber}
+        />
+      </div>
+      <div className="mt-10 p-3 border rounded-3xl shadow-lg ">
+        <Table className=" min-w-[800px]">
+          <TableCaption>
+            {services.length
+              ? "A list of all service receipts."
+              : "No receipts"}
+          </TableCaption>
 
-            <TableCell className="   min-w-[100px] max-w-[120px]  break-all">
-              {formatCurrency(totalSoldProducts)}
-            </TableCell>
+          <TableHeader>
+            <TableRow>
+              <TableHead className=" min-w-[20px]">ID</TableHead>
+              <TableHead>DATE</TableHead>
+              <TableHead>CLIENT</TableHead>
+              <TableHead>CAR</TableHead>
+              <TableHead>STATUS</TableHead>
+              <TableHead>FEES</TableHead>
+              <TableHead className=" whitespace-nowrap">
+                SOLD PRODUCTS
+              </TableHead>
+              <TableHead className="">PRIORITY</TableHead>
+              <TableHead className="text-right">TOTAL PRICE</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {services && services.length
+              ? services.map((service) => (
+                  <Row
+                    key={service.id}
+                    isLoading={loadingIds.includes(service.id)}
+                    selected={selected}
+                    setSelected={setSelected}
+                    isClientPage={isClientPage}
+                    isAdmin={isAdmin}
+                    categories={categories}
+                    status={status}
+                    service={service}
+                    cars={cars}
+                    clients={clients}
+                    currPage={currPage}
+                    currPageSize={currPageSize}
+                  />
+                ))
+              : null}
+          </TableBody>
+          <TableFooter>
+            <TableRow>
+              <TableCell colSpan={5}>Page-Total:</TableCell>
 
-            <TableCell
-              colSpan={2}
-              className=" text-right   min-w-[100px] max-w-[120px]  break-all"
-            >
-              {formatCurrency(totals)}
-            </TableCell>
-          </TableRow>
-        </TableFooter>
-      </Table>
-    </div>
+              <TableCell className="   min-w-[100px] max-w-[120px] ">
+                {formatCurrency(totalFees)}
+              </TableCell>
+
+              <TableCell className="   min-w-[100px] max-w-[120px] ">
+                {formatCurrency(totalSoldProducts)}
+              </TableCell>
+
+              <TableCell
+                colSpan={3}
+                className=" text-right   min-w-[100px] max-w-[120px] "
+              >
+                {formatCurrency(totals)}
+              </TableCell>
+            </TableRow>
+            <StatsRow
+              carId={carId}
+              clientId={clientId}
+              dateTo={dateTo}
+              dateFrom={dateFrom}
+              serviceStatusId={serviceStatusId}
+              maxPrice={maxPrice}
+              minPrice={minPrice}
+            />
+          </TableFooter>
+        </Table>
+      </div>
+    </>
   );
 };
 
 function Row({
+  selected,
+  setSelected,
   isClientPage,
   isAdmin,
   categories,
@@ -215,10 +293,14 @@ function Row({
   service,
   currPage,
   currPageSize,
+  isLoading: loading,
 }: {
+  isLoading: boolean;
+  selected: number[];
+  setSelected: React.Dispatch<React.SetStateAction<number[]>>;
   isClientPage?: boolean;
   isAdmin: boolean;
-  categories: Category[];
+  categories: CategoryProps[];
   clients: ClientWithPhoneNumbers[];
   cars: CarItem[];
   status: ServiceStatus[];
@@ -226,31 +308,35 @@ function Row({
   service: Service;
   currPageSize: number;
 }) {
-  const [open, setOpen] = useState(false);
-  const [deleteOpen, setDeleteOpen] = useState<number | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
   const total = useMemo(() => {
-    const totalFees = service.servicesFee.reduce((sum, curr) => {
-      sum += curr.totalPriceAfterDiscount;
-      return sum;
-    }, 0);
-    const totalSold = service.productsToSell.reduce((sum, curr) => {
-      sum += curr.totalPriceAfterDiscount;
-      return sum;
-    }, 0);
+    const totalFees = service.servicesFee
+      .filter((fee) => !fee.isReturned)
+      .reduce((sum, curr) => {
+        sum += curr.totalPriceAfterDiscount;
+        return sum;
+      }, 0);
+    const totalSold = service.productsToSell
+      .filter((pro) => !pro.isReturned)
+      .reduce((sum, curr) => {
+        sum += curr.totalPriceAfterDiscount;
+        return sum;
+      }, 0);
     const total = totalSold + totalFees;
     return total;
   }, [service]);
-  function handleClose() {
-    setOpen(false);
-  }
+  const item = selected.some((item) => item === service.id);
   return (
     <>
       <TableRow
-        onClick={() => setOpen(true)}
-        className={`${isLoading && "opacity-60  pointer-events-none"}`}
+        onClick={() => {
+          setSelected((selected) => {
+            if (item) return selected.filter((item) => item !== service.id);
+            return [...selected, service.id];
+          });
+        }}
+        className={` ${item && "bg-accent/60 hover:bg-accent/40"}`}
       >
-        <TableCell className="font-medium">{service.id}</TableCell>
+        <TableCell className="font-medium"> {service.id}</TableCell>
 
         <TableCell className=" whitespace-nowrap">
           {service.created_at}
@@ -284,22 +370,27 @@ function Row({
             total={total}
           />
         </TableCell>
-
-        <TableCell className=" min-w-[120px] max-w-[170px] break-all ">
-          {formatCurrency(total)}
+        <TableCell className=" relative">
+          <Priority priority={service.priority} />
         </TableCell>
-
-        <TableCell className=" w-[80px] ">
-          <TableActions
-            isClientPage={isClientPage}
-            isAdmin={isAdmin}
-            cars={cars}
-            clients={clients}
-            status={status}
-            service={service}
-            currPage={currPage}
-            currPageSize={currPageSize}
-          />
+        <TableCell className=" font-bold text-right ">
+          <div className=" flex   items-center justify-end gap-3">
+            <span className={` ${total === 0 && " text-muted-foreground"}`}>
+              {" "}
+              {formatCurrency(total)}{" "}
+            </span>
+            <TableActions
+              loading={loading}
+              isClientPage={isClientPage}
+              isAdmin={isAdmin}
+              cars={cars}
+              clients={clients}
+              status={status}
+              service={service}
+              currPage={currPage}
+              currPageSize={currPageSize}
+            />
+          </div>
         </TableCell>
 
         {/* <TableCell>
@@ -334,6 +425,7 @@ function Row({
 }
 
 function TableActions({
+  loading,
   isClientPage,
   isAdmin,
   status,
@@ -343,6 +435,7 @@ function TableActions({
   cars,
   clients,
 }: {
+  loading: boolean;
   isClientPage?: boolean;
   isAdmin?: boolean;
   cars: CarItem[];
@@ -363,6 +456,38 @@ function TableActions({
   const pathname = usePathname();
   const router = useRouter();
   const params = new URLSearchParams(searchParam);
+  const currLoading = isLoading || loading;
+
+  const handleChangePriority = async (
+    priority: "Low" | "Medium" | "High" | string,
+  ) => {
+    setIsLoading(true);
+    try {
+      await editServiceAction({
+        priority,
+        id: service.id,
+      });
+
+      setIsLoading(false);
+      // handleClose();
+      toast({
+        className: "bg-primary  text-primary-foreground",
+        title: `Data updated!.`,
+        description: (
+          <SuccessToastDescription
+            message={`Service priority has been uptated.'`}
+          />
+        ),
+      });
+    } catch (error: any) {
+      setIsLoading(false);
+      toast({
+        variant: "destructive",
+        title: "Faild to update the service priority.",
+        description: <ErorrToastDescription error={error.message} />,
+      });
+    }
+  };
 
   const handleChangeStatus = async (id: number) => {
     setIsLoading(true);
@@ -387,7 +512,7 @@ function TableActions({
       setIsLoading(false);
       toast({
         variant: "destructive",
-        title: "Faild to delete client's data",
+        title: "Faild to update the service status.",
         description: <ErorrToastDescription error={error.message} />,
       });
     }
@@ -396,32 +521,7 @@ function TableActions({
   const handlePdf = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch(`/api/pdf?id=${service.id}`);
-      // const data = await response.json();
-
-      // console.log("DATA:", data);
-      if (!response.ok) {
-        const error = await response.json();
-        console.error(error.error);
-        setIsLoading(false);
-        toast({
-          variant: "destructive",
-          title: "Failed to download.",
-          description: <ErorrToastDescription error={error.error} />,
-        });
-        return;
-      }
-
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `service_receipt_${service.id}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      window.URL.revokeObjectURL(url);
-      setIsLoading(false);
+      await downloadAsPdf([service.id]);
       toast({
         className: "bg-primary  text-primary-foreground",
         title: `Done.`,
@@ -433,12 +533,14 @@ function TableActions({
       });
     } catch (error: any) {
       console.error(error);
-      setIsLoading(false);
+
       toast({
         variant: "destructive",
         title: "Failed to download.",
         description: <ErorrToastDescription error={error.message} />,
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -489,19 +591,16 @@ function TableActions({
   //   }
   // };
 
-  if (isLoading)
+  if (currLoading)
     return (
       <Spinner
-        className="  w-4 h-4 flex items-center mr-1 justify-center  ml-auto"
+        className="  w-4 h-4 flex items-center mx-1 justify-center  "
         size={15}
       />
     );
 
   return (
-    <div
-      onClick={(e) => e.stopPropagation()}
-      className=" flex items-center justify-end"
-    >
+    <div onClick={(e) => e.stopPropagation()} className=" w-fit ">
       {isAdmin ? (
         <>
           <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
@@ -558,6 +657,77 @@ function TableActions({
               >
                 <PackagePlus className=" w-4 h-4" /> Add more sold products
               </DropdownMenuItem>
+              <DropdownMenuSub
+              // disabled={isLoading}
+              // className=" gap-2"
+              // onClick={() => {
+              //   setOpen("delete");
+              // }}
+              >
+                <DropdownMenuSubTrigger className=" gap-2">
+                  {" "}
+                  <FaArrowUpWideShort /> Change priority
+                </DropdownMenuSubTrigger>
+
+                <DropdownMenuPortal>
+                  <DropdownMenuSubContent className=" max-h-[170px] overflow-y-auto">
+                    <DropdownMenuItem
+                      key="high"
+                      className=" gap-2 justify-between"
+                      onClick={async () => {
+                        if (service.priority?.toLocaleLowerCase() === "high")
+                          return;
+                        await handleChangePriority("High");
+                      }}
+                    >
+                      <Priority priority="high" />
+                      {service.priority?.toLocaleLowerCase() == "high" && (
+                        <Check className=" w-3 h-3" />
+                      )}
+                    </DropdownMenuItem>
+
+                    <DropdownMenuItem
+                      key="medium"
+                      className=" gap-2 justify-between"
+                      onClick={async () => {
+                        if (service.priority?.toLocaleLowerCase() === "medium")
+                          return;
+                        await handleChangePriority("Medium");
+                      }}
+                    >
+                      <Priority priority="medium" />
+                      {service.priority?.toLocaleLowerCase() == "medium" && (
+                        <Check className=" w-3 h-3" />
+                      )}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      key="low"
+                      className=" gap-2 justify-between"
+                      onClick={async () => {
+                        if (service.priority?.toLocaleLowerCase() === "low")
+                          return;
+                        await handleChangePriority("Low");
+                      }}
+                    >
+                      <Priority priority="low" />
+                      {(service.priority?.toLocaleLowerCase() == "low" ||
+                        !service.priority) && <Check className=" w-3 h-3" />}
+                    </DropdownMenuItem>
+
+                    {/* <DropdownMenuItem
+                      key="normal"
+                      className=" gap-2 justify-between "
+                      onClick={async () => {
+                        if (!service.priority) return;
+                        await handleChangePriority("");
+                      }}
+                    >
+                      <Priority priority="low" />
+                      {!service.priority && <Check className=" w-3 h-3" />}
+                    </DropdownMenuItem> */}
+                  </DropdownMenuSubContent>
+                </DropdownMenuPortal>
+              </DropdownMenuSub>
               <DropdownMenuSub
               // disabled={isLoading}
               // className=" gap-2"
@@ -636,7 +806,7 @@ function TableActions({
             currPage={currPage}
             pageSize={currPageSize}
             service={service}
-            isDeleting={isLoading}
+            isDeleting={currLoading}
             setIsDeleting={setIsLoading}
             open={open === "delete"}
             handleClose={() => setOpen("")}
@@ -696,10 +866,12 @@ function DeleteService({
   service: Service;
   pageSize: number;
 }) {
+  const [checked, setChecked] = useState(true);
   const { toast } = useToast();
   const searchParam = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
+  const queryClient = useQueryClient();
 
   function checkIfLastItem() {
     const params = new URLSearchParams(searchParam);
@@ -716,7 +888,7 @@ function DeleteService({
       if (Number(currPage) > 1) {
         params.set("page", String(Number(currPage) - 1));
       }
-      router.push(`${pathname}?${params.toString()}`);
+      router.push(`${pathname}?${params.toString()}`, { scroll: false });
     }
   }
 
@@ -740,7 +912,18 @@ function DeleteService({
             {`You are about to delete a receipt dated '${service.created_at}', issued to the client '${service.clients.name}', along with all its associated data.`}
           </DialogDescription>
         </DialogHeader>
-
+        <div className=" flex items-center gap-2">
+          {" "}
+          <Checkbox
+            checked={checked}
+            onClick={() => setChecked((c) => !c)}
+            id="should-restock"
+            name="should-restock"
+          />
+          <Label htmlFor="should-restock">
+            Restock all the products deleted within the service
+          </Label>
+        </div>
         <DialogFooter className="   gap-2 sm:gap-0">
           <Button onClick={handleClose} size="sm" variant="secondary">
             Cancel
@@ -753,13 +936,33 @@ function DeleteService({
             onClick={async () => {
               setIsDeleting(true);
               try {
+                const productsIds = Array.from(
+                  new Set(service.productsToSell.map((p) => p.productId)),
+                );
+
+                const productsToRestock = checked
+                  ? productsIds.map((id) =>
+                      service.productsToSell
+                        .filter((product) => product.productId === id)
+                        .reduce(
+                          (acc, currPro) => {
+                            acc.quantity += currPro.count;
+                            return acc;
+                          },
+                          { id, quantity: 0 },
+                        ),
+                    )
+                  : undefined;
+
                 const { error } = await deleteServiceAction(
-                  service.id.toString()
+                  service.id.toString(),
+                  productsToRestock,
                 );
                 if (error) throw new Error(error);
                 checkIfLastItem();
                 setIsDeleting(false);
                 handleClose();
+                queryClient.removeQueries({ queryKey: ["servicesStats"] });
                 toast({
                   className: "bg-primary  text-primary-foreground",
                   title: `Data deleted!.`,

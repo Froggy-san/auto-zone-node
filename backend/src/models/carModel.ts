@@ -1,4 +1,17 @@
 import mongoose, { Schema, model, Document } from "mongoose";
+import { CarImage } from "../@types/cars";
+
+const CarImageSchema = new Schema({
+  imagePath: {
+    type: String,
+
+    requried: true,
+  },
+  isMain: {
+    type: Boolean,
+    default: "",
+  },
+});
 
 export interface ICar extends Document {
   plateNumber: string;
@@ -9,6 +22,8 @@ export interface ICar extends Document {
   notes?: string;
   client: mongoose.Types.ObjectId;
   carGeneration: mongoose.Types.ObjectId;
+  mainImageName: string;
+  carImages: CarImage[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -54,8 +69,13 @@ const carSchema = new Schema<ICar>(
       ref: "carGenerations",
       required: [true, "A car must have a specific generation/model"],
     },
+    mainImageName: {
+      type: String,
+      default: "",
+    },
+    carImages: [CarImageSchema],
   },
   { timestamps: true },
 );
 
-export const Car = model<ICar>("Car", carSchema);
+export const CarModel = model<ICar>("Cars", carSchema);

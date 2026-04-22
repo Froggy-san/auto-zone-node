@@ -1,5 +1,5 @@
 "use client";
-import React, { SetStateAction, useEffect, useState } from "react";
+import React, { SetStateAction, useCallback, useEffect, useState } from "react";
 import {
   Table,
   TableBody,
@@ -9,6 +9,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import {
   ClientWithPhoneNumbers,
   PhoneNumber,
@@ -77,6 +83,14 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@components/ui/popover";
+import CurrencyInput, { formatValue } from "react-currency-input-field";
+import TagCarousel from "@components/tag-carousel";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@components/ui/tooltip";
 
 const formatCurrency = (value: number) =>
   new Intl.NumberFormat("en", { style: "currency", currency: "egp" }).format(
@@ -221,13 +235,9 @@ function ProductsDialog({
   const router = useRouter();
   const pathname = usePathname();
 
+  const name = new RegExp(nameValue, "i"); // 'i' for case-insensitive
+  const hasReturned = new RegExp(String(hasReturnedValue), "i");
   let productsArr = proBought.productsBought;
-
-  function handleOpenEdit(filter: string) {
-    const params = new URLSearchParams(searchParam);
-    params.set("edit", filter);
-    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
-  }
 
   productsArr = productsArr.filter((product) => {
     // const price = new RegExp(priceValue, "i");
@@ -237,8 +247,6 @@ function ProductsDialog({
     //   totalPriceAfterDiscountValue,
     //   "i"
     // );
-    const name = new RegExp(nameValue, "i"); // 'i' for case-insensitive
-    const hasReturned = new RegExp(String(hasReturnedValue), "i");
 
     // let filterValue =
     //   price.test(String(product.pricePerUnit)) &&
@@ -247,7 +255,7 @@ function ProductsDialog({
     //   totalPriceAfterDiscount.test(String(product.totalPriceAfterDiscount)) &&
     //   name.test(product.productName);
 
-    let filterValue = name.test(product.productName);
+    let filterValue = name.test(product.product.name);
     if (checked)
       filterValue = filterValue && hasReturned.test(String(product.isReturned));
 
@@ -269,14 +277,36 @@ function ProductsDialog({
     return filterValue;
   });
 
+  function handleReset() {
+    setPriceValue("");
+    setDiscountValue("");
+    setNameValue("");
+    setCountValue("");
+    setTotalPriceAfterDiscount("");
+    setChecked(false);
+    setHasReturnedValue(false);
+  }
+
+  function handleOpenEdit(filter: string) {
+    const params = new URLSearchParams(searchParam);
+    params.set("edit", filter);
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+  }
+
   const totals = productsArr.reduce(
     (acc, item) => {
       acc.totalDiscount += item.discount;
-      acc.totalPrice += item.totalPriceAfterDiscount;
+      acc.totalPrice += item.pricePerUnit * item.count;
+      acc.units += item.count;
+
       return acc;
     },
-    { totalDiscount: 0, totalPrice: 0 }
+    { totalDiscount: 0, totalPrice: 0, units: 0 }
   );
+
+  useEffect(() => {
+    handleReset();
+  }, [open]);
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className=" border-none p-4  sm:p-6  !pb-0  flex flex-col  overflow-y-auto    max-h-[81vh]     max-w-[900px]">
@@ -290,84 +320,125 @@ function ProductsDialog({
 
         {/* <main className="  gap-6  flex flex-col max-h-[90%]  h-full relative   "> */}
 
-        <div className="flex flex-wrap gap-2  xs:gap-3 bg-secondary/50  dark:bg-card/20 rounded-md  justify-center   p-3  text-sm">
-          {/* <div className=" flex  flex-col sm:flex-row items-center  gap-3 "> */}
-          <div className=" space-y-2  w-[48%] sm:w-[32%]  mb-auto">
-            <label className=" text-xs " htmlFor="price">
-              Price per unit
-            </label>
-            <Input
-              id="price"
-              placeholder="Price per unit"
-              value={priceValue}
-              onChange={(e) => setPriceValue(e.target.value)}
-            />
-          </div>
-          <div className=" space-y-2  w-[48%] sm:w-[32%]  mb-auto">
-            <label className=" text-xs " htmlFor="discount">
-              Discount
-            </label>
-            <Input
-              id="discount"
-              placeholder="Discount..."
-              value={discountValue}
-              onChange={(e) => setDiscountValue(e.target.value)}
-            />
-          </div>
-          <div className=" space-y-2  w-[48%] sm:w-[32%]  mb-auto">
-            <label className=" text-xs " htmlFor="count">
-              Count
-            </label>
-            <Input
-              id="count"
-              placeholder="Count..."
-              value={countValue}
-              onChange={(e) => setCountValue(e.target.value)}
-            />
-          </div>
-          <div className=" space-y-2  w-[48%] sm:w-[32%]  mb-auto">
-            <label className=" text-xs " htmlFor="totalPrice">
-              Total price after discount
-            </label>
-            <Input
-              id="totalPrice"
-              placeholder="Total price after discount..."
-              value={totalPriceAfterDiscountValue}
-              onChange={(e) => setTotalPriceAfterDiscount(e.target.value)}
-            />
-          </div>
-          <div className=" space-y-2   w-[48%] sm:w-[32%]  mb-auto">
-            <label className=" text-xs " htmlFor="name">
-              Name
-            </label>
-            <Input
-              id="name"
-              placeholder="Total price after discount..."
-              value={nameValue}
-              onChange={(e) => setNameValue(e.target.value)}
-            />
-          </div>
+        <Accordion type="single" collapsible>
+          <AccordionItem value="item-1" className=" border-none">
+            <div className=" relative w-[98%] mx-auto">
+              <AccordionTrigger className=" flex    rounded-full bg-secondary/50 dark:bg-card/20   gap-1 px-3  py-2 text-[.7rem] mb-1">
+                Filters
+              </AccordionTrigger>
+            </div>
+            <AccordionContent className=" pb-0">
+              <div className=" flex flex-wrap gap-2  xs:gap-3 bg-secondary/50  dark:bg-card/20 rounded-md  justify-center   p-3  text-sm">
+                <div className=" space-y-2  w-full xxs:w-[48%] sm:w-[31%]  md:w-[32%]   mb-auto">
+                  <label className=" text-xs " htmlFor="price">
+                    Price per unit
+                  </label>
+                  <CurrencyInput
+                    autoFocus
+                    id="price"
+                    name="price"
+                    placeholder="Price"
+                    decimalsLimit={2} // Max number of decimal places
+                    prefix="EGP " // Currency symbol (e.g., Egyptian Pound)
+                    decimalSeparator="." // Use dot for decimal
+                    groupSeparator="," // Use comma for thousands
+                    value={priceValue}
+                    onValueChange={(formattedValue, name, value) => {
+                      setPriceValue(formattedValue || "");
+                    }}
+                    className="input-field "
+                  />{" "}
+                </div>
+                <div className=" space-y-2  w-full xxs:w-[48%] sm:w-[31%]  md:w-[32%]  mb-auto">
+                  <label className=" text-xs " htmlFor="discount">
+                    Discount
+                  </label>
+                  <CurrencyInput
+                    id="discount"
+                    name="discount"
+                    placeholder="Discount"
+                    decimalsLimit={2} // Max number of decimal places
+                    prefix="EGP " // Currency symbol (e.g., Egyptian Pound)
+                    decimalSeparator="." // Use dot for decimal
+                    groupSeparator="," // Use comma for thousands
+                    value={discountValue}
+                    onValueChange={(formattedValue, name, value) => {
+                      setDiscountValue(formattedValue || "");
+                    }}
+                    className="input-field "
+                  />
+                </div>
+                <div className=" space-y-2  w-full xxs:w-[48%] sm:w-[31%]  md:w-[32%]  mb-auto">
+                  <label className=" text-xs " htmlFor="count">
+                    Count
+                  </label>
+                  <CurrencyInput
+                    id="count"
+                    name="Count"
+                    placeholder="Available Stock"
+                    decimalsLimit={2} // Max number of decimal places
+                    prefix="UNITS " // Currency symbol (e.g., Egyptian Pound)
+                    decimalSeparator="." // Use dot for decimal
+                    groupSeparator="," // Use comma for thousands
+                    value={countValue}
+                    onValueChange={(formattedValue, name, value) => {
+                      setCountValue(formattedValue || "");
+                    }}
+                    className="input-field  "
+                  />
+                </div>
+                <div className=" space-y-2  w-full xxs:w-[48%] sm:w-[31%]  md:w-[32%]  mb-auto">
+                  <label className=" text-xs " htmlFor="total-price-after-dis">
+                    Total price after discount
+                  </label>
+                  <CurrencyInput
+                    id="total-price-after-dis"
+                    name="discount"
+                    placeholder="Total price after discount"
+                    decimalsLimit={2}
+                    prefix="EGP "
+                    decimalSeparator="."
+                    groupSeparator=","
+                    value={totalPriceAfterDiscountValue}
+                    onValueChange={(formattedValue, name, value) => {
+                      setTotalPriceAfterDiscount(formattedValue || "");
+                    }}
+                    className="input-field "
+                  />
+                </div>
+                <div className=" space-y-2   w-full xxs:w-[48%] sm:w-[31%]  md:w-[32%]  mb-auto">
+                  <label className=" text-xs " htmlFor="name">
+                    Name
+                  </label>
+                  <Input
+                    id="name"
+                    placeholder="Filter by product name"
+                    value={nameValue}
+                    onChange={(e) => setNameValue(e.target.value)}
+                  />
+                </div>
 
-          <div className="flex items-center  justify-end  space-x-2   w-[48%] sm:w-[32%] ">
-            <Switch
-              id="airplane-mode"
-              checked={hasReturnedValue}
-              // onChange={() => setHasReturnedValue((is) => !is)}
-              onClick={() => setHasReturnedValue((is) => !is)}
-              disabled={!checked}
-            />
-            <Label className=" text-xs " htmlFor="airplane-mode">
-              Has it returned
-            </Label>
-            <Checkbox
-              checked={checked}
-              onClick={() => {
-                if (hasReturnedValue) setHasReturnedValue(false);
-                setChecked((is) => !is);
-              }}
-            />
-          </div>
-        </div>
+                <div className="flex items-center  justify-center  space-x-2   w-full xxs:w-[48%] sm:w-[31%]  md:w-[32%] ">
+                  <Switch
+                    id="airplane-mode"
+                    checked={hasReturnedValue}
+                    // onChange={() => setHasReturnedValue((is) => !is)}
+                    // onClick={() => set}
+                    onCheckedChange={(chcked) => setHasReturnedValue(chcked)}
+                    disabled={!checked}
+                  />
+                  <Label className=" text-xs " htmlFor="airplane-mode">
+                    Has it returned
+                  </Label>
+                  <Checkbox
+                    checked={checked}
+                    onClick={() => setChecked((checked) => !checked)}
+                  />
+                </div>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
 
         <div className=" space-y-4    sm:flex-1  sm:px-2   sm:overflow-y-auto">
           <div className=" flex items-center justify-between">
@@ -385,8 +456,6 @@ function ProductsDialog({
           </div>
           {productsArr.length ? (
             productsArr.map((product, i) => {
-              console.log(product);
-
               return (
                 <div
                   key={i}
@@ -471,7 +540,8 @@ function ProductsDialog({
               Close
             </Button>
           </DialogClose>
-          <div className=" flex gap-x-10 gap-y-2 flex-wrap">
+          <Summary summary={{ ...totals, totalEntries: productsArr.length }} />
+          {/* <div className=" flex gap-x-10 gap-y-2 flex-wrap">
             <div>
               Total:{" "}
               <span className=" text-xs  text-muted-foreground">
@@ -485,10 +555,97 @@ function ProductsDialog({
                 {formatCurrency(totals.totalDiscount)}
               </span>
             </div>
-          </div>
+          </div> */}
         </div>
       </DialogContent>
     </Dialog>
+  );
+}
+
+interface SummaryProps {
+  units: number;
+  totalEntries: number;
+  totalPrice: number;
+  totalDiscount: number;
+}
+
+function Summary({
+  summary: { totalDiscount, totalPrice, totalEntries, units },
+}: {
+  summary: SummaryProps;
+}) {
+  return (
+    <TagCarousel>
+      <TooltipProvider delayDuration={500}>
+        <Tooltip>
+          <TooltipTrigger className=" hover:cursor-default">
+            {" "}
+            <div className=" relative h-fit w-fit text-xs">
+              <div className="embla__slide">
+                {" "}
+                <span className=" h-5 w-5 bg-chart-5 rounded-full flex items-center justify-center">
+                  {totalEntries}
+                </span>
+              </div>
+            </div>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Total Displayed Entries.</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+
+      <TooltipProvider delayDuration={500}>
+        <Tooltip>
+          <TooltipTrigger className=" hover:cursor-default">
+            {" "}
+            <div className=" relative">
+              <div className="embla__slide">
+                {" "}
+                <div className="py-[.21rem] px-2 bg-chart-1  break-keep   hover:opacity-90 transition-opacity text-[.7rem] flex items-center gap-1 justify-center rounded-full">
+                  <span className=" inline-flex items-center   px-[0.3rem] py-0.1   shrink-0  bg-chart-5 rounded-full justify-center">
+                    {units}
+                  </span>
+                  Units
+                </div>
+              </div>
+            </div>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Total units bought.</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+
+      <div className=" relative">
+        <div className="embla__slide">
+          {" "}
+          <div className=" py-1 px-2 bg-chart-1  text-nowrap break-keep   hover:opacity-90 transition-opacity text-[.7rem] flex items-center gap-1 justify-center rounded-full ">
+            Total Price:
+            <span>{formatCurrency(totalPrice)}</span>
+          </div>
+        </div>
+      </div>
+
+      <div className=" relative">
+        <div className="embla__slide">
+          {" "}
+          <div className=" py-1 px-2 bg-chart-4  text-nowrap break-keep  hover:opacity-90 transition-opacity rounded-full text-[.7rem] gap-1 flex items-center justify-center ">
+            Total discount: <span>{formatCurrency(totalDiscount)}</span>
+          </div>
+        </div>
+      </div>
+
+      <div className=" relative">
+        <div className="embla__slide">
+          {" "}
+          <div className=" py-1 px-2 bg-chart-5 rounded-full text-nowrap  hover:opacity-90  transition-opacity  text-[.7rem] gap-1 flex items-center justify-center ">
+            Total after discount:{" "}
+            <span>{formatCurrency(totalPrice - totalDiscount)}</span>
+          </div>
+        </div>
+      </div>
+    </TagCarousel>
   );
 }
 

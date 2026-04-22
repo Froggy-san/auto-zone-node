@@ -1,5 +1,5 @@
 "use client";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Carousel,
@@ -23,7 +23,7 @@ interface ViewCarouselProps {
 
 const ViewCarousel = ({ images, index, closeFunction }: ViewCarouselProps) => {
   const [api, setApi] = React.useState<CarouselApi>();
-  const [current, setCurrent] = React.useState(0);
+  const [current, setCurrent] = React.useState(index || 0);
   const [count, setCount] = React.useState(0);
 
   React.useEffect(() => {
@@ -32,14 +32,23 @@ const ViewCarousel = ({ images, index, closeFunction }: ViewCarouselProps) => {
     }
 
     setCount(api.scrollSnapList().length);
-    setCurrent(api.selectedScrollSnap() + 1);
     if (index) api.scrollTo(index, true);
+    setCurrent(api.selectedScrollSnap());
 
     api.on("select", () => {
-      setCurrent(api.selectedScrollSnap() + 1);
+      setCurrent(api.selectedScrollSnap());
     });
-  }, [api, index]);
+  }, [api, index, setCurrent]);
 
+  React.useEffect(() => {
+    const onEsc = (key: KeyboardEvent) => {
+      if (key.code === "Escape") {
+        closeFunction();
+      }
+    };
+    document.addEventListener("keydown", onEsc);
+    return () => document.removeEventListener("keydown", onEsc);
+  }, [closeFunction]);
   React.useEffect(() => {
     const body = document.querySelector("body");
     if (body) {
@@ -54,6 +63,9 @@ const ViewCarousel = ({ images, index, closeFunction }: ViewCarouselProps) => {
 
   return createPortal(
     <motion.div
+      onTouchStart={(e) => e.stopPropagation()}
+      onTouchMove={(e) => e.stopPropagation()}
+      onTouchEnd={(e) => e.stopPropagation()}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.3, type: "spring" }}
       key="container"
@@ -76,15 +88,18 @@ const ViewCarousel = ({ images, index, closeFunction }: ViewCarouselProps) => {
                     key="container"
                     className="z-50 flex h-[100dvh] w-full select-none items-center justify-center"
                   >
-                    <motion.video
+                    <VideoSlide url={image} i={i} index={current} />
+                    {/* <motion.video
                       controls
+                      autoPlay={index === i}
+                      playsInline
                       src={image}
-                      initial={{ scale: 0.7, opacity: 0 }}
+                      initial={{ scale: 1.1, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
-                      exit={{ scale: 0.7, opacity: 0 }}
-                      transition={{ duration: 0.2, type: "spring" }}
+                      exit={{ scale: 1.1, opacity: 0 }}
+                      transition={{ duration: 0.1, ease: "linear" }}
                       className="max-h-[90%] max-w-[100%] object-contain sm:max-h-[100%]"
-                    />
+                    /> */}
                   </div>
                 </CarouselItem>
               );
@@ -97,10 +112,13 @@ const ViewCarousel = ({ images, index, closeFunction }: ViewCarouselProps) => {
                   >
                     <motion.img
                       src={image}
-                      initial={{ scale: 0.7, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      exit={{ scale: 0.7, opacity: 0 }}
-                      transition={{ duration: 0.2, type: "spring" }}
+                      initial={{ scale: 1.1, opacity: 0 }}
+                      animate={{
+                        scale: current === i ? 1 : 0.95,
+                        opacity: current === i ? 1 : 0.5,
+                      }}
+                      exit={{ scale: 1.1, opacity: 0 }}
+                      transition={{ duration: 0.1, ease: "linear" }}
                       alt="Enlarged view"
                       className="max-h-[90%] max-w-[100%] object-contain sm:max-h-[95%]"
                     />
@@ -122,3 +140,52 @@ const ViewCarousel = ({ images, index, closeFunction }: ViewCarouselProps) => {
 };
 
 export default ViewCarousel;
+interface VideoSlideProps {
+  index: number;
+  i: number;
+  url: string;
+}
+
+const VideoSlide: React.FC<VideoSlideProps> = ({ index, i, url }) => {
+  // 1. Create a ref to hold the video element
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  // 2. Use useEffect to control playback whenever the 'index' changes
+  useEffect(() => {
+    const video = videoRef.current;
+
+    // Check if this slide is the currently focused one
+    const isFocused = index === i;
+
+    if (video) {
+      if (isFocused) {
+        // Play the video when the slide is focused
+        video.play().catch((error) => {
+          // Important: Catch and handle potential Autoplay Policy errors
+          console.warn("Video playback blocked by browser policy:", error);
+        });
+      } else {
+        // Pause and reset (optional: video.currentTime = 0;) when the slide moves out
+        video.pause();
+      }
+    }
+  }, [index, i]); // Re-run this effect whenever the global 'index' changes
+
+  return (
+    <motion.video
+      // 3. Attach the ref to the motion.video element
+      ref={videoRef as any} // Framer Motion uses a complex ref type, using 'as any' often resolves TS issues here
+      controls
+      playsInline
+      src={url.startsWith("blob") ? url.split(" ")[0] : url}
+      initial={{ scale: 1.1, opacity: 0 }}
+      animate={{
+        scale: index === i ? 1 : 0.95,
+        opacity: index === i ? 1 : 0.5,
+      }} // Optional: Animate based on focus
+      exit={{ scale: 1.1, opacity: 0 }}
+      transition={{ duration: 0.2, ease: "linear" }}
+      className="max-h-[90%] max-w-[100%] object-contain sm:max-h-[100%]"
+    />
+  );
+};

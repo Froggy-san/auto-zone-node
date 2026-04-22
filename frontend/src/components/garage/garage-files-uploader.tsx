@@ -1,5 +1,5 @@
 import { Button } from "@components/ui/button";
-import { CarImage, FilesWithPreview, ProductImage } from "@lib/types";
+import { CarImage, FileWithPreview, ProductImage } from "@lib/types";
 import { cn } from "@lib/utils";
 import { ImageUp, X } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
@@ -9,7 +9,7 @@ import ProgressBar from "@components/progress-bar";
 
 interface MultiFileUploaderProps {
   fieldChange: React.Dispatch<SetStateAction<File[]>>;
-  selectedFiles: FilesWithPreview[];
+  selectedFiles: FileWithPreview[];
   mediaUrl?: CarImage[];
   disabled?: boolean;
   handleDeleteMedia: (image: CarImage) => void;
@@ -48,7 +48,7 @@ export function GarageFileUploader({
   );
 
   // Handle deletion of selected images
-  function handleDeleteSelectedImages(viewedFile: FilesWithPreview) {
+  function handleDeleteSelectedImages(viewedFile: FileWithPreview) {
     URL.revokeObjectURL(viewedFile.preview); // Revoke the URL of the deleted file
     const newArr = selectedFiles.filter((file) => file !== viewedFile);
     fieldChange(newArr);
