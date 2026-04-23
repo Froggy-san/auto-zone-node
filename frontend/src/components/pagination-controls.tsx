@@ -1,4 +1,3 @@
-"use client";
 import { Button } from "@components/ui/button";
 import { PAGE_SIZE } from "@lib/constants";
 import { cn } from "@lib/utils";

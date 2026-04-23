@@ -27,7 +27,7 @@ export async function getProductTypes(filters?: Filters): Promise<{
     }
   })
 
-  const query = `${BASE_URL}/productTypes?${searchParams.toString()}`
+  const query = `${BASE_URL}/api/v1/productTypes?${searchParams.toString()}`
 
   const response = await fetch(query, {
     method: "GET",
@@ -48,7 +48,7 @@ export async function getProductTypes(filters?: Filters): Promise<{
 }
 
 export async function createProductType(data: FormData): Promise<ProductType> {
-  const res = await fetch(`${BASE_URL}/productTypes`, {
+  const res = await fetch(`${BASE_URL}/api/v1/productTypes`, {
     method: "POST",
     credentials: "include",
     body: data,
@@ -68,7 +68,7 @@ export async function updateProductType(
   id: string,
   data: FormData
 ): Promise<ProductType> {
-  const res = await fetch(`${BASE_URL}/productTypes/${id}`, {
+  const res = await fetch(`${BASE_URL}/api/v1/productTypes/${id}`, {
     method: "PATCH",
     credentials: "include",
     body: data,
@@ -85,7 +85,7 @@ export async function updateProductType(
 }
 
 export async function getProductTypeById(id: string): Promise<ProductType> {
-  const res = await fetch(`${BASE_URL}/productTypes/${id}`, {
+  const res = await fetch(`${BASE_URL}/api/v1/productTypes/${id}`, {
     credentials: "include",
   })
 
@@ -100,7 +100,7 @@ export async function getProductTypeById(id: string): Promise<ProductType> {
 }
 
 export async function deleteProductType(id: string): Promise<void> {
-  const res = await fetch(`${BASE_URL}/productTypes/${id}`, {
+  const res = await fetch(`${BASE_URL}/api/v1/productTypes/${id}`, {
     method: "DELETE",
     credentials: "include",
   })

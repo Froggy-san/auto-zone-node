@@ -1,4 +1,3 @@
-"use client";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -19,9 +18,10 @@ interface ViewCarouselProps {
   images: string[];
   index?: number;
   closeFunction: () => void;
+  shouldHideScrollBar?: boolean;
 }
 
-const ViewCarousel = ({ images, index, closeFunction }: ViewCarouselProps) => {
+const ViewCarousel = ({ images, index, closeFunction , shouldHideScrollBar }: ViewCarouselProps) => {
   const [api, setApi] = React.useState<CarouselApi>();
   const [current, setCurrent] = React.useState(index || 0);
   const [count, setCount] = React.useState(0);
@@ -49,7 +49,9 @@ const ViewCarousel = ({ images, index, closeFunction }: ViewCarouselProps) => {
     document.addEventListener("keydown", onEsc);
     return () => document.removeEventListener("keydown", onEsc);
   }, [closeFunction]);
+
   React.useEffect(() => {
+  if(!shouldHideScrollBar) return
     const body = document.querySelector("body");
     if (body) {
       if (index !== undefined) body.style.overflow = "hidden";
@@ -59,7 +61,7 @@ const ViewCarousel = ({ images, index, closeFunction }: ViewCarouselProps) => {
     return () => {
       if (body) body.style.overflow = "auto";
     };
-  }, [index]);
+  }, [index,shouldHideScrollBar]);
 
   return createPortal(
     <motion.div

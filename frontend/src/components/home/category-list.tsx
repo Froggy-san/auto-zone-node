@@ -1,4 +1,3 @@
-"use client";
 import { CategoryProps } from "@lib/types";
 import React, { useState } from "react";
 import Category from "./category";

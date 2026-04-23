@@ -1,4 +1,3 @@
-"use client";
 
 import useInfiniteTicketHistory from "@lib/queries/tickets/useInfiniteTicketHistory";
 import React, { useCallback, useEffect, useMemo, useRef } from "react";

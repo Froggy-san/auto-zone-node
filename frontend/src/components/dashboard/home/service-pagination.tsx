@@ -15,7 +15,7 @@ interface ServicePaginationProps {
   minPrice?: string;
   maxPrice?: string;
 }
-const ServicePagination = async ({
+const ServicePagination = ({
   pageNumber,
   dateFrom,
   dateTo,

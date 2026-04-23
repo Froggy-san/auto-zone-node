@@ -5,7 +5,7 @@ import { getAllCategoriesAction } from "@lib/actions/categoriesAction";
 import { getServiceById } from "@lib/actions/serviceActions";
 import FeesForm from "./fees-form";
 
-const EditFeesManagement = async ({
+const EditFeesManagement = ({
   feesId,
   addFeeId,
 }: {

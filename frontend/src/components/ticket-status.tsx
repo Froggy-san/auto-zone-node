@@ -1,4 +1,3 @@
-"use client";
 import CloseButton from "@components/close-button";
 import { Badge } from "@components/ui/badge";
 import { TicketStatus as TicketStatusType } from "@lib/types";

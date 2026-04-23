@@ -1,7 +1,7 @@
-import { Button } from "@components/ui/button";
-import { Checkbox } from "@components/ui/checkbox";
-import { FileWithPreview, ProductImage } from "@lib/types";
-import { cn } from "@lib/utils";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+
+import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { ImageUp, X } from "lucide-react";
 import {
@@ -9,16 +9,18 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
-import React, { SetStateAction, useCallback, useEffect, useMemo } from "react";
-import { FileRejection, FileWithPath, useDropzone } from "react-dropzone";
-import ProgressBar from "@components/progress-bar";
+} from "@//components/ui/tooltip";
+import React, {  useCallback, useEffect, useMemo, type SetStateAction } from "react";
+import { useDropzone, type FileRejection, type FileWithPath,  } from "react-dropzone";
+import ProgressBar from "@/components/progress-bar";
 import {
   Progress,
   ProgressBarContainer,
   ProgressMeter,
-} from "@components/progress";
-import { byteSize } from "@lib/constants";
+} from "@/components/progress";
+import { byteSize } from "@/lib/constants";
+import type { ProductImage } from "@/types";
+import type { FileWithPreview } from "@/lib/types";
 
 interface MultiFileUploaderProps {
   isMainImage: ProductImage | number | null;
@@ -123,7 +125,7 @@ export function MultiFileUploader({
                 </Button>
                 {media.imageUrl.includes("mp4") ? (
                   <video
-                    key={media.id}
+                    key={media._id}
                     src={media.imageUrl}
                     className=" max-h-[250px] sm:max-h-[120px]"
                   >
@@ -145,7 +147,7 @@ export function MultiFileUploader({
                         checked={
                           (typeof isMainImage !== "number" &&
                             isMainImage &&
-                            isMainImage.id === media.id) ||
+                            isMainImage._id === media._id) ||
                           false
                         }
                         onClick={() => {
@@ -155,7 +157,7 @@ export function MultiFileUploader({
                         className={` absolute left-1 bottom-1 ${
                           typeof isMainImage !== "number" &&
                           isMainImage &&
-                          isMainImage.id === media.id &&
+                          isMainImage._id === media._id &&
                           "bg-primary"
                         } `}
                       />

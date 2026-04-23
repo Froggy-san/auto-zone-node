@@ -9,7 +9,7 @@ interface ClientsPaginationProps {
   email?: string;
 }
 
-const ClientsPagination = async ({
+const ClientsPagination = ({
   pageNumber,
   name,
   phone,

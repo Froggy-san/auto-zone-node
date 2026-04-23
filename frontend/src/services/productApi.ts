@@ -36,7 +36,7 @@ export async function getProducts(filters?: Filters): Promise<{
     }
   })
 
-  const query = `${BASE_URL}/products?${searchParams.toString()}`
+  const query = `${BASE_URL}/api/v1/products?${searchParams.toString()}`
 
   const response = await fetch(query, {
     method: "GET",
@@ -61,7 +61,7 @@ export async function getProducts(filters?: Filters): Promise<{
 }
 
 export async function createProduct(data: FormData): Promise<Product> {
-  const res = await fetch(`${BASE_URL}/products`, {
+  const res = await fetch(`${BASE_URL}/api/v1/products`, {
     method: "POST",
     credentials: "include",
     body: data,
@@ -81,7 +81,7 @@ export async function updateProduct(
   id: string,
   data: FormData
 ): Promise<Product> {
-  const res = await fetch(`${BASE_URL}/products/${id}`, {
+  const res = await fetch(`${BASE_URL}/api/v1/products/${id}`, {
     method: "PATCH",
     credentials: "include",
     body: data,
@@ -98,7 +98,7 @@ export async function updateProduct(
 }
 
 export async function getProductById(id: string) {
-  const res = await fetch(`${BASE_URL}/products/${id}`, {
+  const res = await fetch(`${BASE_URL}/api/v1/products/${id}`, {
     credentials: "include",
   })
 
@@ -113,7 +113,7 @@ export async function getProductById(id: string) {
 }
 
 export const deleteMultipleProducts = async (ids: string[]) => {
-  const response = await fetch(`${BASE_URL}/products/delete-multiple`, {
+  const response = await fetch(`${BASE_URL}/api/v1/products/delete-multiple`, {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",

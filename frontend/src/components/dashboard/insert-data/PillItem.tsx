@@ -1,4 +1,3 @@
-"use client";
 
 import Spinner from "@components/Spinner";
 import React, { SetStateAction, useCallback, useState } from "react";

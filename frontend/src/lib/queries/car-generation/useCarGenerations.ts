@@ -1,4 +1,3 @@
-"use client";
 
 import { PILL_SIZE } from "@lib/constants";
 import { getCarGenerations } from "@lib/services/car-generations";

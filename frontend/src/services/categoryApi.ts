@@ -28,7 +28,7 @@ export async function getCategories(filters?: Filters): Promise<{
     }
   })
 
-  const query = `${BASE_URL}/categories?${searchParams.toString()}`
+  const query = `${BASE_URL}/api/v1/categories?${searchParams.toString()}`
 
   const response = await fetch(query, {
     method: "GET",
@@ -51,7 +51,7 @@ export async function getCategories(filters?: Filters): Promise<{
 }
 
 export async function createCategory(data: FormData): Promise<Category> {
-  const res = await fetch(`${BASE_URL}/categories`, {
+  const res = await fetch(`${BASE_URL}/api/v1/categories`, {
     method: "POST",
     credentials: "include",
     body: data,
@@ -71,7 +71,7 @@ export async function updateCategory(
   id: string,
   data: FormData
 ): Promise<Category> {
-  const res = await fetch(`${BASE_URL}/categories/${id}`, {
+  const res = await fetch(`${BASE_URL}/api/v1/categories/${id}`, {
     method: "PATCH",
     credentials: "include",
     body: data,
@@ -88,7 +88,7 @@ export async function updateCategory(
 }
 
 export async function getCategoryById(id: string): Promise<Category> {
-  const res = await fetch(`${BASE_URL}/categories/${id}`, {
+  const res = await fetch(`${BASE_URL}/api/v1/categories/${id}`, {
     credentials: "include",
   })
 
@@ -103,7 +103,7 @@ export async function getCategoryById(id: string): Promise<Category> {
 }
 
 export async function deleteCategory(id: string): Promise<void> {
-  const res = await fetch(`${BASE_URL}/categories/${id}`, {
+  const res = await fetch(`${BASE_URL}/api/v1/categories/${id}`, {
     method: "DELETE",
     credentials: "include",
   })

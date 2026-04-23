@@ -1,12 +1,11 @@
-"use client";
-import { Button } from "@components/ui/button";
-import { cn } from "@lib/utils";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import React, { useState } from "react";
 import DeleteProductDialog from "./delete-product-dialog";
 interface Props {
   pageSize: number;
   currPage: number;
-  productId: number | undefined;
+  productId: string | undefined;
   className?: string;
   imagesToDelete: string[];
 }

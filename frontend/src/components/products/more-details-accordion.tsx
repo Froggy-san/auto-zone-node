@@ -1,4 +1,4 @@
-import { AddetionalDetailsSchema } from "@lib/types";
+
 import React from "react";
 import { z } from "zod";
 
@@ -8,9 +8,10 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { cn } from "@lib/utils";
+import { cn } from "@/lib/utils";
+import type { AdditionalDetailsSchema } from "@/lib/types";
 interface Props {
-  additionalDetails: z.infer<typeof AddetionalDetailsSchema>[];
+  additionalDetails: z.infer<typeof AdditionalDetailsSchema>[];
   className?: string;
 }
 const MoreDetialsAccordion = ({ additionalDetails, className }: Props) => {

@@ -1,4 +1,3 @@
-"use client";
 import useCarGenerations from "@lib/queries/car-generation/useCarGenerations";
 import React, { useCallback, useRef, useState } from "react";
 

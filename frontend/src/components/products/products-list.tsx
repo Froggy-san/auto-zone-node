@@ -19,7 +19,7 @@ interface ProductsListProps {
   user: any | null
 }
 
-const ProductsList: React.FC<ProductsListProps> = async ({
+const ProductsList: React.FC<ProductsListProps> =  ({
   user,
   pageNumber,
   name,
@@ -78,7 +78,7 @@ const ProductsList: React.FC<ProductsListProps> = async ({
   const encondedFilters = encodeURIComponent(JSON.stringify(filters))
   return (
     <>
-      <ul className="gr gr-cols-1 xs:gr-cols-2 xl:gr-cols-3 gap-3 p-3">
+      <ul className="grid grid-cols-1 xs:grid-cols-2 xl:grid-cols-3 gap-3 p-3">
         {products && products.length
           ? products.map((product, i: number) => (
               <ProductItem

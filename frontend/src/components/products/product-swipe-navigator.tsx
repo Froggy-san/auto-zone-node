@@ -1,5 +1,4 @@
 // components/ProductSwipeNavigator.tsx
-"use client"; // This directive makes it a Client Component
 
 import { Button } from "@components/ui/button";
 import { useRouter } from "next/navigation";

@@ -1,4 +1,3 @@
-"use client";
 import SubmitButton from "@components/submit-button";
 import SuccessToastDescription, {
   ErorrToastDescription,

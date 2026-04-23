@@ -1,4 +1,3 @@
-"use client";
 
 import { ProductType } from "@lib/types";
 import React, { useCallback, useState } from "react";

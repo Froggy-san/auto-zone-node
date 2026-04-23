@@ -24,15 +24,25 @@ export const createProductSchema = z.object({
     isAvailable: z.coerce.boolean().optional(),
 
     // Now expecting an array of string IDs, not numbers
-    generations: z.array(objectIdSchema).optional(),
+    generations: z.preprocess((val) => {
+    if (typeof val === 'string') return JSON.parse(val);
+    return val;
+  }, z.array(objectIdSchema).optional()),
 
     // Use the sub-schema here for deep validation
-    moreDetails: z.array(moreDetailSchema).optional(),
+    moreDetails: z.preprocess((val) => {
+    if (typeof val === 'string') return JSON.parse(val);
+    return val;
+  },z.array(moreDetailSchema).optional()),
 
     productType: objectIdSchema,
     productBrand: objectIdSchema,
     category: objectIdSchema,
-    productImages: z
+    productImages: z.preprocess((val) => {
+    if (typeof val === 'string') return JSON.parse(val);
+    return val;
+  }, z
+
       .array(
         z.object({
           imageUrl: z.string(),
@@ -41,14 +51,18 @@ export const createProductSchema = z.object({
           isMain: z.boolean().optional(),
         }),
       )
-      .optional(),
+      .optional()),
     mainImageName: z.string().optional().default(""),
 
     carMaker: objectIdSchema.optional(),
     // Keep 'model' here if you want, but remember our 'carModel' clash
     // we discussed earlier. If you renamed it to carModel in the
     // Mongoose schema, change it here too!
-    carModel: objectIdSchema.optional(),
+    carModel: z.preprocess(
+  (val) => (val === "" ? undefined : val), 
+  objectIdSchema.optional()
+),
+    // .or(z.literal("")),
   }),
 });
 

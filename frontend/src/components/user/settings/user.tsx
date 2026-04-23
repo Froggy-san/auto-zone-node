@@ -1,4 +1,3 @@
-"use client";
 import ImageView from "@components/image-view";
 import { Client, User as UserType } from "@lib/types";
 import { ImageOffIcon } from "lucide-react";

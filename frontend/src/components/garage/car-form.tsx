@@ -1,4 +1,3 @@
-"use client";
 import DialogComponent from "@components/dialog-component";
 import SuccessToastDescription, {
   ErorrToastDescription,

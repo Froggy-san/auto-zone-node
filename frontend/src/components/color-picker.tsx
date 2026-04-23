@@ -1,4 +1,3 @@
-"use client";
 import { HslColor } from "@lib/types";
 import { cn } from "@lib/utils";
 import { ClickAwayListener } from "@mui/material";

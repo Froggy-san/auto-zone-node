@@ -3,6 +3,7 @@ import type { Category } from "./category"
 import type { ProductType } from "./productTypes"
 
 export interface MoreDetail {
+  _id: string
   title: string
   description: string
   table: { title: string; description: string }[]

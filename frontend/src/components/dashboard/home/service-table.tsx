@@ -1,4 +1,3 @@
-"use client";
 import React, { SetStateAction, useEffect, useMemo, useState } from "react";
 import {
   Table,

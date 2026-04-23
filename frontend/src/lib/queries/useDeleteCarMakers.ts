@@ -1,4 +1,3 @@
-"use client";
 import { useToast } from "@hooks/use-toast";
 import { deleteCarMaker } from "@lib/services/car-maker-services";
 import { useMutation, useQueryClient } from "@tanstack/react-query";

@@ -3,7 +3,7 @@ import { getAllCarMakersAction } from "@lib/actions/carMakerActions";
 
 import React from "react";
 
-const CarModelManagement = async () => {
+const CarModelManagement = () => {
   const { data, error } = await getAllCarMakersAction();
 
   if (error) return <p>{error}</p>;

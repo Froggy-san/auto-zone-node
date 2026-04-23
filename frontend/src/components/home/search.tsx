@@ -1,4 +1,3 @@
-"use client";
 import React, {
   useCallback,
   useEffect,
@@ -26,16 +25,17 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 
-import { Input } from "@components/ui/input";
+import { Input } from "@/components/ui/input";
 import { AnimatePresence, motion } from "framer-motion";
-import { Button } from "@components/ui/button";
-import { cn } from "@lib/utils";
-import useSearchCategories from "@lib/queries/categories/useSearchCategory";
-import { categoryResult, Product } from "@lib/types";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import useSearchCategories from "@/lib/queries/categories/useSearchCategory";
+
 import { ClickAwayListener, useMediaQuery } from "@mui/material";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
-import CloseButton from "@components/close-button";
+
+import CloseButton from "@/components/close-button";
+import { Link, useNavigate } from "react-router";
+import type { categoryResult, Product } from "@/types";
 
 interface Props {
   className?: string;
@@ -46,13 +46,13 @@ const Search = ({ className }: Props) => {
   const [show, setShow] = useState(false);
   const isSmallScreen = useMediaQuery("(max-width: 839px)");
   const divRef = useRef<HTMLDivElement>(null);
-  const router = useRouter();
+  const navigate = useNavigate();
 
   const { categories, productTypes, products, error, isLoading } =
     useSearchCategories(searchTerm);
 
   function handleCategory(url: string) {
-    router.push(url);
+    navigate(url);
   }
 
   // const show = focused && searchTerm.length > 0;
@@ -241,7 +241,7 @@ function SearchBarOnBigScreens({
                     {categories?.length ? (
                       categories?.map((cat) => (
                         <CommandItem
-                          key={cat.id}
+                          key={cat._id}
                           value={cat.name}
                           onClick={() => {
                             setShow(false);
@@ -253,7 +253,7 @@ function SearchBarOnBigScreens({
                           onSelect={() => {
                             setShow(false);
                             handleCategory(
-                              `/products?page=1&categoryId=${cat.id}`
+                              `/products?page=1&categoryId=${cat._id}`
                             );
                           }}
                           className="  font-semibold"
@@ -414,9 +414,9 @@ function SearchBarOnSmScreens({
               </h3>
               {categories?.map((cat) => (
                 <li
-                  key={cat.id}
+                  key={cat._id}
                   onClick={() =>
-                    handleCategory(`/products?page=1&categoryId=${cat.id}`)
+                    handleCategory(`/products?page=1&categoryId=${cat._id}`)
                   }
                   className=" relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none data-[disabled=true]:pointer-events-none hover:bg-accent hover::text-accent-foreground data-[disabled=true]:opacity-50"
                 >
@@ -467,7 +467,7 @@ function ProductList({
       >
         {products.map((pro) => (
           <ProductItem
-            key={pro.id}
+            key={pro._id}
             product={pro}
             isSmallScreen={isSmallScreen}
           />
@@ -495,7 +495,7 @@ function ProductItem({
       )}
     >
       <Link
-        href={`/products/${product.id}`}
+        to={`/products/${product._id}`}
         className=" flex cursor-default gap-2   justify-center   items-center"
       >
         {image && (

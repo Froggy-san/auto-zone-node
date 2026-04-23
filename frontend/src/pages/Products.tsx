@@ -16,10 +16,10 @@ import useCategories from "@/features/categories/useCategories"
 import useProductBrands from "@/features/productBrands/useProductBrands"
 import IntersectionProvidor from "@/components/products/intersection-providor"
 import ProductsFilterBar from "@/components/products/products-filter-bar"
-import Header from "@/components/header"
+
 import CategoryCarousel from "@/components/products/category-carousel"
 import ProductsList from "@/components/products/products-list"
-import ProductPagenation from "@/components/products/product-pagenation"
+
 import ProductManagement from "@/components/products-management"
 
 import { getParam } from "@/lib/getParam"
@@ -95,7 +95,7 @@ const Page = () => {
       className="flex min-h-screen flex-col bg-background"
     >
       <div className="border-b">
-        <Header showSearch />
+        {/* <Header showSearch /> */}
         <div className="mb-4 space-y-2 px-2">
           {/* <h3 className=" text-md font-semibold">Categories</h3> */}
           <CategoryCarousel

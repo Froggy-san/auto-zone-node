@@ -6,11 +6,17 @@ export const validate =
   (schema: ZodTypeAny) =>
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      await schema.parseAsync({
+// 1. Capture the transformed data
+      const parsedData = await schema.parseAsync({
         body: req.body,
         query: req.query,
         params: req.params,
-      });
+      }) as { body: any; query: any; params: any };;
+
+      // 2. Overwrite the "dirty" request objects with the "clean" transformed ones
+      req.body = parsedData.body;
+      // req.query = parsedData.query;
+      req.params = parsedData.params;
       return next();
     } catch (error: any) {
       // 1. Check if it's a Zod Error
@@ -24,6 +30,6 @@ export const validate =
         return next(new AppError(message, 400));
       }
 
-      return next(new AppError("Validation failed", 400));
+      return next(new AppError(`Validation failed: ${error.message}`, 400));
     }
   };

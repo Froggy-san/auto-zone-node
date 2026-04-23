@@ -7,7 +7,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-const CategorySection = async () => {
+const CategorySection = () => {
   const { data, error } = await getAllCategoriesAction();
   if (error) return <p>{error}</p>;
   return (

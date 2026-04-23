@@ -1,52 +1,51 @@
-"use client";
-import CarBrandsCombobox from "@components/car-brands-combobox";
-import { ComboBox } from "@components/combo-box";
-import { ModelCombobox } from "@components/model-combobox";
-import { Button } from "@components/ui/button";
-import useSearchCategories from "@lib/queries/categories/useSearchCategory";
-import useCarBrands from "@lib/queries/useCarBrands";
-import useProductTypes from "@lib/queries/useProductTypes";
-import { CarMakerData, CarMakersData, CategoryProps } from "@lib/types";
-import { cn } from "@lib/utils";
-import { useRouter } from "next/navigation";
+import CarBrandsCombobox from "@/components/car-brands-combobox";
+import { ComboBox } from "@/components/combo-box";
+import { ModelCombobox } from "@/components/model-combobox";
+import { Button } from "@/components/ui/button";
+
+import { cn } from "@/lib/utils";
+import type { Category } from "@/types";
+import type { CarMaker } from "@/types/carMaker";
+
 import React, { useRef, useState } from "react";
+import { useNavigate } from "react-router";
 
 interface Props {
   className?: string;
-  categories: CategoryProps[];
-  carMakers: CarMakersData[];
+  categories: Category[];
+  carMakers: CarMaker[];
 }
 
 const HomeFilter = ({ categories, carMakers, className }: Props) => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [makerId, setMakerId] = useState<number | null>(null);
-  const [modelId, setModelId] = useState<number | null>(null);
-  const [generationId, setGenerationId] = useState(0);
-  const [productTypeId, setProductTypeId] = useState(0);
-  const [categoryId, setCategoryId] = useState(0);
-  const router = useRouter();
+  const [maker, setMakerId] = useState<string | null>(null);
+  const [model, setModelId] = useState<string | null>(null);
+  const [generation, setgeneration] = useState("");
+  const [productType, setproductType] = useState("");
+  const [category, setcategory] = useState("");
+  const navigate = useNavigate();
   // const { carBrands, isLoading: searching, error } = useCarBrands(searchTerm);
   const carModels =
-    makerId && carMakers?.find((car) => car.id === makerId)?.carModels;
+    maker && carMakers?.find((car) => car._id === maker)?.carModels;
   const carGenerations =
-    modelId &&
+    model &&
     carModels &&
-    carModels.find((model) => model.id === modelId)?.carGenerations;
+    carModels.find((m) => m._id === model)?.carGenerations;
 
   const productTypes =
-    categories.find((cat) => cat.id === categoryId)?.productTypes || [];
+    categories.find((cat) => cat._id === category)?.productTypes || [];
   const disabled =
-    !makerId && !modelId && !generationId && !productTypeId && !categoryId;
+    !maker && !model && !generation && !productType && !category;
   const first = useRef<HTMLButtonElement>(null);
   function handleClick() {
     if (disabled) return;
     let url = "/products?page=1";
-    if (makerId) url = url + `&makerId=${makerId}&carBrand=${searchTerm}`;
-    if (modelId) url = url + `&modelId=${modelId}`;
-    if (generationId) url = url + `&generationId=${generationId}`;
-    if (categoryId) url = url + `&categoryId=${categoryId}`;
-    if (productTypeId) url = url + `&productTypeId=${productTypeId}`;
-    router.push(url);
+    if (maker) url = url + `&maker=${maker}&carBrand=${searchTerm}`;
+    if (model) url = url + `&model=${model}`;
+    if (generation) url = url + `&generation=${generation}`;
+    if (category) url = url + `&category=${category}`;
+    if (productType) url = url + `&productType=${productType}`;
+    navigate(url);
   }
 
   return (
@@ -66,11 +65,11 @@ const HomeFilter = ({ categories, carMakers, className }: Props) => {
         options={carMakers || []}
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
-        value={makerId}
+        value={maker}
         setValue={(value) => {
           setMakerId(value);
           setModelId(null);
-          setGenerationId(0);
+          setgeneration("");
         }}
       />
 
@@ -78,27 +77,27 @@ const HomeFilter = ({ categories, carMakers, className }: Props) => {
         className=" h-14"
         disabled={!carModels || !carModels.length}
         options={carModels || []}
-        value={modelId}
+        value={model}
         setValue={(value) => {
           setModelId(value);
-          setGenerationId(0);
+          setgeneration("");
         }}
       />
       <ComboBox
         className=" h-14"
         placeholder="Select generation..."
-        disabled={!modelId || !carModels || !carModels.length}
+        disabled={!model || !carModels || !carModels.length}
         options={carGenerations || []}
-        value={generationId}
-        setValue={setGenerationId}
+        value={generation}
+        setValue={setgeneration}
       />
       <ComboBox
         className=" h-14"
         placeholder="Select category..."
         disabled={!categories?.length}
         options={categories || []}
-        value={categoryId}
-        setValue={setCategoryId}
+        value={category}
+        setValue={setcategory}
       />
 
       <ComboBox
@@ -107,13 +106,13 @@ const HomeFilter = ({ categories, carMakers, className }: Props) => {
         shouldFilter={false}
         disabled={!productTypes?.length}
         options={productTypes || []}
-        value={productTypeId}
-        setValue={setProductTypeId}
+        value={productType}
+        setValue={setproductType}
       />
-      {/* <Category categories={categories} categoryId={categoryId} setCategoryId={setCategoryId} />
+      {/* <Category categories={categories} category={category} setcategory={setcategory} />
       <ProductTypes
-        productTypeId={productTypeId}
-        setProdcutTypeId={setProductTypeId}
+        productType={productType}
+        setProdcutTypeId={setproductType}
       /> */}
       <Button
         disabled={disabled}
@@ -128,12 +127,12 @@ const HomeFilter = ({ categories, carMakers, className }: Props) => {
 };
 
 // function Category({
-//   categoryId,
-//   setCategoryId,
+//   category,
+//   setcategory,
 //   categories,
 // }: {
-//   categoryId: number;
-//   setCategoryId: React.Dispatch<React.SetStateAction<number>>;
+//   category: number;
+//   setcategory: React.Dispatch<React.SetStateAction<number>>;
 //   categories: CategoryProps[];
 // }) {
 //   const [searchTerm, setSearchTerm] = useState("");
@@ -148,17 +147,17 @@ const HomeFilter = ({ categories, carMakers, className }: Props) => {
 //       setSearchTerm={setSearchTerm}
 //       disabled={!categories?.length}
 //       options={categories || []}
-//       value={categoryId}
-//       setValue={setCategoryId}
+//       value={category}
+//       setValue={setcategory}
 //     />
 //   );
 // }
 
 // function ProductTypes({
-//   productTypeId,
+//   productType,
 //   setProdcutTypeId,
 // }: {
-//   productTypeId: number;
+//   productType: number;
 //   setProdcutTypeId: React.Dispatch<React.SetStateAction<number>>;
 // }) {
 //   const [searchTerm, setSearchTerm] = useState("");
@@ -175,7 +174,7 @@ const HomeFilter = ({ categories, carMakers, className }: Props) => {
 //       setSearchTerm={setSearchTerm}
 //       disabled={!productTypes?.length}
 //       options={productTypes || []}
-//       value={productTypeId}
+//       value={productType}
 //       setValue={setProdcutTypeId}
 //     />
 //   );

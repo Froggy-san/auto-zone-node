@@ -1,4 +1,3 @@
-"use client"
 
 import * as React from "react"
 import { Check, ChevronsUpDown } from "lucide-react"
@@ -48,7 +47,7 @@ export const ModelCombobox: React.FC<CarModelComboBoxProps> = ({
           variant="outline"
           role="CarModelComboBox"
           aria-expanded={open}
-          className={cn("h-fit w-full justify-between select-none", className)}
+          className={cn("w-full h-fit min-h-9  justify-between select-none", className)}
         >
           {selectedItem ? (
             <div className="flex items-center gap-2 text-left text-wrap break-all">

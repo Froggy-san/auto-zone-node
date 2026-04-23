@@ -1,4 +1,4 @@
-"use client";
+
 import React, {
   createContext,
   useCallback,
@@ -9,7 +9,7 @@ import React, {
 } from "react";
 import { motion } from "framer-motion";
 
-import { cn } from "@lib/utils";
+import { cn } from "@/lib/utils";
 import * as Portal from "@radix-ui/react-portal";
 import { Cross2Icon } from "@radix-ui/react-icons";
 
@@ -222,7 +222,7 @@ const DialogContent = React.forwardRef<HTMLDivElement, DialogContentProps>(
             transition={{ type: "spring" }}
             exit={open ? "open" : "close"}
             className={cn(
-              "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4  bg-background p-6 shadow-lg  sm:rounded-lg",
+              "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg gap-4 bg-background p-6 shadow-lg sm:rounded-lg",
               className
             )}
           >
@@ -309,7 +309,7 @@ DialogComponent.Footer = DialogFooter;
 
 export default DialogComponent;
 
-// "use client";
+
 // import React, {
 //   createContext,
 //   useContext,

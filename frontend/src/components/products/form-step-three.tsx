@@ -1,37 +1,32 @@
-import {
-  Category,
-  CategoryProps,
-  ProductBrand,
-  ProductImage,
-  ProductsSchema,
-  ProductType,
-} from "@lib/types";
-import { Control } from "react-hook-form";
+
+
 import { z } from "zod";
 import { AnimatePresence, motion } from "framer-motion";
-import { ProFormSlideVariants, ProFormTransition } from "@lib/constants";
+import { ProFormSlideVariants, ProFormTransition } from "@/lib/constants";
 
-import { Button } from "@components/ui/button";
+import { Button } from "@/components/ui/button";
 import { ImageOff, Minus, Plus } from "lucide-react";
 
-import FullImagesGallery from "@components/full-images-gallery";
-import { formatCurrency } from "@lib/client-helpers";
+import FullImagesGallery from "@/components/full-images-gallery";
+import { formatCurrency } from "@/lib/client-helpers";
 import { useState } from "react";
 import { BsCartDash } from "react-icons/bs";
 import Collapse, {
   CollapseButton,
   CollapseContant,
-} from "@components/collapse";
+} from "@/components/collapse";
 import { TbBoxModel2 } from "react-icons/tb";
-import { Card } from "@components/ui/card";
+import { Card } from "@/components/ui/card";
 import { MdCategory } from "react-icons/md";
 import { VscTypeHierarchySuper } from "react-icons/vsc";
 import MoreDetailsAccordion from "./more-details-accordion";
+import type { Category, ProductBrand, ProductImage } from "@/types";
+import type { ProductsSchema } from "@/lib/types";
 interface StepThreeProps {
   currStep: number[];
   isLoading: boolean;
   mediaUrls: ProductImage[];
-  categoriesArr: CategoryProps[];
+  categoriesArr: Category[];
   productBrandsArr: ProductBrand[];
   formValues: z.infer<typeof ProductsSchema>;
 }
@@ -52,13 +47,13 @@ function StepThree({
   const urls = mediaUrls.map((image) => image.imageUrl);
   const viewedImages = [...urls, ...images];
   const categories = categoriesArr.find(
-    (cat) => cat.id === formValues.categoryId
+    (cat) => cat._id === formValues.category
   );
-  const productTypes = categories?.productTypes.find(
-    (type) => type.id === formValues.productTypeId
+  const productTypes = categories?.productTypes?.find(
+    (type) => type._id === formValues?.productType
   );
   const productBrands = productBrandsArr.find(
-    (brand) => brand.id === formValues.productBrandId
+    (brand) => brand._id === formValues.productBrand
   );
 
   // const date = new Date();
@@ -88,7 +83,7 @@ function StepThree({
       }`}
     >
       {viewedImages.length ? (
-        <FullImagesGallery images={viewedImages} className="  !h-[50vh]" />
+        <FullImagesGallery images={viewedImages}  shouldHideScrollBar={false} className="  !h-[50vh]" />
       ) : (
         <div className=" h-full flex items-center justify-center  bg-foreground/10  font-semibold text-xl py-5 gap-3">
           <ImageOff className=" w-10 h-10" /> No images.

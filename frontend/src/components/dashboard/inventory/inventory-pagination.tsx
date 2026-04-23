@@ -13,7 +13,7 @@ interface InventoryPaginationProps {
   maxTotalPrice?: string;
 }
 
-const InventoryPagination = async ({
+const InventoryPagination = ({
   pageNumber,
   shopName,
   dateOfOrderFrom,

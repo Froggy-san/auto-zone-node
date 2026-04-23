@@ -1,5 +1,5 @@
-import { cn } from "@lib/utils";
-import React, { CSSProperties } from "react";
+import { cn } from "@/lib/utils";
+import React, { type CSSProperties } from "react";
 
 interface Props {
   className?: string;

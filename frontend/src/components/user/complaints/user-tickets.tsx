@@ -19,7 +19,7 @@ interface Props {
   userId: string;
   currUser: User | null;
 }
-const UserTickets = async ({
+const UserTickets = ({
   supabase,
   pageNumber,
   ticketStatusId,

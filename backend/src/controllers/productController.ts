@@ -87,6 +87,7 @@ export const getProducts = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     // 1. Filtering Logic
 
+    console.log(req.query,"QUERY")
     const features = new APIFeatures(Product.find(), req.query)
       .filter()
       .sort()
@@ -179,6 +180,7 @@ export const uploadProductImages = upload.array("productImages", 30);
 
 export const convertProductImages = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
+    console.log(req.body,"BODY")  
     // 1. Better check for files
     const files = req.files as Express.Multer.File[];
     if (!files || files.length === 0) return next();
@@ -213,6 +215,8 @@ export const convertProductImages = catchAsync(
 );
 export const createProduct = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
+
+    console.log(req.body,"BODYsssssssssssss")
     const createdProduct = await Product.create(req.body);
 
     if (!createdProduct) {

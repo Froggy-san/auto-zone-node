@@ -1,4 +1,3 @@
-"use client";
 import { Button } from "@components/ui/button";
 import { TableCell, TableRow } from "@components/ui/table";
 import { formatCurrency } from "@lib/client-helpers";

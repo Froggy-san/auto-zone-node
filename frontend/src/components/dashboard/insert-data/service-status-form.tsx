@@ -1,4 +1,3 @@
-"use client";
 import SuccessToastDescription, {
   ErorrToastDescription,
 } from "@components/toast-items";

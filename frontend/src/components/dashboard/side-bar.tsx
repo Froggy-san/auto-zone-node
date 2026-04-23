@@ -1,4 +1,3 @@
-"use client";
 import { Button } from "@components/ui/button";
 import { logoutUser } from "@lib/actions/authActions";
 import { cn } from "@lib/utils";

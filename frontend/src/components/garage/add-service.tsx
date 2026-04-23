@@ -14,7 +14,7 @@ interface Client {
   phones: PhoneNumber[];
 }
 
-const ServiceManagement = async ({
+const ServiceManagement = ({
   carToEdit,
   className,
   car,

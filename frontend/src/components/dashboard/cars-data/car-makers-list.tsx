@@ -1,4 +1,3 @@
-"use client";
 
 import React, { useCallback, useState, useRef, useEffect } from "react";
 import { CarMakersData, CarModelProps } from "@lib/types";

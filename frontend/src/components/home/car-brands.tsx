@@ -1,4 +1,3 @@
-"use client";
 import { CarGenerationProps, CarMakersData, CarModelProps } from "@lib/types";
 import React, { useCallback, useEffect, useState } from "react";
 import {

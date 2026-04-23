@@ -1,4 +1,3 @@
-"use client";
 
 import { RootState } from "@lib/store/store";
 import { CartItem, ProductById } from "@lib/types";

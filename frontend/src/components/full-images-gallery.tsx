@@ -1,17 +1,18 @@
-"use client";
-import { ProductImage } from "@lib/types";
-import { cn } from "@lib/utils";
+
+import { type ProductImage } from "@/lib/types";
+import { cn } from "@/lib/utils";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import ImageView from "@components/image-view";
-import ViewCarousel from "@components/view-carousel";
+import ImageView from "@/components/image-view";
+import ViewCarousel from "@/components/view-carousel";
 
 const FullImagesGallery = ({
   images,
-
+shouldHideScrollBar,
   className,
 }: {
   productId?: number;
+  shouldHideScrollBar?: boolean;
   className?: string;
   images: string[];
   error?: string;
@@ -162,6 +163,7 @@ const FullImagesGallery = ({
       <AnimatePresence>
         {viewedIndex !== undefined && (
           <ViewCarousel
+          shouldHideScrollBar={shouldHideScrollBar}
             closeFunction={() => setViewedIndex(undefined)}
             images={images}
             index={viewedIndex}

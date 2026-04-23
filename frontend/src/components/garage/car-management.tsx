@@ -11,7 +11,7 @@ import {
 } from "@lib/types";
 import { cn } from "@lib/utils";
 
-const CarManagement = async ({
+const CarManagement = ({
   carToEdit,
   useParams,
   className,

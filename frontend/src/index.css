@@ -6,6 +6,13 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+   
+    --breakpoint-xxs: 22.1875rem;  /* 355px */
+    --breakpoint-xs: 28.125rem;    /* 450px */
+    --breakpoint-1xs: 31.25rem;    /* 500px */
+    --breakpoint-mid: 53.75rem;    /* 860px */
+    --breakpoint-3xl: 100rem;      /* 1600px */
+    --breakpoint-4xl: 137.5rem;    /* 2200px */
     --font-heading: var(--font-sans);
     --font-sans: 'Figtree Variable', sans-serif;
     --color-sidebar-ring: var(--sidebar-ring);
@@ -49,6 +56,743 @@
 }
 
 :root {
+    --background: hsl(0 0% 100%);
+    --foreground: hsl(240 10% 3.9%);
+    --card: hsl(0 0% 100%);
+    --card-foreground: hsl(240 10% 3.9%);
+    --popover: hsl(0 0% 100%);
+    --popover-foreground: hsl(240 10% 3.9%);
+    --primary: hsl(142.1 76.2% 36.3%);
+    --primary-foreground: hsl(355.7 100% 97.3%);
+    --secondary: hsl(240 4.8% 95.9%);
+    --secondary-foreground: hsl(240 5.9% 10%);
+    --muted: hsl(240 4.8% 95.9%);
+    --muted-foreground: hsl(240 3.8% 46.1%);
+    --accent: hsl(240 4.8% 95.9%);
+    --accent-foreground: hsl(240 5.9% 10%);
+    --destructive: hsl(0 84.2% 60.2%);
+    --border: hsl(240 5.9% 90%);
+    --input: hsl(240 5.9% 90%);
+    --ring: hsl(142.1 76.2% 36.3%);
+    --chart-1: hsl(12 76% 61%);
+    --chart-2: hsl(173 58% 39%);
+    --chart-3: hsl(197 37% 24%);
+    --chart-4: hsl(43 74% 66%);
+    --chart-5: hsl(27 87% 67%);
+    --radius: 1rem;
+    --sidebar: oklch(0.985 0 0);
+    --sidebar-foreground: oklch(0.145 0 0);
+    --sidebar-primary: oklch(0.205 0 0);
+    --sidebar-primary-foreground: oklch(0.985 0 0);
+    --sidebar-accent: oklch(0.97 0 0);
+    --sidebar-accent-foreground: oklch(0.205 0 0);
+    --sidebar-border: oklch(0.922 0 0);
+    --sidebar-ring: oklch(0.708 0 0);
+
+    --dashboard-blue: #e0f2fe;
+    --dashboard-green: #dcfce7;
+    --dashboard-indigo: #e0e7ff;
+    --dashboard-orange: #fef9c3;
+
+    --dashboard-text-blue: #0369a1;
+    --dashboard-text-green: #15803d;
+    --dashboard-text-indigo: #4338ca;
+    --dashboard-text-orange: #a16207;
+
+    --action-created: hsl(142 71% 45%);
+    --action-updated: hsl(217 91% 60%);
+    --action-resolved: hsl(142 76% 36%);
+    --action-closed: hsl(220 10% 50%);
+    --action-reopened: hsl(38 92% 50%);
+    --action-escalated: hsl(0 84% 60%);
+    --action-assigned: hsl(262 83% 58%);
+    --action-message: hsl(199 89% 48%);
+
+    --timeline-line: hsl(220 15% 85%);
+    --timeline-dot: hsl(220 70% 50%);
+}
+
+.dark {
+    --background: hsl(20 14.3% 4.1%);
+    --foreground: hsl(0 0% 95%);
+    --card: hsl(24 9.8% 10%);
+    --card-foreground: hsl(0 0% 95%);
+    --popover: hsl(0 0% 9%);
+    --popover-foreground: hsl(0 0% 95%);
+    --primary: hsl(142.1 70.6% 45.3%);
+    --primary-foreground: hsl(144.9 80.4% 10%);
+    --secondary: hsl(240 3.7% 15.9%);
+    --secondary-foreground: hsl(0 0% 98%);
+    --muted: hsl(0 0% 15%);
+    --muted-foreground: hsl(240 5% 64.9%);
+    --accent: hsl(12 6.5% 15.1%);
+    --accent-foreground: hsl(0 0% 98%);
+    --destructive: hsl(0 62.8% 30.6%);
+    --border: hsl(240 3.7% 15.9%);
+    --input: hsl(240 3.7% 15.9%);
+    --ring: hsl(142.4 71.8% 29.2%);
+    --chart-1: hsl(220 70% 50%);
+    --chart-2: hsl(160 60% 45%);
+    --chart-3: hsl(30 80% 55%);
+    --chart-4: hsl(280 65% 60%);
+    --chart-5: hsl(340 75% 55%);
+    --sidebar: oklch(0.205 0 0);
+    --sidebar-foreground: oklch(0.985 0 0);
+    --sidebar-primary: oklch(0.488 0.243 264.376);
+    --sidebar-primary-foreground: oklch(0.985 0 0);
+    --sidebar-accent: oklch(0.269 0 0);
+    --sidebar-accent-foreground: oklch(0.985 0 0);
+    --sidebar-border: oklch(1 0 0 / 10%);
+    --sidebar-ring: oklch(0.556 0 0);
+
+    --dashboard-blue: #075985;
+    --dashboard-green: #166534;
+    --dashboard-indigo: #3730a3;
+    --dashboard-orange: #854d0e;
+
+    --dashboard-text-blue: #e0f2fe;
+    --dashboard-text-green: #dcfce7;
+    --dashboard-text-indigo: #e0e7ff;
+    --dashboard-text-orange: #fef9c3;
+
+    --action-created: hsl(142 71% 50%);
+    --action-updated: hsl(217 91% 65%);
+    --action-resolved: hsl(142 76% 45%);
+    --action-closed: hsl(220 10% 60%);
+    --action-reopened: hsl(38 92% 55%);
+    --action-escalated: hsl(0 84% 65%);
+    --action-assigned: hsl(262 83% 65%);
+    --action-message: hsl(199 89% 55%);
+
+    --timeline-line: hsl(220 20% 25%);
+    --timeline-dot: hsl(217 91% 60%);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+    }
+  body {
+    @apply bg-background text-foreground;
+    }
+  html {
+    @apply font-sans;
+    }
+      input[type="color"]::-webkit-color-swatch-wrapper {
+    padding: 0; /* Removes extra padding around the swatch */
+  }
+
+  input[type="color"]::-webkit-color-swatch {
+    border: none; /* Removes the border inside the swatch */
+  }
+
+
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--accent-foreground);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar:horizontal {
+  height: 6px;
+}
+
+    
+}
+
+@layer utilities {
+  .garage-scroll-bar::-webkit-scrollbar {
+  display: none;
+}
+.ticket-input {
+  overflow-x: visible; /* Required to enable scrolling */
+
+  /* Hide scrollbar for IE/Edge */
+  -ms-overflow-style: none;
+
+  /* Hide scrollbar for Firefox */
+  scrollbar-width: 5px;
+}
+
+/* Hide scrollbar for Chrome, Safari, and newer Edge (WebKit) */
+.ticket-input::-webkit-scrollbar:horizontal {
+  display: none;
+}
+/* ::-webkit-scrollbar-thumb:hover {
+  background-color: hsla(var(--accent-foreground), 0.9);
+} */
+  .input-field {
+    @apply h-9 w-full min-w-0 rounded-4xl border border-input bg-input/30 px-3 py-1 text-base transition-colors outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-[3px] aria-invalid:ring-destructive/20 md:text-sm dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40;
+  }
+
+  .input-div:focus > div {
+    @apply ring-1 ring-ring;
+  }
+  /* Base styles for the command palette */
+  .cmdk-palette {
+    background-color: var(--background);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    max-width: 600px;
+    margin: 20px auto;
+    overflow: hidden; /* To contain potential scrollbars */
+  }
+
+  /* Input field */
+  .cmdk-input {
+    width: 100%;
+    padding: 12px 16px;
+    font-size: 1.1em;
+    border: none;
+    outline: none;
+    border-bottom: 1px solid #eee;
+    box-sizing: border-box; /* Include padding in width */
+  }
+
+  /* List container */
+  .cmdk-list {
+    max-height: 300px; /* Limit height to enable scrolling */
+    overflow-y: auto;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  /* Individual items */
+  .cmdk-item {
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+    transition: background-color 0.1s ease;
+  }
+
+  .cmdk-item:last-child {
+    border-bottom: none;
+  }
+
+  .cmdk-item:hover {
+    background-color: #f0f0f0;
+  }
+
+  /* Styles for the focused item (via keyboard navigation) */
+  .cmdk-item[aria-selected="true"] {
+    background-color: #e0e0e0; /* Different background for focused item */
+    outline: none; /* Remove default focus outline */
+  }
+
+  /* !!! Crucial for filtering: HIDE items with this attribute !!! */
+  .cmdk-item[data-cmdk-hidden="true"] {
+    display: none;
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .embla {
+    max-width: 100%;
+    margin: auto;
+    /* --slide-height: 19rem; */
+    --slide-spacing: 0.5rem;
+    --slide-size: 100%;
+  }
+  .embla__viewport {
+    overflow: hidden;
+  }
+  .embla__container {
+    display: flex;
+    touch-action: pan-y pinch-zoom;
+    margin-left: calc(var(--slide-spacing) * -1);
+  }
+  .embla__slide {
+    transform: translate3d(0, 0, 0);
+    flex: 0 0 var(--slide-size);
+    min-width: 0;
+    padding-left: var(--slide-spacing);
+  }
+  /* .embla__slide:nth-child(1) {
+    flex: 0 0 60%;
+  }
+  .embla__slide:nth-child(2) {
+    flex: 0 0 40%;
+  }
+  .embla__slide:nth-child(3) {
+    flex: 0 0 30%;
+  }
+  .embla__slide:nth-child(4) {
+    flex: 0 0 90%;
+  }
+  .embla__slide:nth-child(5) {
+    flex: 0 0 35%;
+  }
+  .embla__slide:nth-child(6) {
+    flex: 0 0 55%;
+  }
+  .embla__slide:nth-child(7) {
+    flex: 0 0 85%;
+  }
+  .embla__slide:nth-child(8) {
+    flex: 0 0 50%;
+  }
+  .embla__slide:nth-child(9) {
+    flex: 0 0 35%;
+  } */
+  .embla__slide__number {
+    box-shadow: inset 0 0 0 0.2rem var(--detail-medium-contrast);
+    border-radius: 1.8rem;
+    /* font-size: 4rem; */
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: var(--slide-height);
+    user-select: none;
+  }
+  .embla__controls {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    justify-content: space-between;
+    gap: 1.2rem;
+    margin-top: 1.8rem;
+  }
+  .embla__buttons {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.6rem;
+    align-items: center;
+  }
+  .embla__button {
+    -webkit-tap-highlight-color: rgba(var(--text-high-contrast-rgb-value), 0.5);
+    -webkit-appearance: none;
+    appearance: none;
+    background-color: transparent;
+    touch-action: manipulation;
+    display: inline-flex;
+    text-decoration: none;
+    cursor: pointer;
+    border: 0;
+    padding: 0;
+    margin: 0;
+    box-shadow: inset 0 0 0 0.2rem var(--detail-medium-contrast);
+    width: 3.6rem;
+    height: 3.6rem;
+    z-index: 1;
+    border-radius: 50%;
+    color: var(--text-body);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .embla__button:disabled {
+    color: var(--detail-high-contrast);
+  }
+  .embla__button__svg {
+    width: 35%;
+    height: 35%;
+  }
+  .embla__selected-snap-display {
+    justify-self: flex-end;
+    align-self: center;
+    color: var(--text-low-contrast);
+    font-weight: 600;
+  }
+
+  progress {
+    border-radius: 7px;
+    width: 80%;
+    margin-inline: auto;
+    height: 22px;
+    box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.2);
+  }
+  progress::-webkit-progress-bar {
+    border-radius: 7px;
+  }
+  progress::-webkit-progress-value {
+    background-color: blue;
+    border-radius: 7px;
+    /* box-shadow: 1px 1px 5px 3px rgba(255, 0, 0, 0.8); */
+  }
+  progress::-moz-progress-bar {
+    /* style rules */
+  }
+
+
+  .max-page-size {
+    max-width: 1900px;
+    margin-inline: auto;
+  }
+  @keyframes dialogOpen {
+    from {
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(1.05);
+    }
+    to {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+  }
+  @keyframes dialogClose {
+    from {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+    to {
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(1.05);
+    }
+  }
+
+  @keyframes hussam-is-wrong {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0px);
+    }
+  }
+
+  @keyframes hussam-is-still-wrong {
+    from {
+      opacity: 1;
+      transform: translateY(0px);
+    }
+    to {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+  }
+
+  /* Base styles for the container */
+  .scroll-fade-container {
+    /* This is the container that controls the fading effect */
+    position: relative;
+    /* Set a fixed height for the scrollable area */
+    height: 200px;
+    /* Important for the mask to work properly */
+    overflow: hidden;
+  }
+
+  /* Styles for the actual scrollable content area */
+  .scroll-fade-list {
+    /* Make the content itself scrollable */
+    height: 100%;
+    overflow-y: auto;
+    /* Optional: Hide default scrollbar */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .scroll-fade-list::-webkit-scrollbar {
+    display: none;
+  }
+
+  .show-hide-scrollbar::-webkit-scrollbar {
+    /* display: none; */
+    width: 3px;
+  }
+  .show-hide-scrollbar::-webkit-scrollbar:horizontal {
+    height: 3px;
+  }
+  /* --- The Fading Effects (Masking) --- */
+
+  /* 1. FADE BOTH (Scrolled in the middle) */
+  .scroll-fade-container.fade-both .scroll-fade-list {
+    /* * Mask: Fades out at the top, is solid in the middle, and fades out at the bottom.
+   * - top-to-bottom transparent (0%) to black (5%)
+   * - black (95%) to transparent (100%)
+   */
+    mask-image: linear-gradient(
+      to bottom,
+      transparent 0%,
+      black 5%,
+      black 95%,
+      transparent 100%
+    );
+    /* Use -webkit prefix for maximum browser compatibility */
+    -webkit-mask-image: linear-gradient(
+      to bottom,
+      transparent 0%,
+      black 5%,
+      black 95%,
+      transparent 100%
+    );
+  }
+
+  /* 2. FADE TOP (Scrolled to the bottom) */
+  .scroll-fade-container.fade-top .scroll-fade-list {
+    /* Mask: Fades out at the top, solid to the bottom. */
+    mask-image: linear-gradient(to bottom, transparent 0%, black 5%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 5%);
+  }
+
+  /* 3. FADE BOTTOM (Scrolled to the top) */
+  .scroll-fade-container.fade-bottom .scroll-fade-list {
+    /* Mask: Solid from the top, fades out at the bottom. */
+    mask-image: linear-gradient(to bottom, black 95%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, black 95%, transparent 100%);
+  }
+
+  /* 4. NO FADE (Scrolled fully or content is small) */
+  .scroll-fade-container.no-fade .scroll-fade-list {
+    /* Mask: Fully solid, showing all content. */
+    mask-image: none;
+    -webkit-mask-image: none;
+  }
+  .media-container {
+  }
+
+  .media-file {
+    /* max-width: 160px; */
+    max-width: 100%;
+    max-height: 100%;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: all ease-in 0.1s;
+  }
+
+  .media-container:hover .media-file {
+    opacity: 0.55;
+    filter: contrast(0.85);
+  }
+  .media-container-menu-btn {
+    opacity: 0;
+    pointer-events: none;
+    transition: all ease-in 3s;
+  }
+  .media-container-download {
+    opacity: 100;
+    pointer-events: none;
+    transition: all ease-in 3s;
+  }
+  .media-container:hover .media-container-menu-btn {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .animate-div {
+    animation: hussam-is-wrong 0.2s ease-in forwards;
+  }
+
+  .animate-div-two {
+    animation: hussam-is-still-wrong 3s ease-in forwards;
+  }
+  .sub-category-list {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
+  .color-inputs input {
+    background-color: #e0e7ff;
+  }
+  .truncate {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .truncate-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .dialog {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-50%) scale(1.048);
+    opacity: 0;
+    perspective: 1px;
+    filter: blur(0) !important;
+    visibility: hidden;
+    filter: inherit;
+    transition:
+      transform 400ms cubic-bezier(0.16, 1, 0.3, 1),
+      opacity 400ms cubic-bezier(0.16, 1, 0.3, 1);
+    backface-visibility: hidden; /* Improve rendering performance */
+    -webkit-font-smoothing: subpixel-antialiased;
+    will-change: transform; /* Inform browser about possible changes */
+  }
+  .dialog-open {
+    animation: dialogOpen 400ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    visibility: visible;
+    transition: visibility 0s linear 0s;
+  }
+
+  .dialog-closed {
+    animation: dialogClose 150ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    visibility: hidden;
+    transition: visibility 0s linear 150ms;
+  }
+  .signal-bar-destructive-half-opacity {
+    /* This CSS rule will be successfully parsed by the browser */
+    stroke: hsla(var(--destructive), 0.5);
+  }
+  .mask-accent {
+    mask-repeat: no-repeat;
+
+    /* filter: brightness(80%); */
+    /* 3. The magic: Apply the mask-image property */
+    -webkit-mask-image: linear-gradient(
+      to bottom,
+      /* Direction: Start the reveal from the bottom and move up */
+        hsl(var(--accent)) 0%,
+      /* Fully visible (accent color) at the bottom (0%) */ hsl(var(--accent))
+        70%,
+      /* Stay fully visible until 70% of the way up */ transparent 100%
+        /* Fully transparent (hidden) at the bottom (100%) */
+    );
+    mask-image: linear-gradient(
+      to bottom,
+      hsl(var(--accent)) 0%,
+      hsl(var(--accent)) 70%,
+      transparent 100%
+    );
+
+    /* Optional settings for consistency */
+    mask-mode: alpha;
+    -webkit-mask-mode: alpha;
+  }
+
+  .mask-accent-small {
+    mask-repeat: no-repeat;
+
+    /* filter: brightness(80%); */
+    /* 3. The magic: Apply the mask-image property */
+    -webkit-mask-image: linear-gradient(
+      to bottom,
+      /* Direction: Start the reveal from the bottom and move up */
+        hsl(var(--accent)) 0%,
+      /* Fully visible (accent color) at the bottom (0%) */ hsl(var(--accent))
+        80%,
+      /* Stay fully visible until 80% of the way up */ transparent 100%
+        /* Fully transparent (hidden) at the bottom (100%) */
+    );
+    mask-image: linear-gradient(
+      to bottom,
+      hsl(var(--accent)) 0%,
+      hsl(var(--accent)) 80%,
+      transparent 100%
+    );
+
+    /* Optional settings for consistency */
+    mask-mode: alpha;
+    -webkit-mask-mode: alpha;
+  }
+  /* styles/globals.css or a relevant CSS file */
+  /* .dialog {
+    transition: opacity 400ms cubic-bezier(0.16, 1, 0.3, 1),
+      transform 400ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .dialog-open {
+    opacity: 1;
+    transform: scale(1);
+    visibility: visible;
+  }
+
+  .dialog-closed {
+    opacity: 0;
+    transform: scale(1.5);
+    visibility: hidden;
+  } */
+  .background-transition {
+    transition-property: all !important;
+    transition-timing-function: linear !important;
+    transition-duration: 0.04s !important;
+  }
+  .move-div {
+    position: fixed; /* or absolute, depending on your layout */
+    left: -40px; /* or whatever your default left value is */
+    transition: left 0.3s ease; /* to match the Tailwind transition */
+  }
+  .move-div:focus-within {
+    left: 0;
+  }
+  .focus-button:focus {
+    .move-div {
+      left: 0;
+    }
+  }
+  .item:hover {
+    transform: rotatX(20deg);
+  }
+
+  .cleints-search-bar-mobile {
+    position: fixed;
+    width: 90% !important;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .remove-on-touch-divces {
+  }
+
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: var(--dashboard-text-green);
+  }
+  @media (min-width: 640px) {
+    .media-container-download {
+      opacity: 0;
+    }
+    .dashboard-children-hight {
+      height: calc(100vh - 68px);
+    }
+    .cleints-search-bar-mobile {
+      position: static;
+      /* width: 700px !important ; */
+      top: 0;
+      left: 0;
+      transform: translateX(0);
+    }
+    /* Add this to your CSS */
+  }
+
+  /* @media (min-width: 850px) {
+    .cleints-search-bar-mobile {
+      position: static;
+      width: 700px !important ;
+      top: 0;
+      left: 0;
+      transform: translateX(0);
+    }
+  } */
+
+  /* Styles for Touch Devices (Mobile/Tablets) */
+  @media (pointer: coarse) {
+    .remove-on-touch-divces {
+      opacity: 0 !important;
+      pointer-events: none !important;
+    }
+  }
+
+  /* Styles for PCs/Laptops (Mouse Users) */
+  @media (pointer: fine) {
+    .search-button:hover {
+      background: blue; /* Hovers only make sense for mouse users */
+    }
+  }
+
+
+}
+/* root {
     --background: oklch(1 0 0);
     --foreground: oklch(0.145 0 0);
     --card: oklch(1 0 0);
@@ -115,16 +859,4 @@
     --sidebar-accent-foreground: oklch(0.985 0 0);
     --sidebar-border: oklch(1 0 0 / 10%);
     --sidebar-ring: oklch(0.556 0 0);
-}
-
-@layer base {
-  * {
-    @apply border-border outline-ring/50;
-    }
-  body {
-    @apply bg-background text-foreground;
-    }
-  html {
-    @apply font-sans;
-    }
-}
+} */

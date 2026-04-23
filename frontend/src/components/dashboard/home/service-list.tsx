@@ -21,7 +21,7 @@ interface Props {
   minPrice: string;
   maxPrice: string;
 }
-const ServiceList = async ({
+const ServiceList = ({
   pageNumber,
   dateFrom,
   dateTo,

@@ -1,4 +1,3 @@
-"use client";
 import ErrorMessage from "@components/error-message";
 import FormErrorMessage from "@components/form-error-message";
 import Spinner from "@components/Spinner";

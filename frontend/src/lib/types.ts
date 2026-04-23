@@ -3,7 +3,7 @@ import { z } from "zod"
 import { MIN_PASS_LENGTH } from "./constants"
 
 export function validateEgyptianPhoneNumber(phoneNumber: string) {
-  "use client"
+
   // define the regex
   const regex = /^01[0125][0-9]{8}$/
   // test the string against the regex
@@ -76,6 +76,7 @@ const RowSchema = z.object({
 })
 
 export const AdditionalDetailsSchema = z.object({
+  _id:z.string().optional(),
   title: z.string().min(3, "Title is too short."),
   table: z.array(RowSchema),
   description: z.string(),

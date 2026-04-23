@@ -1,6 +1,7 @@
-import { formatCurrency, formatNumber } from "@lib/helper";
-import { Product } from "@lib/types";
-import { cn } from "@lib/utils";
+import { formatCurrency, formatNumber } from "@/lib/helper";
+
+import { cn } from "@/lib/utils";
+import type { Product } from "@/types";
 import React from "react";
 
 interface Props {

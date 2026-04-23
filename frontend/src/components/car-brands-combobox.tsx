@@ -57,7 +57,7 @@ const CarBrandsCombobox = React.forwardRef<HTMLButtonElement, Props>(
             role="combobox"
             aria-expanded={open}
             className={cn(
-              "h-fit w-full justify-between select-none",
+              "w-full  h-fit min-h-9  justify-between select-none",
               className
             )}
           >

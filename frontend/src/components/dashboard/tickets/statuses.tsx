@@ -4,7 +4,7 @@ import React from "react";
 import TicketStatus from "../../ticket-status";
 import { createClient } from "@utils/supabase/server";
 
-const Statuses = async () => {
+const Statuses = () => {
   const supabase = await createClient();
   const { ticketStatus, error } = await getTicketStatusesAction(supabase);
 

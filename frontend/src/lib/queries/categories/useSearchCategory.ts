@@ -1,5 +1,5 @@
-import useDebounce from "@hooks/use-debounce";
-import { searchCategories } from "@lib/services/categories";
+import useDebounce from "@/hooks/use-debounce";
+import { searchCategories } from "@/lib/services/categories";
 import { useQuery } from "@tanstack/react-query";
 
 export default function useSearchCategories(searchTerm: string) {

@@ -18,7 +18,9 @@ import path from "path";
 const app = express();
 
 // Middlewares
-app.use(helmet());
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
 
 const limiter = expressRateLimit({
   max: 100, // 100 request limit
@@ -34,7 +36,14 @@ app.use(
   }),
 ); // Crucial for your React frontend!
 
+
+
 app.use(express.json({ limit: "10kb" })); // Body parser
+
+
+
+// Ensure this is in your app.ts
+app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
 // app.use(ExpressMongoSanitize());
 

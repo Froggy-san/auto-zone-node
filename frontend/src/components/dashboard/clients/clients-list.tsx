@@ -12,7 +12,7 @@ interface ClientListProps {
   phone?: string;
   email?: string;
 }
-const ClientsList = async ({
+const ClientsList = ({
   pageNumber,
   name,
   email,

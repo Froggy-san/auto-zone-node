@@ -1,4 +1,4 @@
-"use client"
+
 import { PAGE_SIZE } from "@/lib/constants"
 import * as React from "react"
 import usePagination from "@mui/material/usePagination"

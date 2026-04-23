@@ -1,4 +1,4 @@
-"use client"
+
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
@@ -6,10 +6,6 @@ import { z } from "zod"
 import { Button } from "@/components/ui/button"
 
 import Spinner from "@/components/Spinner"
-import {
-  revalidateProductById,
-  revalidateProducts,
-} from "@/lib/actions/productsActions"
 
 import SuccessToastDescription, {
   ErorrToastDescription,
@@ -21,7 +17,7 @@ import DialogComponent from "@/components/dialog-component"
 import { ArrowBigLeft, ArrowBigRight } from "lucide-react"
 
 import { SUPABASE_URL } from "@/lib/constants"
-import { createProduct, editProdcut } from "@/lib/services/products-services"
+
 
 import {
   Progress,
@@ -48,6 +44,7 @@ import { useLocation, useNavigate, useSearchParams } from "react-router"
 import { toast } from "sonner"
 import { FieldGroup } from "../ui/field"
 import type { CarMaker } from "@/types/carMaker"
+import useCreateProduct from "@/features/products/useCreateProduct"
 
 interface ProductFormProps {
   categories: Category[]
@@ -73,6 +70,8 @@ const ProductForm: React.FC<ProductFormProps> = ({
   productToEdit,
   useParams = false,
 }) => {
+  
+  const { createProduct } = useCreateProduct()
   const carMaker = productToEdit?.carMaker
   const [searchParam] = useSearchParams()
   const edit = searchParam.get("edit") ?? ""
@@ -81,7 +80,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
     null
   )
 
-  const [deletedDetails, setDeletedDetails] = useState<number[]>([])
+  const [deletedDetails, setDeletedDetails] = useState<string[]>([])
   const [deletedMedia, setDeletedMedia] = useState<ProductImage[]>([])
   const [[step, direction], setStep] = useState([0, 1])
 
@@ -133,7 +132,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
     salePrice: productToEdit?.salePrice ?? 0,
     stock: productToEdit?.stock ?? 0,
 
-    isAvailable: productToEdit?.isAvailable ?? false,
+    isAvailable: productToEdit?.isAvailable ?? true,
 
     images: [],
 
@@ -165,7 +164,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
     for (let i = 0; i < firstStepFields.length; i++) {
       if (
         formErrors[firstStepFields[i]] ||
-        formValues[firstStepFields[i]] === 0
+        formValues[firstStepFields[i]] === ""
       ) {
         isFirstStepValid = false
         break
@@ -292,6 +291,46 @@ const ProductForm: React.FC<ProductFormProps> = ({
           file: img,
         }
       })
+      console.log("IMAGES TO UPLOAD:", imagesToUpload)
+      console.log("FORM VALUES:", {
+        name,
+        category,
+        productBrand,
+        productType,
+        description,
+        listPrice,
+        salePrice,
+        stock,
+        isAvailable,
+        carMaker,
+        carModel,
+        generations,
+        mainImageName,
+        moreDetails,
+      })
+
+      const formData = new FormData()
+ formData.append("name", name)
+      formData.append("category", category)
+ formData.append("productBrand", productBrand)
+  formData.append("productType", productType)
+       formData.append("description", description)
+  formData.append("listPrice", String(listPrice))
+  formData.append("salePrice", String(salePrice))
+  formData.append("stock", String(stock))
+  formData.append("isAvailable", String(isAvailable))
+  formData.append("carMaker", carMaker ?? "")
+  formData.append("carModel", carModel ?? "")
+  formData.append("generations", JSON.stringify(generations))
+  formData.append("moreDetails", JSON.stringify(moreDetails))
+   formData.append("isMainEdited", String(isMainEdited))
+    formData.append("mainImageName", mainImageName)
+      images.forEach((image) => { 
+        formData.append("productImages", image)
+      })
+  
+
+
       if (productToEdit) {
         // const imagesToUpload = images.map((image, i) => {
         //   const formData = new FormData();
@@ -312,49 +351,45 @@ const ProductForm: React.FC<ProductFormProps> = ({
         )
 
         const productToEditData = {
-          id: productToEdit.id,
+          id: productToEdit._id,
           name,
-          categoryId,
-          productBrandId,
-          productTypeId,
+          category,
+          productBrand,
+          productType,
           description,
           listPrice,
           salePrice,
           stock,
           isAvailable,
-          makerId: makerId ? makerId : null,
-          modelId: modelId ? modelId : null,
-          generationsArr: generationsArr.length
-            ? JSON.stringify(generationsArr)
-            : null,
+          carMaker: carMaker ?? null,
+          carModel: carModel ?? null,
+          generations: generations.length
+            ? generations                .map((genId) =>
+                  productToEdit.generations.find((gen) => gen._id === genId)
+                ) : [],
         }
 
         // Edit the product.
 
-        await editProdcut({
-          productToEdit: productToEditData,
-          imagesToUpload,
-          imagesToDelete: deletedMedia,
-          isMain: isMainEdited ? isMainImage : null,
-          prevIsMian: isMainChange,
-          isEqual,
-          deletedDetails,
-          moreDetails: !isMoreDetailEqual ? moreDetails : [],
-        })
-
-        await revalidateProductById(productToEdit.id)
-        // await revalidateProducts();
-        // const { error } = await editProductAction({
+        // await editProdcut({
         //   productToEdit: productToEditData,
         //   imagesToUpload,
         //   imagesToDelete: deletedMedia,
         //   isMain: isMainEdited ? isMainImage : null,
+        //   prevIsMian: isMainChange,
         //   isEqual,
-        // });
+        //   deletedDetails,
+        //   moreDetails: !isMoreDetailEqual ? moreDetails : [],
+        // })
+
+
         // if (error) throw new Error(error);
         handleClose()
         setDeletedMedia([])
       } else {
+
+        await createProduct(formData)
+    
         // const imagesToUpload = images.length
         //   ? images.map((image, i) => {
         //       const formData = new FormData();
@@ -369,24 +404,24 @@ const ProductForm: React.FC<ProductFormProps> = ({
         //     })
         //   : [];
 
-        const product = await createProduct({
-          name,
-          categoryId,
-          productTypeId,
-          productBrandId,
-          description,
-          listPrice,
-          salePrice,
-          stock,
-          isAvailable,
-          images: imagesToUpload,
-          moreDetails,
-          makerId,
-          modelId,
-          generationsArr,
-        })
+        // const product = await createProduct({
+        //   name,
+        //   categoryId,
+        //   productTypeId,
+        //   productBrandId,
+        //   description,
+        //   listPrice,
+        //   salePrice,
+        //   stock,
+        //   isAvailable,
+        //   images: imagesToUpload,
+        //   moreDetails,
+        //   makerId,
+        //   modelId,
+        //   generationsArr,
+        // })
 
-        await revalidateProducts()
+        // await revalidateProducts()
 
         // const { error } = await createProductAction({
         //   name,
@@ -579,12 +614,12 @@ const ProductForm: React.FC<ProductFormProps> = ({
           </FieldGroup>
         </form>
 
-        <DialogComponent.Footer className="bottom-0 z-50 border-t bg-background px-6 pt-2 pb-6 sm:px-14 sm:pt-4 sm:pb-8">
+        <DialogComponent.Footer className=" z-50 border-t bg-background px-6 pt-2 pb-6 sm:px-14 sm:pt-4 sm:pb-8">
           {/* bg-muted-foreground/20 dark:bg-accent */}
-          <div className="flex w-full items-center justify-between gap-4">
+          <div className="flex w-full    items-center justify-between gap-4">
             <div className="flex-1 rounded-md bg-muted-foreground/10 p-3 dark:bg-accent/20">
-              <Progress value={step} maxValue={maxNumOfSteps}>
-                <ProgressBarContainer className="flex-1 border border-secondary-foreground/20 dark:border-border">
+              <Progress  value={step} maxValue={maxNumOfSteps}>
+                <ProgressBarContainer className="flex-1    border border-secondary-foreground/20 dark:border-border">
                   <ProgressMeter />
                 </ProgressBarContainer>
               </Progress>
@@ -597,14 +632,14 @@ const ProductForm: React.FC<ProductFormProps> = ({
                 variant="secondary"
                 size="sm"
                 disabled={isLoading || step === 0}
-                className="w-full"
+                className="w-full sm:w-[unset]"
               >
                 Back
               </Button>
               <Button
                 size="sm"
                 disabled={isLoading || disabled}
-                className="w-full"
+                className="w-full sm:w-[unset]" 
                 onClick={() => {
                   if (step < maxNumOfSteps) {
                     handleNext(step + 1)

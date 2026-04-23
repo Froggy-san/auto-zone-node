@@ -1,3 +1,4 @@
+import type { Product } from "./product"
 import type { ProductType } from "./productTypes"
 export interface Category {
   _id: string
@@ -7,4 +8,10 @@ export interface Category {
   productTypes: ProductType[]
   createdAt: string
   updatedAt: string
+}
+
+
+
+export interface categoryResult  extends Omit<Category, "productTypes"> {
+  products: Product[]
 }

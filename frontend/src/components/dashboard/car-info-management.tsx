@@ -5,7 +5,7 @@ import { getAllCarMakersAction } from "@lib/actions/carMakerActions";
 import { getAllCarGenerationsAction } from "@lib/actions/carGenerationsActions";
 import CarInfoForm from "./car-info-form";
 
-const CarInfoManagement = async () => {
+const CarInfoManagement = () => {
   const [carModels, carMakers, carGenerations] = await Promise.all([
     getAllCarModelsAction(),
     getAllCarMakersAction(),

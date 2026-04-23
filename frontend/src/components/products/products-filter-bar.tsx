@@ -19,7 +19,7 @@ interface Props {
   carBrand?: string
   // count: number
 }
-const ProductsFilterBar: React.FC<Props> = async ({
+const ProductsFilterBar: React.FC<Props> =  ({
   category,
   productType,
   isAvailable,
@@ -36,7 +36,7 @@ const ProductsFilterBar: React.FC<Props> = async ({
 }) => {
   const { pagination } = useProducts()
   return (
-    <aside className={`3xl:w-[260px] sm:w-[210px] sm:border-r`}>
+    <aside className={`3xl:w-[260px] sm:w-[250px] sm:border-r`}>
       <ProductsFilterContent
         name={name}
         count={pagination?.totalCount || 0}

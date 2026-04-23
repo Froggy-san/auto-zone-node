@@ -6,7 +6,7 @@ import ErrorMessage from "@components/error-message";
 import PillList from "./pill-list";
 import { getAllProductTypesAction } from "@lib/actions/productTypeActions";
 
-const ProductTypes = async () => {
+const ProductTypes = () => {
   const { data, error } = await getAllProductTypesAction();
   return (
     <section className=" space-y-2">

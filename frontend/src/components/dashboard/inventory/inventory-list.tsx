@@ -17,7 +17,7 @@ interface ClientListProps {
   minTotalPrice?: string;
   maxTotalPrice?: string;
 }
-const InventoryList = async ({
+const InventoryList = ({
   pageNumber,
   name,
   shopName,

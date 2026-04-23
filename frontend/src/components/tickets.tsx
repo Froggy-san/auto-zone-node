@@ -20,7 +20,7 @@ interface Props {
   ticketCategories: TicketCategory[];
   ticketPriorities: TicketPriority[];
 }
-const Tickets = async ({
+const Tickets = ({
   ticketCategories,
   ticketPriorities,
   ticketStatuses,

@@ -16,6 +16,13 @@ class APIFeatures {
     queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
 
     this.filtersObj = JSON.parse(queryStr);
+    // 3. IMPROVEMENT: Make string filters case-insensitive (Regex)
+    // This allows searching 'bosch' to find 'Bosch'
+    Object.keys(this.filtersObj).forEach((key) => {
+      if (typeof this.filtersObj[key] === "string"  && this.filtersObj[key] !== "true" && this.filtersObj[key] !== "false") {
+        this.filtersObj[key] = { $regex: this.filtersObj[key], $options: "i" };
+      }
+    });    
   }
 
   filter() {

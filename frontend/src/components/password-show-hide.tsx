@@ -1,4 +1,3 @@
-"use client";
 import React, { SetStateAction, useCallback, useState } from "react";
 import { Control, FieldValues, Path } from "react-hook-form";
 import {

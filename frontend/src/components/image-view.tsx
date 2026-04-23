@@ -1,10 +1,11 @@
 import { useEffect } from "react";
-import { ClickAwayListener, Portal } from "@mui/base";
+
 
 import { motion, AnimatePresence } from "framer-motion";
 import { createPortal } from "react-dom";
 import { Button } from "./ui/button";
 import { X } from "lucide-react";
+import { ClickAwayListener, Portal } from "@mui/material";
 
 const ImageView = ({
   handleClose,

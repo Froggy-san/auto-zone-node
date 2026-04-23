@@ -118,26 +118,26 @@ const ProductsFilterContent: React.FC<ProdcutFilterContentProps> = ({
   const params = new URLSearchParams(searchParams)
   function handleChange(filter: string, name: string, initalValue?: string) {
     params.set("page", "1")
-    if (name === "makerId") {
-      params.delete("modelId")
-      params.delete("generationId")
+    if (name === "carMaker") {
+      params.delete("carMaker")
+      params.delete("generation")
     }
 
-    if (name === "modelId") params.delete("generationId")
-    if (name === "categoryId") params.delete("productTypeId")
+    if (name === "carModel") params.delete("generation")
+    if (name === "category") params.delete("productTypeI")
     if (!filter || filter === initalValue) {
       params.delete(`${name}`)
       params.set("page", "1")
       navigate(`${pathname}?${params.toString()}`, { replace: true })
     } else {
       /// Filters to be reset after changing the pick of a perant select component.
-      // if (name === "makerId") {
-      //   params.delete("modelId");
-      //   params.delete("generationId");
+      // if (name === "carMaker") {
+      //   params.delete("carModel");
+      //   params.delete("generation");
       // }
 
-      // if (name === "modelId") params.delete("generationId");
-      // if (name === "categoryId") params.delete("productTypeId");
+      // if (name === "carModel") params.delete("generation");
+      // if (name === "category") params.delete("productType");
       // params.set("page", "1");
       params.set(`${name}`, filter)
       navigate(`${pathname}?${params.toString()}`)
@@ -145,78 +145,43 @@ const ProductsFilterContent: React.FC<ProdcutFilterContentProps> = ({
     window.scrollTo(0, 0)
   }
 
-  useEffect(() => {
-    if (isFirstMount) return
-    params.set("page", "1")
-    if (selectedMaker !== undefined) {
-      // Car Maker.
-      if (selectedMaker) {
-        params.set("makerId", selectedMaker)
-        navigate(`${pathname}?${params.toString()}`)
-      } else {
-        params.delete("makerId")
-        navigate(`${pathname}?${params.toString()}`, { replace: true })
-      }
-    }
+useEffect(() => {
+  if (isFirstMount) return;
 
-    if (selectedModel !== undefined) {
-      // Car Model.
-      if (selectedModel) {
-        params.set("modelId", selectedModel)
-        navigate(`${pathname}?${params.toString()}`)
-      } else {
-        params.delete("modelId")
-        navigate(`${pathname}?${params.toString()}`, { replace: true })
-      }
-    }
+  // 1. Reset page to 1 whenever filters change
+  params.set("page", "1");
 
-    if (selectedGeneration !== undefined) {
-      if (selectedGeneration) {
-        params.set("generationId", selectedGeneration)
-        navigate(`${pathname}?${params.toString()}`)
-      } else {
-        params.delete("generationId")
-        navigate(`${pathname}?${params.toString()}`, { replace: true })
-      }
+  // 2. Define a helper to update params without navigating yet
+  const updateParam = (key: string, value: string | undefined) => {
+    if (value) {
+      params.set(key, value);
+    } else {
+      params.delete(key);
     }
+  };
 
-    if (selectedCategory !== undefined) {
-      if (selectedCategory) {
-        params.set("categoryId", selectedCategory)
-        navigate(`${pathname}?${params.toString()}`)
-      } else {
-        params.delete("categoryId")
-        navigate(`${pathname}?${params.toString()}`, { replace: true })
-      }
-    }
+  // 3. Process all filters
+  updateParam("carMaker", selectedMaker);
+  updateParam("carModel", selectedModel);
+  updateParam("generation", selectedGeneration);
+  updateParam("category", selectedCategory);
+  updateParam("productType", selectedProductType);
+  updateParam("productBrand", selectedProductBrand);
 
-    if (selectedProductType !== undefined) {
-      if (selectedProductType) {
-        params.set("productTypeId", selectedProductType)
-        navigate(`${pathname}?${params.toString()}`)
-      } else {
-        params.delete("productTypeId")
-        navigate(`${pathname}?${params.toString()}`, { replace: true })
-      }
-    }
+  // 4. Navigate ONCE with the final query string
+  navigate(`${pathname}?${params.toString()}`, { 
+    // Usually 'replace: true' is better for filters so you don't clog history
+    replace: true 
+  });
 
-    if (selectedProductBrand !== undefined) {
-      if (selectedProductBrand) {
-        params.set("productBrandId", selectedProductBrand)
-        navigate(`${pathname}?${params.toString()}`)
-      } else {
-        params.delete("productBrandId")
-        navigate(`${pathname}?${params.toString()}`, { replace: true })
-      }
-    }
-  }, [
-    selectedMaker,
-    selectedModel,
-    selectedGeneration,
-    selectedProductBrand,
-    selectedProductType,
-    selectedCategory,
-  ])
+}, [
+  selectedMaker,
+  selectedModel,
+  selectedGeneration,
+  selectedProductBrand,
+  selectedProductType,
+  selectedCategory,
+]);
   return (
     <>
       {isBigScreen && (
@@ -248,7 +213,7 @@ const ProductsFilterContent: React.FC<ProdcutFilterContentProps> = ({
             handleChange={handleChange}
           />
 
-          <div className="space-y-2">
+          <div className=" flex flex-col gap-2.5">
             <label>Categories</label>
             <ComboBox
               value={selectedCategory}
@@ -262,7 +227,7 @@ const ProductsFilterContent: React.FC<ProdcutFilterContentProps> = ({
               // setParam={handleChange}
             />
           </div>
-          <div className="space-y-2">
+          <div className=" flex flex-col gap-2.5">
             <label>Sub-Categories</label>
             <ComboBox
               disabled={
@@ -278,7 +243,7 @@ const ProductsFilterContent: React.FC<ProdcutFilterContentProps> = ({
             />
           </div>
 
-          <div className="space-y-2">
+          <div className=" flex flex-col gap-2.5">
             <label>Product brands</label>
             <ComboBox
               placeholder="Select Brand..."
@@ -330,7 +295,7 @@ const ProductsFilterContent: React.FC<ProdcutFilterContentProps> = ({
                 <ProdcutFilterInput name={name || ""} />
 
                 <div className="xs:flex-row flex flex-col items-center gap-3">
-                  <div className="w-full space-y-2">
+                  <div className="w-full  flex flex-col gap-2.5">
                     <label>Car Brand</label>
                     <CarBrandsCombobox
                       options={carMakers}
@@ -339,12 +304,12 @@ const ProductsFilterContent: React.FC<ProdcutFilterContentProps> = ({
                         setSelectedMaker(value ? value : undefined)
                         setSelectedModel(undefined)
                         setSelectedGeneration(undefined)
-                        // handleChange(value, "makerId", makerId);
+                        // handleChange(value, "carMaker", carMaker);
                       }}
                     />
                   </div>
 
-                  <div className="w-full space-y-2">
+                  <div className="w-full  flex flex-col gap-2.5">
                     <label>Car Model</label>
                     <ModelCombobox
                       disabled={!carModels || !carModels.length || !maker}
@@ -354,13 +319,13 @@ const ProductsFilterContent: React.FC<ProdcutFilterContentProps> = ({
                         setSelectedModel(value ? value : undefined)
                         setSelectedGeneration(undefined)
 
-                        // handleChange(value, "makerId", makerId);
+                        // handleChange(value, "carMaker", carMaker);
                       }}
                     />
                   </div>
                 </div>
                 <div className="xs:flex-row flex flex-col items-center gap-3">
-                  <div className="w-full space-y-2">
+                  <div className="w-full  flex flex-col gap-2.5">
                     <label>Car Generation</label>
                     <ComboBox
                       placeholder="Select selectedGeneration..."
@@ -396,7 +361,7 @@ const ProductsFilterContent: React.FC<ProdcutFilterContentProps> = ({
                       options={productTypes || []}
                     />
                   </div>
-                  <div className="w-full space-y-2">
+                  <div className="w-full  flex flex-col gap-2.5">
                     <label>Product brands</label>
                     <ComboBox
                       value={selectedProductBrand}
@@ -462,7 +427,7 @@ function AvailableSwitch({
   }
 
   return (
-    <div className={cn("flex items-center justify-between", className)}>
+    <div className={cn("flex items-center  overflow-hidden justify-between", className)}>
       <div className="flex items-center space-x-2">
         <Switch
           checked={available}
@@ -526,16 +491,16 @@ const CarFilter = ({
   handleChange,
 }: Props) => {
   // const carModels =
-  //   makerId && carMakers?.find((car) => car.id === makerId)?.carModels;
+  //   carMaker && carMakers?.find((car) => car.id === carMaker)?.carModels;
   // const carGenerations =
-  //   modelId &&
+  //   carModel &&
   //   carModels &&
-  //   carModels.find((selectedModel) => selectedModel.id === modelId)?.carGenerations;
+  //   carModels.find((selectedModel) => selectedModel.id === carModel)?.carGenerations;
 
   return (
     <section className={className}>
-      <div className="space-y-2">
-        <label>Car Brand</label>
+      <div className=" flex flex-col gap-2.5">
+        <label >Car Brand</label>
         <CarBrandsCombobox
           options={carMakers}
           value={maker ? maker : null}
@@ -543,12 +508,12 @@ const CarFilter = ({
             setSelectedMaker(value ? value : "")
             setSelectedModel("")
             setSelectedGeneration("")
-            // handleChange(value, "makerId", makerId);
+            // handleChange(value, "carMaker", carMaker);
           }}
         />
       </div>
 
-      <div className="space-y-2">
+      <div className=" flex flex-col gap-2.5">
         <label>Car Model</label>
         <ModelCombobox
           disabled={!carModels || !carModels.length || !maker}
@@ -557,11 +522,11 @@ const CarFilter = ({
           setValue={(value) => {
             setSelectedModel(value ? value : "")
             setSelectedGeneration("")
-            // handleChange(value, "modelId", modelId);
+            // handleChange(value, "carModel", carModel);
           }}
         />
       </div>
-      <div className="space-y-2">
+      <div className=" flex flex-col gap-2.5">
         <label>Car Generation</label>
         <ComboBox
           placeholder="Select selectedGeneration..."
@@ -569,7 +534,7 @@ const CarFilter = ({
           options={carGenerations || []}
           setValue={(value) => {
             setSelectedGeneration(value ? value : "")
-            // handleChange(value, "generationId", generationId);
+            // handleChange(value, "generation", generation);
           }}
           value={generation}
         />

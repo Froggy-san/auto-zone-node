@@ -6,7 +6,7 @@ import PillList from "./pill-list";
 import { getAllProductBrandsAction } from "@lib/actions/productBrandsActions";
 import ProductBrandForm from "../product-brand-form";
 
-const ProductBrands = async () => {
+const ProductBrands = () => {
   const { data, error } = await getAllProductBrandsAction();
   return (
     <section className="  space-y-2">

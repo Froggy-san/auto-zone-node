@@ -5,7 +5,7 @@ import { getProductToSellById } from "@lib/actions/product-sold-actions";
 import { getProductsAction } from "@lib/actions/productsActions";
 import { getServiceById } from "@lib/actions/serviceActions";
 
-const ProductSoldManagement = async ({
+const ProductSoldManagement = ({
   editSold,
   addSoldId,
 }: {

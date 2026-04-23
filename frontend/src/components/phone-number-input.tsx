@@ -1,4 +1,3 @@
-"use client";
 import React, { useState, useRef } from "react";
 
 // Helper function to format the phone number

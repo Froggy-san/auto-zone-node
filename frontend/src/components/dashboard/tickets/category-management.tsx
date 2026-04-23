@@ -4,7 +4,7 @@ import { createClient } from "@utils/supabase/server";
 import React from "react";
 import Categories from "./categories";
 
-const CategoryManagement = async () => {
+const CategoryManagement = () => {
   const supabase = await createClient();
   const { ticketCategories, error } = await getTicketCategoriesAction(supabase);
 

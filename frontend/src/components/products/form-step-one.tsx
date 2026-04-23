@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button"
 import { Check, ChevronsUpDown, Trash2 } from "lucide-react"
 import { Switch } from "@/components/ui/switch"
 import CarBrandsCombobox from "@/components/car-brands-combobox"
-import useCarBrands from "@/lib/queries/useCarBrands"
+
 import { useEffect, useMemo, useState } from "react"
 import { ModelCombobox } from "@/components/model-combobox"
 import GenerationsTagInput from "@/components/generations-tag-input"

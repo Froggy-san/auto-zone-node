@@ -1,4 +1,3 @@
-"use client";
 
 import { CommandInput } from "@components/search-command/CommandInput";
 import { CommandItem } from "@components/search-command/CommandItem";

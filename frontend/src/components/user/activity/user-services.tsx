@@ -22,7 +22,7 @@ interface Props {
   client: ClientWithPhoneNumbers;
   user: User;
 }
-const UserServices = async ({
+const UserServices = ({
   pageNumber,
   dateFrom,
   dateTo,

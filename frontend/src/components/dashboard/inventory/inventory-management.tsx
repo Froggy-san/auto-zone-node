@@ -4,7 +4,7 @@ import { getProductsAction } from "@lib/actions/productsActions";
 import { getRestockingBillsAction } from "@lib/actions/restockingBillActions";
 import { getProductBoughtByIdAction } from "@lib/actions/productBoughtActions";
 
-const InventoryManagement = async ({
+const InventoryManagement = ({
   edit,
   reStockingBillId,
 }: {

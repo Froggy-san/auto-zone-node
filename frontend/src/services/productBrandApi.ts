@@ -27,7 +27,7 @@ export async function getProductBrands(filters?: Filters): Promise<{
     }
   })
 
-  const query = `${BASE_URL}/productBrands?${searchParams.toString()}`
+  const query = `${BASE_URL}/api/v1/productBrands?${searchParams.toString()}`
 
   const response = await fetch(query, {
     method: "GET",
@@ -50,7 +50,7 @@ export async function getProductBrands(filters?: Filters): Promise<{
 export async function createProductBrand(data: {
   name: string
 }): Promise<ProductBrand> {
-  const res = await fetch(`${BASE_URL}/productBrands`, {
+  const res = await fetch(`${BASE_URL}/api/v1/productBrands`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -73,7 +73,7 @@ export async function updateProductBrand(
   id: string,
   data: { name: string }
 ): Promise<ProductBrand> {
-  const res = await fetch(`${BASE_URL}/productBrands/${id}`, {
+  const res = await fetch(`${BASE_URL}/api/v1/productBrands/${id}`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
@@ -93,7 +93,7 @@ export async function updateProductBrand(
 }
 
 export async function getProductBrandById(id: string): Promise<ProductBrand> {
-  const res = await fetch(`${BASE_URL}/productBrands/${id}`, {
+  const res = await fetch(`${BASE_URL}/api/v1/productBrands/${id}`, {
     credentials: "include",
   })
 
@@ -108,7 +108,7 @@ export async function getProductBrandById(id: string): Promise<ProductBrand> {
 }
 
 export async function deleteProductBrand(id: string): Promise<void> {
-  const res = await fetch(`${BASE_URL}/productBrands/${id}`, {
+  const res = await fetch(`${BASE_URL}/api/v1/productBrands/${id}`, {
     method: "DELETE",
     credentials: "include",
   })

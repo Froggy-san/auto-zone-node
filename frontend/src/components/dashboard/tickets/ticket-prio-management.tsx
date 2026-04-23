@@ -6,7 +6,7 @@ import Categories from "./categories";
 import { getTickettPrioritiesAction } from "@lib/actions/ticket-priority-action";
 import Priorities from "./priorities";
 
-const PrioManagement = async () => {
+const PrioManagement = () => {
   const supabase = await createClient();
   const { ticketPriorities, error } = await getTickettPrioritiesAction(
     supabase

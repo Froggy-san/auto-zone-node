@@ -1,7 +1,7 @@
 import { getRestockingBillsAction } from "@lib/actions/restockingBillActions";
 import React from "react";
 
-const RestockingList = async () => {
+const RestockingList = () => {
   const { data, error } = await getRestockingBillsAction({});
 
   if (error) return <p>{error}</p>;

@@ -1,4 +1,3 @@
-"use client";
 
 import useDebounce from "@hooks/use-debounce";
 import { MAKER_PAGE_SIZE } from "@lib/constants";

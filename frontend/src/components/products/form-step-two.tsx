@@ -4,7 +4,7 @@ import { Controller, useFieldArray, type Control } from "react-hook-form"
 import { AnimatePresence, motion, useAnimate, usePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
-import { Cross2Icon } from "@/radix-ui/react-icons"
+
 import {
   Field,
   FieldDescription,
@@ -19,12 +19,13 @@ import useEmblaCarousel from "embla-carousel-react"
 import { cn } from "@/lib/utils"
 import { ClickAwayListener } from "@mui/material"
 import { ProFormSlideVariants, ProFormTransition } from "@/lib/constants"
+import { Cross2Icon } from "@radix-ui/react-icons"
 
 interface StepTwoProps {
   control: Control<z.infer<typeof ProductsSchema>>
   moreDetails: z.infer<typeof AdditionalDetailsSchema>[]
   currStep: number[]
-  setDeletedDetails: React.Dispatch<React.SetStateAction<number[]>>
+  setDeletedDetails: React.Dispatch<React.SetStateAction<string[]>>
 }
 
 function StepTwo({
@@ -140,7 +141,7 @@ function StepTwo({
           size="sm"
           type="button"
           onClick={() => {
-            append({
+            append({  
               title: "",
               description: "",
               table: [],
@@ -166,7 +167,7 @@ function MoreDetailsItem({
   index: number
   control: Control<z.infer<typeof ProductsSchema>>
   handleRemoveItem: (index: number) => void
-  moreDetailsArr: z.infer<typeof AddetionalDetailsSchema>[]
+  moreDetailsArr: z.infer<typeof AdditionalDetailsSchema>[]
 }) {
   const {
     fields,
@@ -307,7 +308,7 @@ interface RowProps {
   moreDetailsIndex: number
   index: number
   removeRow: () => void
-  moreDetailsArr: z.infer<typeof AddetionalDetailsSchema>[]
+  moreDetailsArr: z.infer<typeof AdditionalDetailsSchema>[]
 }
 
 function Row({

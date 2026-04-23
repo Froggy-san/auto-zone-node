@@ -9,7 +9,7 @@ const imageUrl = [
   "https://jldptczaxybijbhlcbjj.supabase.co/storage/v1/object/public/projects/0.365694995834676-450801928_122185965308031351_3973663162623189835_n.jpg",
   "https://jldptczaxybijbhlcbjj.supabase.co/storage/v1/object/public/projects/0.4160722142697284-FB_IMG_1715907147440.jpg",
 ]
-
+const API_URL = import.meta.env.VITE_API_URL
 const ProductImages = ({
   imageUrls,
   // productId,
@@ -72,7 +72,7 @@ const ProductImages = ({
               controls={false}
               playsInline
               key={i}
-              src={url}
+            src={`${API_URL}${url}`}
               className={cn(
                 "absolute inset-0 h-full w-full object-cover transition-all",
                 {
@@ -81,12 +81,13 @@ const ProductImages = ({
                 }
               )}
             >
-              <source src={url} />
+              <source src={`${API_URL}${url}`}/>
             </video>
           ) : (
             <img
               loading="lazy"
-              src={url}
+              // crossOrigin="use-credentials"
+              src={`${API_URL}${url}`}
               key={i}
               className={cn(
                 "absolute inset-0 h-full w-full object-cover transition-all",

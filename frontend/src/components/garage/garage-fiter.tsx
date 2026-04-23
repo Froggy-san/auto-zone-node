@@ -1,4 +1,3 @@
-"use client";
 import { ComboBox } from "@components/combo-box";
 
 import {

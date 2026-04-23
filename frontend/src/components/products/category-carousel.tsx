@@ -1,26 +1,22 @@
-"use client";
-import React, {
-  ReactNode,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import { EmblaOptionsType } from "embla-carousel";
+
+import  type { EmblaOptionsType } from "embla-carousel";
 
 import useEmblaCarousel from "embla-carousel-react";
-import { CategoryProps } from "@lib/types";
+
 import { setWith } from "lodash";
-import { Badge } from "@components/ui/badge";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { cn } from "@lib/utils";
-import { Button } from "@components/ui/button";
+import { Badge } from "@/components/ui/badge";
+
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { usePrevNextButtons } from "@hooks/use-prev-next-buttons";
+import { usePrevNextButtons } from "@/hooks/use-prev-next-buttons";
+import type { Category } from "@/types";
+import { useLocation, useNavigate } from "react-router";
+import { useSearchParams } from "react-router";
+import { useEffect, useMemo } from "react";
 
 type PropType = {
-  categories: CategoryProps[];
+  categories: Category[];
   slides?: number[];
   options?: EmblaOptionsType;
   asLinks?: boolean;
@@ -30,11 +26,11 @@ const CategoryCarousel: React.FC<PropType> = (props) => {
   const { slides, options, categories, asLinks = false } = props;
   const [emblaRef, emblaApi] = useEmblaCarousel(options);
 
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const router = useRouter();
+  const pathname = useLocation().pathname;
+  const [searchParams] = useSearchParams();
+  const naviagte = useNavigate();
   const params = new URLSearchParams(searchParams);
-  const currCategory = searchParams.get("categoryId") ?? "";
+  const currCategory = searchParams.get("category") ?? "";
 
   const {
     prevBtnDisabled,
@@ -43,22 +39,22 @@ const CategoryCarousel: React.FC<PropType> = (props) => {
     onNextButtonClick,
   } = usePrevNextButtons(emblaApi);
 
-  function handleCategoryClick(category: CategoryProps) {
-    if (Number(currCategory) === category.id) {
-      params.delete("categoryId");
+  function handleCategoryClick(category: Category) {
+    if (currCategory === category._id) {
+      params.delete("category");
     } else {
       params.set("page", "1");
-      params.set("categoryId", String(category.id));
+      params.set("category", String(category._id));
     }
-    router.push(`${pathname}?${params.toString()}`, { scroll: false });
+    naviagte(`${pathname}?${params.toString()}`);
   }
 
-  function handleNavTo(category: CategoryProps) {
-    router.push(`/products?categoryId=${category.id}`, { scroll: false });
+  function handleNavTo(category: Category) {
+    naviagte(`/products?category=${category._id}`);
   }
 
   const selectedIndex = useMemo(() => {
-    return categories.findIndex((item) => item.id === Number(currCategory));
+    return categories.findIndex((item) => item._id === currCategory);
   }, [categories, currCategory]);
 
   // Makes sure that the selected tab is displayed on the screen.
@@ -124,7 +120,7 @@ const CategoryCarousel: React.FC<PropType> = (props) => {
                     "select-none px-2 py-1  text-xs  whitespace-nowrap  font-bold rounded-[.5rem] bg-secondary hover:bg-muted-foreground/20   dark:bg-card dark:hover:bg-accent  transition-colors duration-200",
                     {
                       "bg-primary dark:bg-primary dark:hover:bg-primary/85  text-primary-foreground hover:bg-primary":
-                        Number(currCategory) === category.id,
+                        currCategory === category._id,
                     }
                   )}
                 >

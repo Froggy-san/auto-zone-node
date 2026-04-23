@@ -1,4 +1,3 @@
-"use client";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { CategoryProps, ProductType, ProductTypeSchema } from "@lib/types";

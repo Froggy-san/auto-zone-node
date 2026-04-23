@@ -1,4 +1,3 @@
-"use client";
 import { OrderStatusSchema, PaymentStatusSchema } from "@lib/types";
 import { cn } from "@lib/utils";
 import { BsExclamationDiamond } from "react-icons/bs";

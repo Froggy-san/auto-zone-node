@@ -1,5 +1,5 @@
-import { cn } from "@lib/utils";
-import React, { createContext, CSSProperties, useContext } from "react";
+import { cn } from "@/lib/utils";
+import React, { createContext,  type CSSProperties, useContext } from "react";
 
 interface ContextProps {
   value: number;

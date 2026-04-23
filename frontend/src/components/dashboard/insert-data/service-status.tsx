@@ -9,7 +9,7 @@ const StatusBadge = dynamic(() => import("../status-badge"), {
   loading: () => <Spinner className="  w-fit h-fit" size={12} />,
   ssr: false,
 });
-const ServiceStatus = async () => {
+const ServiceStatus = () => {
   const { data, error } = await getServiceStatusAction();
 
   if (error || !data)

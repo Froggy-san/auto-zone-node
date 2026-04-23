@@ -1,4 +1,3 @@
-"use client";
 import React, { SetStateAction, useEffect } from "react";
 import {
   Dialog,

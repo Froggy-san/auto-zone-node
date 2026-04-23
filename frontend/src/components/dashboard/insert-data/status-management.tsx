@@ -1,4 +1,3 @@
-"use client";
 import { cn } from "@lib/utils";
 import React, { useState } from "react";
 import StatusFormDialog from "./status-form-dialog";
