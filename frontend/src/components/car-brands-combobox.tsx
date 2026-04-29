@@ -57,7 +57,7 @@ const CarBrandsCombobox = React.forwardRef<HTMLButtonElement, Props>(
             role="combobox"
             aria-expanded={open}
             className={cn(
-              "w-full  h-fit min-h-9  justify-between select-none",
+              "h-fit min-h-9 w-full justify-between select-none",
               className
             )}
           >
@@ -66,11 +66,11 @@ const CarBrandsCombobox = React.forwardRef<HTMLButtonElement, Props>(
                 {selected.logo ? (
                   <img
                     src={selected.logo}
-                    className="3xl:max-w-14 3xl:h-11 h-9 max-w-10 object-contain"
+                    className="h-9 max-w-10 object-contain 3xl:h-11 3xl:max-w-14"
                     alt="Car image"
                   />
                 ) : null}
-                <span className="3xl:text-lg text-wrap break-all">
+                <span className="text-wrap break-all 3xl:text-lg">
                   {" "}
                   {selected.name}
                 </span>
@@ -92,10 +92,12 @@ const CarBrandsCombobox = React.forwardRef<HTMLButtonElement, Props>(
             <CommandList>
               <CommandEmpty>No option found.</CommandEmpty>
               <CommandGroup>
-                {options?.map((option) => {
+                {options?.map((option, i) => {
+                  console.log(option._id, "DDDDDDDD")
                   return (
                     <CommandItem
-                      key={option._id}
+                      key={`${option._id}-${i}`}
+                      value={option._id}
                       onSelect={() => {
                         setValue(option._id === value ? "" : option._id)
                         setOpen(false)
@@ -112,7 +114,7 @@ const CarBrandsCombobox = React.forwardRef<HTMLButtonElement, Props>(
                         {option.logo ? (
                           <img
                             src={option.logo}
-                            className="3xl:max-w-14 3xl:h-14 h-9 max-w-10 object-contain"
+                            className="h-9 max-w-10 object-contain 3xl:h-14 3xl:max-w-14"
                             alt="Car image"
                           />
                         ) : null}{" "}

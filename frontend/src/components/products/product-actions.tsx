@@ -21,7 +21,6 @@ import DeleteProductDialog from "./delete-product-dialog"
 import { Link } from "react-router"
 
 export function ProdcutAction({
-  imagesToDelete,
   productId,
   currPage,
   pageSize,
@@ -91,7 +90,6 @@ export function ProdcutAction({
         setIsLoading={setIsLoading}
         open={open}
         setOpen={setOpen}
-        imagesToDelete={imagesToDelete}
         productId={productId}
       />
     </div>

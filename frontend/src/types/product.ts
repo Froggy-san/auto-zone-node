@@ -39,7 +39,8 @@ export interface CarModel {
   notes: string
   image: string
   carMaker: CarMaker
-  carGenerations: CarGeneration[]
+  carGeneration: string
+  generations?: CarGeneration[]
   createdAt: string
   updatedAt: string
 }
@@ -89,4 +90,8 @@ export type Product = Omit<
   productBrand: string
   carMaker: string
   carModel: string
+}
+export interface CartItem extends ProductWithDetails {
+  quantity: number
+  totalPrice: number
 }

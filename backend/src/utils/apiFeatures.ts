@@ -1,3 +1,5 @@
+import { processReqQuery } from "./helper";
+
 class APIFeatures {
   public queryString;
   public query;
@@ -6,25 +8,55 @@ class APIFeatures {
     this.query = query;
     this.queryString = queryString;
 
-    const queryObj = { ...queryString };
+    //! the fieldsToPreventRegex are the fields you want the function to avoid putting the regex filter on like the (_id,category,ext).
+    this.filtersObj = processReqQuery({
+      query: queryString,
+      excludedFields: ["page", "sort", "limit", "fields"],
+      fieldsToPreventRegex: [
+        "category",
+        "productType",
+        "productBrand",
+        "carMaker",
+        "carModel",
+        "_id",
+      ],
+    });
 
-    const excludedFields = ["page", "sort", "limit", "fields"];
-    excludedFields.forEach((el) => delete queryObj[el]);
+    // const queryObj = { ...queryString };
 
-    // 2. Advanced Filtering (gte, gt, etc.)
-    let queryStr = JSON.stringify(queryObj);
-    queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
+    // const excludedFields = ["page", "sort", "limit", "fields"];
+    // excludedFields.forEach((el) => delete queryObj[el]);
 
-    this.filtersObj = JSON.parse(queryStr);
-    // 3. IMPROVEMENT: Make string filters case-insensitive (Regex)
-    // This allows searching 'bosch' to find 'Bosch'
-    Object.keys(this.filtersObj).forEach((key) => {
-      if (typeof this.filtersObj[key] === "string"  && this.filtersObj[key] !== "true" && this.filtersObj[key] !== "false") {
-        this.filtersObj[key] = { $regex: this.filtersObj[key], $options: "i" };
-      }
-    });    
+    // // 2. Advanced Filtering (gte, gt, etc.)
+    // let queryStr = JSON.stringify(queryObj);
+    // queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
+
+    // this.filtersObj = JSON.parse(queryStr);
+    // // 3. IMPROVEMENT: Make string filters case-insensitive (Regex)
+    // // This allows searching 'bosch' to find 'Bosch'
+    // Object.keys(this.filtersObj).forEach((key) => {
+    //   const value = this.filtersObj[key];
+
+    //   // 1. Define keys that should NEVER use regex (your MongoDB IDs)
+    //   const exactMatchKeys = [
+    //     "category",
+    //     "productType",
+    //     "productBrand",
+    //     "carMaker",
+    //     "carModel",
+    //     "_id",
+    //   ];
+
+    //   if (
+    //     typeof value === "string" &&
+    //     !exactMatchKeys.includes(key) && // Skip IDs
+    //     value !== "true" &&
+    //     value !== "false"
+    //   ) {
+    //     this.filtersObj[key] = { $regex: value, $options: "i" };
+    //   }
+    // });
   }
-
   filter() {
     this.query = this.query.find(this.filtersObj);
     return this;

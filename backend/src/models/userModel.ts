@@ -58,7 +58,11 @@ export const clientSchema = new Schema<IUser>(
     },
     deletedAt: Date, // Match JS naming convention (deletedAt vs deleted_at)
   },
-  { timestamps: true },
+  {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  },
 );
 
 export const Client = model<IUser>("users", clientSchema);

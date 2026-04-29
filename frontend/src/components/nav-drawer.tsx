@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from "react"
 import {
   Drawer,
   DrawerContent,
@@ -7,8 +7,8 @@ import {
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
-} from "@/components/ui/drawer";
-import { Button } from "./ui/button";
+} from "@/components/ui/drawer"
+import { Button } from "./ui/button"
 import {
   AppWindow,
   Barcode,
@@ -21,143 +21,145 @@ import {
   Package,
   PersonStanding,
   Ticket,
-} from "lucide-react";
-import Link from "next/link";
-import { GiMechanicGarage, GiTowTruck } from "react-icons/gi";
-import { MdOutlineCarRepair } from "react-icons/md";
-import { logoutUser } from "@lib/actions/authActions";
-import UserUi from "./user-ui";
-import useCurrUser from "@lib/queries/useCurrUser";
-import Spinner from "./Spinner";
-import { TbMessageReport } from "react-icons/tb";
+} from "lucide-react"
+
+import { GiMechanicGarage, GiTowTruck } from "react-icons/gi"
+import { MdOutlineCarRepair } from "react-icons/md"
+
+// import UserUi from "./user-ui";
+// import useCurrUser from "@/lib/queries/useCurrUser";
+import Spinner from "./Spinner"
+import { TbMessageReport } from "react-icons/tb"
+import { Link } from "react-router"
 const NavDrawer = () => {
-  const [open, setOpen] = useState(false);
-  const { user, isLoading } = useCurrUser();
+  const [open, setOpen] = useState(false)
+  // const { user, isLoading } = useCurrUser();
   const userBtns = (
     <>
-      <div className=" h-[1px] w-[90%] bg-muted-foreground/55 my-3 mx-auto" />
+      <div className="mx-auto my-3 h-[1px] w-[90%] bg-muted-foreground/55" />
       <Button
         asChild
-        className=" justify-start gap-1"
+        className="justify-start gap-1"
         variant="ghost"
         size="sm"
         onClick={() => setOpen(false)}
       >
-        <Link href={`/user/${user?.id}`}>
-          <AppWindow className=" w-4 h-4" /> Your Activity
+        <Link to={`/user/`}>
+          <AppWindow className="h-4 w-4" /> Your Activity
         </Link>
       </Button>
       <Button
         asChild
-        className=" justify-start gap-1"
+        className="justify-start gap-1"
         variant="ghost"
         size="sm"
         onClick={() => setOpen(false)}
       >
-        <Link href={`/user/${user?.id}/settings`}>
-          <PersonStanding className=" w-4 h-4" /> Personal details
+        <Link to={`/user//settings`}>
+          <PersonStanding className="h-4 w-4" /> Personal details
         </Link>
       </Button>
       <Button
         asChild
-        className=" justify-start gap-1"
+        className="justify-start gap-1"
         variant="ghost"
         size="sm"
         onClick={() => setOpen(false)}
       >
-        <Link href={`/user/${user?.id}/complaints`}>
-          <TbMessageReport className=" w-4 h-4" /> Your Complaints
+        <Link to={`/user//complaints`}>
+          <TbMessageReport className="h-4 w-4" /> Your Complaints
         </Link>
       </Button>
     </>
-  );
-  const isAdmin = user?.user_metadata.role.toLowerCase() === "admin";
+  )
+  const isAdmin = true
+  //  user?.user_metadata.role.toLowerCase() === "admin";
   const adminBtn = isAdmin ? (
     <>
       <Button
         asChild
-        className=" justify-start gap-1"
+        className="justify-start gap-1"
         variant="ghost"
         size="sm"
         onClick={() => setOpen(false)}
       >
-        <Link href="/garage">
-          <GiMechanicGarage className=" w-5 h-5" /> Garage
+        <Link to="/garage">
+          <GiMechanicGarage className="h-5 w-5" /> Garage
         </Link>
       </Button>
-      <div className=" relative group z-10">
+      <div className="group relative z-10">
         <Button
           asChild
-          className="  justify-start w-full  "
+          className="w-full justify-start"
           variant="ghost"
           size="sm"
           onClick={() => setOpen(false)}
         >
-          <Link href="/dashboard" className=" gap-1" prefetch={false}>
-            <LayoutDashboard className=" w-4 h-4" /> Dashboard
+          <Link to="/dashboard" className="gap-1">
+            <LayoutDashboard className="h-4 w-4" /> Dashboard
           </Link>
         </Button>
 
-        <div className=" sm:absolute sm:invisible sm:opacity-0 sm:-right-20 bg-background sm:top-6 sm:rounded-lg  sm:border  pl-5 sm:shadow-md  sm:group-hover:visible  sm:group-hover:top-2 sm:group-hover:opacity-100 sm:transition-all sm:w-40 sm:p-1">
+        <div className="bg-background pl-5 sm:invisible sm:absolute sm:top-6 sm:-right-20 sm:w-40 sm:rounded-lg sm:border sm:p-1 sm:opacity-0 sm:shadow-md sm:transition-all sm:group-hover:visible sm:group-hover:top-2 sm:group-hover:opacity-100">
           <Button
             asChild
-            className=" justify-start gap-1  z-50 w-full"
+            className="z-50 w-full justify-start gap-1"
             size="sm"
             variant="ghost"
             onClick={() => setOpen(false)}
           >
-            <Link href="/dashboard/inventory" prefetch={false}>
+            <Link to="/dashboard/inventory">
               {" "}
-              <Package className=" h-4 w-4" /> Inventory
+              <Package className="h-4 w-4" /> Inventory
             </Link>
           </Button>
 
           <Button
             asChild
-            className=" justify-start  z-50 w-full gap-1"
+            className="z-50 w-full justify-start gap-1"
             size="sm"
             variant="ghost"
             onClick={() => setOpen(false)}
           >
-            <Link href="/dashboard/customers" prefetch={false}>
-              <PersonStanding className=" w-4 h-4" /> Clients
+            <Link to="/dashboard/customers">
+              <PersonStanding className="h-4 w-4" /> Clients
             </Link>
           </Button>
 
           <Button
             asChild
-            className=" justify-start  z-50 w-full gap-1"
+            className="z-50 w-full justify-start gap-1"
             size="sm"
             variant="ghost"
             onClick={() => setOpen(false)}
           >
-            <Link href="/dashboard/cars-data" prefetch={false}>
-              <Car className=" w-4 h-4" /> Cars Data
+            <Link to="/dashboard/cars-data">
+              <Car className="h-4 w-4" /> Cars Data
             </Link>
           </Button>
 
           <Button
             asChild
-            className=" justify-start  z-50 w-full gap-1"
+            className="z-50 w-full justify-start gap-1"
             size="sm"
             variant="ghost"
             onClick={() => setOpen(false)}
           >
-            <Link href="/dashboard/insert-data">
-              <Grid2x2Plus className=" w-4 h-4" />
+            <Link to="/dashboard/insert-data">
+              <Grid2x2Plus className="h-4 w-4" />
               Products Data
             </Link>
           </Button>
 
           <Button
             asChild
-            className=" justify-start  z-50 w-full gap-1"
+            className="z-50 w-full justify-start gap-1"
             size="sm"
             variant="ghost"
             onClick={() => setOpen(false)}
           >
-            <Link href="/dashboard/tickets">
-              <Ticket className=" w-4 h-4" />
+            <Link to="/dashboard/tickets">
+              <Ticket className="h-4 w-4" />
               Tickets
             </Link>
           </Button>
@@ -167,71 +169,71 @@ const NavDrawer = () => {
     </>
   ) : (
     userBtns
-  );
+  )
   return (
     <Drawer direction="left" open={open} onOpenChange={setOpen}>
-      <DrawerTrigger className=" rounded-full" asChild>
+      <DrawerTrigger className="rounded-full" asChild>
         <Button className="rounded-full" size="icon" variant="outline">
           <ListFilter size={20} />
         </Button>
       </DrawerTrigger>
-      <DrawerContent className=" h-full   w-[250px] ">
-        <DrawerHeader className=" hidden">
+      <DrawerContent className="h-full w-[250px]">
+        <DrawerHeader className="hidden">
           <DrawerTitle>Are you absolutely sure?</DrawerTitle>
           <DrawerDescription>This action cannot be undone.</DrawerDescription>
         </DrawerHeader>
-        <div className="   p-4 flex flex-col justify-between h-full">
-          <div className=" flex flex-col gap-3 justify-start">
+        <div className="flex h-full flex-col justify-between p-4">
+          <div className="flex flex-col justify-start gap-3">
             <Button
               asChild
-              className=" justify-start gap-1"
+              className="justify-start gap-1"
               variant="ghost"
               size="sm"
               onClick={() => setOpen(false)}
             >
-              <Link href="/">
+              <Link to="/">
                 {" "}
-                <House className=" w-4 h-4" />
+                <House className="h-4 w-4" />
                 Home
               </Link>
             </Button>
             <Button
               asChild
-              className=" justify-start gap-1"
+              className="justify-start gap-1"
               variant="ghost"
               size="sm"
               onClick={() => setOpen(false)}
             >
-              <Link href="/products">
+              <Link to="/products">
                 {" "}
-                <Barcode className=" w-4 h-4" />
+                <Barcode className="h-4 w-4" />
                 Products
               </Link>
             </Button>
-            {isLoading ? (
+            {/* {isLoading ? (
               <Spinner className=" static w-7 h-7 mx-auto" />
-            ) : !user ? null : (
-              adminBtn
-            )}
+            ) : !user ? null : ( */}
+            {adminBtn}
+            {/* )} */}
           </div>
 
           {/* <UserUi showName /> */}
           <Button
-            className=" justify-start    z-50  w-full gap-1"
+            className="z-50 w-full justify-start gap-1"
             size="sm"
             variant="ghost"
             onClick={async () => {
-              setOpen(false);
-              await logoutUser();
+              setOpen(false)
+              // await logoutUser()
             }}
           >
-            <LogOut className=" w-4 h-4" />
+            <LogOut className="h-4 w-4" />
             Log out
           </Button>
         </div>
       </DrawerContent>
     </Drawer>
-  );
-};
+  )
+}
 
-export default NavDrawer;
+export default NavDrawer

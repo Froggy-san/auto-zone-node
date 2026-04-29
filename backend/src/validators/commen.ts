@@ -9,7 +9,7 @@ export const objectIdSchema = z
   });
 
 export const paramIdSchema = z.object({
-  params: objectIdSchema,
+  params: z.object({ id: objectIdSchema }),
 });
 
 export const objectIdArraySchema = z.array(objectIdSchema).optional();

@@ -55,7 +55,12 @@ export const createCarMaker = catchAsync(
   },
 );
 
-export const getCarMakers = getAll(CarMaker);
+export const getCarMakers = getAll(CarMaker, {
+  path: "carModels",
+  populate: {
+    path: "generations",
+  },
+});
 
 export const getCarMaker = getOne(CarMaker);
 export const updateCarMaker = catchAsync(

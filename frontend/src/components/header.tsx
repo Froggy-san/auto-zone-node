@@ -1,5 +1,5 @@
 import React from "react"
-import Logo from "@../public/autozone-logo.svg"
+// import Logo from "@../public/autozone-logo.svg"
 
 // import UserUi from "@components/user-ui";
 import NavDrawer from "./nav-drawer"
@@ -21,14 +21,14 @@ const Header = ({
         "relative flex items-center justify-between gap-3 px-2 py-4 sm:px-6",
         className,
         {
-          "mid:mb-0 mb-12": showSearch,
+          "mb-12 mid:mb-0": showSearch,
         }
       )}
     >
       <div className="flex items-center gap-2">
         <NavDrawer />
         <img
-          src={Logo}
+          src={"../public/autozone-logo.svg"}
           alt="logo"
           className="w-[120px] select-none sm:w-[200px]"
         />

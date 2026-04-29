@@ -9,7 +9,7 @@ interface Filters {
   priceTo?: string
   carBrand?: string
   carModel?: string
-  carGeneration?: string
+  generations?: string
   category?: string
   subCategory?: string
   productBrand?: string
@@ -43,7 +43,7 @@ export default function useProducts() {
     priceTo: getParam("priceTo"),
     carBrand: getParam("carBrand"),
     carModel: getParam("carModel"),
-    carGeneration: getParam("carGeneration"),
+    generations: getParam("generations"),
     category: getParam("category"),
     subCategory: getParam("subCategory"),
     productBrand: getParam("productBrand"),

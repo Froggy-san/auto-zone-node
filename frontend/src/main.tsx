@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/components/theme-provider.tsx"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
 import { Toaster } from "sonner"
+import StoreProvider from "./lib/providers/store-provider.tsx"
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -19,7 +20,9 @@ createRoot(document.getElementById("root")!).render(
     <QueryClientProvider client={queryClient}>
       <ReactQueryDevtools initialIsOpen={false} />
       <ThemeProvider>
-        <App />
+        <StoreProvider>
+          <App />
+        </StoreProvider>
         <Toaster />
       </ThemeProvider>
     </QueryClientProvider>

@@ -25,6 +25,8 @@ import ProductManagement from "@/components/products-management"
 import { getParam } from "@/lib/getParam"
 import useCarMakers from "@/features/carMakers/useCarMakers"
 import Footer from "@/components/home/footer"
+import { useEffect, useRef } from "react"
+import Header from "@/components/header"
 
 // Define the type for searchParam
 interface SearchParams {
@@ -40,7 +42,7 @@ interface SearchParams {
 
 const Page = () => {
   const [searchParams] = useSearchParams()
-
+  const productsSectionRef = useRef<HTMLDivElement | null>(null)
   const name = getParam(searchParams, "name", "")
   const pageNumber = getParam(searchParams, "page", "1")
   const limit = getParam(searchParams, "limit", "20")
@@ -48,22 +50,27 @@ const Page = () => {
   const productType = getParam(searchParams, "productType", "")
   const productBrand = getParam(searchParams, "productBrand", "")
   const isAvailable = getParam(searchParams, "isAvailable", "")
-  const maker = getParam(searchParams, "maker", "")
-  const model = getParam(searchParams, "model", "")
-  const generation = getParam(searchParams, "generation", "")
-  const carBrand = getParam(searchParams, "carBrand", "")
+  const carMaker = getParam(searchParams, "carMaker", "")
+  const carModel = getParam(searchParams, "carModel", "")
+  const generations = getParam(searchParams, "generations", "")
+
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: "instant",
+    })
+  }, [pageNumber])
 
   const { categories: categoriesData, pagination: categoriesPagination } =
     useCategories()
 
   const { productBrands, pagination: productBrandsPagination } =
     useProductBrands()
-
+  console.log(productBrands, "BOR")
   const { carMakers: carMakersData, pagination: carMakersPagination } =
     useCarMakers()
 
-  console.log("Categories data:", categoriesData)
-  console.log("Product Brands data:", productBrands)
   // const supabase = await createClient();
   // if (productsError || categoriesError) {
   //   return <div>Error loading data</div>;
@@ -95,7 +102,7 @@ const Page = () => {
       className="flex min-h-screen flex-col bg-background"
     >
       <div className="border-b">
-        {/* <Header showSearch /> */}
+        <Header showSearch />
         <div className="mb-4 space-y-2 px-2">
           {/* <h3 className=" text-md font-semibold">Categories</h3> */}
           <CategoryCarousel
@@ -112,14 +119,14 @@ const Page = () => {
             category={category}
             productType={productType}
             productBrand={productBrand}
-            maker={maker}
-            model={model}
-            generation={generation}
+            carMaker={carMaker}
+            carModel={carModel}
+            generations={generations}
             isAvailable={isAvailable}
             categories={categoriesData || []}
             carMakers={carMakersData || []}
             productBrands={productBrands || []}
-            carBrand={carBrand}
+
             // count={pagination?.totalCount || 0}
           />
           <section className="flex-1">
@@ -130,9 +137,9 @@ const Page = () => {
               category={category}
               productType={productType}
               productBrand={productBrand}
-              maker={maker}
-              model={model}
-              generation={generation}
+              carMaker={carMaker}
+              carModel={carModel}
+              generations={generations}
               isAvailable={isAvailable}
             />
 

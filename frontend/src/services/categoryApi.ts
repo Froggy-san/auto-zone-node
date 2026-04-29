@@ -46,7 +46,7 @@ export async function getCategories(filters?: Filters): Promise<{
   }
 
   const data = await response.json()
-  console.log("Fetched Categories:", data.data)
+
   return data.data
 }
 

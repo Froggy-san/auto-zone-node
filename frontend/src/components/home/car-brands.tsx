@@ -1,5 +1,4 @@
-import { CarGenerationProps, CarMakersData, CarModelProps } from "@lib/types";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react"
 import {
   Dialog,
   DialogContent,
@@ -7,7 +6,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from "@/components/ui/dialog"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -15,36 +14,37 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
+} from "@/components/ui/breadcrumb"
 
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion"
 
-import { cn } from "@lib/utils";
-import { Button } from "@components/ui/button";
-import { ChevronLeft } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
+import { ChevronLeft } from "lucide-react"
+import type { CarMaker } from "@/types/carMaker"
+import { useNavigate } from "react-router"
+import type { CarGeneration, CarModel } from "@/types"
+import { BASE_URL } from "@/lib/constants"
 
-const CarBrands = ({ carBrands }: { carBrands: CarMakersData[] }) => {
-  const [selectedBrand, setSelectedBrand] = useState<CarMakersData | null>(
-    null
-  );
+const CarBrands = ({ carBrands }: { carBrands: CarMaker[] }) => {
+  const [selectedBrand, setSelectedBrand] = useState<CarMaker | null>(null)
   return (
-    <div className="my-20 space-y-12  max-w-[1200px] mx-auto ">
-      <h2 className="  ml-2  md:ml-6 font-semibold  text-lg sm:text-2xl lg:text-3xl">
+    <div className="mx-auto my-20 max-w-[1200px] space-y-12">
+      <h2 className="ml-2 text-lg font-semibold sm:text-2xl md:ml-6 lg:text-3xl">
         Select the right parts for your car
       </h2>
       {carBrands.length ? (
-        <ul className=" max-w-[1200px] mx-auto  grid   grid-cols-3  gap-2 sm:grid-cols-4   lg:grid-cols-5 xl:grid-cols-9 ">
+        <ul className="mx-auto grid max-w-[1200px] grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-9">
           {carBrands.map((brand) => (
             <CarBrand
-              key={brand.id}
+              key={brand._id}
               carBrand={brand}
               handleChose={() => setSelectedBrand(brand)}
             />
           ))}
         </ul>
       ) : (
-        <p className=" text-xl  text-muted-foreground">No brand</p>
+        <p className="text-xl text-muted-foreground">No brand</p>
       )}
       <DetailsDialog
         open={!!selectedBrand}
@@ -52,113 +52,108 @@ const CarBrands = ({ carBrands }: { carBrands: CarMakersData[] }) => {
         carBrand={selectedBrand}
       />
     </div>
-  );
-};
+  )
+}
 
 function CarBrand({
   carBrand,
   handleChose,
 }: {
-  carBrand: CarMakersData;
-  handleChose: () => void;
+  carBrand: CarMaker
+  handleChose: () => void
 }) {
   return (
     <li
       onClick={handleChose}
-      className=" flex  flex-col items-center justify-center gap-4 px-3 py-2  rounded-lg  group   "
+      className="group flex flex-col items-center justify-center gap-4 rounded-lg px-3 py-2"
     >
       {carBrand.logo ? (
         <img
           loading="lazy"
-          src={carBrand.logo}
+          src={`${BASE_URL}${carBrand.logo}`}
           alt={carBrand.name}
-          className="  h-20 object-contain group-hover:scale-110   transition-all duration-200 ease-out"
+          className="h-20 object-contain transition-all duration-200 ease-out group-hover:scale-110"
         />
       ) : null}
-      <p className=" font-semibold text-sm text-muted-foreground">
+      <p className="text-sm font-semibold text-muted-foreground">
         {carBrand.name}
       </p>
     </li>
-  );
+  )
 }
 
 interface Dia {
-  open: boolean;
-  carBrand: CarMakersData | null;
-  setOpen: React.Dispatch<React.SetStateAction<CarMakersData | null>>;
-  className?: string;
+  open: boolean
+  carBrand: CarMaker | null
+  setOpen: React.Dispatch<React.SetStateAction<CarMaker | null>>
+  className?: string
 }
 
 function DetailsDialog({ open, setOpen, carBrand, className }: Dia) {
-  const [modelId, setModelId] = useState(0);
-  const [generationId, setGenerationId] = useState(0);
-  const router = useRouter();
-  const model = carBrand?.carModels.find((model) => model.id === modelId);
-  const generaiton = model?.carGenerations.find(
-    (gen) => gen.id === generationId
-  );
+  const [modelId, setModelId] = useState<string | null>(null)
+  const [generationId, setGenerationId] = useState<string | null>(null)
+  const navigate = useNavigate()
+  const model = carBrand?.carModels?.find((model) => model._id === modelId)
+  const generaiton = model?.generations?.find((gen) => gen._id === generationId)
 
-  const models = carBrand?.carModels;
-  const generations = model?.carGenerations;
+  const models = carBrand?.carModels
+  const generations = model?.generations
 
   function handleSelect() {
-    console.log("Called");
+    if (!modelId || !generationId || !carBrand) return
 
-    if (!modelId || !generationId || !carBrand) return;
-    console.log("CLICED");
-    const route = `/products?page=1&makerId=${carBrand.id}&carBrand=${carBrand.name}&modelId=${modelId}&generationId=${generationId}`;
-    setOpen(null);
-    router.push(route);
+    const route = `/products?page=1&carMaker=${carBrand._id}&carBrand=${carBrand.name}&carModel=${modelId}&generations=${generationId}`
+    setOpen(null)
+    navigate(route)
   }
 
   const handleReset = useCallback(() => {
-    console.log("CALLED AGAIN");
-    setModelId(0);
-    setGenerationId(0);
-  }, [open]);
+    setModelId(null)
+    setGenerationId(null)
+  }, [open])
 
   useEffect(() => {
-    handleSelect();
-  }, [modelId, generationId, handleSelect]);
+    handleSelect()
+  }, [modelId, generationId, handleSelect])
   useEffect(() => {
-    handleReset();
-  }, [open]);
+    handleReset()
+  }, [open])
 
   return (
     <Dialog open={open} onOpenChange={() => setOpen(null)}>
-      <DialogContent className="  max-w-[800px]  p-0 overflow-hidden">
-        <div className=" relative flex flex-col   max-h-[80vh]  space-y-2  pb-2 sm:pb-6  ">
+      <DialogContent className="max-w-[800px] overflow-hidden p-0">
+        <div className="relative flex max-h-[80vh] flex-col space-y-2 pb-2 sm:pb-6">
           {/* <div className=" py-5" /> */}
           <motion.div
             key={modelId}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
           >
-            <DialogHeader className="   pt-2 sm:pt-4 pb-1 border-b bg-background w-full px-2 sm:px-6  ">
-              <DialogTitle className=" flex  items-center gap-5">
+            <DialogHeader className="w-full border-b bg-background px-2 pt-2 pb-1 sm:px-6 sm:pt-4">
+              <DialogTitle className="flex items-center gap-5">
                 <Button
                   disabled={!modelId}
-                  className=" w-6 h-6 p-0 shrink-0"
+                  className="h-6 w-6 shrink-0 p-0"
                   onClick={handleReset}
                 >
-                  <ChevronLeft className=" w-4 h-4" />
+                  <ChevronLeft className="h-4 w-4" />
                 </Button>
-                <div className=" flex flex-col sm:flex-row gap-y-1 gap-x-4 items-center flex-1 pr-6">
-                  <h2 className=" text-sm sm:text-lg font-semibold leading-none tracking-tight ">
+                <div className="flex flex-1 flex-col items-center gap-x-4 gap-y-1 pr-6 sm:flex-row">
+                  <h2 className="text-sm leading-none font-semibold tracking-tight sm:text-lg">
                     {" "}
                     Select your car.
                   </h2>
                   <Breadcrumb>
-                    <BreadcrumbList className=" !text-xs  sm:!text-sm">
+                    <BreadcrumbList className="!text-xs sm:!text-sm">
                       <BreadcrumbItem>
                         <BreadcrumbLink
                           onClick={handleReset}
-                          className=" flex items-center gap-1"
+                          className="flex items-center gap-1"
                         >
                           {carBrand?.logo ? (
                             <img
-                              src={carBrand.logo}
-                              className=" h-6 object-contain"
+                              src={`${BASE_URL}${carBrand.logo}`}
+                              className="h-6 object-contain"
                             />
                           ) : null}
                           {carBrand?.name}
@@ -166,7 +161,7 @@ function DetailsDialog({ open, setOpen, carBrand, className }: Dia) {
                       </BreadcrumbItem>
                       <BreadcrumbSeparator />
                       <BreadcrumbItem
-                        onClick={() => setModelId(0)}
+                        onClick={() => setModelId(null)}
                         className={`${
                           !modelId ? "text-foreground" : "text-muted-foreground"
                         }`}
@@ -181,7 +176,7 @@ function DetailsDialog({ open, setOpen, carBrand, className }: Dia) {
                           className={`${
                             modelId
                               ? "!text-foreground"
-                              : "!text-muted-foreground pointer-events-none"
+                              : "pointer-events-none !text-muted-foreground"
                           }`}
                         >
                           {generaiton ? generaiton.name : "Chose generation"}
@@ -194,7 +189,7 @@ function DetailsDialog({ open, setOpen, carBrand, className }: Dia) {
               <DialogDescription></DialogDescription>
             </DialogHeader>
           </motion.div>
-          <div className=" flex-1 overflow-y-auto  overflow-x-hidden px-2 sm:px-6">
+          <div className="flex-1 overflow-x-hidden overflow-y-auto px-2 sm:px-6">
             <AnimatePresence mode="wait">
               {!modelId ? (
                 <ModelList
@@ -218,7 +213,7 @@ function DetailsDialog({ open, setOpen, carBrand, className }: Dia) {
         </div>
       </DialogContent>
     </Dialog>
-  );
+  )
 }
 
 function ModelList({
@@ -227,12 +222,12 @@ function ModelList({
   modelId,
   setModelId,
 }: {
-  carBrand: { name: string; image: string | null };
-  models: CarModelProps[] | undefined;
-  modelId: number;
-  setModelId: React.Dispatch<React.SetStateAction<number>>;
+  carBrand: { name: string; image: string | null }
+  models: CarModel[] | undefined
+  modelId: string | null
+  setModelId: React.Dispatch<React.SetStateAction<string | null>>
 }) {
-  const [hovered, setHovered] = useState<number | null>(null);
+  const [hovered, setHovered] = useState<number | null>(null)
 
   return (
     <motion.div
@@ -258,7 +253,7 @@ function ModelList({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className=" flex  justify-center  gap-2  flex-wrap"
+            className="flex flex-wrap justify-center gap-2"
           >
             {models.map((model, i) => (
               <motion.li
@@ -272,18 +267,18 @@ function ModelList({
                   // duration: 0.01,
                   delay: i * 0.01,
                 }}
-                key={model.id}
+                key={model._id}
                 onClick={() => {
-                  if (modelId === model.id) setModelId(0);
-                  else setModelId(model.id);
+                  if (modelId === model._id) setModelId(null)
+                  else setModelId(model._id)
                 }}
                 className={
-                  "relative w-[48%] h-fit   sm:w-fit px-3 py-2 flex flex-col  items-center     cursor-pointer  gap-2 text-sm  border border-border/45  rounded-lg "
+                  "relative flex h-fit w-[48%] cursor-pointer flex-col items-center gap-2 rounded-lg border border-border/45 px-3 py-2 text-sm sm:w-fit"
                 }
               >
                 {model.image ? (
                   <img
-                    src={model.image}
+                    src={`${BASE_URL}${model.image}`}
                     alt={model.name}
                     className="w-20 object-contain"
                   />
@@ -293,7 +288,7 @@ function ModelList({
                   <motion.div
                     transition={{ duration: 0.2 }}
                     layoutId="item-card"
-                    className=" absolute left-0 top-0 w-full h-full rounded-lg  bg-border/70  dark:bg-card   z-[-1]"
+                    className="absolute top-0 left-0 z-[-1] h-full w-full rounded-lg bg-border/70 dark:bg-card"
                   />
                 )}
               </motion.li>
@@ -309,14 +304,14 @@ function ModelList({
             ))}
           </motion.ul>
         ) : (
-          <div className=" flex flex-col-reverse items-center my-5 gap-2">
+          <div className="my-5 flex flex-col-reverse items-center gap-2">
             <AnimatePresence>
               {carBrand.image ? (
                 <motion.img
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  src={carBrand.image}
+                  src={`${BASE_URL}${carBrand.image}`}
                   alt={carBrand.name}
                   className="h-12 object-contain"
                 />
@@ -324,7 +319,7 @@ function ModelList({
             </AnimatePresence>
             <p
               key="no-models"
-              className="  text-muted-foreground text-center  font-semibold"
+              className="text-center font-semibold text-muted-foreground"
             >
               No {carBrand.name} models were found.
             </p>
@@ -332,7 +327,7 @@ function ModelList({
         )}
       </AnimatePresence>
     </motion.div>
-  );
+  )
 }
 
 function GenerationList({
@@ -340,11 +335,11 @@ function GenerationList({
   handleSelect,
   setGenerationId,
 }: {
-  generations: CarGenerationProps[] | undefined;
-  setGenerationId: React.Dispatch<React.SetStateAction<number>>;
-  handleSelect: () => void;
+  generations: CarGeneration[] | undefined
+  setGenerationId: React.Dispatch<React.SetStateAction<string | null>>
+  handleSelect: () => void
 }) {
-  const [hovered, setHovered] = useState<number | null>(null);
+  const [hovered, setHovered] = useState<number | null>(null)
   return (
     <motion.div
       key="generations-list"
@@ -368,11 +363,11 @@ function GenerationList({
             exit={{ opacity: 0 }}
             onMouseLeave={() => setHovered(null)}
             key="generations-list"
-            className=" grid gap-2 grid-cols-2 sm:grid-cols-3 "
+            className="grid grid-cols-2 gap-2 sm:grid-cols-3"
           >
             {generations.map((gen, i) => (
               <motion.li
-                key={gen.id}
+                key={gen._id}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 onMouseEnter={() => setHovered(i)}
@@ -384,26 +379,29 @@ function GenerationList({
                   delay: i * 0.03,
                 }}
                 onClick={() => {
-                  setGenerationId(gen.id);
+                  setGenerationId(gen._id)
                   // handleSelect();
                 }}
                 className={cn(
-                  `relative  h-fit  f   px-3 py-2 flex flex-col  items-center justify-between     cursor-pointer  gap-2 text-sm border  border-border/45 rounded-lg `,
-                  { "px-3 py-[0.4rem] ": !gen.image }
+                  `f relative flex h-fit cursor-pointer flex-col items-center justify-between gap-2 rounded-lg border border-border/45 px-3 py-2 text-sm`,
+                  { "px-3 py-[0.4rem]": !gen.image }
                 )}
               >
                 {gen.image ? (
-                  <img src={gen.image} className=" w-20 object-contain" />
+                  <img
+                    src={`${BASE_URL}${gen.image}`}
+                    className="w-20 object-contain"
+                  />
                 ) : null}
 
-                <p className=" text-muted-foreground text-center font-semibold">
+                <p className="text-center font-semibold text-muted-foreground">
                   {gen.name}
                 </p>
                 {hovered === i && (
                   <motion.div
                     transition={{ duration: 0.2 }}
                     layoutId="item-card"
-                    className=" absolute left-0 top-0 w-full h-full rounded-lg  bg-border/70  dark:bg-card   z-[-1]"
+                    className="absolute top-0 left-0 z-[-1] h-full w-full rounded-lg bg-border/70 dark:bg-card"
                   />
                 )}
               </motion.li>
@@ -416,7 +414,7 @@ function GenerationList({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               key="no-generations"
-              className=" text-center py-5"
+              className="py-5 text-center"
             >
               No generations
             </motion.p>
@@ -424,7 +422,7 @@ function GenerationList({
         )}
       </AnimatePresence>
     </motion.div>
-  );
+  )
 }
 
-export default CarBrands;
+export default CarBrands

@@ -51,14 +51,17 @@ export const ComboBox: React.FC<ComboBoxProps> = ({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className={cn("w-full h-fit min-h-9 justify-between select-none", className)}
+          className={cn(
+            "h-fit min-h-9 w-full justify-between select-none",
+            className
+          )}
         >
           <p className="flex items-center gap-2 text-left text-wrap break-all">
             {" "}
             {selectedValue?.image && (
               <img
                 loading="lazy"
-                className="3xl:max-w-16 3xl:h-11 h-7 max-w-12 object-contain"
+                className="h-7 max-w-12 object-contain 3xl:h-11 3xl:max-w-16"
                 src={selectedValue?.image}
               />
             )}
@@ -101,7 +104,7 @@ export const ComboBox: React.FC<ComboBoxProps> = ({
                   {option.image && (
                     <img
                       loading="lazy"
-                      className="3xl:max-w-16 3xl:h-11 h-7 max-w-12 object-contain"
+                      className="h-7 max-w-12 object-contain 3xl:h-11 3xl:max-w-16"
                       src={option.image}
                     />
                   )}

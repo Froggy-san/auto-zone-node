@@ -1,35 +1,36 @@
-import { CategoryProps } from "@lib/types";
-import { cn } from "@lib/utils";
-import React from "react";
+import { BASE_URL } from "@/lib/constants"
+import { cn } from "@/lib/utils"
+import type { Category as CategoryType } from "@/types"
+import React from "react"
 
 const Category = ({
   category,
   setSelectedCategory,
 }: {
-  category: CategoryProps;
-  setSelectedCategory: React.Dispatch<React.SetStateAction<number | undefined>>;
+  category: CategoryType
+  setSelectedCategory: React.Dispatch<React.SetStateAction<string | undefined>>
 }) => {
   return (
     <li
-      onClick={() => setSelectedCategory(category.id)}
+      onClick={() => setSelectedCategory(category._id)}
       className={cn(
-        `relative   px-3 py-2 flex flex-col  items-center justify-between    hover:bg-accent/30  transition-all cursor-pointer  gap-2 text-sm   rounded-xl `
+        `relative flex cursor-pointer flex-col items-center justify-between gap-2 rounded-xl px-3 py-2 text-sm transition-all hover:bg-accent/30`
       )}
     >
       {category.image ? (
         <img
           loading="lazy"
-          src={category.image}
+          src={`${BASE_URL}${category.image}`}
           alt={`${category.name} image`}
-          className="  h-20 sm:h-24 block  object-contain"
+          className="block h-20 object-contain sm:h-24"
         />
       ) : null}
 
-      <p className=" font-semibold text-center text-xs  sm:text-sm text-muted-foreground">
+      <p className="text-center text-xs font-semibold text-muted-foreground sm:text-sm">
         {category.name}
       </p>
     </li>
-  );
-};
+  )
+}
 
-export default Category;
+export default Category

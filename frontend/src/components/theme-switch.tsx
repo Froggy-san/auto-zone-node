@@ -1,64 +1,64 @@
+import * as React from "react"
+import { MoonIcon, SunIcon } from "@radix-ui/react-icons"
 
-import * as React from "react";
-import { MoonIcon, SunIcon } from "@radix-ui/react-icons";
-import { useTheme } from "next-themes";
-
-import { Button } from "@/components/ui/button";
-import { MonitorCog } from "lucide-react";
+import { Button } from "@/components/ui/button"
+import { MonitorCog } from "lucide-react"
+import { useTheme } from "./theme-provider"
 
 // import sound from "@public/sound/mixkit-on-or-off-light-switch-tap-2585.wav";
 export function ModeToggle() {
-  const { theme, setTheme } = useTheme();
-  const audioRef = React.useRef<HTMLAudioElement>(null);
+  const { theme, setTheme } = useTheme()
+  console.log(theme, "THEME ")
+  const audioRef = React.useRef<HTMLAudioElement>(null)
 
   const playSound = () => {
     if (audioRef.current) {
-      audioRef.current.currentTime = 0;
-      audioRef.current.play();
+      audioRef.current.currentTime = 0
+      audioRef.current.play()
     }
-  };
+  }
 
   return (
-    <div className=" h-full flex  bg-background  items-center  w-fit    rounded-lg border">
+    <div className="flex h-full w-fit items-center rounded-lg border bg-background">
       <Button
         onClick={() => {
-          playSound();
-          setTheme("light");
+          playSound()
+          setTheme("light")
         }}
         variant="ghost"
-        className={`p-0 flex items-center border-none justify-center rounded-full   w-7 h-7  ${
+        className={`flex h-7 w-7 items-center justify-center rounded-full border-none p-0 ${
           theme === "light" ? "bg-secondary" : ""
         }`}
       >
         {" "}
-        <SunIcon className="h-3 w-3 rotate-0 scale-100   " />
+        <SunIcon className="h-3 w-3 scale-100 rotate-0" />
       </Button>
       <Button
         onClick={() => {
-          playSound();
-          setTheme("system");
+          playSound()
+          setTheme("system")
         }}
         variant="ghost"
-        className={`p-0 flex items-center border-none justify-center rounded-full   w-7 h-7  ${
+        className={`flex h-7 w-7 items-center justify-center rounded-full border-none p-0 ${
           theme === "system" ? "bg-secondary" : ""
         }`}
       >
         {" "}
-        <MonitorCog className="h-3 w-3 rotate-0 scale-100   " />
+        <MonitorCog className="h-3 w-3 scale-100 rotate-0" />
       </Button>
 
       <Button
         onClick={() => {
-          playSound();
-          setTheme("dark");
+          playSound()
+          setTheme("dark")
         }}
         variant="ghost"
-        className={`p-0 flex items-center border-none justify-center rounded-full   w-7 h-7  ${
+        className={`flex h-7 w-7 items-center justify-center rounded-full border-none p-0 ${
           theme === "dark" ? "bg-secondary" : ""
         }`}
       >
         {" "}
-        <MoonIcon className="h-3 w-3 rotate-0 scale-100   " />
+        <MoonIcon className="h-3 w-3 scale-100 rotate-0" />
       </Button>
       <audio
         ref={audioRef}
@@ -85,5 +85,5 @@ export function ModeToggle() {
     //     </DropdownMenuItem>
     //   </DropdownMenuContent>
     // </DropdownMenu>
-  );
+  )
 }

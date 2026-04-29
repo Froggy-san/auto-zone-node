@@ -1,4 +1,4 @@
-import type { Product } from "@/types/product"
+import type { Product, ProductWithDetails } from "@/types/product"
 
 const BASE_URL = import.meta.env.VITE_API_URL
 
@@ -35,6 +35,7 @@ export async function getProducts(filters?: Filters): Promise<{
       searchParams.append(key, value.toString())
     }
   })
+  console.log(searchParams.toString(), "PARAMS")
 
   const query = `${BASE_URL}/api/v1/products?${searchParams.toString()}`
 
@@ -77,10 +78,13 @@ export async function createProduct(data: FormData): Promise<Product> {
   return createdProduct.data
 }
 
-export async function updateProduct(
-  id: string,
+export async function updateProduct({
+  id,
+  data,
+}: {
+  id: string
   data: FormData
-): Promise<Product> {
+}): Promise<Product> {
   const res = await fetch(`${BASE_URL}/api/v1/products/${id}`, {
     method: "PATCH",
     credentials: "include",
@@ -93,12 +97,21 @@ export async function updateProduct(
   }
 
   const updatedProduct = await res.json()
-  console.log("Updated Product:", updatedProduct.data)
+
   return updatedProduct.data
 }
 
-export async function getProductById(id: string) {
-  const res = await fetch(`${BASE_URL}/api/v1/products/${id}`, {
+export async function getProductById(
+  id: string,
+  searchParams: URLSearchParams
+): Promise<{
+  product: ProductWithDetails
+  nextProductId: string | null
+  prevProductId: string | null
+}> {
+  const queryString = searchParams.toString()
+  const url = `${BASE_URL}/api/v1/products/${id}${queryString ? `?${queryString}` : ""}`
+  const res = await fetch(url, {
     credentials: "include",
   })
 
@@ -107,9 +120,32 @@ export async function getProductById(id: string) {
     throw new Error(error.message || "Failed to get product")
   }
 
-  const createdProduct = await res.json()
-  console.log("Product:", createdProduct.data)
-  return createdProduct.data
+  const parsedRes = await res.json()
+
+  const data = parsedRes.data
+  console.log(parsedRes, "DDDDDDD")
+
+  return {
+    product: data.product,
+    nextProductId: data.nextDoc?._id || null,
+    prevProductId: data.prevDoc?._id || null,
+  }
+}
+
+export async function deleteProduct(id: string) {
+  const res = await fetch(`${BASE_URL}/api/v1/products/${id}`, {
+    credentials: "include",
+    method: "DELETE",
+  })
+
+  if (!res.ok) {
+    const error = await res.json()
+    throw new Error(
+      error.message || "Something went wrong while deleting a product"
+    )
+  }
+
+  return res.status === 204 ? null : await res.json()
 }
 
 export const deleteMultipleProducts = async (ids: string[]) => {

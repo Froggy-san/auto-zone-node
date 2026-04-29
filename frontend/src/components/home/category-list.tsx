@@ -1,25 +1,24 @@
-import { CategoryProps } from "@lib/types";
-import React, { useState } from "react";
-import Category from "./category";
-import CategoryDetails from "./category-details";
+import React, { useState } from "react"
 
-const CategoryList = ({ categories }: { categories: CategoryProps[] }) => {
-  const [selectedCategory, setSelectedCategory] = useState<
-    number | undefined
-  >();
+import CategoryDetails from "./category-details"
+import type { Category as CategoryType } from "@/types"
+import Category from "./category"
+
+const CategoryList = ({ categories }: { categories: CategoryType[] }) => {
+  const [selectedCategory, setSelectedCategory] = useState<string | undefined>()
 
   const showDetailsOfCat = categories.find(
-    (cat) => cat.id === selectedCategory
-  );
+    (cat) => cat._id === selectedCategory
+  )
   return (
-    <div className="my-20 space-y-12  max-w-[1200px] mx-auto ">
-      <h2 className="  ml-2  md:ml-6 font-semibold  text-lg sm:text-2xl lg:text-3xl">
+    <div className="mx-auto my-20 max-w-[1200px] space-y-12">
+      <h2 className="ml-2 text-lg font-semibold sm:text-2xl md:ml-6 lg:text-3xl">
         Most popular categories.
       </h2>
-      <ul className=" grid  items-center justify-end   gap-4  grid-cols-3  md:grid-cols-4  lg:grid-cols-5   xl:grid-cols-6">
+      <ul className="grid grid-cols-3 items-center justify-end gap-4 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
         {categories.map((item) => (
           <Category
-            key={item.id}
+            key={item._id}
             category={item}
             setSelectedCategory={setSelectedCategory}
           />
@@ -31,7 +30,7 @@ const CategoryList = ({ categories }: { categories: CategoryProps[] }) => {
         setSelectedCategory={setSelectedCategory}
       />
     </div>
-  );
-};
+  )
+}
 
-export default CategoryList;
+export default CategoryList

@@ -1,45 +1,46 @@
-import { cn } from "@lib/utils";
-import { Cross, Drill, MapPinCheckInside, Recycle } from "lucide-react";
-import React, { useState } from "react";
-import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
-import { PiEngineBold } from "react-icons/pi";
-import Link from "next/link";
-import { TbBatteryAutomotive } from "react-icons/tb";
+import { cn } from "@/lib/utils"
+import { Cross, Drill, MapPinCheckInside, Recycle } from "lucide-react"
+import React, { useState } from "react"
+import { AnimatePresence, LayoutGroup, motion } from "framer-motion"
+import { PiEngineBold } from "react-icons/pi"
+
+import { TbBatteryAutomotive } from "react-icons/tb"
+import { Link } from "react-router"
 
 interface ItemProps {
-  className?: string;
-  icon?: React.ReactNode | string;
-  link: string;
-  header?: string;
-  description?: string;
-  focused: boolean;
-  focus: () => void;
-  unFocus: () => void;
+  className?: string
+  icon?: React.ReactNode | string
+  link: string
+  header?: string
+  description?: string
+  focused: boolean
+  focus: () => void
+  unFocus: () => void
 }
 const ITEMS: Omit<ItemProps, "className" | "focused" | "focus" | "unFocus">[] =
   [
     {
-      icon: <Drill className=" w-10 h-10  xs:w-12 xs:h-12 " />,
+      icon: <Drill className="h-10 w-10 xs:h-12 xs:w-12" />,
       link: "/loan-a-tool",
       header: "Loan-A-Tool",
       description: "Borrow a specialty tools.",
     },
     {
-      icon: <PiEngineBold className=" w-10 h-10  xs:w-12 xs:h-12 " />,
+      icon: <PiEngineBold className="h-10 w-10 xs:h-12 xs:w-12" />,
       link: "/engine-check",
       header: "Engine check-up",
       description: "We will check your engine and give you a free report.",
     },
 
     {
-      icon: <Cross className=" w-10 h-10  xs:w-12 xs:h-12 " />,
+      icon: <Cross className="h-10 w-10 xs:h-12 xs:w-12" />,
       link: "/part-testing",
       header: "Free In-Store Parts Testing",
       description: "We'll check your alternator, starter, battery and more.",
     },
 
     {
-      icon: <TbBatteryAutomotive className=" w-10 h-10  xs:w-12 xs:h-12 " />,
+      icon: <TbBatteryAutomotive className="h-10 w-10 xs:h-12 xs:w-12" />,
       link: "battary-testing",
       header: "Battery Solutions",
       description:
@@ -47,7 +48,7 @@ const ITEMS: Omit<ItemProps, "className" | "focused" | "focus" | "unFocus">[] =
     },
 
     {
-      icon: <Recycle className=" w-10 h-10  xs:w-12 xs:h-12 " />,
+      icon: <Recycle className="h-10 w-10 xs:h-12 xs:w-12" />,
       link: "/recycling",
       header: "Recycling",
       description:
@@ -55,12 +56,12 @@ const ITEMS: Omit<ItemProps, "className" | "focused" | "focus" | "unFocus">[] =
     },
 
     {
-      icon: <MapPinCheckInside className=" w-10 h-10  xs:w-12 xs:h-12 " />,
+      icon: <MapPinCheckInside className="h-10 w-10 xs:h-12 xs:w-12" />,
       link: "/pick-up",
       header: "Store Pick Up",
       description: "Pick up at any location in Egypt.",
     },
-  ];
+  ]
 
 const StoreServices = ({ className }: { className?: string }) => {
   // const [focused, setFocused] = useState(-1);
@@ -73,7 +74,7 @@ const StoreServices = ({ className }: { className?: string }) => {
       //   setFocused(-1);
       //   setHovered(false);
       // }}
-      className={cn(" grid   grid-cols-2 md:grid-cols-3 gap-3 p-3", className)}
+      className={cn("grid grid-cols-2 gap-3 p-3 md:grid-cols-3", className)}
     >
       <LayoutGroup>
         {ITEMS.map((item, i) => (
@@ -83,19 +84,19 @@ const StoreServices = ({ className }: { className?: string }) => {
             // onFocus={() => setFocused(i)}
             //   onMouseLeave={unFocus}
             className={cn(
-              "  rounded-xl shadow-md  border-2 hover:border-primary/80   transition-all duration-500  z-10  relative "
+              "relative z-10 rounded-xl border-2 shadow-md transition-all duration-500 hover:border-primary/80"
             )}
             key={i}
           >
             <Link
-              href={item.link}
-              className="  flex flex-col items-center   focus:border-none focus:outline-none focus:right-0 justify-center p-2 "
+              to={item.link}
+              className="flex flex-col items-center justify-center p-2 focus:right-0 focus:border-none focus:outline-none"
             >
-              <span className=" mb-3">{item.icon}</span>
-              <h4 className=" sm:text-xl font-extrabold text-center ">
+              <span className="mb-3">{item.icon}</span>
+              <h4 className="text-center font-extrabold sm:text-xl">
                 {item.header}
               </h4>
-              <p className=" w-[80%]  text-xs  xs:text-sm sm:text-base mx-auto text-center">
+              <p className="mx-auto w-[80%] text-center text-xs xs:text-sm sm:text-base">
                 {item.description}
               </p>
 
@@ -120,8 +121,8 @@ const StoreServices = ({ className }: { className?: string }) => {
         ))}
       </LayoutGroup>
     </ul>
-  );
-};
+  )
+}
 
 function Item({
   icon,
@@ -137,12 +138,12 @@ function Item({
       // onMouseEnter={focus}
       //   onMouseLeave={unFocus}
       className={cn(
-        " flex flex-col items-center p-2  rounded-xl shadow-md border justify-center z-10  relative",
+        "relative z-10 flex flex-col items-center justify-center rounded-xl border p-2 shadow-md",
         className
       )}
     >
-      <span className=" mb-3">{icon}</span>
-      <h4 className=" text-xl font-extrabold ">{header}</h4>
+      <span className="mb-3">{icon}</span>
+      <h4 className="text-xl font-extrabold">{header}</h4>
       <p>{description}</p>
 
       {/* <AnimatePresence>
@@ -158,10 +159,10 @@ function Item({
         )}
       </AnimatePresence> */}
     </div>
-  );
+  )
 }
 
-export default StoreServices;
+export default StoreServices
 
 /*
           initial={{ opacity: 0,left:"50%", top:"50%", translateX:"-50%",translateY:"-50%" }}

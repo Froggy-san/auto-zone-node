@@ -1,5 +1,6 @@
-import mongoose, { Schema, model, Document } from "mongoose";
+import mongoose, { Schema, model, Document, Query } from "mongoose";
 import { MoreDetail, ProductImage } from "../@types";
+import { NextFunction } from "express";
 
 export interface IProduct extends Document {
   name: string;
@@ -60,15 +61,16 @@ const productSchema = new Schema<IProduct>(
     },
     salePrice: {
       type: Number,
-      required: [true, "Sale price is required"],
-      validate: {
-        // This only works on .create() and .save()
-        validator: function (this: any, val: number) {
-          return val <= this.listPrice;
-        },
-        message:
-          "Sale price ({VALUE}) must be lower than or equal to list price",
-      },
+      defualt: 0,
+      // validate: {
+      //   // This only works on .create() and .save()
+      //   validator: function (this: any, val: number) {
+
+      //     return val <= this.listPrice;
+      //   },
+      //   message:
+      //     "Sale price ({VALUE}) must be lower than or equal to list price",
+      // },
     },
     stock: {
       type: Number,
@@ -78,12 +80,6 @@ const productSchema = new Schema<IProduct>(
       type: Boolean,
       default: true,
     },
-    generations: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: "carGenerations", // Ensure this matches your Generation model name
-      },
-    ],
 
     moreDetails: [moreDetailSchema],
     // Relationships (SQL Foreign Keys -> MongoDB References)
@@ -102,11 +98,19 @@ const productSchema = new Schema<IProduct>(
     carMaker: {
       type: Schema.Types.ObjectId,
       ref: "carMakers",
+      required: false,
     },
     carModel: {
       type: Schema.Types.ObjectId,
       ref: "carModels",
+      required: false,
     },
+    generations: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "carGenerations", // Ensure this matches your Generation model name
+      },
+    ],
     productImages: [productImageSchema], // This is an array of subdocuments, not references
     mainImageName: {
       type: String,
@@ -119,5 +123,29 @@ const productSchema = new Schema<IProduct>(
     toObject: { virtuals: true },
   },
 );
+
+// productSchema.pre("findOne", function (this: Query<any, any>, next : NextFunction) {
+//   // Get the fields being selected in the query
+//   const selectedFields = this.getOptions().projection;
+
+//   // If we are only fetching the _id (like in our neighbor search), don't populate
+//   if (
+//     selectedFields &&
+//     Object.keys(selectedFields).length === 1 &&
+//     selectedFields._id
+//   ) {
+//     return next();
+//   }
+
+//   this.populate({ path: "category", model: "categories" })
+//     .populate({ path: "productType", model: "productTypes" })
+//     .populate({ path: "productBrand", model: "productBrands" })
+//     .populate({ path: "carMaker", model: "carMakers" })
+//     .populate({ path: "carModel", model: "carModels" })
+//     .populate({
+//       path: "generations",
+//       model: "carGenerations",
+//     });
+// });
 
 export const Product = model<IProduct>("products", productSchema);

@@ -32,6 +32,8 @@ export const carGenerationSchema = new Schema(
   },
   {
     timestamps: true, // This automatically creates 'createdAt' and 'updatedAt'
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
   },
 );
 

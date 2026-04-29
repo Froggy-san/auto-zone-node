@@ -29,13 +29,14 @@ export default function useProductBrands() {
     name: debouncedName,
   }
 
-  const { data, isError, isLoading } = useQuery({
+  const { data, isError, isLoading, error } = useQuery({
     queryKey: ["productBrands", filters],
-    queryFn: () => getProductBrands(filters),
+    queryFn: () => getProductBrands(),
   })
   return {
     productBrands: data?.data || [],
     pagination: data?.pagination,
+    error,
     isError,
     isLoading,
   }

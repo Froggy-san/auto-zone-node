@@ -1,27 +1,27 @@
-import { Button } from "@components/ui/button";
-import { Minus, Plus } from "lucide-react";
-import React, { useEffect, useRef, useState } from "react";
-import { useDispatch } from "react-redux";
-import { decreaseItemQuantity, increaseItemQuantity } from "./cartSlice";
-import { AnimatePresence, motion } from "framer-motion";
-import { CartItem, ProductById } from "@lib/types";
+import { Button } from "@/components/ui/button"
+import { Minus, Plus } from "lucide-react"
+import React, { useEffect, useRef, useState } from "react"
+import { useDispatch } from "react-redux"
+import { decreaseItemQuantity, increaseItemQuantity } from "./cartSlice"
+import { AnimatePresence, motion } from "framer-motion"
 
-import { useMemo } from "react";
-import { MdOutlineExposurePlus1 } from "react-icons/md";
-import { TbExposureMinus1 } from "react-icons/tb";
-
+import { useMemo } from "react"
+import { MdOutlineExposurePlus1 } from "react-icons/md"
+import { TbExposureMinus1 } from "react-icons/tb"
+import type { CartItem } from "@/types"
+const BASE_URL = import.meta.env.VITE_API_URL
 const CartIncDec = ({ productInCart }: { productInCart: CartItem }) => {
-  const dispatch = useDispatch();
-  const prevQuantityRef = useRef(productInCart.quantity);
+  const dispatch = useDispatch()
+  const prevQuantityRef = useRef(productInCart.quantity)
 
   // Determine if we are adding or removing
-  const isIncrement = productInCart.quantity >= prevQuantityRef.current;
+  const isIncrement = productInCart.quantity >= prevQuantityRef.current
 
   useEffect(() => {
-    prevQuantityRef.current = productInCart.quantity;
-  }, [productInCart.quantity]);
+    prevQuantityRef.current = productInCart.quantity
+  }, [productInCart.quantity])
 
-  const firstImage = productInCart?.productImages?.[0]?.imageUrl || null;
+  const firstImage = productInCart?.productImages?.[0]?.imageUrl || null
 
   // Random horizontal variance and rotation
   const randomEffect = useMemo(
@@ -29,16 +29,16 @@ const CartIncDec = ({ productInCart }: { productInCart: CartItem }) => {
       x: Math.floor(Math.random() * 60) - 30,
       rotate: Math.floor(Math.random() * 50) - 25,
     }),
-    [productInCart.quantity],
-  );
+    [productInCart.quantity]
+  )
 
   return (
-    <div className="relative flex items-center  gap-1 sm:gap-2">
+    <div className="relative flex items-center gap-1 sm:gap-2">
       <AnimatePresence mode="popLayout">
         {firstImage && (
           <motion.div
             key={productInCart.quantity}
-            className=" absolute left-1/2 pointer-events-none z-50"
+            className="pointer-events-none absolute left-1/2 z-50"
             initial={
               isIncrement
                 ? { opacity: 0, y: -15, x: "-50%", scale: 0.5 }
@@ -83,28 +83,28 @@ const CartIncDec = ({ productInCart }: { productInCart: CartItem }) => {
             }}
           >
             {isIncrement ? (
-              <MdOutlineExposurePlus1 className=" w-5 h-5" />
+              <MdOutlineExposurePlus1 className="h-5 w-5" />
             ) : (
-              <TbExposureMinus1 className=" w-5 h-5" />
+              <TbExposureMinus1 className="h-5 w-5" />
             )}{" "}
             <img
-              src={firstImage}
-              className="h-[35px] w-auto max-w-16 object-cover rounded-[5px]"
+              src={`${BASE_URL}${firstImage}`}
+              className="h-[35px] w-auto max-w-16 rounded-[5px] object-cover"
             />
           </motion.div>
         )}
       </AnimatePresence>
 
       <Button
-        onClick={() => dispatch(decreaseItemQuantity(productInCart.id))}
+        onClick={() => dispatch(decreaseItemQuantity(productInCart._id))}
         size="sm"
-        className="p-2 h-fit"
+        className="h-fit p-2"
       >
         <Minus size={17} />
       </Button>
 
       {/* Numerical counter with sliding effect */}
-      <div className="overflow-hidden h-7 flex text-sm sm:text-md items-center justify-center min-w-[24px]">
+      <div className="sm:text-md flex h-7 min-w-[24px] items-center justify-center overflow-hidden text-sm">
         <AnimatePresence mode="wait" initial={false}>
           <motion.span
             key={productInCart.quantity}
@@ -121,13 +121,13 @@ const CartIncDec = ({ productInCart }: { productInCart: CartItem }) => {
 
       <Button
         disabled={productInCart?.quantity === productInCart.stock}
-        onClick={() => dispatch(increaseItemQuantity(productInCart.id))}
+        onClick={() => dispatch(increaseItemQuantity(productInCart._id))}
         size="sm"
-        className="p-2 h-fit"
+        className="h-fit p-2"
       >
         <Plus size={17} />
       </Button>
     </div>
-  );
-};
-export default CartIncDec;
+  )
+}
+export default CartIncDec

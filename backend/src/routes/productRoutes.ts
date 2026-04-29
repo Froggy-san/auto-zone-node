@@ -45,7 +45,7 @@ router
   .patch(
     uploadProductImages,
     convertProductImages,
-    ensureArray(["productImages", "imagesToDelete"]),
+    ensureArray(["productImages"]),
     validate(updateProductSchema),
     updateProduct,
   )

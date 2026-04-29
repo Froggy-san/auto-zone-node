@@ -7,7 +7,7 @@ import sharp from "sharp";
 import path from "path";
 import fs from "fs";
 import { ProductImage } from "../@types";
-import { deleteFiles } from "../utils/helper";
+import { deleteFiles, processReqQuery } from "../utils/helper";
 import APIFeatures from "../utils/apiFeatures";
 
 // export const getProducts = catchAsync(
@@ -87,7 +87,6 @@ export const getProducts = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     // 1. Filtering Logic
 
-    console.log(req.query,"QUERY")
     const features = new APIFeatures(Product.find(), req.query)
       .filter()
       .sort()
@@ -180,7 +179,6 @@ export const uploadProductImages = upload.array("productImages", 30);
 
 export const convertProductImages = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    console.log(req.body,"BODY")  
     // 1. Better check for files
     const files = req.files as Express.Multer.File[];
     if (!files || files.length === 0) return next();
@@ -188,35 +186,34 @@ export const convertProductImages = catchAsync(
     req.body.productImages = [];
 
     // 2. Process images
-    await Promise.all(
-      files.map(async (file, i) => {
-        const imageName = `product-${Date.now()}-${Math.round(Math.random() * 1e9)}.jpeg`;
 
-        await sharp(file.buffer)
-          // .resize(800, 800) // Recommended to keep your garage catalog looking uniform
-          .toFormat("jpeg")
-          // .jpeg({ quality: 90 })
-          .toFile(`public/uploads/products/${imageName}`);
+    for (const file of files) {
+      const imageName = `product-${Date.now()}-${Math.round(Math.random() * 1e9)}.jpeg`;
 
-        // 3. Robust isMain logic
-        // It's main if: it matches the name OR if it's the first image and no name was provided
-        let isMain = file.originalname === req.body.mainImageName;
+      await sharp(file.buffer)
+        // .resize(800, 800) // Recommended to keep your garage catalog looking uniform
+        .toFormat("jpeg")
+        // .jpeg({ quality: 90 })
+        .toFile(`public/uploads/products/${imageName}`);
 
-        req.body.productImages.push({
-          imageUrl: `/uploads/products/${imageName}`,
-          filename: file.originalname,
-          isMain: isMain,
-        });
-      }),
-    );
+      // 3. Robust isMain logic
+      // It's main if: it matches the name OR if it's the first image and no name was provided
+      let isMain = file.originalname === req.body.mainImageName;
+
+      req.body.productImages.push({
+        imageUrl: `/uploads/products/${imageName}`,
+        filename: file.originalname,
+        isMain: isMain,
+      });
+    }
 
     next();
   },
 );
+
 export const createProduct = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-
-    console.log(req.body,"BODYsssssssssssss")
+    console.log("AYOOO from the creation process");
     const createdProduct = await Product.create(req.body);
 
     if (!createdProduct) {
@@ -245,14 +242,63 @@ export const createProduct = catchAsync(
 
 export const getProduct = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const product = await Product.findById(req.params.id);
+    console.log(req.params.id, "ID----------------------");
+    const product = await Product.findById(req.params.id).populate([
+      { path: "category", model: "categories" },
+      { path: "productType", model: "productTypes" },
+      { path: "productBrand", model: "productBrands" },
+      { path: "carMaker", model: "carMakers" },
+      { path: "carModel", model: "carModels" },
+      { path: "generations", model: "carGenerations" },
+    ]);
     if (!product) {
       return next(new AppError("No product found with that ID", 404));
     }
+
+    const filtersObj = processReqQuery({
+      query: req.query,
+      excludedFields: ["page", "sort", "limit", "fields", "size"],
+      fieldsToPreventRegex: [
+        "category",
+        "productType",
+        "generations",
+        "productBrand",
+        "carMaker",
+        "carModel",
+        "_id",
+      ],
+    });
+
+    // 1. Ensure product has the timestamp
+    const currentTS = product.createdAt;
+
+    // NEXT PRODUCT: Should be the first product OLDER than this one
+    const nextDoc = await Product.findOne({
+      ...filtersObj,
+      $or: [
+        { createdAt: { $lt: currentTS } },
+        { createdAt: currentTS, _id: { $lt: product._id } }, // Tie-breaker for same-second uploads
+      ],
+    })
+      .sort({ createdAt: -1, _id: -1 }) // Sort exactly like the gallery
+      .select("_id");
+
+    // PREVIOUS PRODUCT: Should be the first product NEWER than this one
+    const prevDoc = await Product.findOne({
+      ...filtersObj,
+      $or: [
+        { createdAt: { $gt: currentTS } },
+        { createdAt: currentTS, _id: { $gt: product._id } }, // Tie-breaker
+      ],
+    })
+      .sort({ createdAt: 1, _id: 1 }) // Reversed sort to find the "closest" newer item
+      .select("_id");
     res.status(200).json({
       status: "success",
       data: {
         product,
+        nextDoc: nextDoc || null,
+        prevDoc: prevDoc || null,
       },
     });
   },
@@ -260,8 +306,7 @@ export const getProduct = catchAsync(
 
 export const updateProduct = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const { id } = req.params;
-
+    const id = req.params.id;
     // 1) Get the current product
     const productBeingUpdated = await Product.findById(id);
     if (!productBeingUpdated) {
@@ -284,7 +329,24 @@ export const updateProduct = catchAsync(
     );
 
     // Overwrite the body with the final merged list
-    req.body.productImages = [...remainingImages, ...newImages];
+    req.body.productImages = [...remainingImages, ...newImages].map((img) => {
+      // 1. Check if the image is a Mongoose document (it has a .toObject method)
+      // If it's a new image from req.body, it's already a plain object.
+      const cleanImg =
+        typeof (img as any).toObject === "function"
+          ? (img as any).toObject()
+          : img;
+
+      // 2. Return the clean object with the updated isMain logic
+      return {
+        ...cleanImg,
+        isMain: cleanImg.filename === req.body.mainImageName,
+      };
+    });
+
+    console.log(req.body.imagesToDelete, "UPDATED DATA");
+    console.log(req.body, "INCOMEING DATA");
+    // console.log(req.body, "UPDATED DATA");
 
     // 4) Update the product
     const updatedProduct = await Product.findByIdAndUpdate(id, req.body, {

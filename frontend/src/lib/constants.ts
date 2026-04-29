@@ -49,3 +49,5 @@ export const SUPABASE_URL = "https://umkyoinqpknmedkowqva.supabase.co"
 // /app/user/[userID]
 export const maxSize = 1000000
 export const maxFiles = 1
+
+export const BASE_URL = import.meta.env.VITE_API_URL

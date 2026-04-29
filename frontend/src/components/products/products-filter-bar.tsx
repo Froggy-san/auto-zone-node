@@ -9,17 +9,17 @@ interface Props {
   category: string
   productType?: string
   productBrand: string
-  maker: string
-  model: string
-  generation: string
+  carMaker: string
+  carModel: string
+  generations: string
   isAvailable: string
   categories: Category[]
   carMakers: CarMaker[]
   productBrands: ProductBrand[]
-  carBrand?: string
+
   // count: number
 }
-const ProductsFilterBar: React.FC<Props> =  ({
+const ProductsFilterBar: React.FC<Props> = ({
   category,
   productType,
   isAvailable,
@@ -28,15 +28,15 @@ const ProductsFilterBar: React.FC<Props> =  ({
   categories,
   productBrands,
   // count,
-  maker,
-  model,
-  generation,
-  carBrand,
+  carMaker,
+  carModel,
+  generations,
+
   carMakers,
 }) => {
   const { pagination } = useProducts()
   return (
-    <aside className={`3xl:w-[260px] sm:w-[250px] sm:border-r`}>
+    <aside className={`sm:w-[250px] sm:border-r 3xl:w-[260px]`}>
       <ProductsFilterContent
         name={name}
         count={pagination?.totalCount || 0}
@@ -47,10 +47,9 @@ const ProductsFilterBar: React.FC<Props> =  ({
         categories={categories || []}
         productBrands={productBrands || []}
         carMakers={carMakers}
-        maker={maker}
-        model={model}
-        generation={generation}
-        carBrand={carBrand}
+        carMaker={carMaker}
+        carModel={carModel}
+        generations={generations}
       />
     </aside>
   )

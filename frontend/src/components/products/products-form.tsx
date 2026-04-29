@@ -1,7 +1,6 @@
-
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
+import { useController, useForm } from "react-hook-form"
 import { z } from "zod"
 import { Button } from "@/components/ui/button"
 
@@ -17,7 +16,6 @@ import DialogComponent from "@/components/dialog-component"
 import { ArrowBigLeft, ArrowBigRight } from "lucide-react"
 
 import { SUPABASE_URL } from "@/lib/constants"
-
 
 import {
   Progress,
@@ -45,6 +43,7 @@ import { toast } from "sonner"
 import { FieldGroup } from "../ui/field"
 import type { CarMaker } from "@/types/carMaker"
 import useCreateProduct from "@/features/products/useCreateProduct"
+import useEditProduct from "@/features/products/useEditProduct"
 
 interface ProductFormProps {
   categories: Category[]
@@ -70,15 +69,12 @@ const ProductForm: React.FC<ProductFormProps> = ({
   productToEdit,
   useParams = false,
 }) => {
-  
   const { createProduct } = useCreateProduct()
+  const { editProduct } = useEditProduct()
   const carMaker = productToEdit?.carMaker
   const [searchParam] = useSearchParams()
   const edit = searchParam.get("edit") ?? ""
   const [isOpen, setIsOpen] = useState(edit ? true : false)
-  const [isMainImage, setIsMainImage] = useState<ProductImage | null | number>(
-    null
-  )
 
   const [deletedDetails, setDeletedDetails] = useState<string[]>([])
   const [deletedMedia, setDeletedMedia] = useState<ProductImage[]>([])
@@ -102,7 +98,8 @@ const ProductForm: React.FC<ProductFormProps> = ({
   )
 
   const isMainChange =
-    productToEdit?.productImages.find((image) => image.isMain === true) || null
+    productToEdit?.productImages.find((image) => image.isMain === true)
+      ?.filename || ""
 
   const mediaUrls = useMemo(() => {
     const deletedIds = deletedMedia.map((del) => del._id)
@@ -141,6 +138,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
 
     moreDetails: productToEdit?.moreDetails ?? [],
   }
+
   const form = useForm<ProductFormValues>({
     mode: "onChange",
     resolver: zodResolver(ProductsSchema),
@@ -149,6 +147,10 @@ const ProductForm: React.FC<ProductFormProps> = ({
 
   const { images, moreDetails } = form.watch()
 
+  const { field: mainImageName } = useController({
+    name: "mainImageName",
+    control: form.control,
+  })
   const formValues = form.getValues()
   const formErrors = form.formState.errors
 
@@ -198,7 +200,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
     (step === 0 && !isFirstVaild) ||
     (step === 1 && !isSecondVaild) ||
     (step === 2 &&
-      isMainChange === isMainImage &&
+      isMainChange === mainImageName.value &&
       isEqual &&
       !deletedMedia.length)
 
@@ -206,7 +208,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
 
   useEffect(() => {
     if (!productToEdit && images.length) {
-      setIsMainImage(0)
+      mainImageName.onChange("")
     }
   }, [images, productToEdit])
 
@@ -215,9 +217,9 @@ const ProductForm: React.FC<ProductFormProps> = ({
     form.reset(defaultValues)
     setStep([0, 1])
     setDeletedDetails([])
-    setIsMainImage(
-      productToEdit?.productImages.find((image) => image.isMain === true) ||
-        null
+    mainImageName.onChange(
+      productToEdit?.productImages.find((image) => image.isMain === true)
+        ?.filename || ""
     )
 
     if (formRef.current) formRef.current.scrollTo(0, 0)
@@ -243,9 +245,9 @@ const ProductForm: React.FC<ProductFormProps> = ({
 
     if (isLoading) return
 
-    setIsMainImage(
-      productToEdit?.productImages.find((image) => image.isMain === true) ||
-        null
+    mainImageName.onChange(
+      productToEdit?.productImages.find((image) => image.isMain === true)
+        ?.filename || ""
     )
     setDeletedMedia([])
   }
@@ -279,7 +281,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
     moreDetails,
   }: z.infer<typeof ProductsSchema>) {
     try {
-      const isMainEdited = isMainImage && typeof isMainImage !== "number"
+      const isMainEdited = mainImageName && typeof mainImageName !== "number"
       const imagesToUpload = images.map((img, i) => {
         const name = `${Math.random()}-${img.name}`.replace(/\//g, "")
         const path = `${SUPABASE_URL}/storage/v1/object/public/product/${name}`
@@ -287,58 +289,43 @@ const ProductForm: React.FC<ProductFormProps> = ({
         return {
           name,
           path,
-          isMain: typeof isMainImage === "number" && isMainImage === i,
+          isMain: typeof mainImageName === "number" && mainImageName === i,
           file: img,
         }
       })
-      console.log("IMAGES TO UPLOAD:", imagesToUpload)
-      console.log("FORM VALUES:", {
-        name,
-        category,
-        productBrand,
-        productType,
-        description,
-        listPrice,
-        salePrice,
-        stock,
-        isAvailable,
-        carMaker,
-        carModel,
-        generations,
-        mainImageName,
-        moreDetails,
-      })
 
       const formData = new FormData()
- formData.append("name", name)
+      formData.append("name", name)
       formData.append("category", category)
- formData.append("productBrand", productBrand)
-  formData.append("productType", productType)
-       formData.append("description", description)
-  formData.append("listPrice", String(listPrice))
-  formData.append("salePrice", String(salePrice))
-  formData.append("stock", String(stock))
-  formData.append("isAvailable", String(isAvailable))
-  formData.append("carMaker", carMaker ?? "")
-  formData.append("carModel", carModel ?? "")
-  formData.append("generations", JSON.stringify(generations))
-  formData.append("moreDetails", JSON.stringify(moreDetails))
-   formData.append("isMainEdited", String(isMainEdited))
-    formData.append("mainImageName", mainImageName)
-      images.forEach((image) => { 
+      formData.append("productBrand", productBrand)
+      formData.append("productType", productType)
+      formData.append("description", description)
+      formData.append("listPrice", String(listPrice))
+      formData.append("salePrice", String(salePrice))
+      formData.append("stock", String(stock))
+      formData.append("isAvailable", String(isAvailable))
+      if (carMaker) formData.append("carMaker", carMaker ?? "")
+      if (carModel) formData.append("carModel", carModel ?? "")
+      if (generations)
+        formData.append("generations", JSON.stringify(generations))
+      formData.append("moreDetails", JSON.stringify(moreDetails))
+      formData.append("mainImageName", mainImageName)
+      images.forEach((image) => {
         formData.append("productImages", image)
       })
-  
-
 
       if (productToEdit) {
+        const imagesToDelete = deletedMedia.map((img) => img.imageUrl)
+        formData.append("imagesToDelete", JSON.stringify(imagesToDelete))
+
+        await editProduct({ id: productToEdit._id, data: formData })
         // const imagesToUpload = images.map((image, i) => {
         //   const formData = new FormData();
         //   formData.append("image", image);
         //   formData.append("productId", String(productToEdit.id));
         //   formData.append(
         //     "isMain",
-        //     typeof isMainImage === "number" && isMainImage === i
+        //     typeof mainImageName === "number" && mainImageName === i
         //       ? "true"
         //       : "false"
         //   );
@@ -364,9 +351,10 @@ const ProductForm: React.FC<ProductFormProps> = ({
           carMaker: carMaker ?? null,
           carModel: carModel ?? null,
           generations: generations.length
-            ? generations                .map((genId) =>
-                  productToEdit.generations.find((gen) => gen._id === genId)
-                ) : [],
+            ? generations.map((genId) =>
+                productToEdit.generations.find((gen) => gen._id === genId)
+              )
+            : [],
         }
 
         // Edit the product.
@@ -375,28 +363,26 @@ const ProductForm: React.FC<ProductFormProps> = ({
         //   productToEdit: productToEditData,
         //   imagesToUpload,
         //   imagesToDelete: deletedMedia,
-        //   isMain: isMainEdited ? isMainImage : null,
+        //   isMain: isMainEdited ? mainImageName : null,
         //   prevIsMian: isMainChange,
         //   isEqual,
         //   deletedDetails,
         //   moreDetails: !isMoreDetailEqual ? moreDetails : [],
         // })
 
-
         // if (error) throw new Error(error);
         handleClose()
         setDeletedMedia([])
       } else {
-
         await createProduct(formData)
-    
+
         // const imagesToUpload = images.length
         //   ? images.map((image, i) => {
         //       const formData = new FormData();
         //       formData.append("image", image);
         //       formData.append(
         //         "isMain",
-        //         typeof isMainImage === "number" && isMainImage === i
+        //         typeof mainImageName === "number" && mainImageName === i
         //           ? "true"
         //           : "false"
         //       );
@@ -580,8 +566,8 @@ const ProductForm: React.FC<ProductFormProps> = ({
                   currStep={[step, direction]}
                   categories={categories}
                   productBrand={productBrand}
-                  isMainImage={isMainImage}
-                  setIsMainImage={setIsMainImage}
+                  mainImageName={mainImageName.value}
+                  setMainImageName={mainImageName.onChange}
                   handleDeleteMedia={handleDeleteMedia}
                   mediaUrls={mediaUrls}
                   productToEdit={productToEdit}
@@ -614,12 +600,12 @@ const ProductForm: React.FC<ProductFormProps> = ({
           </FieldGroup>
         </form>
 
-        <DialogComponent.Footer className=" z-50 border-t bg-background px-6 pt-2 pb-6 sm:px-14 sm:pt-4 sm:pb-8">
+        <DialogComponent.Footer className="z-50 border-t bg-background px-6 pt-2 pb-6 sm:px-14 sm:pt-4 sm:pb-8">
           {/* bg-muted-foreground/20 dark:bg-accent */}
-          <div className="flex w-full    items-center justify-between gap-4">
+          <div className="flex w-full items-center justify-between gap-4">
             <div className="flex-1 rounded-md bg-muted-foreground/10 p-3 dark:bg-accent/20">
-              <Progress  value={step} maxValue={maxNumOfSteps}>
-                <ProgressBarContainer className="flex-1    border border-secondary-foreground/20 dark:border-border">
+              <Progress value={step} maxValue={maxNumOfSteps}>
+                <ProgressBarContainer className="flex-1 border border-secondary-foreground/20 dark:border-border">
                   <ProgressMeter />
                 </ProgressBarContainer>
               </Progress>
@@ -639,7 +625,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
               <Button
                 size="sm"
                 disabled={isLoading || disabled}
-                className="w-full sm:w-[unset]" 
+                className="w-full sm:w-[unset]"
                 onClick={() => {
                   if (step < maxNumOfSteps) {
                     handleNext(step + 1)

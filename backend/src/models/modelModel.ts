@@ -31,8 +31,15 @@ export const carModelSchema = new Schema(
     },
   },
   {
-    timestamps: true, // This automatically creates 'createdAt' and 'updatedAt'
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
   },
 );
+carModelSchema.virtual("generations", {
+  ref: "carGenerations",
+  localField: "_id",
+  foreignField: "carModel",
+});
 
 export const Model = model<ICarModel>("carModels", carModelSchema);

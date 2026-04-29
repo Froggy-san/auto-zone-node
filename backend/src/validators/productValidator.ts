@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { objectIdSchema } from "./commen";
+import { objectIdSchema, paramIdSchema } from "./commen";
 
 // 1. Define the sub-schema for the "Table" inside MoreDetails
 const detailTableSchema = z.object({
@@ -18,6 +18,7 @@ const moreDetailSchema = z.object({
 export const createProductSchema = z.object({
   body: z.object({
     name: z.string().min(3).max(100),
+    description: z.string().optional().default(""),
     listPrice: z.coerce.number().positive(),
     salePrice: z.coerce.number().positive(),
     stock: z.coerce.number().int().nonnegative().optional(),
@@ -25,43 +26,46 @@ export const createProductSchema = z.object({
 
     // Now expecting an array of string IDs, not numbers
     generations: z.preprocess((val) => {
-    if (typeof val === 'string') return JSON.parse(val);
-    return val;
-  }, z.array(objectIdSchema).optional()),
+      if (typeof val === "string") return JSON.parse(val);
+      return val;
+    }, z.array(objectIdSchema).optional()),
 
     // Use the sub-schema here for deep validation
     moreDetails: z.preprocess((val) => {
-    if (typeof val === 'string') return JSON.parse(val);
-    return val;
-  },z.array(moreDetailSchema).optional()),
+      if (typeof val === "string") return JSON.parse(val);
+      return val;
+    }, z.array(moreDetailSchema).optional()),
 
     productType: objectIdSchema,
     productBrand: objectIdSchema,
     category: objectIdSchema,
-    productImages: z.preprocess((val) => {
-    if (typeof val === 'string') return JSON.parse(val);
-    return val;
-  }, z
+    productImages: z.preprocess(
+      (val) => {
+        if (typeof val === "string") return JSON.parse(val);
+        return val;
+      },
+      z
 
-      .array(
-        z.object({
-          imageUrl: z.string(),
-          // .url(),
-          filename: z.string(),
-          isMain: z.boolean().optional(),
-        }),
-      )
-      .optional()),
+        .array(
+          z.object({
+            imageUrl: z.string(),
+            // .url(),
+            filename: z.string(),
+            isMain: z.boolean().optional(),
+          }),
+        )
+        .optional(),
+    ),
     mainImageName: z.string().optional().default(""),
 
-    carMaker: objectIdSchema.optional(),
+    carMaker: objectIdSchema.nullable().optional().default(null),
     // Keep 'model' here if you want, but remember our 'carModel' clash
     // we discussed earlier. If you renamed it to carModel in the
     // Mongoose schema, change it here too!
     carModel: z.preprocess(
-  (val) => (val === "" ? undefined : val), 
-  objectIdSchema.optional()
-),
+      (val) => (val === "" ? undefined : val),
+      objectIdSchema.nullable().optional(),
+    ),
     // .or(z.literal("")),
   }),
 });
@@ -69,11 +73,15 @@ export const createProductSchema = z.object({
 // ! Here we are showing you how to tell zod to convert the imagesToDelete value into an array incase it's a single string.
 // ! We are not using it becasue we are using a middleware caleld 'ensureArray' instead but make note of how we used the 'z.preprocess'
 export const updateProductSchema = createProductSchema.partial().extend({
+  params: z.object({ id: objectIdSchema }),
   body: createProductSchema.shape.body.partial().extend({
     //     imagesToDelete: z.preprocess((val) => {
     //   if (typeof val === 'string') return [val];
     //   return val;
     // }, z.array(z.string())).optional(),
-    imagesToDelete: z.array(z.string()).optional(),
+    imagesToDelete: z.preprocess((val) => {
+      if (typeof val === "string") return JSON.parse(val);
+      return val;
+    }, z.array(z.string()).optional()),
   }),
 });

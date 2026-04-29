@@ -4,15 +4,15 @@ import React, {
   useLayoutEffect,
   useRef,
   useState,
-} from "react";
-import { PackageSearch } from "lucide-react";
+} from "react"
+import { PackageSearch } from "lucide-react"
 import {
   Command,
   CommandEmpty,
   CommandGroup,
   CommandItem,
   CommandList,
-} from "@/components/ui/command";
+} from "@/components/ui/command"
 
 import {
   Drawer,
@@ -23,36 +23,37 @@ import {
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
-} from "@/components/ui/drawer";
+} from "@/components/ui/drawer"
 
-import { Input } from "@/components/ui/input";
-import { AnimatePresence, motion } from "framer-motion";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import useSearchCategories from "@/lib/queries/categories/useSearchCategory";
+import { Input } from "@/components/ui/input"
+import { AnimatePresence, motion } from "framer-motion"
+import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 
-import { ClickAwayListener, useMediaQuery } from "@mui/material";
+import { ClickAwayListener, useMediaQuery } from "@mui/material"
 
-import CloseButton from "@/components/close-button";
-import { Link, useNavigate } from "react-router";
-import type { categoryResult, Product } from "@/types";
+import CloseButton from "@/components/close-button"
+import { Link, useNavigate } from "react-router"
+import type { categoryResult, Product } from "@/types"
+import useSearchResults from "@/features/useSearchResults"
+import { BASE_URL } from "@/lib/constants"
 
 interface Props {
-  className?: string;
+  className?: string
 }
 
 const Search = ({ className }: Props) => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [show, setShow] = useState(false);
-  const isSmallScreen = useMediaQuery("(max-width: 839px)");
-  const divRef = useRef<HTMLDivElement>(null);
-  const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState("")
+  const [show, setShow] = useState(false)
+  const isSmallScreen = useMediaQuery("(max-width: 839px)")
+  const divRef = useRef<HTMLDivElement>(null)
+  const navigate = useNavigate()
 
   const { categories, productTypes, products, error, isLoading } =
-    useSearchCategories(searchTerm);
+    useSearchResults(searchTerm)
 
   function handleCategory(url: string) {
-    navigate(url);
+    navigate(url)
   }
 
   // const show = focused && searchTerm.length > 0;
@@ -61,7 +62,7 @@ const Search = ({ className }: Props) => {
     <>
       <div
         className={cn(
-          "  absolute  transition-all duration-300 lg:absolute left-1/2  px-2 sm:px-6   top-14  w-full   mid:w-[400px]  lg:w-[500px] z-50  flex-1 -translate-x-1/2  mid:-translate-x-1/3 mid:left-1/2  mid:top-[unset]   lg:left-1/2 lg:top-[unset] lg:-translate-x-1/2",
+          "absolute top-14 left-1/2 z-50 w-full flex-1 -translate-x-1/2 px-2 transition-all duration-300 sm:px-6 mid:top-[unset] mid:left-1/2 mid:w-[400px] mid:-translate-x-1/3 lg:absolute lg:top-[unset] lg:left-1/2 lg:w-[500px] lg:-translate-x-1/2",
           { "mid:w-full mid:-translate-x-1/2": show }
         )}
       >
@@ -94,24 +95,24 @@ const Search = ({ className }: Props) => {
         )}
       </div>
     </>
-  );
-};
+  )
+}
 
 interface SearchProps {
-  searchTerm: string;
-  setSearchTerm: React.Dispatch<React.SetStateAction<string>>;
-  className?: string;
-  isLoading: boolean;
-  show: boolean;
-  isSmallScreen: boolean;
-  setShow: React.Dispatch<React.SetStateAction<boolean>>;
-  categories: categoryResult[] | undefined | null;
+  searchTerm: string
+  setSearchTerm: React.Dispatch<React.SetStateAction<string>>
+  className?: string
+  isLoading: boolean
+  show: boolean
+  isSmallScreen: boolean
+  setShow: React.Dispatch<React.SetStateAction<boolean>>
+  categories: categoryResult[] | undefined | null
   productTypes:
     | { id: number; image: string | null; name: string; categoryId: number }[]
     | undefined
-    | null;
-  products: Product[] | undefined | null;
-  handleCategory: (url: string) => void;
+    | null
+  products: Product[] | undefined | null
+  handleCategory: (url: string) => void
 }
 
 function SearchBarOnBigScreens({
@@ -127,17 +128,17 @@ function SearchBarOnBigScreens({
   isSmallScreen,
   handleCategory,
 }: SearchProps) {
-  const divRef = useRef<HTMLDivElement>(null);
+  const divRef = useRef<HTMLDivElement>(null)
 
   //! There was an issue with making the element scroll it's height when we have the flex direction set to "flex-col-reverse" becasue we were calling the "scrollTo(x:0,y:0) thinking it would scorll to the top just like it normally would if the flex direction was not set, but that was wrong when it's set to "flex-col-reverse" it reverses the whole element upside down, which means in order to scroll to the top of the element in question you need to scroll all the way down.
   useLayoutEffect(() => {
     if (divRef.current) {
-      const element = divRef.current;
+      const element = divRef.current
 
       // Check if there's actual scrollable content
       if (element.scrollHeight > element.clientHeight) {
         // Determine scroll position based on flex direction
-        element.scrollTo(0, 0);
+        element.scrollTo(0, 0)
         // if (!isSmallScreen) {
         //   // This corresponds to flex-col-reverse
         //   // For flex-col-reverse, "scrolling to top" visually means scrolling to max position
@@ -148,11 +149,11 @@ function SearchBarOnBigScreens({
         // }
       }
     }
-  }, [searchTerm]);
+  }, [searchTerm])
   return (
     <ClickAwayListener
       onClickAway={() => {
-        setShow(false);
+        setShow(false)
       }}
     >
       <Command
@@ -161,18 +162,18 @@ function SearchBarOnBigScreens({
         onValueChange={setSearchTerm}
         shouldFilter={false}
         className={cn(
-          "rounded-lg border shadow-md w-full my-2  overflow-visible  relative ",
+          "relative my-2 w-full overflow-visible rounded-lg border shadow-md",
           className,
 
           { "animate-pulse": isLoading }
         )}
       >
         {/* <CommandInput placeholder="Type a command or search..." /> */}
-        <div className=" relative ">
+        <div className="relative">
           <Input
             onFocus={() => {
               // if (isSmallScreen) return;
-              setShow(true);
+              setShow(true)
             }}
             onBlur={() => {
               // if (isSmallScreen) return;
@@ -180,13 +181,13 @@ function SearchBarOnBigScreens({
             }}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="    w-full pr-4 focus-visible:ring-2"
+            className="w-full pr-4 focus-visible:ring-2"
           />
           <Button
             size="sm"
-            className=" absolute right-2 top-1/2  p-0 h-7 w-7  -translate-y-1/2"
+            className="absolute top-1/2 right-2 h-7 w-7 -translate-y-1/2 p-0"
           >
-            <PackageSearch className=" h-4 w-4  " />
+            <PackageSearch className="h-4 w-4" />
           </Button>
         </div>
 
@@ -225,9 +226,9 @@ function SearchBarOnBigScreens({
                 opacity: 0,
                 transition: { duration: 0.2 },
               }}
-              className="absolute w-full flex p-2    gap-2 flex-row  overscroll-contain overflow-y-scroll bg-card z-40 rounded-xl border"
+              className="absolute z-40 flex w-full flex-row gap-2 overflow-y-scroll overscroll-contain rounded-xl border bg-card p-2"
             >
-              <CommandList className=" overflow-visible max-h-full  flex-1">
+              <CommandList className="max-h-full flex-1 overflow-visible">
                 {/* <h3 className=" text-sm text-muted-foreground mb-3">
                 Categories
                 </h3>
@@ -244,27 +245,25 @@ function SearchBarOnBigScreens({
                           key={cat._id}
                           value={cat.name}
                           onClick={() => {
-                            setShow(false);
+                            setShow(false)
 
                             // handleCategory(
                             //   `/products?page=1&categoryId=${cat.id}`
                             // );
                           }}
                           onSelect={() => {
-                            setShow(false);
+                            setShow(false)
                             handleCategory(
                               `/products?page=1&categoryId=${cat._id}`
-                            );
+                            )
                           }}
-                          className="  font-semibold"
+                          className="font-semibold"
                         >
                           <span>{cat.name}</span>
                         </CommandItem>
                       ))
                     ) : (
-                      <p className="  text-sm pl-3">
-                        No categoy results found.
-                      </p>
+                      <p className="pl-3 text-sm">No categoy results found.</p>
                     )}
                   </CommandGroup>
                   <CommandGroup heading="Sub-Categories">
@@ -275,7 +274,7 @@ function SearchBarOnBigScreens({
                           value={type.name}
                           onClick={() =>
                             handleCategory(
-                              `/products?page=1&categoryId=${type.categoryId}&productTypeId=${type.id}`
+                              `/products?page=1&category=${type.categoryId}&productType=${type.id}`
                             )
                           }
                           onSelect={() =>
@@ -283,20 +282,20 @@ function SearchBarOnBigScreens({
                               `/products?page=1&categoryId=${type.categoryId}&productTypeId=${type.id}`
                             )
                           }
-                          className=" font-semibold"
+                          className="font-semibold"
                         >
                           {type.image ? (
                             <img
                               src={type.image}
                               alt={`${type.name} image`}
-                              className="  max-w-16   h-12 pr-2 object-contain"
+                              className="h-12 max-w-16 object-contain pr-2"
                             />
                           ) : null}{" "}
                           <span>{type.name}</span>
                         </CommandItem>
                       ))
                     ) : (
-                      <p className="  text-sm pl-3">
+                      <p className="pl-3 text-sm">
                         No sub-category results found.
                       </p>
                     )}
@@ -314,7 +313,7 @@ function SearchBarOnBigScreens({
         </AnimatePresence>
       </Command>
     </ClickAwayListener>
-  );
+  )
 }
 
 function SearchBarOnSmScreens({
@@ -330,35 +329,35 @@ function SearchBarOnSmScreens({
   className,
   handleCategory,
 }: SearchProps) {
-  const inputRef = useRef<HTMLInputElement>(null);
-  const [handleOnly, setHandleOnly] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null)
+  const [handleOnly, setHandleOnly] = useState(false)
 
   const handleDisableDrag = () => {
-    setHandleOnly(true);
-  };
+    setHandleOnly(true)
+  }
 
-  const handleEnableDrag = () => setHandleOnly(false);
+  const handleEnableDrag = () => setHandleOnly(false)
 
   useEffect(() => {
-    let focusTimeout: NodeJS.Timeout;
+    let focusTimeout: NodeJS.Timeout
     if (show) {
       // Set a timeout to allow the drawer's open animation to complete
       focusTimeout = setTimeout(() => {
         if (inputRef.current) {
-          inputRef.current.focus();
+          inputRef.current.focus()
         }
-      }, 300); // Adjust this delay (milliseconds) based on your drawer's animation duration
+      }, 300) // Adjust this delay (milliseconds) based on your drawer's animation duration
     } else {
       // Optional: blur on close if you want, but often not necessary
       if (inputRef.current) {
-        inputRef.current.blur();
+        inputRef.current.blur()
       }
     }
 
     return () => {
-      clearTimeout(focusTimeout); // Clean up the timeout
-    };
-  }, [show]); // Only re-run when the 'show' prop changes;
+      clearTimeout(focusTimeout) // Clean up the timeout
+    }
+  }, [show]) // Only re-run when the 'show' prop changes;
 
   return (
     <Drawer
@@ -368,36 +367,36 @@ function SearchBarOnSmScreens({
       direction="right"
     >
       <DrawerTrigger asChild>
-        <div className=" relative  hover:cursor-pointer  bg-popover hover:bg-popover/80  mt-2 transition-all rounded-lg ">
-          <Input className="   pointer-events-none    w-full  " />
+        <div className="relative mt-2 rounded-lg bg-popover transition-all hover:cursor-pointer hover:bg-popover/80">
+          <Input className="pointer-events-none w-full" />
           <Button
             size="sm"
-            className=" absolute right-2 top-1/2  p-0 h-7 w-7  -translate-y-1/2"
+            className="absolute top-1/2 right-2 h-7 w-7 -translate-y-1/2 p-0"
           >
-            <PackageSearch className=" h-4 w-4  " />
+            <PackageSearch className="h-4 w-4" />
           </Button>
         </div>
       </DrawerTrigger>
-      <DrawerContent className=" max-h-full h-full  overflow-y-auto overflow-x-hidden ">
-        <DrawerHeader className=" bg-primary py-1 ">
-          <DrawerTitle className=" flex items-center justify-between text-sm text-primary-foreground ">
+      <DrawerContent className="h-full max-h-full overflow-x-hidden overflow-y-auto">
+        <DrawerHeader className="bg-primary py-1">
+          <DrawerTitle className="flex items-center justify-between text-sm text-primary-foreground">
             SEARCH
-            <CloseButton onClick={() => setShow(false)} className="  static " />
+            <CloseButton onClick={() => setShow(false)} className="static" />
           </DrawerTitle>
-          <DrawerDescription className=" hidden">
+          <DrawerDescription className="hidden">
             This action cannot be undone.
           </DrawerDescription>
         </DrawerHeader>
-        <div className=" p-2 space-y-6 ">
+        <div className="space-y-6 p-2">
           <Input
             ref={inputRef}
             id="Search-input"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Search..."
-            className=" w-full bg-popover"
+            className="w-full bg-popover"
           />
-          <div className=" space-y-3 max-h-full  overflow-y-scroll overflow-x-hidden">
+          <div className="max-h-full space-y-3 overflow-x-hidden overflow-y-scroll">
             {products && products.length ? (
               <ProductList
                 isSmallScreen={isSmallScreen}
@@ -409,16 +408,14 @@ function SearchBarOnSmScreens({
               />
             ) : null}
             <ul>
-              <h3 className=" text-muted-foreground text-sm  mb-3 ">
-                Category
-              </h3>
+              <h3 className="mb-3 text-sm text-muted-foreground">Category</h3>
               {categories?.map((cat) => (
                 <li
                   key={cat._id}
                   onClick={() =>
-                    handleCategory(`/products?page=1&categoryId=${cat._id}`)
+                    handleCategory(`/products?page=1&category=${cat._id}`)
                   }
-                  className=" relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none data-[disabled=true]:pointer-events-none hover:bg-accent hover::text-accent-foreground data-[disabled=true]:opacity-50"
+                  className="hover::text-accent-foreground relative flex cursor-default items-center rounded-sm px-2 py-1.5 text-sm outline-none select-none hover:bg-accent data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50"
                 >
                   {cat.name}
                 </li>
@@ -428,19 +425,19 @@ function SearchBarOnSmScreens({
         </div>
         <DrawerFooter>
           <DrawerClose>
-            <Button variant="outline" className=" w-full">
+            <Button variant="outline" className="w-full">
               Cancel
             </Button>
           </DrawerClose>
         </DrawerFooter>
       </DrawerContent>
     </Drawer>
-  );
+  )
 }
 
 interface ProductListProps extends React.HTMLAttributes<HTMLUListElement> {
-  products: Product[];
-  isSmallScreen: boolean;
+  products: Product[]
+  isSmallScreen: boolean
 }
 
 function ProductList({
@@ -452,15 +449,15 @@ function ProductList({
   return (
     <div
       className={cn(
-        " flex-shrink-0 w-full    overflow-hidden h-full max-h-full max-w-full sm:border-l p-2",
+        "h-full max-h-full w-full max-w-full flex-shrink-0 overflow-hidden p-2 sm:border-l",
         className,
         { "w-[50%]": !isSmallScreen }
       )}
     >
-      <h3 className=" text-muted-foreground text-sm  mb-3 ">Products</h3>
+      <h3 className="mb-3 text-sm text-muted-foreground">Products</h3>
       <ul
         className={cn(
-          "flex   flex-row pb-3   overflow-x-auto   w-full max-w-full     gap-y-3 gap-x-4",
+          "flex w-full max-w-full flex-row gap-x-4 gap-y-3 overflow-x-auto pb-3",
           { "flex-col pb-0": !isSmallScreen }
         )}
         {...props}
@@ -474,40 +471,40 @@ function ProductList({
         ))}
       </ul>
     </div>
-  );
+  )
 }
 function ProductItem({
   product,
   isSmallScreen,
 }: {
-  product: Product;
-  isSmallScreen?: boolean;
+  product: Product
+  isSmallScreen?: boolean
 }) {
   const image = product.productImages.length
     ? product.productImages.find((image) => image.isMain)?.imageUrl ||
       product.productImages[0].imageUrl
-    : null;
+    : null
   return (
     <li
       className={cn(
-        " relative select-none w-[250px]   bg-accent shadow-md flex items-center  shrink-0  rounded-sm px-3 py-3  text-sm outline-none  hover:bg-accent/50  hover:text-accent-foreground transition-all  ",
-        { "w-full ": !isSmallScreen }
+        "relative flex w-[250px] shrink-0 items-center rounded-sm bg-accent px-3 py-3 text-sm shadow-md transition-all outline-none select-none hover:bg-accent/50 hover:text-accent-foreground",
+        { "w-full": !isSmallScreen }
       )}
     >
       <Link
         to={`/products/${product._id}`}
-        className=" flex cursor-default gap-2   justify-center   items-center"
+        className="flex cursor-default items-center justify-center gap-2"
       >
         {image && (
           <img
-            src={image}
+            src={`${BASE_URL}${image}`}
             alt={`${product.name} image`}
-            className="  h-10 w-11 object-contain"
+            className="h-10 w-11 object-contain"
           />
         )}{" "}
-        <p className="  line-clamp-2 ">{product.name}</p>
+        <p className="line-clamp-2">{product.name}</p>
       </Link>
     </li>
-  );
+  )
 }
-export default Search;
+export default Search

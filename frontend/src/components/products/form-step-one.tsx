@@ -49,15 +49,13 @@ interface StepOneProps {
   isLoading: boolean
   categories: Category[]
   productBrand: ProductBrand[]
-  isMainImage: number | ProductImage | null
+  mainImageName: string
   mediaUrls: ProductImage[]
   productToEdit?: ProductWithDetails
   currStep: number[]
   carMaker: CarMaker | undefined
   handleDeleteMedia(productImage?: ProductImage): void
-  setIsMainImage: React.Dispatch<
-    React.SetStateAction<number | ProductImage | null>
-  >
+  setMainImageName: React.Dispatch<React.SetStateAction<string>>
   setDeletedMedia: React.Dispatch<React.SetStateAction<ProductImage[]>>
   carMakers: CarMaker[]
 }
@@ -69,8 +67,8 @@ function StepOne({
   isLoading,
   categories,
   productBrand,
-  isMainImage,
-  setIsMainImage,
+  mainImageName,
+  setMainImageName,
   handleDeleteMedia,
   mediaUrls,
   setDeletedMedia,
@@ -86,7 +84,7 @@ function StepOne({
   const carGenerations =
     carModel &&
     carModels &&
-    carModels.find((model) => model._id === carModel)?.carGenerations
+    carModels.find((model) => model._id === carModel)?.generations
 
   const productTypes = useMemo(() => {
     return categories.find((cat) => cat._id === category)?.productTypes || []
@@ -125,21 +123,7 @@ function StepOne({
             </Field>
           )}
         />
-        {/* <FormField
-          disabled={isLoading}
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem className="w-full">
-              <FormLabel>Name</FormLabel>
-              <FormControl>
-                <Input disabled={isLoading} placeholder="name" {...field} />
-              </FormControl>
-              <FormDescription>Enter the name of the product.</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        /> */}
+
         <Controller
           disabled={isLoading || !categories.length}
           control={form.control}
@@ -164,32 +148,6 @@ function StepOne({
             </Field>
           )}
         />
-        {/* <FormField
-          disabled={isLoading || !categories.length}
-          control={form.control}
-          name="categoryId"
-          render={({ field }) => (
-            <FormItem className="w-full">
-              <FormLabel>Category</FormLabel>
-              <FormControl className=" ">
-                <ComboBox
-                  placeholder="Select category..."
-                  disabled={isLoading || !categories.length}
-                  options={categories}
-                  value={field.value}
-                  setValue={(value) => {
-                    field.onChange(value)
-                    form.setValue("productTypeId", 0)
-                  }}
-                />
-              </FormControl>
-              <FormDescription>
-                Enter what category does the product belong to.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        /> */}
       </div>
 
       <div className="flex flex-col gap-2 sm:flex-row">
@@ -235,53 +193,6 @@ function StepOne({
             </Field>
           )}
         />
-
-        {/*
-        <FormField
-          disabled={isLoading || !productTypes.length}
-          control={form.control}
-          name="productTypeId"
-          render={({ field }) => (
-            <FormItem className="w-full">
-              <FormLabel>Product type</FormLabel>
-              <FormControl>
-                <ComboBox
-                  placeholder="Select type..."
-                  disabled={isLoading || !productTypes.length}
-                  options={productTypes}
-                  value={field.value}
-                  setValue={field.onChange}
-                />
-              </FormControl>
-              <FormDescription>
-                Enter what type of product it is.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          disabled={isLoading || !productBrand.length}
-          control={form.control}
-          name="productBrandId"
-          render={({ field }) => (
-            <FormItem className="w-full">
-              <FormLabel>Product brand</FormLabel>
-              <FormControl>
-                <ComboBox
-                  placeholder="Select Brand..."
-                  disabled={isLoading || !productBrand.length}
-                  options={productBrand}
-                  value={field.value}
-                  setValue={field.onChange}
-                />
-              </FormControl>
-              <FormDescription>Enter the brand of the product.</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        */}
       </div>
       <div className="flex flex-row flex-wrap gap-x-2 gap-y-3">
         <Controller
@@ -311,40 +222,6 @@ function StepOne({
           )}
         />
 
-        {/* <FormField
-          disabled={isLoading}
-          control={form.control}
-          name="listPrice"
-          render={({ field }) => (
-            <FormItem className="w-full flex-1">
-              <FormLabel htmlFor="listPrice">List price</FormLabel>
-              <FormControl>
-                <CurrencyField onChange={field.onChange} />
-
-                <CurrencyInput
-                  id="listPrice"
-                  name="price"
-                  placeholder="Original Price"
-                  decimalsLimit={2} // Max number of decimal places
-                  prefix="EGP " // Currency symbol (e.g., Egyptian Pound)
-                  decimalSeparator="." // Use dot for decimal
-                  groupSeparator="," // Use comma for thousands
-                  value={field.value || ""}
-                  onValueChange={(formattedValue, name, value) => {
-                    // setFormattedListing(formattedValue || "");
-
-                    field.onChange(Number(value?.value) || 0)
-                  }}
-                  className="input-field"
-                />
-              </FormControl>
-              <FormDescription>Enter the listing price.</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        */}
-
         <Controller
           disabled={isLoading}
           control={form.control}
@@ -371,36 +248,7 @@ function StepOne({
             </Field>
           )}
         />
-        {/*
-        <FormField
-          disabled={isLoading}
-          control={form.control}
-          name="salePrice"
-          render={({ field }) => (
-            <FormItem className="w-full flex-1">
-              <FormLabel htmlFor="salesInput">Sale price</FormLabel>
-              <FormControl>
-                <CurrencyInput
-                  id="salesInput"
-                  name="price"
-                  placeholder="Discounted Price"
-                  decimalsLimit={2} // Max number of decimal places
-                  prefix="EGP " // Currency symbol (e.g., Egyptian Pound)
-                  decimalSeparator="." // Use dot for decimal
-                  groupSeparator="," // Use comma for thousands
-                  value={field.value || ""}
-                  onValueChange={(formattedValue, name, value) => {
-                    field.onChange(Number(value?.value) || 0)
-                  }}
-                  className="input-field"
-                />
-              </FormControl>
-              <FormDescription>Enter the discounted price.</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        */}
+
         <Controller
           disabled={isLoading}
           control={form.control}
@@ -432,38 +280,6 @@ function StepOne({
             </Field>
           )}
         />
-        {/*
-        <FormField
-          disabled={isLoading}
-          control={form.control}
-          name="stock"
-          render={({ field }) => (
-            <FormItem className="w-full basis-full sm:flex-1">
-              <FormLabel htmlFor="stockInput">Stock available </FormLabel>
-              <FormControl>
-                <CurrencyInput
-                  id="stockInput"
-                  name="price"
-                  placeholder="Available Stock"
-                  decimalsLimit={2} // Max number of decimal places
-                  prefix="UNITS " // Currency symbol (e.g., Egyptian Pound)
-                  decimalSeparator="." // Use dot for decimal
-                  groupSeparator="," // Use comma for thousands
-                  value={field.value || ""}
-                  onValueChange={(formattedValue, name, value) => {
-                    field.onChange(Number(value?.value) || 0)
-                  }}
-                  className="input-field"
-                />
-              </FormControl>
-              <FormDescription>
-                Enter the amount of stock available.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        */}
       </div>
       <div className="flex flex-col gap-2 sm:flex-row">
         <Controller
@@ -494,38 +310,6 @@ function StepOne({
             </Field>
           )}
         />
-        {/*
-        <FormField
-          disabled={isLoading}
-          control={form.control}
-          name="makerId"
-          render={({ field }) => (
-            <FormItem className="w-full">
-              <FormLabel>
-                Car brand{" "}
-                <span className="pl-1 text-xs text-muted-foreground">
-                  Optional
-                </span>
-              </FormLabel>
-              <FormControl>
-                <CarBrandsCombobox
-                  options={carMakers}
-                  value={field.value}
-                  setValue={(value) => {
-                    field.onChange(value)
-                    form.setValue("modelId", null)
-                    form.setValue("generationsArr", [])
-                  }}
-                />
-              </FormControl>
-              <FormDescription>
-                Enter the amount of stock available.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        */}
 
         <Controller
           disabled={isLoading}
@@ -555,38 +339,6 @@ function StepOne({
             </Field>
           )}
         />
-        {/*
-        <FormField
-          disabled={isLoading}
-          control={form.control}
-          name="modelId"
-          render={({ field }) => (
-            <FormItem className="w-full">
-              <FormLabel>
-                Car model{" "}
-                <span className="pl-1 text-xs text-muted-foreground">
-                  Optional
-                </span>
-              </FormLabel>
-              <FormControl>
-                <ModelCombobox
-                  disabled={!carModels || !carModels.length}
-                  options={carModels || []}
-                  value={field.value}
-                  setValue={(value) => {
-                    form.setValue("generationsArr", [])
-                    field.onChange(value)
-                  }}
-                />
-              </FormControl>
-              <FormDescription>
-                Enter the amount of stock available.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        */}
       </div>
       <div>
         <Controller
@@ -614,72 +366,9 @@ function StepOne({
             </Field>
           )}
         />
-        {/*
-        <FormField
-          disabled={isLoading}
-          control={form.control}
-          name="generationsArr"
-          render={({ field }) => (
-            <FormItem className="w-full">
-              <FormLabel>
-                Car Generations{" "}
-                <span className="pl-1 text-xs text-muted-foreground">
-                  Optional
-                </span>
-              </FormLabel>
-              <FormControl>
-                <GenerationsTagInput
-                  disabled={!carGenerations || !carGenerations.length}
-                  setIds={field.onChange}
-                  ids={field.value}
-                  generations={carGenerations || []}
-                />
-              </FormControl>
-              <FormDescription>
-                Enter the amount of stock available.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        */}
       </div>
 
-      <div className="flex flex-col gap-2 sm:flex-row">
-        {/* <FormField
-          disabled={isLoading}
-          control={form.control}
-          name="stock"
-          render={({ field }) => (
-            <FormItem className=" w-full">
-              <FormLabel>Stock available</FormLabel>
-              <FormControl>
-                <CurrencyInput
-                  id="priceInput"
-                  name="price"
-                  placeholder="UNITS, 1,234.56"
-                  decimalsLimit={2} // Max number of decimal places
-                  prefix="UNITS " // Currency symbol (e.g., Egyptian Pound)
-                  decimalSeparator="." // Use dot for decimal
-                  groupSeparator="," // Use comma for thousands
-                  value={formattedStockValue}
-                  onValueChange={(formattedValue, name, value) => {
-                    setFormattedStock(formattedValue || "");
-                    field.onChange(Number(value?.value) || 0);
-                  }}
-                  className="input-field "
-                />
-
-     
-              </FormControl>
-              <FormDescription>
-                Enter the amount of stock available.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        /> */}
-      </div>
+      <div className="flex flex-col gap-2 sm:flex-row"></div>
 
       <Controller
         disabled={isLoading}
@@ -699,28 +388,7 @@ function StepOne({
           </Field>
         )}
       />
-      {/*
-      <FormField
-        disabled={isLoading}
-        control={form.control}
-        name="description"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Description</FormLabel>
-            <FormControl>
-              <Textarea
-                disabled={isLoading}
-                cols={6}
-                placeholder="Description"
-                {...field}
-              />
-            </FormControl>
-            <FormDescription>Describe the product.</FormDescription>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      */}
+
       <Controller
         disabled={isLoading}
         control={form.control}
@@ -729,8 +397,8 @@ function StepOne({
           <Field data-invalid={fieldState.invalid} className="w-full">
             <FieldLabel>Product images</FieldLabel>
             <MultiFileUploader
-              isMainImage={isMainImage}
-              setIsMainImage={setIsMainImage}
+              mainImageName={mainImageName}
+              setMainImageName={setMainImageName}
               disabled={isLoading}
               handleDeleteMedia={handleDeleteMedia}
               selectedFiles={field.value}
@@ -748,13 +416,12 @@ function StepOne({
                     (!field.value.length && !mediaUrls.length) || isLoading
                   }
                   onClick={() => {
-                    field.onChange((value: any[]) => {
-                      value.forEach((image) =>
-                        URL.revokeObjectURL(image.preview)
-                      )
-                      return []
-                    })
-                    setIsMainImage(null)
+                    field.value.forEach((img) =>
+                      URL.revokeObjectURL(img.preview)
+                    )
+                    field.onChange([])
+
+                    setMainImageName("")
                     if (productToEdit)
                       setDeletedMedia(productToEdit.productImages)
                   }}

@@ -1,15 +1,25 @@
 import { getProductById } from "@/services/productApi"
 import { useQuery } from "@tanstack/react-query"
+import { useSearchParams } from "react-router"
 
 export function useProductById(id: string) {
-  const { data, isLoading, isError } = useQuery({
+  const [searchParams] = useSearchParams()
+  const {
+    data: { product, nextProductId, prevProductId } = {},
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
     queryKey: ["product", id],
-    queryFn: () => getProductById(id),
+    queryFn: () => getProductById(id, searchParams),
   })
 
   return {
-    data,
+    product,
+    nextProductId: nextProductId || null,
+    prevProductId: prevProductId || null,
     isLoading,
     isError,
+    error,
   }
 }

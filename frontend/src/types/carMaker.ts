@@ -6,5 +6,6 @@ export interface CarMaker {
   name: string
   notes: string
   logo: string | null
+  carModel: string
   carModels?: CarModel[]
 }

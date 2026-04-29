@@ -1,4 +1,4 @@
-import React, { SetStateAction, useEffect } from "react";
+import React, { type SetStateAction, useEffect } from "react"
 import {
   Dialog,
   DialogClose,
@@ -8,17 +8,17 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from "@/components/ui/dialog"
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { NotepadTextDashed } from "lucide-react";
-import { Button } from "@components/ui/button";
-import { cn } from "@lib/utils";
-import { AnimatePresence, motion } from "framer-motion";
+} from "@/components/ui/tooltip"
+import { NotepadTextDashed } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
+import { AnimatePresence, motion } from "framer-motion"
 function NoteDialog({
   title,
   description,
@@ -27,22 +27,22 @@ function NoteDialog({
   open,
   onOpenChange,
 }: {
-  className?: string;
-  open?: boolean;
-  onOpenChange?: React.Dispatch<SetStateAction<boolean>>;
-  content: React.ReactNode;
-  title?: string;
-  description?: React.ReactNode;
+  className?: string
+  open?: boolean
+  onOpenChange?: React.Dispatch<SetStateAction<boolean>>
+  content: React.ReactNode
+  title?: string
+  description?: React.ReactNode
 }) {
   useEffect(() => {
-    const body = document.querySelector("body");
+    const body = document.querySelector("body")
     if (body) {
-      body.style.pointerEvents = "auto";
+      body.style.pointerEvents = "auto"
     }
     return () => {
-      if (body) body.style.pointerEvents = "auto";
-    };
-  }, [open]);
+      if (body) body.style.pointerEvents = "auto"
+    }
+  }, [open])
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <TooltipProvider>
@@ -51,11 +51,11 @@ function NoteDialog({
             <DialogTrigger asChild>
               <button
                 className={cn(
-                  "flex items-center justify-center rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground  ",
+                  "flex items-center justify-center rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground",
                   className
                 )}
               >
-                <NotepadTextDashed className=" w-5 h-5" />
+                <NotepadTextDashed className="h-5 w-5" />
               </button>
             </DialogTrigger>
           </TooltipTrigger>
@@ -65,9 +65,9 @@ function NoteDialog({
         </Tooltip>
       </TooltipProvider>
 
-      <DialogContent className="sm:max-w-[500px]  max-h-[55vh] overflow-y-auto     border-none">
+      <DialogContent className="max-h-[55vh] overflow-y-auto border-none sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle className=" break-all  pr-5">
+          <DialogTitle className="pr-5 break-all">
             {title ? title : "Note."}
           </DialogTitle>
           <DialogDescription className={`${!description && "hidden"}`}>
@@ -82,7 +82,7 @@ function NoteDialog({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.1 }}
-              className="grid gap-4 py-4  indent-4  whitespace-pre-wrap   text-left break-all"
+              className="grid gap-4 py-4 text-left indent-4 break-all whitespace-pre-wrap"
             >
               {content}
             </motion.div>
@@ -90,13 +90,13 @@ function NoteDialog({
         </AnimatePresence>
 
         <DialogClose asChild>
-          <Button size="sm" variant="secondary" className=" w-full">
+          <Button size="sm" variant="secondary" className="w-full">
             Cancel
           </Button>
         </DialogClose>
       </DialogContent>
     </Dialog>
-  );
+  )
 }
 
-export default NoteDialog;
+export default NoteDialog

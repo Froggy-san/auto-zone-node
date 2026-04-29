@@ -1,5 +1,5 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import React, { ReactNode } from "react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import React, { type ReactNode } from "react"
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -7,11 +7,11 @@ const queryClient = new QueryClient({
       staleTime: 0,
     },
   },
-});
+})
 const ReactQueryProvidor = ({ children }: { children: ReactNode }) => {
   return (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-  );
-};
+  )
+}
 
-export default ReactQueryProvidor;
+export default ReactQueryProvidor

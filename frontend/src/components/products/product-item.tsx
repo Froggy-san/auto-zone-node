@@ -29,7 +29,7 @@ const ProductItem = ({
       className={`${(!product.isAvailable || !product.stock) && "opacity-50"}`}
     >
       <Link
-        to={`/products/${product._id}?size=${pageSize}&page=${currPage}&filters=${appliedFilters}`}
+        to={`/products/${product._id}?${appliedFilters}`}
         className="flex flex-col space-y-1"
         // prefetch={false}
       >
@@ -38,10 +38,10 @@ const ProductItem = ({
             <FullImagesGallery
               imageUrls={viewedImages}
               productId={product._id}
-              className="3xl:h-[330px] 4xl:h-[400px] relative h-[250px] overflow-hidden rounded-lg select-none"
+              className="relative h-[250px] overflow-hidden rounded-lg select-none 3xl:h-[330px] 4xl:h-[400px]"
             />
           ) : (
-            <div className="3xl:h-[330px] 4xl:h-[400px] flex h-[250px] items-center justify-center rounded-lg bg-foreground/10">
+            <div className="flex h-[250px] items-center justify-center rounded-lg bg-foreground/10 3xl:h-[330px] 4xl:h-[400px]">
               <ImageOff className="h-20 w-20" />
             </div>
           )}

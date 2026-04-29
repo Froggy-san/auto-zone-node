@@ -1,5 +1,4 @@
-import { CategoryProps, ProductType } from "@lib/types";
-import React, { useState } from "react";
+import React, { useState } from "react"
 import {
   Dialog,
   DialogContent,
@@ -7,19 +6,24 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { AnimatePresence, motion } from "framer-motion";
-import { PiSubtract } from "react-icons/pi";
-import { useRouter } from "next/navigation";
+} from "@/components/ui/dialog"
+import { AnimatePresence, motion } from "framer-motion"
+import { PiSubtract } from "react-icons/pi"
+
+import type { Category } from "@/types"
+
+import { useNavigate } from "react-router"
+import { BASE_URL } from "@/lib/constants"
+import type { ProductType } from "@/types/productTypes"
 
 const opacity = {
   hidden: { opacity: 0 },
   visible: { opacity: 1 },
-};
+}
 
 interface Props {
-  category: CategoryProps | undefined;
-  setSelectedCategory: React.Dispatch<React.SetStateAction<number | undefined>>;
+  category: Category | undefined
+  setSelectedCategory: React.Dispatch<React.SetStateAction<string | undefined>>
 }
 const CategoryDetails = ({ category, setSelectedCategory }: Props) => {
   return (
@@ -27,7 +31,7 @@ const CategoryDetails = ({ category, setSelectedCategory }: Props) => {
       open={!!category}
       onOpenChange={() => setSelectedCategory(undefined)}
     >
-      <DialogContent className="  p-3 sm:p-6  max-h-[65vh] overflow-y-auto  sm:max-h-[76vh max-w-[800px]">
+      <DialogContent className="sm:max-h-[76vh max-h-[65vh] max-w-[800px] overflow-y-auto p-3 sm:p-6">
         <DialogHeader>
           <AnimatePresence>
             {category?.productTypes.length && category.name ? (
@@ -38,17 +42,17 @@ const CategoryDetails = ({ category, setSelectedCategory }: Props) => {
                 animate="visible"
                 exit="hidden"
               >
-                <DialogTitle className=" flex flex-col sm:flex-row text-center justify-center items-center text-muted-foreground gap-2">
-                  <PiSubtract className=" w-10 h-10  sm:w-8 sm:h-8 text-muted-foreground" />{" "}
+                <DialogTitle className="flex flex-col items-center justify-center gap-2 text-center text-muted-foreground sm:flex-row">
+                  <PiSubtract className="h-10 w-10 text-muted-foreground sm:h-8 sm:w-8" />{" "}
                   Select a sub-category from &apos;
                   {category.name}&apos;
                 </DialogTitle>
               </motion.div>
             ) : (
-              <DialogTitle className="  hidden"></DialogTitle>
+              <DialogTitle className="hidden"></DialogTitle>
             )}
           </AnimatePresence>
-          <DialogDescription className=" hidden">
+          <DialogDescription className="hidden">
             This action cannot be undone. This will permanently delete your
             account and remove your data from our servers.
           </DialogDescription>
@@ -58,7 +62,7 @@ const CategoryDetails = ({ category, setSelectedCategory }: Props) => {
           {category?.productTypes.length ? (
             <SubCategoryList
               productTypes={category.productTypes}
-              categoryId={category.id}
+              categoryId={category._id}
             />
           ) : (
             <motion.p
@@ -67,10 +71,10 @@ const CategoryDetails = ({ category, setSelectedCategory }: Props) => {
               initial="hidden"
               animate="visible"
               exit="hidden"
-              className=" flex flex-col gap-3 justify-center text-center items-center "
+              className="flex flex-col items-center justify-center gap-3 text-center"
             >
               {" "}
-              <span className="  font-semibold md:text-xl">
+              <span className="font-semibold md:text-xl">
                 No related sub-categories to{" "}
                 <AnimatePresence mode="wait">
                   {category?.name && (
@@ -85,29 +89,29 @@ const CategoryDetails = ({ category, setSelectedCategory }: Props) => {
                   )}
                 </AnimatePresence>
               </span>
-              <PiSubtract className=" md:h-10 md:w-10 w-6 h-6 text-muted-foreground" />
+              <PiSubtract className="h-6 w-6 text-muted-foreground md:h-10 md:w-10" />
             </motion.p>
           )}
         </AnimatePresence>
       </DialogContent>
     </Dialog>
-  );
-};
+  )
+}
 
 function SubCategoryList({
   productTypes,
   categoryId,
 }: {
-  productTypes: ProductType[];
-  categoryId: number;
+  productTypes: ProductType[]
+  categoryId: string
 }) {
-  const [hovered, setHovered] = useState<number | null>(null);
+  const [hovered, setHovered] = useState<number | null>(null)
 
-  const router = useRouter();
-  function handleSelect(prodcutTypeId: number) {
-    router.push(
-      `/products?page=1&categoryId=${categoryId}&productTypeId=${prodcutTypeId}`
-    );
+  const navigate = useNavigate()
+  function handleSelect(prodcutTypeId: string) {
+    navigate(
+      `/products?page=1&category=${categoryId}&productType=${prodcutTypeId}`
+    )
   }
   return (
     <motion.ul
@@ -116,40 +120,40 @@ function SubCategoryList({
       initial="hidden"
       animate="visible"
       exit="hidden"
-      className=" grid  items-start  grid-cols-2 xs:grid-cols-3  md:grid-cols-5  gap-2  xs:my-5  flex-wrap"
+      className="grid grid-cols-2 flex-wrap items-start gap-2 xs:my-5 xs:grid-cols-3 md:grid-cols-5"
       onMouseLeave={() => setHovered(null)}
     >
       {productTypes
-        .sort((a, b) => a.id - b.id)
+        // .sort((a, b) => a._id - b._id)
         .map((item, i) => (
           <li
-            key={item.id}
-            onClick={() => handleSelect(item.id)}
+            key={item._id}
+            onClick={() => handleSelect(item._id)}
             onMouseEnter={() => setHovered(i)}
-            className={`relative   px-3 py-2 flex flex-col  items-center justify-between    cursor-pointer  gap-2 text-sm   rounded-xl `}
+            className={`relative flex cursor-pointer flex-col items-center justify-between gap-2 rounded-xl px-3 py-2 text-sm`}
           >
             {item.image ? (
               <img
                 loading="lazy"
-                src={item.image}
+                src={`${BASE_URL}${item.image}`}
                 alt={item.name}
-                className="  h-20 block  object-contain"
+                className="block h-20 object-contain"
               />
             ) : null}
-            <p className=" font-semibold text-center text-xs sm:text-sm">
+            <p className="text-center text-xs font-semibold sm:text-sm">
               {item.name}
             </p>
             {hovered === i && (
               <motion.div
                 transition={{ duration: 0.2 }}
                 layoutId="item-card"
-                className=" absolute left-0 top-0 w-full h-full rounded-lg  bg-border/70  dark:bg-card   z-[-1]"
+                className="absolute top-0 left-0 z-[-1] h-full w-full rounded-lg bg-border/70 dark:bg-card"
               />
             )}
           </li>
         ))}
     </motion.ul>
-  );
+  )
 }
 
-export default CategoryDetails;
+export default CategoryDetails

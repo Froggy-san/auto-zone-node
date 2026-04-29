@@ -1,51 +1,48 @@
-import CarBrandsCombobox from "@/components/car-brands-combobox";
-import { ComboBox } from "@/components/combo-box";
-import { ModelCombobox } from "@/components/model-combobox";
-import { Button } from "@/components/ui/button";
+import CarBrandsCombobox from "@/components/car-brands-combobox"
+import { ComboBox } from "@/components/combo-box"
+import { ModelCombobox } from "@/components/model-combobox"
+import { Button } from "@/components/ui/button"
 
-import { cn } from "@/lib/utils";
-import type { Category } from "@/types";
-import type { CarMaker } from "@/types/carMaker";
+import { cn } from "@/lib/utils"
+import type { Category } from "@/types"
+import type { CarMaker } from "@/types/carMaker"
 
-import React, { useRef, useState } from "react";
-import { useNavigate } from "react-router";
+import React, { useRef, useState } from "react"
+import { useNavigate } from "react-router"
 
 interface Props {
-  className?: string;
-  categories: Category[];
-  carMakers: CarMaker[];
+  className?: string
+  categories: Category[]
+  carMakers: CarMaker[]
 }
 
 const HomeFilter = ({ categories, carMakers, className }: Props) => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [maker, setMakerId] = useState<string | null>(null);
-  const [model, setModelId] = useState<string | null>(null);
-  const [generation, setgeneration] = useState("");
-  const [productType, setproductType] = useState("");
-  const [category, setcategory] = useState("");
-  const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState("")
+  const [maker, setMakerId] = useState<string | null>(null)
+  const [model, setModelId] = useState<string | null>(null)
+  const [generation, setgeneration] = useState("")
+  const [productType, setproductType] = useState("")
+  const [category, setcategory] = useState("")
+  const navigate = useNavigate()
   // const { carBrands, isLoading: searching, error } = useCarBrands(searchTerm);
   const carModels =
-    maker && carMakers?.find((car) => car._id === maker)?.carModels;
+    maker && carMakers?.find((car) => car._id === maker)?.carModels
   const carGenerations =
-    model &&
-    carModels &&
-    carModels.find((m) => m._id === model)?.carGenerations;
+    model && carModels && carModels.find((m) => m._id === model)?.generations
 
   const productTypes =
-    categories.find((cat) => cat._id === category)?.productTypes || [];
-  const disabled =
-    !maker && !model && !generation && !productType && !category;
-  const first = useRef<HTMLButtonElement>(null);
+    categories.find((cat) => cat._id === category)?.productTypes || []
+  const disabled = !maker && !model && !generation && !productType && !category
+  const first = useRef<HTMLButtonElement>(null)
   function handleClick() {
-    if (disabled) return;
-    let url = "/products?page=1";
-    if (maker) url = url + `&maker=${maker}&carBrand=${searchTerm}`;
-    if (model) url = url + `&model=${model}`;
-    if (generation) url = url + `&generation=${generation}`;
-    if (category) url = url + `&category=${category}`;
-    if (productType) url = url + `&productType=${productType}`;
-    navigate(url);
+    if (disabled) return
+    let url = "/products?page=1"
+    if (maker) url = url + `&carMaker=${maker}&carBrand=${searchTerm}`
+    if (model) url = url + `&carModel=${model}`
+    if (generation) url = url + `&generations=${generation}`
+    if (category) url = url + `&category=${category}`
+    if (productType) url = url + `&productType=${productType}`
+    navigate(url)
   }
 
   return (
@@ -57,34 +54,34 @@ const HomeFilter = ({ categories, carMakers, className }: Props) => {
       //     if (first.current) first.current.focus();
       //   }
       // }}
-      className={cn("space-y-2  w-full  mb-3", className)}
+      className={cn("mb-3 w-full space-y-2", className)}
     >
       <CarBrandsCombobox
         ref={first}
-        className=" h-14"
+        className="h-14"
         options={carMakers || []}
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
         value={maker}
         setValue={(value) => {
-          setMakerId(value);
-          setModelId(null);
-          setgeneration("");
+          setMakerId(value)
+          setModelId(null)
+          setgeneration("")
         }}
       />
 
       <ModelCombobox
-        className=" h-14"
+        className="h-14"
         disabled={!carModels || !carModels.length}
         options={carModels || []}
         value={model}
         setValue={(value) => {
-          setModelId(value);
-          setgeneration("");
+          setModelId(value)
+          setgeneration("")
         }}
       />
       <ComboBox
-        className=" h-14"
+        className="h-14"
         placeholder="Select generation..."
         disabled={!model || !carModels || !carModels.length}
         options={carGenerations || []}
@@ -92,7 +89,7 @@ const HomeFilter = ({ categories, carMakers, className }: Props) => {
         setValue={setgeneration}
       />
       <ComboBox
-        className=" h-14"
+        className="h-14"
         placeholder="Select category..."
         disabled={!categories?.length}
         options={categories || []}
@@ -101,7 +98,7 @@ const HomeFilter = ({ categories, carMakers, className }: Props) => {
       />
 
       <ComboBox
-        className=" h-14"
+        className="h-14"
         placeholder="Select product type..."
         shouldFilter={false}
         disabled={!productTypes?.length}
@@ -118,13 +115,13 @@ const HomeFilter = ({ categories, carMakers, className }: Props) => {
         disabled={disabled}
         onClick={handleClick}
         size="sm"
-        className=" w-full select-none  "
+        className="w-full select-none"
       >
         Pick up
       </Button>
     </section>
-  );
-};
+  )
+}
 
 // function Category({
 //   category,
@@ -180,4 +177,4 @@ const HomeFilter = ({ categories, carMakers, className }: Props) => {
 //   );
 // }
 
-export default HomeFilter;
+export default HomeFilter

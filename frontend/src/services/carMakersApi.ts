@@ -48,7 +48,6 @@ export async function getCarMakers(filters?: Filters): Promise<{
   }
 
   const data = await response.json()
-  console.log("Fetched carMakers:", data.data)
   return data.data
 }
 

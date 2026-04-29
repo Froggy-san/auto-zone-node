@@ -14,8 +14,9 @@ export default function useCarMakers() {
 
   const {
     data: carMakersData,
-    error: carMakersError,
-    isLoading: carMakersLoading,
+    error,
+    isLoading,
+    isError,
   } = useQuery({
     queryKey: ["carMakers", name, pageNumber, limit, id],
     queryFn: () => getCarMakers(),
@@ -24,5 +25,8 @@ export default function useCarMakers() {
   return {
     carMakers: carMakersData?.data || [],
     pagination: carMakersData?.pagination,
+    error,
+    isLoading,
+    isError,
   }
 }

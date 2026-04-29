@@ -11,17 +11,17 @@ import {
 
 import Spinner from "@/components/Spinner"
 
-
 import SuccessToastDescription, {
   ErorrToastDescription,
 } from "@/components/toast-items"
 import { useQueryClient } from "@tanstack/react-query"
 import { useLocation, useNavigate, useSearchParams } from "react-router"
 import { toast } from "sonner"
+import useDeleteProduct from "@/features/products/useDeleteProduct"
 const DeleteProductDialog = ({
   navBack,
   open,
-  imagesToDelete,
+
   setOpen,
   productId,
   isLoading,
@@ -30,7 +30,6 @@ const DeleteProductDialog = ({
   currPage,
 }: {
   navBack?: boolean
-  imagesToDelete: string[]
   pageSize: number
   currPage: number
   productId: string | undefined
@@ -42,7 +41,7 @@ const DeleteProductDialog = ({
   const [searchParam] = useSearchParams()
   const navigate = useNavigate()
   const pathname = useLocation().pathname
-
+  const { deleteProduct } = useDeleteProduct()
   useEffect(() => {
     return () => {
       const body = document.querySelector("body")
@@ -56,9 +55,9 @@ const DeleteProductDialog = ({
     // if (navBack) navigate.back();
     if (pageSize === 1) {
       if (Number(currPage) === 1) {
-        params.delete("categoryId")
-        params.delete("productBrandId")
-        params.delete("productTypeId")
+        params.delete("category")
+        params.delete("productBrand")
+        params.delete("productType")
         params.delete("name")
       }
 
@@ -75,36 +74,34 @@ const DeleteProductDialog = ({
     }
   }, [productId, pageSize, navBack, pathname, navigate, searchParam])
 
-  //   async function handleDelete() {
-  //     try {
-  //       setIsLoading?.(true);
-  //       const { error } = await deleteProductsByIdAction(
-  //         productId as number,
-  //         imagesToDelete
-  //       );
-  //       if (error) throw new Error(error);
-  //       setOpen(false);
-  //       checkIfLastItem();
+  async function handleDelete() {
+    try {
+      if (!productId) return
+      setIsLoading?.(true)
+      await deleteProduct(productId)
 
-  // toast.success("Product deleted.")
-  //       // toast({
-  //       //   className: "bg-primary  text-primary-foreground",
-  //       //   variant: "default",
-  //       //   title: "Data deleted!.",
-  //       //   description: <SuccessToastDescription message="Product deleted." />,
-  //       // });
-  //     } catch (error: any) {
+      setOpen(false)
+      checkIfLastItem()
 
-  // toast.warning("Failed to delete product, Please try agian")
-  //       // toast({
-  //       //   variant: "destructive",
-  //       //   title: "Something went wrong.",
-  //       //   description: <ErorrToastDescription error={error.message} />,
-  //       // });
-  //     } finally {
-  //       setIsLoading?.(false);
-  //     }
-  //   }
+      toast.success("Product deleted.")
+      // toast({
+      //   className: "bg-primary  text-primary-foreground",
+      //   variant: "default",
+      //   title: "Data deleted!.",
+      //   description: <SuccessToastDescription message="Product deleted." />,
+      // });
+    } catch (error: any) {
+      console.log(error.message)
+      toast.warning("Failed to delete product, Please try agian", error)
+      // toast({
+      //   variant: "destructive",
+      //   title: "Something went wrong.",
+      //   description: <ErorrToastDescription error={error.message} />,
+      // });
+    } finally {
+      setIsLoading?.(false)
+    }
+  }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -131,7 +128,7 @@ const DeleteProductDialog = ({
           <Button
             variant="destructive"
             className="w-full sm:w-fit"
-            // onClick={handleDelete}
+            onClick={handleDelete}
             type="submit"
             size="sm"
             disabled={isLoading}

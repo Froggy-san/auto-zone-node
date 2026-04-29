@@ -29,7 +29,7 @@ export default function useCategories() {
     name: debouncedName,
   }
 
-  const { data, isError, isLoading } = useQuery({
+  const { data, error, isError, isLoading } = useQuery({
     queryKey: ["categories", filters],
     queryFn: () => getCategories(filters),
   })
@@ -39,5 +39,6 @@ export default function useCategories() {
     pagination: data?.pagination,
     isError,
     isLoading,
+    error,
   }
 }

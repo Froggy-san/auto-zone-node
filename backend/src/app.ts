@@ -15,12 +15,15 @@ import carMakerRouter from "./routes/carMakerRoutes";
 import carModelRouter from "./routes/carModelRoutes";
 import categoryRouter from "./routes/categoryRoutes";
 import path from "path";
+import carGenerationRouter from "./routes/carGenerationRoutes";
 const app = express();
 
 // Middlewares
-app.use(helmet({
-  crossOriginResourcePolicy: { policy: "cross-origin" }
-}));
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+  }),
+);
 
 const limiter = expressRateLimit({
   max: 100, // 100 request limit
@@ -28,7 +31,7 @@ const limiter = expressRateLimit({
   message: "Too many requests from this IP, please try again in an hour!",
 });
 
-app.use("/api", limiter);
+// app.use("/api", limiter);
 app.use(
   cors({
     origin: process.env.FRONTEND_URL, // Your React URL
@@ -36,14 +39,10 @@ app.use(
   }),
 ); // Crucial for your React frontend!
 
-
-
 app.use(express.json({ limit: "10kb" })); // Body parser
 
-
-
 // Ensure this is in your app.ts
-app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
+app.use("/uploads", express.static(path.join(__dirname, "public/uploads")));
 
 // app.use(ExpressMongoSanitize());
 
@@ -58,6 +57,7 @@ app.use("/api/v1/productTypes", productTypeRouter);
 app.use("/api/v1/categories", categoryRouter);
 app.use("/api/v1/carMakers", carMakerRouter);
 app.use("/api/v1/carModels", carModelRouter);
+app.use("/api/v1/carGenerations", carGenerationRouter);
 // 2) HEALTH CHECK ROUTE
 app.get("/health", (req: Request, res: Response) => {
   res.status(200).json({

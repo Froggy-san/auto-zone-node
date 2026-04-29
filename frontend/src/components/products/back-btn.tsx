@@ -1,13 +1,14 @@
-import { Button } from "@components/ui/button";
-import { cn } from "@lib/utils";
-import { ArrowLeft } from "lucide-react";
-import { useRouter } from "next/navigation";
-import React from "react";
+import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
+import { ArrowLeft } from "lucide-react"
 
-type BackButton = React.HTMLAttributes<HTMLButtonElement>;
+import React from "react"
+import { useNavigate } from "react-router"
+
+type BackButton = React.HTMLAttributes<HTMLButtonElement>
 
 const BackBtn = ({ onClick, className, ...props }: BackButton) => {
-  const router = useRouter();
+  const navigate = useNavigate()
 
   return (
     <Button
@@ -15,17 +16,17 @@ const BackBtn = ({ onClick, className, ...props }: BackButton) => {
       size="sm"
       onClick={(e) => {
         if (onClick !== undefined) {
-          onClick?.(e);
+          onClick?.(e)
         } else {
-          router.back();
+          navigate(-1)
         }
       }}
       className={cn("group", className)}
       {...props}
     >
-      <ArrowLeft className=" icon  w-4 h-4  sm:w-6 sm:h-6  group-hover:-translate-x-1 transition-all" />
+      <ArrowLeft className="icon h-4 w-4 transition-all group-hover:-translate-x-1 sm:h-6 sm:w-6" />
     </Button>
-  );
-};
+  )
+}
 
-export default BackBtn;
+export default BackBtn

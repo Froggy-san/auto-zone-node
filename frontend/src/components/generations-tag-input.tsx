@@ -33,7 +33,8 @@ const GenerationsTagInput = ({
 
   const handleRemove = useCallback(
     (id: string) => {
-      setIds((ids) => ids.filter((gen) => gen !== id))
+      const newArr = ids.filter((gen) => gen !== id)
+      setIds(newArr)
     },
     [setIds]
   )
@@ -67,15 +68,17 @@ const GenerationsTagInput = ({
       ) : (
         <p className="text-muted-foreground">Add car generations.</p>
       )}
-      <SearchBar generations={unAddedGens} setIds={setIds} />
+      <SearchBar ids={ids} generations={unAddedGens} setIds={setIds} />
     </ul>
   )
 }
 
 function SearchBar({
+  ids,
   generations,
   setIds,
 }: {
+  ids: string[]
   generations: CarGeneration[]
   setIds: React.Dispatch<React.SetStateAction<string[]>>
 }) {
@@ -84,7 +87,7 @@ function SearchBar({
   const inputRef = useRef<HTMLInputElement>(null)
   const container = useRef<HTMLDivElement>(null)
   const handleSelect = (generationId: string) => {
-    setIds((ids) => [generationId, ...ids])
+    setIds([generationId, ...ids])
     // setOpen(false);
   }
   const ref = useOutsideClick(() => setOpen(false))
@@ -113,11 +116,9 @@ function SearchBar({
           onKeyDown={(e) => {
             if (e.code === "Backspace" && !term.length) {
               e.preventDefault()
-              setIds((ids) => {
-                const newArr = [...ids]
-                newArr.pop()
-                return newArr
-              })
+              const newArr = [...ids]
+              newArr.pop()
+              setIds(newArr)
             }
           }}
           onFocus={() => setOpen(true)}

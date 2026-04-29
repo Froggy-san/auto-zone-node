@@ -1,46 +1,45 @@
-
-import { type ProductImage } from "@/lib/types";
-import { cn } from "@/lib/utils";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
-import ImageView from "@/components/image-view";
-import ViewCarousel from "@/components/view-carousel";
+import { type ProductImage } from "@/lib/types"
+import { cn } from "@/lib/utils"
+import React, { useCallback, useEffect, useMemo, useState } from "react"
+import { AnimatePresence, motion } from "framer-motion"
+import ImageView from "@/components/image-view"
+import ViewCarousel from "@/components/view-carousel"
 
 const FullImagesGallery = ({
   images,
-shouldHideScrollBar,
+  shouldHideScrollBar,
   className,
 }: {
-  productId?: number;
-  shouldHideScrollBar?: boolean;
-  className?: string;
-  images: string[];
-  error?: string;
+  productId?: string
+  shouldHideScrollBar?: boolean
+  className?: string
+  images: string[]
+  error?: string
 }) => {
-  const [viewedImage, setViewedImage] = useState(0);
-  const [viewBar, setViewBar] = useState(false);
-  const [isTouching, setIsTouching] = useState(false);
-  const [viewedIndex, setViewedIndex] = useState<number | undefined>(undefined);
+  const [viewedImage, setViewedImage] = useState(0)
+  const [viewBar, setViewBar] = useState(false)
+  const [isTouching, setIsTouching] = useState(false)
+  const [viewedIndex, setViewedIndex] = useState<number | undefined>(undefined)
 
   const handleTouchHold = useCallback(() => {
     if (images.length > 1) {
-      setIsTouching(true);
-      setViewBar(true);
+      setIsTouching(true)
+      setViewBar(true)
     }
-  }, []);
+  }, [])
   useEffect(() => {
-    let timer: NodeJS.Timeout | undefined;
+    let timer: NodeJS.Timeout | undefined
     if (isTouching) {
       timer = setInterval(() => {
-        setViewedImage((curr) => (curr + 1) % images.length);
-      }, 1000);
+        setViewedImage((curr) => (curr + 1) % images.length)
+      }, 1000)
     } else {
       if (timer) {
-        clearInterval(timer);
+        clearInterval(timer)
       }
     }
-    return () => clearInterval(timer);
-  }, [isTouching, images.length]);
+    return () => clearInterval(timer)
+  }, [isTouching, images.length])
 
   return (
     <>
@@ -48,21 +47,21 @@ shouldHideScrollBar,
         onTouchStart={handleTouchHold}
         onTouchEnd={() => {
           if (images.length > 1) {
-            setIsTouching(false);
-            setViewBar(false);
-            setViewedImage(0);
+            setIsTouching(false)
+            setViewBar(false)
+            setViewedImage(0)
           }
         }}
         onMouseOut={() => {
-          setViewedImage(0);
-          setViewBar(false);
+          setViewedImage(0)
+          setViewBar(false)
         }}
         onMouseOver={() => images.length > 1 && setViewBar(true)}
       >
         {/* h-[550px]  */}
         <div
           className={cn(
-            " h-[60vh] sm:h-[80vh] relative  overflow-hidden z-10",
+            "relative z-10 h-[60vh] overflow-hidden sm:h-[80vh]",
             className
           )}
         >
@@ -71,7 +70,7 @@ shouldHideScrollBar,
               <div
                 key={i}
                 className={cn(
-                  " max-w-full  max-h-full flex items-center justify-center object-contain absolute inset-0 transition-all",
+                  "absolute inset-0 flex max-h-full max-w-full items-center justify-center object-contain transition-all",
                   {
                     "opacity-0": viewedImage !== i,
                     "opacity-100": viewedImage === i,
@@ -82,7 +81,7 @@ shouldHideScrollBar,
                 <video
                   playsInline
                   src={url.startsWith("blob") ? url.split(" ")[0] : url}
-                  className=" w-full h-full object-cover absolute inset-0 origin-top  z-10  blur-lg"
+                  className="absolute inset-0 z-10 h-full w-full origin-top object-cover blur-lg"
                 >
                   <source src={url} />
                 </video>
@@ -90,7 +89,7 @@ shouldHideScrollBar,
                   controls={false}
                   playsInline
                   src={url.startsWith("blob") ? url.split(" ")[0] : url}
-                  className={cn(" max-w-full  max-h-full object-contain z-30")}
+                  className={cn("z-30 max-h-full max-w-full object-contain")}
                 >
                   <source src={url} />
                 </video>
@@ -99,7 +98,7 @@ shouldHideScrollBar,
               <div
                 key={i}
                 className={cn(
-                  " max-w-full  max-h-full flex items-center justify-center object-contain absolute inset-0 transition-all",
+                  "absolute inset-0 flex max-h-full max-w-full items-center justify-center object-contain transition-all",
                   {
                     "opacity-0": viewedImage !== i,
                     "opacity-100": viewedImage === i,
@@ -109,36 +108,36 @@ shouldHideScrollBar,
                 <img
                   loading="lazy"
                   src={url}
-                  className=" w-full h-full object-cover absolute inset-0 origin-top  z-10  blur-lg"
+                  className="absolute inset-0 z-10 h-full w-full origin-top object-cover blur-lg"
                 />
                 <img
                   loading="lazy"
                   src={url}
-                  className={cn(" max-w-full  max-h-full object-contain z-30")}
+                  className={cn("z-30 max-h-full max-w-full object-contain")}
                 />
               </div>
             )
           )}
-          <div className=" absolute  flex inset-0 w-full h-full">
+          <div className="absolute inset-0 flex h-full w-full">
             {images.map((image, i) => (
               <div
                 key={i}
                 onClick={() => setViewedIndex(i)}
                 onMouseOver={() => setViewedImage(i)}
                 //  border bg-red-300/20
-                className=" h-full cursor-pointer   z-50"
+                className="z-50 h-full cursor-pointer"
                 style={{ width: `calc( 100% / ${images.length})` }}
               ></div>
             ))}
           </div>
         </div>
         {viewBar ? (
-          <div className=" h-1  flex">
+          <div className="flex h-1">
             {images.map((_, i) => (
               <div
                 key={i}
                 className={cn(
-                  "h-full    transition-all"
+                  "h-full transition-all"
                   //   {
                   //     "opacity-0": viewedImage !== i,
                   //     "opacity-100": viewedImage === i,
@@ -150,20 +149,20 @@ shouldHideScrollBar,
                   <motion.div
                     transition={{ duration: 0.2 }}
                     layoutId="tab-indicator"
-                    className="w-full h-full  bg-accent-foreground rounded-full "
+                    className="h-full w-full rounded-full bg-accent-foreground"
                   ></motion.div>
                 )}
               </div>
             ))}
           </div>
         ) : (
-          <div className=" h-1" />
+          <div className="h-1" />
         )}
       </div>
       <AnimatePresence>
         {viewedIndex !== undefined && (
           <ViewCarousel
-          shouldHideScrollBar={shouldHideScrollBar}
+            shouldHideScrollBar={shouldHideScrollBar}
             closeFunction={() => setViewedIndex(undefined)}
             images={images}
             index={viewedIndex}
@@ -171,7 +170,7 @@ shouldHideScrollBar,
         )}
       </AnimatePresence>
     </>
-  );
-};
+  )
+}
 
-export default FullImagesGallery;
+export default FullImagesGallery
