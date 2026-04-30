@@ -99,24 +99,39 @@ export const getOne = (Model: Model<any>, populateOptions?: any) =>
     });
   });
 
-export const getAll = (Model: Model<any>, populateOptions?: any) =>
+export const getAll = (
+  Model: Model<any>,
+  populateOptions?: any,
+  options?: Record<string, any>,
+) =>
   catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    const features = new APIFeatures(Model.find(), req.query)
+    // 1. Initialize the base query with options
+    let baseQuery = Model.find();
+    if (options) baseQuery = baseQuery.setOptions(options);
+
+    // 2. Build features based on that base query
+    const features = new APIFeatures(baseQuery, req.query)
       .filter()
       .limitFields()
       .sort()
       .paginate();
 
-    const totalCount = await Model.countDocuments(features.filtersObj);
+    // 3. IMPORTANT: Apply options to the Count too!
+    // We create a count query and apply the same options
+    const countQuery = Model.countDocuments(features.filtersObj);
+    if (options) countQuery.setOptions(options);
+    const totalCount = await countQuery;
 
-    const limit = parseInt(req.query.limit as string, 100) || 100;
-    const page = parseInt(req.query.page as string, 1) || 1;
-
+    // 4. Fix the radix (the 100 and 1 you had earlier)
+    const limit = parseInt(req.query.limit as string, 10) || 100;
+    const page = parseInt(req.query.page as string, 10) || 1;
     const totalPages = Math.ceil(totalCount / limit);
 
-    const doc = populateOptions
-      ? await features.query.populate(populateOptions)
-      : await features.query;
+    // 5. Finalize the document query
+    let query = features.query;
+    if (populateOptions) query = query.populate(populateOptions);
+
+    const doc = await query;
 
     if (!doc)
       return next(

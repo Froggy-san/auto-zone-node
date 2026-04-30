@@ -44,7 +44,7 @@ export const createCategory = catchAsync(
 
     const createdCategory = await Category.create(req.body);
     if (!createdCategory) {
-      if (req.file) deleteFiles([req.file.filename]);
+      if (req.file) await deleteFiles([req.file.filename]);
       return next(new AppError("Failed to create category", 500));
     }
     res.status(201).json({

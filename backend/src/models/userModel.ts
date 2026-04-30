@@ -1,23 +1,41 @@
-import { Document, Schema, model } from "mongoose";
+import mongoose, { Document, Query, Schema, model } from "mongoose";
 import { Provider, Role } from "../@types";
-
+import { NextFunction } from "express";
+import bcrypt from "bcryptjs";
 export interface IUser extends Document {
+  id: string;
   createdAt: Date;
   updatedAt: Date;
-  name: string;
+  username: string;
   email: string;
   password?: string;
   passwordConfirm?: string;
   picture: string;
   provider: Provider;
-  isDeleted: boolean;
+  isDeleted?: boolean;
   deletedAt?: Date; // Optional because it's only set on delete
   role: Role;
+  passwordChangedAt?: Date;
+  passwordResetToken?: string;
+  passwordResetExpires?: Date;
+  isCorrectPassword(
+    enteredPassword: string,
+    passwordInDb: string,
+  ): Promise<boolean>;
+  isPassChangedAfterJWT: (JWTTimeStamp: number) => boolean;
 }
 
-export const clientSchema = new Schema<IUser>(
+declare global {
+  namespace Express {
+    interface Request {
+      user?: IUser;
+    }
+  }
+}
+
+export const userSchema = new Schema<IUser>(
   {
-    name: {
+    username: {
       type: String,
       required: [true, "Please provide a name for the user"],
       trim: true,
@@ -30,6 +48,17 @@ export const clientSchema = new Schema<IUser>(
       lowercase: true, // Corrects 'lowerCase' typo
       trim: true,
       required: [true, "Please provide an email"],
+    },
+    password: {
+      type: String,
+      required: [
+        function (this: any) {
+          return this.provider === "email";
+        },
+        "Please provide a password",
+      ],
+      minlength: 8,
+      select: false, // DO NOT leak this to the frontend
     },
     picture: {
       type: String,
@@ -57,6 +86,9 @@ export const clientSchema = new Schema<IUser>(
       select: false, // Professional tip: Hide this from normal queries
     },
     deletedAt: Date, // Match JS naming convention (deletedAt vs deleted_at)
+    passwordChangedAt: Date,
+    passwordResetToken: String,
+    passwordResetExpires: Date,
   },
   {
     timestamps: true,
@@ -65,4 +97,58 @@ export const clientSchema = new Schema<IUser>(
   },
 );
 
-export const Client = model<IUser>("users", clientSchema);
+// 1. We specify { query: true } in the options object
+
+// userSchema.pre(/^find/, {  query: true }, function (this: Query<any, IUser>, next: NextFunction) {
+//   this.find({ isDeleted: { $ne: false } });
+//   next();
+// });
+
+//! Here the middleware won't just work for the find method but also for the count method as well.
+userSchema.pre(/^find|^count/, function (
+  this: Query<any, IUser>,
+  next: NextFunction,
+) {
+  if (this.getOptions().showDelete) return;
+  this.find({ active: { $ne: false } });
+  next();
+} as any); // The 'as any' here only applies to the hook registration, not your logic
+
+userSchema.pre("save", async function () {
+  if (this.isModified("password")) {
+    this.password = await bcrypt.hash(this.password as string, 12);
+  }
+});
+
+userSchema.pre("save", async function () {
+  if (!this.isModified("password") || this.isNew) return;
+
+  this.passwordChangedAt = new Date(Date.now() - 1000);
+});
+
+userSchema.methods.isCorrectPassword = async (
+  endteredPassword: string,
+  passwordInDb: string,
+): Promise<boolean> => {
+  return await bcrypt.compare(endteredPassword, passwordInDb);
+};
+
+userSchema.methods.isPassChangedAfterJWT = function (
+  JWTTimeStamp: number,
+): boolean {
+  if (this.passwordChangedAt) {
+    // Use Math.floor to get the integer part of the seconds
+    const changedTimeStamp = Math.floor(
+      this.passwordChangedAt.getTime() / 1000,
+    );
+
+    // If the time the password changed is greater than the time the token was issued
+    // it means the password was changed AFTER the token was created.
+    return JWTTimeStamp < changedTimeStamp;
+  }
+
+  // False means NOT changed (password is still valid)
+  return false;
+};
+
+export const User = model<IUser>("users", userSchema);

@@ -1,5 +1,5 @@
 import { Request } from "express";
-import fs from "fs";
+import fs from "fs/promises";
 import path from "path";
 export function normalizeReqQuery(req: Request) {
   const normalizedQuery: any = {};
@@ -10,22 +10,45 @@ export function normalizeReqQuery(req: Request) {
   return normalizedQuery;
 }
 
+
+
+
+
+export const deleteFiles = async (filePaths: string[]): Promise<void> => {
+  // Use Promise.all to run all deletions in parallel!
+  await Promise.all(
+    filePaths.map(async (file) => {
+      const filePath = path.join(__dirname, "../../public", file);
+      
+      try {
+        // Just try to delete it directly
+        await fs.unlink(filePath);
+      } catch (err: any) {
+        // ENOENT means "File not found" - we can ignore that
+        if (err.code !== 'ENOENT') {
+          console.error(`[FileHelper] Error deleting ${file}:`, err);
+        }
+      }
+    })
+  );
+};
+
 /**
  * Deletes multiple files from the public folder
  * @param filePaths Array of relative paths (e.g., ['/uploads/img.jpg'])
  */
-export const deleteFiles = (filePaths: string[]) => {
-  filePaths.forEach((file) => {
-    // Ensure we are pointing to the correct public directory
-    const filePath = path.join(__dirname, "../../public", file);
+// export const deleteFiles = (filePaths: string[]) => {
+//   filePaths.forEach((file) => {
+//     // Ensure we are pointing to the correct public directory
+//     const filePath = path.join(__dirname, "../../public", file);
 
-    if (fs.existsSync(filePath)) {
-      fs.unlink(filePath, (err) => {
-        if (err) console.error(`[FileHelper] Error deleting ${file}:`, err);
-      });
-    }
-  });
-};
+//     if (fs.existsSync(filePath)) {
+//       fs.unlink(filePath, (err) => {
+//         if (err) console.error(`[FileHelper] Error deleting ${file}:`, err);
+//       });
+//     }
+//   });
+// };
 
 export function processReqQuery({
   query,
