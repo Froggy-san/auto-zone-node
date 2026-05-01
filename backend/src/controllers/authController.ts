@@ -72,7 +72,7 @@ export const login = catchAsync(
   },
 );
 
-const logout = catchAsync(
+export const logout = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     res.cookie("autoZoneToken", "logged out", {
       expires: new Date(Date.now() + 10 * 1000),
