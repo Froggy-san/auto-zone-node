@@ -1,30 +1,30 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react"
 
 // --- Type Definitions ---
 // Define the type for a single search result item.
 // This can be more complex if your items are objects (e.g., { id: string, name: string }).
-type SearchResultItem = string;
+type SearchResultItem = string
 
 interface SearchComponentProps {
   // You could add props here if your component needs them (e.g., initialSearchTerm)
 }
 
 const SearchComponent: React.FC<SearchComponentProps> = () => {
-  const [searchTerm, setSearchTerm] = useState<string>("");
-  const [searchResults, setSearchResults] = useState<SearchResultItem[]>([]);
-  const [focusedIndex, setFocusedIndex] = useState<number>(-1); // -1 means no item is focused
+  const [searchTerm, setSearchTerm] = useState<string>("")
+  const [searchResults, setSearchResults] = useState<SearchResultItem[]>([])
+  const [focusedIndex, setFocusedIndex] = useState<number>(-1) // -1 means no item is focused
 
   // Ref for the results container (optional, but good for type safety)
-  const searchResultsRef = useRef<HTMLUListElement>(null);
+  const searchResultsRef = useRef<HTMLUListElement>(null)
   // Array to store refs for individual result items
-  const resultRefs = useRef<(HTMLLIElement | null)[]>([]);
+  const resultRefs = useRef<(HTMLLIElement | null)[]>([])
 
   // --- YOUR SEARCH LOGIC GOES HERE ---
   // This is a placeholder. In a real app, you'd fetch data or filter an array.
   useEffect(() => {
     if (searchTerm.trim() === "") {
-      setSearchResults([]);
-      return;
+      setSearchResults([])
+      return
     }
     // Simulate an API call or filtering
     const dummyData: SearchResultItem[] = [
@@ -52,78 +52,78 @@ const SearchComponent: React.FC<SearchComponentProps> = () => {
       "Xigua",
       "Yellow Watermelon",
       "Zucchini",
-    ];
+    ]
     const filtered = dummyData.filter((item: SearchResultItem) =>
       item.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    setSearchResults(filtered);
-    setFocusedIndex(-1); // Reset focus when search results change
+    )
+    setSearchResults(filtered)
+    setFocusedIndex(-1) // Reset focus when search results change
     // Clear old refs, keeping only as many as there are current search results
-    resultRefs.current = resultRefs.current.slice(0, filtered.length);
-  }, [searchTerm]);
+    resultRefs.current = resultRefs.current.slice(0, filtered.length)
+  }, [searchTerm])
   // --- END OF SEARCH LOGIC ---
 
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>) => {
-      if (searchResults.length === 0) return;
+      if (searchResults.length === 0) return
 
       switch (event.key) {
         case "ArrowDown":
-          event.preventDefault(); // Prevent page scroll
+          event.preventDefault() // Prevent page scroll
           setFocusedIndex((prevIndex: number) => {
-            const newIndex = (prevIndex + 1) % searchResults.length;
-            return newIndex;
-          });
-          break;
+            const newIndex = (prevIndex + 1) % searchResults.length
+            return newIndex
+          })
+          break
         case "ArrowUp":
-          event.preventDefault(); // Prevent page scroll
+          event.preventDefault() // Prevent page scroll
           setFocusedIndex((prevIndex: number) => {
             const newIndex =
-              (prevIndex - 1 + searchResults.length) % searchResults.length;
-            return newIndex;
-          });
-          break;
+              (prevIndex - 1 + searchResults.length) % searchResults.length
+            return newIndex
+          })
+          break
         case "Enter":
           if (focusedIndex >= 0 && focusedIndex < searchResults.length) {
-            const selectedItem = searchResults[focusedIndex];
+            const selectedItem = searchResults[focusedIndex]
             // You would typically perform an action here, e.g.,
             // navigate, populate input, close results.
-            setSearchTerm(selectedItem); // Example: put selected item in input
-            setSearchResults([]); // Clear results after selection
-            setFocusedIndex(-1);
+            setSearchTerm(selectedItem) // Example: put selected item in input
+            setSearchResults([]) // Clear results after selection
+            setFocusedIndex(-1)
           }
-          break;
+          break
         case "Escape":
-          setSearchResults([]); // Clear results on escape
-          setFocusedIndex(-1);
-          break;
+          setSearchResults([]) // Clear results on escape
+          setFocusedIndex(-1)
+          break
         default:
-          break;
+          break
       }
     },
     [searchResults, focusedIndex]
-  );
+  )
 
   // Effect to scroll the focused item into view
   useEffect(() => {
     if (focusedIndex !== -1) {
-      const focusedElement = resultRefs.current[focusedIndex];
+      const focusedElement = resultRefs.current[focusedIndex]
       if (focusedElement) {
         focusedElement.scrollIntoView({
           behavior: "smooth",
           block: "nearest",
-        });
+        })
       }
     }
-  }, [focusedIndex]);
+  }, [focusedIndex])
 
   const handleResultClick = (index: number, item: SearchResultItem) => {
-    setFocusedIndex(index);
-    console.log("Clicked:", item);
-    setSearchTerm(item); // Example: put clicked item in input
-    setSearchResults([]); // Clear results after selection
-    setFocusedIndex(-1);
-  };
+    setFocusedIndex(index)
+    console.log("Clicked:", item)
+    setSearchTerm(item) // Example: put clicked item in input
+    setSearchResults([]) // Clear results after selection
+    setFocusedIndex(-1)
+  }
 
   return (
     <div style={{ position: "relative", width: "300px", margin: "50px auto" }}>
@@ -158,7 +158,7 @@ const SearchComponent: React.FC<SearchComponentProps> = () => {
               // Store ref for each item. Type `HTMLLIElement | null` is used
               // because the ref might be null initially or if the element is unmounted.
               ref={(el: HTMLLIElement | null) => {
-                resultRefs.current[index] = el;
+                resultRefs.current[index] = el
               }}
               onClick={() => handleResultClick(index, result)}
               style={{
@@ -175,7 +175,7 @@ const SearchComponent: React.FC<SearchComponentProps> = () => {
         </ul>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default SearchComponent;
+export default SearchComponent

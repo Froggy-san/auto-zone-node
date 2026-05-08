@@ -1,5 +1,5 @@
-import React, { SetStateAction, useEffect } from "react";
-import { Button } from "@/components/ui/button";
+import React, { useEffect, type SetStateAction } from "react"
+import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -7,76 +7,76 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from "@/components/ui/dialog"
 
-import Spinner from "@components/Spinner";
-import { useToast } from "@hooks/use-toast";
+import Spinner from "@/components/Spinner"
+
 import SuccessToastDescription, {
   ErorrToastDescription,
-} from "@components/toast-items";
-import { deleteCarAction } from "@lib/actions/carsAction";
-import { useQueryClient } from "@tanstack/react-query";
+} from "@/components/toast-items"
+
+import { deleteCar } from "@/services/carApi"
 
 interface Props {
-  checkIfLastItem: () => void;
-  carId: number;
-  setIsLoading?: React.Dispatch<SetStateAction<boolean>>;
-  isLoading?: boolean;
-  open: boolean;
-  setOpen: React.Dispatch<SetStateAction<boolean>>;
-  imagePaths: string[];
-  clientId: number;
+  checkIfLastItem: () => void
+  carId: string
+  setIsLoading?: React.Dispatch<SetStateAction<boolean>>
+  isLoading?: boolean
+  open: boolean
+  setOpen: React.Dispatch<SetStateAction<boolean>>
+  // imagePaths: string[]
+  // clientId: string
 }
 
 const CarDeleteDialog = ({
   checkIfLastItem,
   open,
   setOpen,
-  imagePaths,
   carId,
   isLoading,
   setIsLoading,
-  clientId,
+  // imagePaths,
+  // clientId,
 }: Props) => {
-  const { toast } = useToast();
-
   useEffect(() => {
     return () => {
-      const body = document.querySelector("body");
-      if (body) body.style.pointerEvents = "auto";
-    };
-  }, [open]);
+      const body = document.querySelector("body")
+      if (body) body.style.pointerEvents = "auto"
+    }
+  }, [open])
 
   async function handleDelete() {
     try {
-      setIsLoading?.(true);
-      const { error } = await deleteCarAction(clientId, carId, imagePaths);
-      if (error) throw new Error(error);
-      checkIfLastItem();
+      setIsLoading?.(true)
+      // const { error } = await deleteCarAction(clientId, carId, imagePaths)
+
+      await deleteCar(carId)
+
+      checkIfLastItem()
       // queryClient.invalidateQueries({ queryKey: ["carCount"] });
-      setOpen(false);
-      setIsLoading?.(false);
-      toast({
-        className: "bg-primary  text-primary-foreground",
-        variant: "default",
-        title: "Data deleted!.",
-        description: (
-          <SuccessToastDescription message="Car has been deleted." />
-        ),
-      });
+      setOpen(false)
+      setIsLoading?.(false)
+      // toast({
+      //   className: "bg-primary  text-primary-foreground",
+      //   variant: "default",
+      //   title: "Data deleted!.",
+      //   description: (
+      //     <SuccessToastDescription message="Car has been deleted." />
+      //   ),
+      // })
     } catch (error: any) {
-      setIsLoading?.(false);
-      toast({
-        variant: "destructive",
-        title: "Something went wrong.",
-        description: <ErorrToastDescription error={error.message} />,
-      });
+      setIsLoading?.(false)
+      // toast({
+      //   variant: "destructive",
+      //   title: "Something went wrong.",
+      //   description: <ErorrToastDescription error={error.message} />,
+      // })
     }
   }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="sm:max-w-[425px] border-none">
+      <DialogContent className="border-none sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Are you sure?</DialogTitle>
           <DialogDescription>
@@ -85,7 +85,7 @@ const CarDeleteDialog = ({
           </DialogDescription>
         </DialogHeader>
 
-        <DialogFooter className=" gap-y-2 ">
+        <DialogFooter className="gap-y-2">
           <Button
             onClick={() => setOpen(false)}
             type="reset"
@@ -107,7 +107,7 @@ const CarDeleteDialog = ({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  );
-};
+  )
+}
 
-export default CarDeleteDialog;
+export default CarDeleteDialog

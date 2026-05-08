@@ -1,43 +1,43 @@
-import useCarGenerations from "@lib/queries/car-generation/useCarGenerations";
-import React, { useCallback, useRef, useState } from "react";
+import useCarGenerations from "@lib/queries/car-generation/useCarGenerations"
+import React, { useCallback, useRef, useState } from "react"
 
-import { CarGenerationProps } from "@lib/types";
-import { Button } from "@components/ui/button";
-import { MoveLeft, MoveRight } from "lucide-react";
-import Spinner from "@components/Spinner";
+import { CarGenerationProps } from "@lib/types"
+import { Button } from "@components/ui/button"
+import { MoveLeft, MoveRight } from "lucide-react"
+import Spinner from "@components/Spinner"
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/components/ui/accordion";
-import useScrollToPoint from "@hooks/use-scroll-to-point";
-import GenerationItem from "./generation-item";
+} from "@/components/ui/accordion"
+import useScrollToPoint from "@hooks/use-scroll-to-point"
+import GenerationItem from "./generation-item"
 
 const CarGenerationList = () => {
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(1)
 
   const { isLoading, carGenerations, pageCount, error } =
-    useCarGenerations(page);
-  const ref = useRef<HTMLDivElement>(null);
-  const handleScroll = useScrollToPoint({ ref });
+    useCarGenerations(page)
+  const ref = useRef<HTMLDivElement>(null)
+  const handleScroll = useScrollToPoint({ ref })
 
-  const carGenerationData: CarGenerationProps[] = carGenerations || [];
+  const carGenerationData: CarGenerationProps[] = carGenerations || []
 
   const handleResetPage = useCallback(() => {
     if (carGenerationData.length === 1) {
-      setPage((page) => page - 1);
+      setPage((page) => page - 1)
     }
-  }, [carGenerationData.length, setPage]);
+  }, [carGenerationData.length, setPage])
 
   // if (error) return <p>{String(error)}</p>;
 
   return (
     <Accordion type="single" collapsible defaultValue="item-1">
-      <AccordionItem value="item-1" className=" border-none">
+      <AccordionItem value="item-1" className="border-none">
         <AccordionTrigger>
           {" "}
-          <h3 className=" tracking-wider font-semibold text-2xl">
+          <h3 className="text-2xl font-semibold tracking-wider">
             CAR GENERATIONS
           </h3>
         </AccordionTrigger>
@@ -46,11 +46,11 @@ const CarGenerationList = () => {
         ) : (
           <AccordionContent>
             {isLoading ? (
-              <Spinner className=" h-[300px]" size={25} />
+              <Spinner className="h-[300px]" size={25} />
             ) : !carGenerationData.length ? (
               <p>No car generation data has been posted yet!</p>
             ) : (
-              <ul className=" flex flex-wrap gap-2 p-4 max-h-[45vh] overflow-y-auto  ">
+              <ul className="flex max-h-[45vh] flex-wrap gap-2 overflow-y-auto p-4">
                 {/* {carGenerationData.map((item) => (
                   <GenerationItem
                     key={item.id}
@@ -62,12 +62,12 @@ const CarGenerationList = () => {
               </ul>
             )}
 
-            <div className=" flex  my-4 justify-end gap-3">
+            <div className="my-4 flex justify-end gap-3">
               <Button
                 onClick={() => {
-                  if (isLoading || page === 1) return;
-                  setPage((page) => page - 1);
-                  handleScroll();
+                  if (isLoading || page === 1) return
+                  setPage((page) => page - 1)
+                  handleScroll()
                 }}
                 size="icon"
                 variant="secondary"
@@ -77,10 +77,10 @@ const CarGenerationList = () => {
               </Button>
               <Button
                 onClick={() => {
-                  if (isLoading || page === pageCount) return;
+                  if (isLoading || page === pageCount) return
 
-                  setPage((page) => page + 1);
-                  handleScroll();
+                  setPage((page) => page + 1)
+                  handleScroll()
                 }}
                 variant="secondary"
                 size="icon"
@@ -95,7 +95,7 @@ const CarGenerationList = () => {
         )}
       </AccordionItem>
     </Accordion>
-  );
-};
+  )
+}
 
-export default CarGenerationList;
+export default CarGenerationList

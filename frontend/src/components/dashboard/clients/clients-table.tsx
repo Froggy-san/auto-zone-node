@@ -1,4 +1,4 @@
-import React, { SetStateAction, useEffect, useState } from "react";
+import React, { SetStateAction, useEffect, useState } from "react"
 import {
   Table,
   TableBody,
@@ -7,16 +7,16 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { ClientWithPhoneNumbers, PhoneNumber } from "@lib/types";
-import { Button } from "@components/ui/button";
+} from "@/components/ui/table"
+import { ClientWithPhoneNumbers, PhoneNumber } from "@lib/types"
+import { Button } from "@components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@/components/ui/dropdown-menu"
 import {
   Dialog,
   DialogClose,
@@ -26,13 +26,13 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from "@/components/ui/dialog"
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from "@/components/ui/tooltip"
 
 import {
   Ban,
@@ -42,37 +42,37 @@ import {
   Mail,
   UserPen,
   UserRoundMinus,
-} from "lucide-react";
-import { useToast } from "@hooks/use-toast";
+} from "lucide-react"
+import { useToast } from "@hooks/use-toast"
 import SuccessToastDescription, {
   ErorrToastDescription,
-} from "@components/toast-items";
-import Spinner from "@components/Spinner";
-import ClientForm from "./client-form";
-import { deleteClientByIdAction } from "@lib/actions/clientActions";
+} from "@components/toast-items"
+import Spinner from "@components/Spinner"
+import ClientForm from "./client-form"
+import { deleteClientByIdAction } from "@lib/actions/clientActions"
 import {
   useParams,
   usePathname,
   useRouter,
   useSearchParams,
-} from "next/navigation";
-import { FcGoogle } from "react-icons/fc";
-import ImageView from "@components/image-view";
-import Link from "next/link";
-import BanClient from "./ban-client";
+} from "next/navigation"
+import { FcGoogle } from "react-icons/fc"
+import ImageView from "@components/image-view"
+import Link from "next/link"
+import BanClient from "./ban-client"
 const ClientsTable = ({
   clients,
   currPage,
 }: {
-  currPage: string;
-  clients: ClientWithPhoneNumbers[] | null;
+  currPage: string
+  clients: ClientWithPhoneNumbers[] | null
 }) => {
   if (!clients)
-    return <p>Something went wrong while getting the client&apos;s data</p>;
-  const currPageSize = clients.length;
+    return <p>Something went wrong while getting the client&apos;s data</p>
+  const currPageSize = clients.length
 
   return (
-    <Table className=" shadow-lg">
+    <Table className="shadow-lg">
       <TableCaption>
         {clients.length ? "A list of your clients." : "No clients"}
       </TableCaption>
@@ -99,9 +99,9 @@ const ClientsTable = ({
                 <TableCell>
                   <PhoneNumbersDialog client={client} />
                 </TableCell>
-                <TableCell className="text-right ">
+                <TableCell className="text-right">
                   {" "}
-                  <div className=" flex items-center gap-2 justify-end">
+                  <div className="flex items-center justify-end gap-2">
                     <ShowCars client={client} />
                     <ClientsTableActions
                       currPage={currPage}
@@ -115,11 +115,11 @@ const ClientsTable = ({
           : null}
       </TableBody>
     </Table>
-  );
-};
+  )
+}
 
 function ClientPic({ pic }: { pic: string | null }) {
-  const [viewedImg, setViewedImg] = useState<string | null>(null);
+  const [viewedImg, setViewedImg] = useState<string | null>(null)
   return (
     <TableCell>
       <TooltipProvider>
@@ -128,12 +128,12 @@ function ClientPic({ pic }: { pic: string | null }) {
             {pic ? (
               <img
                 onClick={() => setViewedImg(pic)}
-                className=" w-7 h-7 rounded-full object-cover hover:opacity-80 hover:contrast-[90%] transition-all "
+                className="h-7 w-7 rounded-full object-cover transition-all hover:opacity-80 hover:contrast-[90%]"
                 src={pic}
               />
             ) : (
-              <div className=" w-7 h-7 border rounded-full flex items-center justify-center  ">
-                <ImageOff className=" h-4 w-4" />
+              <div className="flex h-7 w-7 items-center justify-center rounded-full border">
+                <ImageOff className="h-4 w-4" />
               </div>
             )}
           </TooltipTrigger>
@@ -146,26 +146,26 @@ function ClientPic({ pic }: { pic: string | null }) {
         <ImageView image={viewedImg} handleClose={() => setViewedImg(null)} />
       ) : null}
     </TableCell>
-  );
+  )
 }
 
 function Provider({ provider }: { provider: string | null }) {
-  const isGoogle = provider == "google";
+  const isGoogle = provider == "google"
   return (
     <TableCell>
       <TooltipProvider>
         <Tooltip>
-          <TooltipTrigger className="  cursor-default">
+          <TooltipTrigger className="cursor-default">
             {provider ? (
-              <div className=" w-7 h-7 border rounded-full  flex items-center justify-center ">
+              <div className="flex h-7 w-7 items-center justify-center rounded-full border">
                 {isGoogle ? (
-                  <FcGoogle className=" h-4 w-4" />
+                  <FcGoogle className="h-4 w-4" />
                 ) : (
-                  <Mail className=" h-4 w-4" />
+                  <Mail className="h-4 w-4" />
                 )}
               </div>
             ) : (
-              <div className="  px-2 py-[.1rem] text-xs  border rounded-full  flex items-center justify-center ">
+              <div className="flex items-center justify-center rounded-full border px-2 py-[.1rem] text-xs">
                 None
               </div>
             )}
@@ -180,77 +180,77 @@ function Provider({ provider }: { provider: string | null }) {
         </Tooltip>
       </TooltipProvider>
     </TableCell>
-  );
+  )
 }
 function ClientsTableActions({
   client,
   currPageSize,
   currPage,
 }: {
-  currPage: string;
-  client: ClientWithPhoneNumbers;
-  currPageSize: number;
+  currPage: string
+  client: ClientWithPhoneNumbers
+  currPageSize: number
 }) {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [open, setOpen] = useState<"delete" | "edit" | "ban" | "">("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [open, setOpen] = useState<"delete" | "edit" | "ban" | "">("")
+  const [isLoading, setIsLoading] = useState(false)
 
   function handleClose() {
-    setOpen("");
+    setOpen("")
   }
 
-  if (isLoading) return <Spinner className=" h-6 w-6" size={14} />;
+  if (isLoading) return <Spinner className="h-6 w-6" size={14} />
 
   return (
     <>
       <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="icon" className=" p-0 h-6 w-6">
-            <Ellipsis className=" w-4 h-4" />
+          <Button variant="outline" size="icon" className="h-6 w-6 p-0">
+            <Ellipsis className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className=" min-w-[200px] mr-5 ">
+        <DropdownMenuContent className="mr-5 min-w-[200px]">
           {/* <DropdownMenuLabel>My Account</DropdownMenuLabel> */}
           {/* <DropdownMenuSeparator /> */}
           <DropdownMenuItem
             asChild
             disabled={!client.provider || !client.user_id}
             onClick={(e) => {
-              if (!client.provider) e.preventDefault();
+              if (!client.provider) e.preventDefault()
             }}
             className={!client.user_id ? "pointer-events-none" : ""}
           >
             <Link
               href={`/user/${client.user_id}`}
-              className=" flex items-center gap-2"
+              className="flex items-center gap-2"
             >
-              <CircleUser className=" w-4 h-4" /> View client&apos;s detials
+              <CircleUser className="h-4 w-4" /> View client&apos;s detials
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem
-            className=" gap-2"
+            className="gap-2"
             onClick={() => {
-              setOpen("edit");
+              setOpen("edit")
             }}
           >
-            <UserPen className=" w-4 h-4" /> Edit client
+            <UserPen className="h-4 w-4" /> Edit client
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => {
-              setOpen("ban");
+              setOpen("ban")
             }}
-            className=" gap-2 text-destructive-foreground"
+            className="text-destructive-foreground gap-2"
           >
-            <Ban className="w-4 h-4" /> Ban user
+            <Ban className="h-4 w-4" /> Ban user
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem
-            className=" gap-2 text-destructive-foreground"
+            className="text-destructive-foreground gap-2"
             onClick={() => {
-              setOpen("delete");
+              setOpen("delete")
             }}
           >
-            <UserRoundMinus className=" w-4 h-4" /> Delete
+            <UserRoundMinus className="h-4 w-4" /> Delete
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -274,18 +274,18 @@ function ClientsTableActions({
         handleClose={handleClose}
       />
     </>
-  );
+  )
 }
 
 function PhoneNumbersDialog({ client }: { client: ClientWithPhoneNumbers }) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(false)
 
   if (!client.phones.length)
     return (
       <TooltipProvider delayDuration={500}>
         <Tooltip>
           <TooltipTrigger>
-            <span className="  inline-flex items-center justify-center whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring pointer-events-none opacity-50 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground rounded-md h-6 px-2 py-3 text-xs">
+            <span className="pointer-events-none inline-flex h-6 items-center justify-center rounded-md border border-input bg-background px-2 py-3 text-xs font-medium whitespace-nowrap opacity-50 shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none">
               Show
             </span>
           </TooltipTrigger>
@@ -294,34 +294,34 @@ function PhoneNumbersDialog({ client }: { client: ClientWithPhoneNumbers }) {
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
-    );
+    )
 
-  if (client.phones.length === 1) return <span>{client.phones[0].number}</span>;
+  if (client.phones.length === 1) return <span>{client.phones[0].number}</span>
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <Button
         onClick={() => setOpen(true)}
         size="sm"
-        className="   h-6 px-2 py-3 text-xs"
+        className="h-6 px-2 py-3 text-xs"
         variant="outline"
       >
         Show
       </Button>
 
-      <DialogContent className=" border-none">
+      <DialogContent className="border-none">
         <DialogHeader>
           <DialogTitle>{`${client?.name}'s phome numbers`}</DialogTitle>
-          <DialogDescription className=" hidden">
+          <DialogDescription className="hidden">
             This action cannot be undone. This will permanently delete your
             account and remove your data from our servers.
           </DialogDescription>
         </DialogHeader>
-        <main className=" space-y-2">
+        <main className="space-y-2">
           {client.phones.length
             ? client.phones.map((phone, i) => (
                 <div
                   key={i}
-                  className="flex text-sm  text-muted-foreground  items-center gap-2"
+                  className="flex items-center gap-2 text-sm text-muted-foreground"
                 >
                   <span>{`Phone ${i + 1}`}: </span>
                   <span>{phone.number}</span>
@@ -330,45 +330,45 @@ function PhoneNumbersDialog({ client }: { client: ClientWithPhoneNumbers }) {
             : null}
         </main>
         <DialogClose asChild>
-          <Button size="sm" className=" w-full" variant="secondary">
+          <Button size="sm" className="w-full" variant="secondary">
             Close
           </Button>
         </DialogClose>
       </DialogContent>
     </Dialog>
-  );
+  )
 }
 
 function ShowCars({ client }: { client: ClientWithPhoneNumbers }) {
-  const router = useRouter();
+  const router = useRouter()
 
   if (!client.cars[0].count)
     return (
       <TooltipProvider delayDuration={500}>
         <Tooltip>
           <TooltipTrigger>
-            <span className="  inline-flex items-center justify-center whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring pointer-events-none opacity-50 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground rounded-md h-6 px-2 py-3 text-xs">
+            <span className="pointer-events-none inline-flex h-6 items-center justify-center rounded-md border border-input bg-background px-2 py-3 text-xs font-medium whitespace-nowrap opacity-50 shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none">
               Show
             </span>
           </TooltipTrigger>
           <TooltipContent>This clients doesn&apos;t have cors.</TooltipContent>
         </Tooltip>
       </TooltipProvider>
-    );
+    )
 
   return (
     <Button
       disabled={!client.cars[0].count}
       onClick={() => {
-        if (client.cars[0].count) router.push(`/garage?clientId=${client.id}`);
+        if (client.cars[0].count) router.push(`/garage?clientId=${client.id}`)
       }}
       size="sm"
-      className="   h-6 px-2 py-3 text-xs"
+      className="h-6 px-2 py-3 text-xs"
       variant="outline"
     >
       Show
     </Button>
-  );
+  )
 }
 
 function DeleteClientDialog({
@@ -380,48 +380,48 @@ function DeleteClientDialog({
   setIsDeleting,
   client,
 }: {
-  currPage: string;
-  open: boolean;
-  isDeleting: boolean;
-  setIsDeleting: React.Dispatch<SetStateAction<boolean>>;
-  handleClose: () => void;
-  client: ClientWithPhoneNumbers;
-  pageSize: number;
+  currPage: string
+  open: boolean
+  isDeleting: boolean
+  setIsDeleting: React.Dispatch<SetStateAction<boolean>>
+  handleClose: () => void
+  client: ClientWithPhoneNumbers
+  pageSize: number
 }) {
-  const isFirstPage = currPage === "1";
+  const isFirstPage = currPage === "1"
 
-  const { toast } = useToast();
-  const searchParam = useSearchParams();
-  const router = useRouter();
-  const pathname = usePathname();
+  const { toast } = useToast()
+  const searchParam = useSearchParams()
+  const router = useRouter()
+  const pathname = usePathname()
 
   function checkIfLastItem() {
-    const params = new URLSearchParams(searchParam);
+    const params = new URLSearchParams(searchParam)
     if (pageSize === 1) {
-      params.delete("name");
-      params.delete("phone");
-      params.delete("email");
+      params.delete("name")
+      params.delete("phone")
+      params.delete("email")
       if (!isFirstPage) {
-        params.set("page", String(Number(currPage) - 1));
+        params.set("page", String(Number(currPage) - 1))
       }
-      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false })
     }
   }
 
   useEffect(() => {
-    const body = document.querySelector("body");
+    const body = document.querySelector("body")
 
     if (body) {
-      body.style.pointerEvents = "auto";
+      body.style.pointerEvents = "auto"
     }
     return () => {
-      if (body) body.style.pointerEvents = "auto";
-    };
-  }, [open]);
+      if (body) body.style.pointerEvents = "auto"
+    }
+  }, [open])
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[425px] border-none">
+      <DialogContent className="border-none sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Delete clients data.</DialogTitle>
           <DialogDescription>
@@ -429,7 +429,7 @@ function DeleteClientDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <DialogFooter className="   gap-2 sm:gap-0">
+        <DialogFooter className="gap-2 sm:gap-0">
           <DialogClose asChild>
             <Button size="sm" variant="secondary">
               Cancel
@@ -440,13 +440,13 @@ function DeleteClientDialog({
             variant="destructive"
             size="sm"
             onClick={async () => {
-              setIsDeleting(true);
+              setIsDeleting(true)
               try {
-                const { error } = await deleteClientByIdAction(client.id);
-                if (error) throw new Error(error);
-                checkIfLastItem();
-                setIsDeleting(false);
-                handleClose();
+                const { error } = await deleteClientByIdAction(client.id)
+                if (error) throw new Error(error)
+                checkIfLastItem()
+                setIsDeleting(false)
+                handleClose()
                 toast({
                   className: "bg-primary  text-primary-foreground",
                   title: `Data deleted!`,
@@ -455,24 +455,24 @@ function DeleteClientDialog({
                       message={`${client.name}'s data has been deleted`}
                     />
                   ),
-                });
+                })
               } catch (error: any) {
-                console.error(error);
-                setIsDeleting(false);
+                console.error(error)
+                setIsDeleting(false)
                 toast({
                   variant: "destructive",
                   title: "Faild to delete client's data",
                   description: <ErorrToastDescription error={error.message} />,
-                });
+                })
               }
             }}
           >
-            {isDeleting ? <Spinner className=" h-full" /> : "Confrim"}
+            {isDeleting ? <Spinner className="h-full" /> : "Confrim"}
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  );
+  )
 }
 
-export default ClientsTable;
+export default ClientsTable

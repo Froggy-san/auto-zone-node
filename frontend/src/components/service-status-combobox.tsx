@@ -1,9 +1,8 @@
+import * as React from "react"
+import { Check, ChevronsUpDown } from "lucide-react"
 
-import * as React from "react";
-import { Check, ChevronsUpDown } from "lucide-react";
-
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
 import {
   Command,
   CommandEmpty,
@@ -11,15 +10,15 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "@/components/ui/command";
+} from "@/components/ui/command"
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
-import { ServiceStatus } from "@lib/types";
-import { DEFAULT_CAR_LOGO } from "@lib/constants";
-import StatusBadge from "./dashboard/status-badge";
+} from "@/components/ui/popover"
+import { ServiceStatus } from "@lib/types"
+import { DEFAULT_CAR_LOGO } from "@lib/constants"
+import StatusBadge from "./dashboard/status-badge"
 
 // const frameworks = [
 //   {
@@ -45,11 +44,11 @@ import StatusBadge from "./dashboard/status-badge";
 // ];
 
 interface ComboBoxProps {
-  setValue: React.Dispatch<React.SetStateAction<number>>;
-  value: number;
-  options: ServiceStatus[];
-  disabled?: boolean;
-  className?: string;
+  setValue: React.Dispatch<React.SetStateAction<number>>
+  value: number
+  options: ServiceStatus[]
+  disabled?: boolean
+  className?: string
 }
 
 export const ServiceStatusCombobox: React.FC<ComboBoxProps> = ({
@@ -59,9 +58,9 @@ export const ServiceStatusCombobox: React.FC<ComboBoxProps> = ({
   className,
   disabled,
 }) => {
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = React.useState(false)
   // const [value, setValue] = React.useState(0);
-  const selected = options.find((option) => option.id === value);
+  const selected = options.find((option) => option.id === value)
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -71,14 +70,14 @@ export const ServiceStatusCombobox: React.FC<ComboBoxProps> = ({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className={cn("w-full   justify-between   h-fit ", className)}
+          className={cn("h-fit w-full justify-between", className)}
         >
           {selected ? (
-            <div className=" flex max-w-full   items-center gap-2">
+            <div className="flex max-w-full items-center gap-2">
               Status:{" "}
               <StatusBadge
                 status={selected}
-                className=" py-[.1rem] text-wrap"
+                className="py-[.1rem] text-wrap"
                 key={selected.id}
               />
             </div>
@@ -88,7 +87,7 @@ export const ServiceStatusCombobox: React.FC<ComboBoxProps> = ({
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className=" max-h-[30vh] sm:h-[unset]  w-[300px] sm:w-[400px]   p-0">
+      <PopoverContent className="max-h-[30vh] w-[300px] p-0 sm:h-[unset] sm:w-[400px]">
         <Command>
           <CommandInput placeholder="Search option..." />
           <CommandList>
@@ -99,8 +98,8 @@ export const ServiceStatusCombobox: React.FC<ComboBoxProps> = ({
                   key={option.id}
                   value={option.name + String(option.id)} // to avoid selecting two or more items that has the same name proprty.
                   onSelect={() => {
-                    setValue(option.id === value ? 0 : option.id);
-                    setOpen(false);
+                    setValue(option.id === value ? 0 : option.id)
+                    setOpen(false)
                   }}
                   className="gap-2"
                 >
@@ -110,8 +109,8 @@ export const ServiceStatusCombobox: React.FC<ComboBoxProps> = ({
                       value === option.id ? "opacity-100" : "opacity-0"
                     )}
                   />
-                  <div className="  flex items-center gap-2 ">
-                    <StatusBadge status={option} className=" py-[.1rem]" />
+                  <div className="flex items-center gap-2">
+                    <StatusBadge status={option} className="py-[.1rem]" />
                   </div>
                 </CommandItem>
               ))}
@@ -120,5 +119,5 @@ export const ServiceStatusCombobox: React.FC<ComboBoxProps> = ({
         </Command>
       </PopoverContent>
     </Popover>
-  );
-};
+  )
+}

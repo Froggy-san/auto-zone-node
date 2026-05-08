@@ -1,8 +1,8 @@
-import React, { useCallback, useState } from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { Button } from "@/components/ui/button";
+import React, { useCallback, useState } from "react"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
+import { z } from "zod"
+import { Button } from "@/components/ui/button"
 import {
   Form,
   FormControl,
@@ -11,7 +11,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
+} from "@/components/ui/form"
 
 import {
   CarModelProps,
@@ -19,27 +19,27 @@ import {
   CarGenerationProps,
   CarInfoSchema,
   CarMakersData,
-} from "@lib/types";
+} from "@lib/types"
 
-import Spinner from "@components/Spinner";
+import Spinner from "@components/Spinner"
 
-import { useToast } from "@hooks/use-toast";
+import { useToast } from "@hooks/use-toast"
 
 import SuccessToastDescription, {
   ErorrToastDescription,
-} from "@components/toast-items";
+} from "@components/toast-items"
 
-import { MakerCombobox } from "@components/maker-combobox";
-import { ModelCombobox } from "@components/model-combobox";
+import { MakerCombobox } from "@components/maker-combobox"
+import { ModelCombobox } from "@components/model-combobox"
 
-import { createCarInfoAction } from "@lib/actions/carInfoActions";
-import useObjectCompare from "@hooks/use-compare-objs";
-import DialogComponent from "@components/dialog-component";
+import { createCarInfoAction } from "@lib/actions/carInfoActions"
+import useObjectCompare from "@hooks/use-compare-objs"
+import DialogComponent from "@components/dialog-component"
 
 interface CarInfoFormProps {
-  carModels: CarModelProps[];
-  carMakers: CarMakersData[];
-  carGenerations: CarGenerationProps[];
+  carModels: CarModelProps[]
+  carMakers: CarMakersData[]
+  carGenerations: CarGenerationProps[]
 }
 
 export const CarInfoForm: React.FC<CarInfoFormProps> = ({
@@ -47,66 +47,66 @@ export const CarInfoForm: React.FC<CarInfoFormProps> = ({
   carMakers,
   carGenerations,
 }) => {
-  const [open, setOpen] = useState(false);
-  const { toast } = useToast();
+  const [open, setOpen] = useState(false)
+  const { toast } = useToast()
 
   const defaultValues = {
     carMakerId: 0,
     carGenerationId: 0,
     carModelId: 0,
-  };
+  }
 
   const form = useForm<z.infer<typeof CarInfoSchema>>({
     resolver: zodResolver(CarInfoSchema),
     defaultValues,
-  });
+  })
 
-  const { carMakerId, carModelId, carGenerationId } = form.watch();
-  const isEqual = useObjectCompare(form.getValues(), defaultValues);
+  const { carMakerId, carModelId, carGenerationId } = form.watch()
+  const isEqual = useObjectCompare(form.getValues(), defaultValues)
 
   const modelArr = carMakerId
     ? carModels.filter((model) => model.carMakerId === carMakerId)
-    : carModels;
+    : carModels
 
   const generationsArr = carModelId
     ? carGenerations.filter((gen) => gen.carModelId === carModelId)
-    : carGenerations;
+    : carGenerations
 
   const handleClose = useCallback(() => {
-    setOpen(false);
-    form.reset();
-  }, [open]);
+    setOpen(false)
+    form.reset()
+  }, [open])
 
-  const isLoading = form.formState.isSubmitting;
+  const isLoading = form.formState.isSubmitting
 
   async function onSubmit(carInfo: z.infer<typeof CarInfoSchema>) {
     try {
-      if (isEqual) throw new Error("You haven't changed anything.");
-      await createCarInfoAction(carInfo);
-      form.reset();
-      setOpen(false);
+      if (isEqual) throw new Error("You haven't changed anything.")
+      await createCarInfoAction(carInfo)
+      form.reset()
+      setOpen(false)
       toast({
         className: "bg-primary  text-primary-foreground",
         title: "Success!.",
         description: (
           <SuccessToastDescription message="A new car information has been create." />
         ),
-      });
+      })
     } catch (error: any) {
       toast({
         variant: "destructive",
         title: "Something went wrong while creating a new car information.",
         description: <ErorrToastDescription error={error.message} />,
-      });
+      })
     }
   }
   return (
     <DialogComponent open={open} onOpenChange={handleClose}>
-      <Button onClick={() => setOpen(true)} size="sm" className=" w-full">
+      <Button onClick={() => setOpen(true)} size="sm" className="w-full">
         New car information
       </Button>
 
-      <DialogComponent.Content className="  max-h-[65vh]  sm:max-h-[76vh] overflow-y-auto max-w-[1000px] sm:p-14">
+      <DialogComponent.Content className="max-h-[65vh] max-w-[1000px] overflow-y-auto sm:max-h-[76vh] sm:p-14">
         <DialogComponent.Header>
           <DialogComponent.Title>Car information</DialogComponent.Title>
           <DialogComponent.Description>
@@ -114,14 +114,14 @@ export const CarInfoForm: React.FC<CarInfoFormProps> = ({
           </DialogComponent.Description>
         </DialogComponent.Header>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 ">
-            <div className=" flex flex-col sm:flex-row   items-center gap-3">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <div className="flex flex-col items-center gap-3 sm:flex-row">
               <FormField
                 disabled={isLoading}
                 control={form.control}
                 name="carMakerId"
                 render={({ field }) => (
-                  <FormItem className=" w-full mb-auto">
+                  <FormItem className="mb-auto w-full">
                     <FormLabel>Car Maker</FormLabel>
                     <FormControl>
                       {/* <MakerCombobox
@@ -146,15 +146,15 @@ export const CarInfoForm: React.FC<CarInfoFormProps> = ({
                 control={form.control}
                 name="carModelId"
                 render={({ field }) => (
-                  <FormItem className=" w-full mb-auto">
+                  <FormItem className="mb-auto w-full">
                     <FormLabel>Car models</FormLabel>
                     <FormControl>
                       <ModelCombobox
                         disabled={isLoading || !carMakerId}
                         value={field.value}
                         setValue={(id) => {
-                          field.onChange(id);
-                          form.setValue("carGenerationId", 0);
+                          field.onChange(id)
+                          form.setValue("carGenerationId", 0)
                         }}
                         options={modelArr}
                       />
@@ -194,7 +194,7 @@ export const CarInfoForm: React.FC<CarInfoFormProps> = ({
                 type="reset"
                 variant="secondary"
                 size="sm"
-                className=" w-full sm:w-[unset]"
+                className="w-full sm:w-[unset]"
               >
                 Cancel
               </Button>
@@ -202,16 +202,16 @@ export const CarInfoForm: React.FC<CarInfoFormProps> = ({
                 type="submit"
                 size="sm"
                 disabled={isLoading || isEqual}
-                className=" w-full sm:w-[unset]"
+                className="w-full sm:w-[unset]"
               >
-                {isLoading ? <Spinner className=" h-full" /> : "Create"}
+                {isLoading ? <Spinner className="h-full" /> : "Create"}
               </Button>
             </DialogComponent.Footer>
           </form>
         </Form>
       </DialogComponent.Content>
     </DialogComponent>
-  );
-};
+  )
+}
 
-export default CarInfoForm;
+export default CarInfoForm

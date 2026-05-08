@@ -1,15 +1,15 @@
-import { Button } from "@components/ui/button";
-import { cn } from "@lib/utils";
-import React, { useState } from "react";
+import { Button } from "@components/ui/button"
+import { cn } from "@lib/utils"
+import React, { useState } from "react"
 
 const TestingAnimation = () => {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(false)
 
   return (
     <>
       <Button onClick={() => setOpen((is) => !is)}>Open</Button>
       <div
-        className={cn("w-[250px] h-52 rounded-md bg-accent border dialog", {
+        className={cn("dialog h-52 w-[250px] rounded-md border bg-accent", {
           "dialog-open": open,
           "dialog-closed": !open,
         })}
@@ -18,7 +18,7 @@ const TestingAnimation = () => {
         {open ? "open" : "closed"}
       </div>
     </>
-  );
-};
+  )
+}
 
-export default TestingAnimation;
+export default TestingAnimation

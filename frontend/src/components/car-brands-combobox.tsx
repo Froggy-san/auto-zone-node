@@ -93,7 +93,6 @@ const CarBrandsCombobox = React.forwardRef<HTMLButtonElement, Props>(
               <CommandEmpty>No option found.</CommandEmpty>
               <CommandGroup>
                 {options?.map((option, i) => {
-                  console.log(option._id, "DDDDDDDD")
                   return (
                     <CommandItem
                       key={`${option._id}-${i}`}

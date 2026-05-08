@@ -1,21 +1,21 @@
-import React from "react";
+import React from "react"
 
-import { getClientsAction } from "@lib/actions/clientActions";
-import InventoryTable from "./inventory-table";
-import { getProductsBoughtAction } from "@lib/actions/productBoughtActions";
-import { getRestockingBillsAction } from "@lib/actions/restockingBillActions";
-import PaginationControl from "@components/pagination-controls";
+import { getClientsAction } from "@lib/actions/clientActions"
+import InventoryTable from "./inventory-table"
+import { getProductsBoughtAction } from "@lib/actions/productBoughtActions"
+import { getRestockingBillsAction } from "@lib/actions/restockingBillActions"
+import PaginationControl from "@components/pagination-controls"
 
 interface ClientListProps {
   // Add the properties you expect in searchParam
   // query: string;
-  pageNumber: string;
-  name?: string;
-  shopName?: string;
-  dateOfOrderFrom?: string;
-  dateOfOrderTo?: string;
-  minTotalPrice?: string;
-  maxTotalPrice?: string;
+  pageNumber: string
+  name?: string
+  shopName?: string
+  dateOfOrderFrom?: string
+  dateOfOrderTo?: string
+  minTotalPrice?: string
+  maxTotalPrice?: string
 }
 const InventoryList = ({
   pageNumber,
@@ -34,9 +34,9 @@ const InventoryList = ({
     dateOfOrderTo,
     minTotalPrice,
     maxTotalPrice,
-  });
+  })
 
-  if (error) return <p>{error}</p>;
+  if (error) return <p>{error}</p>
 
   return (
     <div>
@@ -48,7 +48,7 @@ const InventoryList = ({
         <PaginationControl count={inventoryData.count} currPage={pageNumber} />
       )}
     </div>
-  );
-};
+  )
+}
 
-export default InventoryList;
+export default InventoryList

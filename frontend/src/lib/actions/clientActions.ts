@@ -1,28 +1,28 @@
-"use server";
+"use server"
 
-import { AUTH_TOEKN_NAME, PAGE_SIZE } from "@lib/constants";
-import { getToken } from "@lib/helper";
+import { AUTH_TOEKN_NAME, PAGE_SIZE } from "@lib/constants"
+import { getToken } from "@lib/helper"
 import {
   Client,
   ClientById,
   ClientWithPhoneNumbers,
   CreateClient,
   PhoneNumber,
-} from "@lib/types";
-import { revalidateTag } from "next/cache";
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
-import { editPhoneNumAction } from "./phoneActions";
-import { createClient } from "@utils/supabase/server";
+} from "@lib/types"
+import { revalidateTag } from "next/cache"
+import { cookies } from "next/headers"
+import { redirect } from "next/navigation"
+import { editPhoneNumAction } from "./phoneActions"
+import { createClient } from "@utils/supabase/server"
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
 interface GetClientsActionProps {
-  name?: string;
-  email?: string;
-  phone?: string;
-  pageNumber?: string;
+  name?: string
+  email?: string
+  phone?: string
+  pageNumber?: string
 }
 
 export async function getClientsAction({
@@ -31,27 +31,27 @@ export async function getClientsAction({
   email,
   phone,
 }: GetClientsActionProps): Promise<{
-  data: { clients: ClientWithPhoneNumbers[]; count: number | string } | null;
-  error: string;
+  data: { clients: ClientWithPhoneNumbers[]; count: number | string } | null
+  error: string
 }> {
   try {
-    const from = (Number(pageNumber) - 1) * PAGE_SIZE;
-    const to = from + PAGE_SIZE - 1;
+    const from = (Number(pageNumber) - 1) * PAGE_SIZE
+    const to = from + PAGE_SIZE - 1
 
-    let query = `${supabaseUrl}/rest/v1/clients?select=*,phones(*),cars(count)&order=created_at.asc&phones.order=created_at.asc`;
+    let query = `${supabaseUrl}/rest/v1/clients?select=*,phones(*),cars(count)&order=created_at.asc&phones.order=created_at.asc`
 
-    if (name) query = query + `&name=ilike.*${name}*`;
-    if (email) query = query + `&email=ilike.*${email}*`;
-    if (phone) query = query + `&phones.number=eq.${phone}`;
+    if (name) query = query + `&name=ilike.*${name}*`
+    if (email) query = query + `&email=ilike.*${email}*`
+    if (phone) query = query + `&phones.number=eq.${phone}`
 
     const headers = {
       apikey: `${supabaseKey}`,
       Authorization: `Bearer ${supabaseKey}`,
-    } as Record<string, string>;
+    } as Record<string, string>
 
     if (pageNumber) {
-      headers.Range = `${from}-${to}`;
-      headers.Prefer = "count=exact";
+      headers.Range = `${from}-${to}`
+      headers.Prefer = "count=exact"
     }
 
     const response = await fetch(query, {
@@ -60,24 +60,22 @@ export async function getClientsAction({
       next: {
         tags: ["clients"],
       },
-    });
+    })
 
     if (!response.ok) {
       const error =
-        (await response.json()).message || "Failed to get the clients data.";
-      throw new Error(error);
+        (await response.json()).message || "Failed to get the clients data."
+      throw new Error(error)
     }
-    const count = response.headers.get("content-range")?.split("/")[1] || 0;
-    const data = (await response.json()) as ClientWithPhoneNumbers[];
+    const count = response.headers.get("content-range")?.split("/")[1] || 0
+    const data = (await response.json()) as ClientWithPhoneNumbers[]
 
-    const clients = phone
-      ? data.filter((client) => client.phones.length)
-      : data;
+    const clients = phone ? data.filter((client) => client.phones.length) : data
 
-    return { data: { clients, count }, error: "" };
+    return { data: { clients, count }, error: "" }
   } catch (error: any) {
-    console.log(`Failed to get the clietns: ${error.message}`);
-    return { data: null, error: error.message };
+    console.log(`Failed to get the clietns: ${error.message}`)
+    return { data: null, error: error.message }
   }
 }
 
@@ -121,37 +119,37 @@ export async function getClientsAction({
 // }
 
 export async function getCurrentClientAction(): Promise<{
-  data: Client | null;
-  error: string | null;
+  data: Client | null
+  error: string | null
 }> {
   try {
-    const supabase = await createClient();
+    const supabase = await createClient()
     const {
       data: { user },
       error,
-    } = await supabase.auth.getUser();
-    if (error) throw new Error(error.message);
-    if (!user) throw new Error(`Failed to get the current user's data.`);
+    } = await supabase.auth.getUser()
+    if (error) throw new Error(error.message)
+    if (!user) throw new Error(`Failed to get the current user's data.`)
 
     const { data: clientById, error: clientError } = await supabase
       .from("clients")
       .select("*")
       .eq("user_id", user.id)
-      .single();
-    if (clientError) throw new Error(clientError.message);
+      .single()
+    if (clientError) throw new Error(clientError.message)
 
     if (!clientById)
-      throw new Error(`Failed to get the currently logged in client.`);
+      throw new Error(`Failed to get the currently logged in client.`)
 
-    return { data: clientById, error: null };
+    return { data: clientById, error: null }
   } catch (error: any) {
-    console.log(`Failed to the currently logged in client.`);
-    return { data: null, error: error.message };
+    console.log(`Failed to the currently logged in client.`)
+    return { data: null, error: error.message }
   }
 }
 export async function getClientByIdAction(
   id: string,
-  tag: "id" | "user_id",
+  tag: "id" | "user_id"
 ): Promise<{ data: ClientById | null; error: string }> {
   const response = await fetch(
     `${supabaseUrl}/rest/v1/clients?${tag}=eq.${id}&select=*,phones(*),cars(*,carImages(*),carGenerations(*,carModels(*,carMakers(*))))&cars.carImages.order=created_at.asc`,
@@ -162,23 +160,23 @@ export async function getClientByIdAction(
         Authorization: `Bearer ${supabaseKey}`,
         // Prefer: "plurality=ignore", // The limit=1 makes this work
       },
-    },
-  );
+    }
+  )
 
   if (!response.ok) {
     const error =
       (await response.json()).message ||
-      "Somthing went wrong whil getting the car data.";
+      "Somthing went wrong whil getting the car data."
     return {
       data: null,
       error,
-    };
+    }
   }
 
-  const data = (await response.json())[0];
+  const data = (await response.json())[0]
 
-  if (!data) return { data: null, error: "Something went wrong" };
-  return { data: data, error: "" };
+  if (!data) return { data: null, error: "Something went wrong" }
+  return { data: data, error: "" }
 }
 
 export async function createClientAction({
@@ -189,29 +187,29 @@ export async function createClientAction({
   provider,
   picture,
 }: CreateClient & {
-  provider: string;
-  user_id?: string;
-  picture?: string;
+  provider: string
+  user_id?: string
+  picture?: string
 }) {
-  const supabase = await createClient();
+  const supabase = await createClient()
 
   const { data, error } = await supabase
     .from("clients")
     .insert([{ name, email, user_id, picture, provider }])
-    .select();
+    .select()
 
   if (error) {
     return {
       data: null,
       error: error.message,
-    };
+    }
   }
-  const { id } = data?.[0];
+  const { id } = data?.[0]
   if (!data)
     return {
       data: null,
       error: "Something went wrong while creating a new client.",
-    };
+    }
   if (phones.length) {
     // const upload = phones.map((phone) =>
     //   createPhoneNumAction({ number: phone.number, clientId })
@@ -225,12 +223,12 @@ export async function createClientAction({
     // Add the clientId to each phone number.
 
     const phonesToUpload = phones.map((phone) => {
-      return { number: phone.number, clientId: id };
-    });
+      return { number: phone.number, clientId: id }
+    })
 
     const { error: phoneError } = await supabase
       .from("phones")
-      .insert(phonesToUpload);
+      .insert(phonesToUpload)
 
     // Sent the phone numbers array to the back-end.
 
@@ -238,16 +236,16 @@ export async function createClientAction({
     // In case of an error, delete the client we created above.
 
     if (phoneError) {
-      const { error } = await supabase.from("clients").delete().eq("id", id);
+      const { error } = await supabase.from("clients").delete().eq("id", id)
       return {
         data: null,
         error: phoneError.message || error?.message,
-      };
+      }
     }
   }
-  revalidateTag("clients");
+  revalidateTag("clients")
 
-  return { data: null, error: "" };
+  return { data: null, error: "" }
 }
 
 export async function editClientAction({
@@ -256,78 +254,78 @@ export async function editClientAction({
   phonesToAdd,
   phonesToDelete,
 }: {
-  phonesToEdit: PhoneNumber[];
-  phonesToDelete: PhoneNumber[];
-  clientToEdit: Client;
-  phonesToAdd: { number: string }[];
+  phonesToEdit: PhoneNumber[]
+  phonesToDelete: PhoneNumber[]
+  clientToEdit: Client
+  phonesToAdd: { number: string }[]
 }) {
-  const supabase = await createClient();
+  const supabase = await createClient()
 
-  const { id, name, email } = clientToEdit;
+  const { id, name, email } = clientToEdit
 
   const { data, error } = await supabase
     .from("clients")
     .update({ name, email })
-    .eq("id", id);
+    .eq("id", id)
 
-  if (error) return { data: null, error: error.message };
+  if (error) return { data: null, error: error.message }
 
   // Adding new phone numbers
   if (phonesToAdd.length) {
     const phones = phonesToAdd.map((phone) => {
-      return { number: phone.number, clientId: id };
-    });
+      return { number: phone.number, clientId: id }
+    })
 
-    const { error: phoneError } = await supabase.from("phones").insert(phones);
+    const { error: phoneError } = await supabase.from("phones").insert(phones)
 
-    if (phoneError) return { data: null, error: phoneError.message };
+    if (phoneError) return { data: null, error: phoneError.message }
   }
 
   // // Handling the editing of phone numbers
   if (phonesToEdit.length) {
     const editPhones = phonesToEdit.map((phone) =>
-      editPhoneNumAction({ id: phone.id, number: phone.number }),
-    );
+      editPhoneNumAction({ id: phone.id, number: phone.number })
+    )
 
     try {
-      await Promise.all(editPhones);
+      await Promise.all(editPhones)
     } catch (error: any) {
-      return { data: null, error };
+      return { data: null, error }
     }
   }
 
   // // Handling the deleting of phone numbers.
 
   if (phonesToDelete.length) {
-    const ids = phonesToDelete.map((phone) => phone.id);
+    const ids = phonesToDelete.map((phone) => phone.id)
 
-    const { error } = await supabase.from("phones").delete().in("id", ids);
+    const { error } = await supabase.from("phones").delete().in("id", ids)
 
-    if (error) return { data: null, error: error.message };
+    if (error) return { data: null, error: error.message }
   }
 
-  revalidateTag("clients");
+  revalidateTag("clients")
   // revalidatePath("/dashboard/customers");
 
-  return { data: null, error: "" };
+  return { data: null, error: "" }
 }
 
 export async function deleteClientByIdAction(id: number, revalidate = true) {
-  const supabase = await createClient();
-  const { error } = await supabase.from("clients").delete().eq("id", id);
-  if (error) return { data: null, error: error.message };
+  const supabase = await createClient()
+  const { error } = await supabase.from("clients").delete().eq("id", id)
+  if (error) return { data: null, error: error.message }
 
   // return data;
   // revalidatePath("/products");
-  if (revalidate) revalidateTag("clients");
+  if (revalidate) revalidateTag("clients")
 
-  return { data: null, error: "" };
+  return { data: null, error: "" }
 }
 
 interface GetClientsCountActionProps {
-  name?: string;
-  email?: string;
-  phone?: string;
+  name?: string
+  email?: string
+  phone?: string
 }
 
 export async function getClientsCountAction({
@@ -337,21 +335,21 @@ export async function getClientsCountAction({
 }: GetClientsCountActionProps) {
   //Product?PageNumber=1&PageSize=10
 
-  const token = getToken();
+  const token = getToken()
 
   if (!token)
     return {
       data: null,
       error: "You are not authorized to get the products count data.",
-    };
+    }
 
-  let query = `${process.env.API_URL}/api/Clients/count?`;
+  let query = `${process.env.API_URL}/api/Clients/count?`
 
-  if (name) query = query + `&Name=${name}`;
+  if (name) query = query + `&Name=${name}`
 
-  if (phone) query = query + `&phone=${phone}`;
+  if (phone) query = query + `&phone=${phone}`
 
-  if (email) query = query + `&email=${email}`;
+  if (email) query = query + `&email=${email}`
 
   const response = await fetch(query, {
     method: "GET",
@@ -359,18 +357,18 @@ export async function getClientsCountAction({
       Authorization: `Bearer ${token}`,
       // "Content-type": "application/json",
     },
-  });
+  })
 
   if (!response.ok) {
     return {
       data: null,
       error: "Something went wrong while grabbing the products count.",
-    };
+    }
   }
 
-  const data = await response.json();
+  const data = await response.json()
 
-  return { data, error: "" };
+  return { data, error: "" }
 }
 
 /// PRODUCT IMAGES.
@@ -378,10 +376,10 @@ export async function getClientsCountAction({
 export async function getProductsImageAction(id: number) {
   //Product?PageNumber=1&PageSize=10
 
-  const token = getToken();
+  const token = getToken()
 
   if (!token)
-    return { data: null, error: "You are not authorized to make this action." };
+    return { data: null, error: "You are not authorized to make this action." }
 
   const response = await fetch(
     `${process.env.API_URL}/api/ProductImages/${id}`,
@@ -391,26 +389,26 @@ export async function getProductsImageAction(id: number) {
         Authorization: `Bearer ${token}`,
         // "Content-type": "application/json",
       },
-    },
-  );
+    }
+  )
 
   if (!response.ok) {
     return {
       data: null,
       error: "Something went wrong while grabbing the products.",
-    };
+    }
   }
 
-  const data = await response.json();
+  const data = await response.json()
 
-  return { data, error: "" };
+  return { data, error: "" }
 }
 
 export async function createProductImageAction(formData: FormData) {
-  const cookie = cookies();
-  const token = cookie.get(AUTH_TOEKN_NAME)?.value || "";
+  const cookie = cookies()
+  const token = cookie.get(AUTH_TOEKN_NAME)?.value || ""
 
-  if (!token) redirect("/login");
+  if (!token) redirect("/login")
 
   const response = await fetch(`${process.env.API_URL}/api/ProductImages`, {
     method: "POST",
@@ -418,30 +416,30 @@ export async function createProductImageAction(formData: FormData) {
       Authorization: `Bearer ${token}`,
     },
     body: formData,
-  });
+  })
 
   if (!response.ok) {
     if (response.status === 409) {
-      return { data: null, error: (await response.json()).message };
+      return { data: null, error: (await response.json()).message }
     }
     return {
       data: null,
       error: "Something went wrong while creating the product.",
-    };
+    }
   }
 
   // const data = await response.json();
   // return data;
 
-  return { data: null, error: "" };
+  return { data: null, error: "" }
 }
 
 export async function deleteProductsImageAction(imageId: number) {
   //Product?PageNumber=1&PageSize=10
 
-  const token = getToken();
+  const token = getToken()
 
-  if (!token) redirect("/login");
+  if (!token) redirect("/login")
 
   const response = await fetch(
     `${process.env.API_URL}/api/ProductImages/${imageId}`,
@@ -451,25 +449,25 @@ export async function deleteProductsImageAction(imageId: number) {
         Authorization: `Bearer ${token}`,
         // "Content-type": "application/json",
       },
-    },
-  );
+    }
+  )
 
   if (!response.ok) {
     if (response.status === 409) {
-      return { data: null, error: (await response.json()).message };
+      return { data: null, error: (await response.json()).message }
     }
 
     return {
       data: null,
       error: "Something went wrong while grabbing the products.",
-    };
+    }
   }
 
   // const data = await response.json();
 
   // return { data, error: "" };
 
-  return { data: null, error: "" };
+  return { data: null, error: "" }
 }
 
 /// WTF IS THIS ?
@@ -477,10 +475,10 @@ export async function deleteProductsImageAction(imageId: number) {
 export async function getProductsImagesMainAction(id: number) {
   //Product?PageNumber=1&PageSize=10
 
-  const token = getToken();
+  const token = getToken()
 
   if (!token)
-    return { data: null, error: "You are not authorized to make this action." };
+    return { data: null, error: "You are not authorized to make this action." }
 
   const response = await fetch(
     `${process.env.API_URL}/api/ProductImages/main/${id}`,
@@ -490,28 +488,28 @@ export async function getProductsImagesMainAction(id: number) {
         Authorization: `Bearer ${token}`,
         // "Content-type": "application/json",
       },
-    },
-  );
+    }
+  )
 
   if (!response.ok) {
     return {
       data: null,
       error: "Something went wrong while grabbing the products.",
-    };
+    }
   }
 
-  const data = await response.json();
+  const data = await response.json()
 
-  return { data, error: "" };
+  return { data, error: "" }
 }
 
 export async function deleteProductsImageMainAction(id: number) {
   //Product?PageNumber=1&PageSize=10
 
-  const token = getToken();
+  const token = getToken()
 
   if (!token)
-    return { data: null, error: "You are not authorized to make this action." };
+    return { data: null, error: "You are not authorized to make this action." }
 
   const response = await fetch(
     `${process.env.API_URL}/api/ProductImages/main/${id}`,
@@ -521,19 +519,19 @@ export async function deleteProductsImageMainAction(id: number) {
         Authorization: `Bearer ${token}`,
         // "Content-type": "application/json",
       },
-    },
-  );
+    }
+  )
 
   if (!response.ok) {
     return {
       data: null,
       error: "Something went wrong while grabbing the products.",
-    };
+    }
   }
 
-  const data = await response.json();
+  const data = await response.json()
 
-  return { data, error: "" };
+  return { data, error: "" }
 }
 
 /*

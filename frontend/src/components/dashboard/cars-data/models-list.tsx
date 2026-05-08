@@ -1,43 +1,43 @@
-import React, { useState } from "react";
+import React, { useState } from "react"
 
-import { motion, AnimatePresence } from "framer-motion";
-import { CarMakersData, CarModelProps } from "@lib/types";
-import ModelItem from "./model-item";
-import MoreDetails from "./more-details";
-import { GenerationForm } from "./generation-form";
+import { motion, AnimatePresence } from "framer-motion"
+import { CarMakersData, CarModelProps } from "@lib/types"
+import ModelItem from "./model-item"
+import MoreDetails from "./more-details"
+import { GenerationForm } from "./generation-form"
 const ModelsList = ({
   carMaker,
   setModelToEdit,
   setModel,
 }: {
-  carMaker: CarMakersData | null;
-  setModel: React.Dispatch<React.SetStateAction<CarModelProps | null>>;
+  carMaker: CarMakersData | null
+  setModel: React.Dispatch<React.SetStateAction<CarModelProps | null>>
   setModelToEdit: React.Dispatch<
     React.SetStateAction<CarModelProps | undefined>
-  >;
+  >
 }) => {
-  const [selectedModelId, setSelectedModelId] = useState<number | null>(null);
+  const [selectedModelId, setSelectedModelId] = useState<number | null>(null)
   const [genToEdit, setGenToEdit] = useState<{
-    modelId: number;
-    genId: number;
-  } | null>(null);
-  const [modelGenId, setModelGenId] = useState<number | null>(null); // we are setting this state to a model id
+    modelId: number
+    genId: number
+  } | null>(null)
+  const [modelGenId, setModelGenId] = useState<number | null>(null) // we are setting this state to a model id
 
   const selectedModel = carMaker?.carModels.find(
     (model) => model.id === selectedModelId
-  );
+  )
   const relatedModelToGen = carMaker?.carModels.find(
     (model) => model.id === modelGenId
-  );
+  )
   const model = carMaker?.carModels.find(
     (model) => model.id === genToEdit?.modelId
-  );
+  )
   const generationToEdit = model?.carGenerations.find(
     (gen) => gen.id === genToEdit?.genId
-  );
+  )
   return (
     <div>
-      <h3 className="sm:text-xl md:text-2xl font-semibold mb-3">Models</h3>
+      <h3 className="mb-3 font-semibold sm:text-xl md:text-2xl">Models</h3>
       <AnimatePresence mode="wait">
         {carMaker?.carModels.length ? (
           <motion.ul
@@ -46,7 +46,7 @@ const ModelsList = ({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.09 }}
-            className="flex items-center justify-center  gap-3 flex-wrap"
+            className="flex flex-wrap items-center justify-center gap-3"
           >
             {carMaker.carModels.map((model) => (
               <ModelItem
@@ -62,7 +62,7 @@ const ModelsList = ({
         ) : (
           <p
             key="no-model"
-            className="text-muted-foreground w-full text-center"
+            className="w-full text-center text-muted-foreground"
           >
             No Models
           </p>
@@ -80,9 +80,9 @@ const ModelsList = ({
       <GenerationForm
         open={!!genToEdit || !!modelGenId}
         setOpen={() => {
-          setGenToEdit(null);
-          setModelGenId(null);
-          setSelectedModelId(model?.id || relatedModelToGen?.id || null);
+          setGenToEdit(null)
+          setModelGenId(null)
+          setSelectedModelId(model?.id || relatedModelToGen?.id || null)
         }}
         genToEdit={generationToEdit}
         model={model || relatedModelToGen}
@@ -92,7 +92,7 @@ const ModelsList = ({
       />
       {/* ) : null} */}
     </div>
-  );
-};
+  )
+}
 
-export default ModelsList;
+export default ModelsList

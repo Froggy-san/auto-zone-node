@@ -1,25 +1,25 @@
-import React from "react";
+import React from "react"
 
-import { getClientsAction } from "@lib/actions/clientActions";
+import { getClientsAction } from "@lib/actions/clientActions"
 
-import ServiceTable from "./service-table";
-import { getServicesAction } from "@lib/actions/serviceActions";
-import { getServiceStatusAction } from "@lib/actions/serviceStatusAction";
-import { getAllCategoriesAction } from "@lib/actions/categoriesAction";
-import { getCarsAction } from "@lib/actions/carsAction";
-import SearchDialog from "./search-dialog";
-import { createClient } from "@utils/supabase/server";
-import PaginationControl from "@components/pagination-controls";
+import ServiceTable from "./service-table"
+import { getServicesAction } from "@lib/actions/serviceActions"
+import { getServiceStatusAction } from "@lib/actions/serviceStatusAction"
+import { getAllCategoriesAction } from "@lib/actions/categoriesAction"
+import { getCarsAction } from "@lib/actions/carsAction"
+import SearchDialog from "./search-dialog"
+import { createClient } from "@utils/supabase/server"
+import PaginationControl from "@components/pagination-controls"
 
 interface Props {
-  pageNumber: string;
-  dateFrom: string;
-  dateTo: string;
-  clientId: string;
-  carId: string;
-  serviceStatusId: string;
-  minPrice: string;
-  maxPrice: string;
+  pageNumber: string
+  dateFrom: string
+  dateTo: string
+  clientId: string
+  carId: string
+  serviceStatusId: string
+  minPrice: string
+  maxPrice: string
 }
 const ServiceList = ({
   pageNumber,
@@ -31,7 +31,7 @@ const ServiceList = ({
   minPrice,
   maxPrice,
 }: Props) => {
-  const supabase = await createClient();
+  const supabase = await createClient()
   // const { data, error } = await getServicesAction({
   //   pageNumber,
   //   dateFrom,
@@ -59,15 +59,15 @@ const ServiceList = ({
       getAllCategoriesAction(),
       getClientsAction({}),
       getCarsAction({ supabase }),
-    ]);
-  const { data: status, error: statusError } = statusData;
-  const { data: categories, error: categoriesError } = categoriesData;
-  const { data: clients, error: clientsError } = clientsData;
-  const { data: cars, error: carsError } = carsData;
-  const { data, error } = servicesData;
+    ])
+  const { data: status, error: statusError } = statusData
+  const { data: categories, error: categoriesError } = categoriesData
+  const { data: clients, error: clientsError } = clientsData
+  const { data: cars, error: carsError } = carsData
+  const { data, error } = servicesData
 
   return (
-    <div className=" mt-16">
+    <div className="mt-16">
       {/* <SearchDialog
         isAdmin
         cars={cars?.cars || []}
@@ -82,7 +82,7 @@ const ServiceList = ({
         minPrice={minPrice}
         currPage={pageNumber}
       /> */}
-      <h3 className="   text-lg sm:text-3xl font-semibold  my-10">Services</h3>
+      <h3 className="my-10 text-lg font-semibold sm:text-3xl">Services</h3>
       {!servicesData.error ? (
         <>
           <ServiceTable
@@ -111,7 +111,7 @@ const ServiceList = ({
         <p>{error}</p>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default ServiceList;
+export default ServiceList

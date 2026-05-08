@@ -1,37 +1,37 @@
-import { Button } from "@components/ui/button";
-import { TableCell, TableRow } from "@components/ui/table";
-import { formatCurrency } from "@lib/client-helpers";
-import useServicesStats from "@lib/queries/dashboard/home/useServicesStats";
-import { cn } from "@lib/utils";
-import { RefreshCcw } from "lucide-react";
-import { useRouter } from "next/navigation";
-import React from "react";
+import { Button } from "@components/ui/button"
+import { TableCell, TableRow } from "@components/ui/table"
+import { formatCurrency } from "@lib/client-helpers"
+import useServicesStats from "@lib/queries/dashboard/home/useServicesStats"
+import { cn } from "@lib/utils"
+import { RefreshCcw } from "lucide-react"
+import { useRouter } from "next/navigation"
+import React from "react"
 type Params = {
-  dateFrom?: string;
-  dateTo?: string;
-  clientId?: string;
-  carId?: string;
-  serviceStatusId?: string;
-  minPrice?: string;
-  maxPrice?: string;
-};
+  dateFrom?: string
+  dateTo?: string
+  clientId?: string
+  carId?: string
+  serviceStatusId?: string
+  minPrice?: string
+  maxPrice?: string
+}
 
 const StatsRow = (filters: Params) => {
-  const router = useRouter();
-  const { data, isLoading, error } = useServicesStats(filters);
+  const router = useRouter()
+  const { data, isLoading, error } = useServicesStats(filters)
 
   const RefreshButton = (
     <Button size="sm" onClick={() => router.refresh()}>
-      <span>Refresh</span> <RefreshCcw className=" w-4 h-4" />
+      <span>Refresh</span> <RefreshCcw className="h-4 w-4" />
     </Button>
-  );
+  )
 
   if (error)
     return (
-      <p className=" text-center text-xs ">
+      <p className="text-center text-xs">
         {`${error}`} {RefreshButton}
       </p>
-    );
+    )
   //   if (!data)
   //     return (
   //       <div className="flex items-center justify-center gap-2 flex-col ">
@@ -43,13 +43,13 @@ const StatsRow = (filters: Params) => {
   //   const { totalProductsSold, totalServicesPerformed } = data;
   return (
     <TableRow
-      className={cn(" bg-secondary hover:bg-secondary/50", {
+      className={cn("bg-secondary hover:bg-secondary/50", {
         "animate-pulse": isLoading,
       })}
     >
       <TableCell colSpan={5}>Total:</TableCell>
 
-      <TableCell className="   min-w-[100px] max-w-[120px]  break-all">
+      <TableCell className="max-w-[120px] min-w-[100px] break-all">
         {data
           ? formatCurrency(
               data.totalServicesPerformed.totalPrice -
@@ -58,7 +58,7 @@ const StatsRow = (filters: Params) => {
           : null}
       </TableCell>
 
-      <TableCell className="   min-w-[100px] max-w-[120px]  break-all">
+      <TableCell className="max-w-[120px] min-w-[100px] break-all">
         {data
           ? formatCurrency(
               data.totalProductsSold.totalPrice -
@@ -69,7 +69,7 @@ const StatsRow = (filters: Params) => {
 
       <TableCell
         colSpan={3}
-        className=" text-right   min-w-[100px] max-w-[120px]  break-all"
+        className="max-w-[120px] min-w-[100px] text-right break-all"
       >
         {data
           ? formatCurrency(
@@ -81,7 +81,7 @@ const StatsRow = (filters: Params) => {
           : null}
       </TableCell>
     </TableRow>
-  );
-};
+  )
+}
 
-export default StatsRow;
+export default StatsRow

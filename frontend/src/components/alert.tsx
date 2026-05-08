@@ -1,23 +1,23 @@
-import { cn } from "@lib/utils";
-import { BadgeInfo } from "lucide-react";
-import React from "react";
+import { cn } from "@lib/utils"
+import { BadgeInfo } from "lucide-react"
+import React from "react"
 
 interface Props {
-  className?: string;
-  children?: React.ReactNode;
+  className?: string
+  children?: React.ReactNode
 }
 const Alert: React.FC<Props> = ({ className, children }) => {
   return (
     <div
       className={cn(
-        "px-3 py-2 rounded-md  text-xs  text-red-700    font-semibold border border-destructive/70 bg-destructive/70 w-full   flex items-center gap-3",
+        "flex w-full items-center gap-3 rounded-md border border-destructive/70 bg-destructive/70 px-3 py-2 text-xs font-semibold text-red-700",
         className
       )}
     >
-      <BadgeInfo className=" w-5 h-5 " />
+      <BadgeInfo className="h-5 w-5" />
       {children || "Attention needed"}
     </div>
-  );
-};
+  )
+}
 
-export default Alert;
+export default Alert

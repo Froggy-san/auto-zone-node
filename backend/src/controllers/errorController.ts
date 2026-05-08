@@ -11,7 +11,6 @@ export const globalErrorHandler = (
 
   // 1. Handle Zod Validation Errors
   if (err.name === "ZodError") {
-    console.log(err, "SSSSSSSSSS");
     return res.status(400).json({
       status: "fail",
       message: "Invalid input data",
@@ -24,7 +23,6 @@ export const globalErrorHandler = (
 
   // 2. Handle Mongoose Validation Errors (e.g., salePrice < listPrice)
   if (err.name === "ValidationError") {
-    console.log(err, "EEEEEEEEEE");
     const errors = Object.values(err.errors).map((el: any) => el.message);
     return res.status(400).json({
       status: "fail",

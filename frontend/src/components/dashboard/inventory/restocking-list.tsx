@@ -1,11 +1,11 @@
-import { getRestockingBillsAction } from "@lib/actions/restockingBillActions";
-import React from "react";
+import { getRestockingBillsAction } from "@lib/actions/restockingBillActions"
+import React from "react"
 
 const RestockingList = () => {
-  const { data, error } = await getRestockingBillsAction({});
+  const { data, error } = await getRestockingBillsAction({})
 
-  if (error) return <p>{error}</p>;
-  return <ul>RestockingList</ul>;
-};
+  if (error) return <p>{error}</p>
+  return <ul>RestockingList</ul>
+}
 
-export default RestockingList;
+export default RestockingList

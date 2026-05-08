@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express";
-
+import cookieParser from "cookie-parser";
 import morgan from "morgan";
 import cors from "cors";
 import expressRateLimit from "express-rate-limit";
@@ -14,6 +14,8 @@ import productTypeRouter from "./routes/productTypeRoutes";
 import carMakerRouter from "./routes/carMakerRoutes";
 import carModelRouter from "./routes/carModelRoutes";
 import categoryRouter from "./routes/categoryRoutes";
+import userRouter from "./routes/userRoutes";
+import carRouter from "./routes/carRoutes";
 import path from "path";
 import carGenerationRouter from "./routes/carGenerationRoutes";
 const app = express();
@@ -30,7 +32,6 @@ const limiter = expressRateLimit({
   windowMs: 60 * 60 * 1000, // 100 per hour
   message: "Too many requests from this IP, please try again in an hour!",
 });
-
 // app.use("/api", limiter);
 app.use(
   cors({
@@ -38,6 +39,7 @@ app.use(
     credentials: true, // The backend must also say "Yes, I allow cookies"
   }),
 ); // Crucial for your React frontend!
+app.use(cookieParser());
 
 app.use(express.json({ limit: "10kb" })); // Body parser
 
@@ -58,6 +60,8 @@ app.use("/api/v1/categories", categoryRouter);
 app.use("/api/v1/carMakers", carMakerRouter);
 app.use("/api/v1/carModels", carModelRouter);
 app.use("/api/v1/carGenerations", carGenerationRouter);
+app.use("/api/v1/users", userRouter);
+app.use("/api/v1/cars", carRouter);
 // 2) HEALTH CHECK ROUTE
 app.get("/health", (req: Request, res: Response) => {
   res.status(200).json({

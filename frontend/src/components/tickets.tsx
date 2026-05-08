@@ -1,24 +1,24 @@
-import { getTicketsAction } from "@lib/actions/tickets-actions";
-import { createClient } from "@utils/supabase/server";
-import React from "react";
-import TicketTable from "./ticket-table";
-import ErrorMessage from "./error-message";
-import PaginationControl from "./pagination-controls";
-import { TicketCategory, TicketPriority, TicketStatus } from "@lib/types";
-import TicketTableOperations from "./ticket-table-operations";
+import { getTicketsAction } from "@lib/actions/tickets-actions"
+import { createClient } from "@utils/supabase/server"
+import React from "react"
+import TicketTable from "./ticket-table"
+import ErrorMessage from "./error-message"
+import PaginationControl from "./pagination-controls"
+import { TicketCategory, TicketPriority, TicketStatus } from "@lib/types"
+import TicketTableOperations from "./ticket-table-operations"
 interface SearchParams {
-  page?: string;
+  page?: string
 }
 interface Props {
-  page?: string;
-  dateTo: string;
-  dateFrom: string;
-  name: string;
-  sort: string;
-  ticketStatusId: string;
-  ticketStatuses: TicketStatus[];
-  ticketCategories: TicketCategory[];
-  ticketPriorities: TicketPriority[];
+  page?: string
+  dateTo: string
+  dateFrom: string
+  name: string
+  sort: string
+  ticketStatusId: string
+  ticketStatuses: TicketStatus[]
+  ticketCategories: TicketCategory[]
+  ticketPriorities: TicketPriority[]
 }
 const Tickets = ({
   ticketCategories,
@@ -31,8 +31,8 @@ const Tickets = ({
   dateTo,
   sort,
 }: Props) => {
-  const pageNumber = page || "1";
-  const supabase = await createClient();
+  const pageNumber = page || "1"
+  const supabase = await createClient()
 
   const { tickets, count, error } = await getTicketsAction(
     {
@@ -44,7 +44,7 @@ const Tickets = ({
       sort,
     },
     supabase
-  );
+  )
 
   // const [] = await Promise.all([]);
 
@@ -70,7 +70,7 @@ const Tickets = ({
       />
       <PaginationControl count={count ? count : 0} currPage={pageNumber} />
     </div>
-  );
-};
+  )
+}
 
-export default Tickets;
+export default Tickets

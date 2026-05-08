@@ -1,5 +1,5 @@
-import { cn } from "@/lib/utils";
-import { TicketHistoryAction } from "@lib/types";
+import { cn } from "@/lib/utils"
+import { TicketHistoryAction } from "@lib/types"
 import {
   Plus,
   Pencil,
@@ -13,24 +13,24 @@ import {
   MessageSquareOff,
   MessageSquareDashed,
   Replace,
-} from "lucide-react";
-import { TbStatusChange } from "react-icons/tb";
-import { z } from "zod";
+} from "lucide-react"
+import { TbStatusChange } from "react-icons/tb"
+import { z } from "zod"
 
-type ActionType = z.infer<typeof TicketHistoryAction>;
+type ActionType = z.infer<typeof TicketHistoryAction>
 
 interface ActionBadgeProps {
-  action: ActionType;
-  className?: string;
+  action: ActionType
+  className?: string
 }
 
 const actionConfig: Record<
   ActionType,
   {
-    label: string;
-    icon: React.ElementType;
-    bgClass: string;
-    textClass: string;
+    label: string
+    icon: React.ElementType
+    bgClass: string
+    textClass: string
   }
 > = {
   created: {
@@ -148,23 +148,23 @@ const actionConfig: Record<
     bgClass: "bg-action-message/15",
     textClass: "text-action-message",
   },
-};
+}
 
 export function ActionBadge({ action, className }: ActionBadgeProps) {
-  const config = actionConfig[action] || actionConfig.updated;
-  const Icon = config.icon;
+  const config = actionConfig[action] || actionConfig.updated
+  const Icon = config.icon
 
   return (
     <span
       className={cn(
-        " inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium gap-1.5",
+        "inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium",
         config.bgClass,
         config.textClass,
         className
       )}
     >
-      <Icon className="w-3 h-3" />
+      <Icon className="h-3 w-3" />
       {config.label}
     </span>
-  );
+  )
 }

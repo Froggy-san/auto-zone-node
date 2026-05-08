@@ -1,52 +1,52 @@
-import { Message } from "./types";
+import { Message } from "./types"
 
 export interface TicketDetailStates {
-  positionY: number;
-  isDragging: boolean;
-  selectedMessageId: number | null;
-  isInternalOnly: boolean;
-  isMounted: boolean;
-  isHistory: boolean;
-  focusedMessage: number | null;
-  isMessagesOnly: boolean;
-  isLoading: boolean;
-  statusId: number | undefined;
-  failedMessages: Message[];
+  positionY: number
+  isDragging: boolean
+  selectedMessageId: number | null
+  isInternalOnly: boolean
+  isMounted: boolean
+  isHistory: boolean
+  focusedMessage: number | null
+  isMessagesOnly: boolean
+  isLoading: boolean
+  statusId: number | undefined
+  failedMessages: Message[]
 }
 
 export type PositionAction = {
-  type: "position";
-  payload: number;
-};
+  type: "position"
+  payload: number
+}
 
 export type IsDragingAction = {
-  type: "is-dragging";
-};
+  type: "is-dragging"
+}
 
 export type IsInternalOnlyAction = {
-  type: "is-internal";
-};
+  type: "is-internal"
+}
 
 export type IsMessagesOnlyAction = {
-  type: "is-messages";
-};
+  type: "is-messages"
+}
 
 export type IsLoadingAction = {
-  type: "is-loading";
-};
+  type: "is-loading"
+}
 export type StatusIdAction = {
-  type: "status-id";
-  payload: number | undefined;
-};
+  type: "status-id"
+  payload: number | undefined
+}
 
 export type AddFailedMessages = {
-  type: "add-failed-message";
-  payload: Message;
-};
+  type: "add-failed-message"
+  payload: Message
+}
 
 export type ResetAction = {
-  type: "reset";
-};
+  type: "reset"
+}
 
 export type Action =
   | { type: "position"; payload: number }
@@ -61,4 +61,4 @@ export type Action =
   | { type: "set-status-id"; payload: number | undefined }
   | { type: "add-failed-message"; payload: Message }
   | { type: "remove-failed-message"; payload: Message }
-  | { type: "reset" };
+  | { type: "reset" }

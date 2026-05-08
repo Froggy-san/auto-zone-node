@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect } from "react"
 import {
   Command,
   CommandDialog,
@@ -9,23 +9,23 @@ import {
   CommandList,
   CommandSeparator,
   CommandShortcut,
-} from "@/components/ui/command";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { cn } from "@lib/utils";
-import { Client } from "@lib/types";
-import useInfiniteClients from "@lib/queries/useInfiniteclients";
-import Spinner from "./Spinner";
-import { useInView } from "react-intersection-observer";
-import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
-import useDebounce from "@hooks/use-debounce";
-import { Check } from "lucide-react";
+} from "@/components/ui/command"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { cn } from "@lib/utils"
+import { Client } from "@lib/types"
+import useInfiniteClients from "@lib/queries/useInfiniteclients"
+import Spinner from "./Spinner"
+import { useInView } from "react-intersection-observer"
+import { MagnifyingGlassIcon } from "@radix-ui/react-icons"
+import useDebounce from "@hooks/use-debounce"
+import { Check } from "lucide-react"
 
 interface InfiniteClientsListProps {
-  className?: string;
-  selectedClient?: Client | null;
-  setOpen?: (open: boolean) => void;
+  className?: string
+  selectedClient?: Client | null
+  setOpen?: (open: boolean) => void
 
-  onVlaueChange?: (client: Client | null) => void;
+  onVlaueChange?: (client: Client | null) => void
 }
 const InfiniteClientsList = React.forwardRef<
   HTMLInputElement,
@@ -40,8 +40,8 @@ const InfiniteClientsList = React.forwardRef<
     }: InfiniteClientsListProps,
     inputRef
   ) => {
-    const [name, setName] = React.useState("");
-    const debouce = useDebounce(name, 500);
+    const [name, setName] = React.useState("")
+    const debouce = useDebounce(name, 500)
     const {
       isFetched,
       isFetching,
@@ -50,18 +50,18 @@ const InfiniteClientsList = React.forwardRef<
       hasNextPage,
       data,
       error,
-    } = useInfiniteClients({ name: debouce });
-    const { ref, inView } = useInView();
+    } = useInfiniteClients({ name: debouce })
+    const { ref, inView } = useInView()
 
     const clients: Client[] = React.useMemo(() => {
-      return data?.pages.flatMap((page) => page.clients) || [];
-    }, [data]);
+      return data?.pages.flatMap((page) => page.clients) || []
+    }, [data])
 
     useEffect(() => {
       if (!isFetchingNextPage && inView && hasNextPage) {
-        fetchNextPage();
+        fetchNextPage()
       }
-    }, [inView, hasNextPage]);
+    }, [inView, hasNextPage])
     return (
       <Command className={cn(className)} shouldFilter={false}>
         <div className="flex items-center border-b px-3" cmdk-input-wrapper="">
@@ -78,7 +78,7 @@ const InfiniteClientsList = React.forwardRef<
           />
         </div>
         {isFetching && clients.length === 0 ? (
-          <Spinner className="  h-10" size={30} />
+          <Spinner className="h-10" size={30} />
         ) : (
           <CommandList>
             <CommandEmpty>No clients found.</CommandEmpty>
@@ -94,19 +94,19 @@ const InfiniteClientsList = React.forwardRef<
               ))}
               <div ref={ref}>
                 {isFetchingNextPage && (
-                  <Spinner className=" static h-11 " size={20} />
+                  <Spinner className="static h-11" size={20} />
                 )}
               </div>
             </CommandGroup>
           </CommandList>
         )}
       </Command>
-    );
+    )
   }
-);
+)
 
-export default InfiniteClientsList;
-InfiniteClientsList.displayName = "InfiniteClientsList";
+export default InfiniteClientsList
+InfiniteClientsList.displayName = "InfiniteClientsList"
 
 function Item({
   client,
@@ -114,45 +114,45 @@ function Item({
   selectedClient,
   onVlaueChange,
 }: {
-  client: Client;
-  setOpen?: (open: boolean) => void;
-  selectedClient?: Client | null;
-  onVlaueChange?: (client: Client | null) => void;
+  client: Client
+  setOpen?: (open: boolean) => void
+  selectedClient?: Client | null
+  onVlaueChange?: (client: Client | null) => void
 }) {
-  const isSelected = selectedClient?.id === client.id;
+  const isSelected = selectedClient?.id === client.id
   const initials = client.name
     .split(" ")
     .map((n) => n[0])
     .join("")
     .toUpperCase()
-    .slice(0, 2);
+    .slice(0, 2)
 
   return (
     <CommandItem
       value={`${client.name}-${client.id}`}
       onSelect={() => {
-        onVlaueChange?.(isSelected ? null : client);
-        setOpen?.(false);
+        onVlaueChange?.(isSelected ? null : client)
+        setOpen?.(false)
       }}
     >
-      <div className=" flex items-center gap-3 w-full  overflow-hidden   ">
-        <Avatar className=" w-8 h-8">
+      <div className="flex w-full items-center gap-3 overflow-hidden">
+        <Avatar className="h-8 w-8">
           <AvatarImage src={client.picture || undefined} />
           <AvatarFallback>{initials}</AvatarFallback>
         </Avatar>
 
-        <div className=" flex flex-col flex-1 ">
-          <p className=" text-sm line-clamp-2">{client.name}</p>
-          <p className=" text-xs text-muted-foreground     truncate-text   ">
+        <div className="flex flex-1 flex-col">
+          <p className="line-clamp-2 text-sm">{client.name}</p>
+          <p className="truncate-text text-xs text-muted-foreground">
             {client.email}
           </p>
         </div>
         {isSelected && (
-          <div className=" ml-auto shrink-0 ">
-            <Check className=" w-4 h-5" />
+          <div className="ml-auto shrink-0">
+            <Check className="h-5 w-4" />
           </div>
         )}
       </div>
     </CommandItem>
-  );
+  )
 }

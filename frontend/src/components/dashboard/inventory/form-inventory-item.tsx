@@ -1,4 +1,4 @@
-import React, { useId } from "react";
+import React, { useId } from "react"
 import {
   Form,
   FormControl,
@@ -7,62 +7,62 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { motion } from "framer-motion";
-import { Control, FieldArrayWithId, UseFormReturn } from "react-hook-form";
-import { Cross2Icon } from "@radix-ui/react-icons";
-import { ProductsComboBox } from "@components/proudcts-combo-box";
-import { ProductWithCategory, RestockingBill } from "@lib/types";
-import { RestockingComboBox } from "@components/restocking-combo-box";
-import { Input } from "@components/ui/input";
-import { Textarea } from "@components/ui/textarea";
-import { formatCurrency } from "@lib/client-helpers";
-import CurrencyInput from "react-currency-input-field";
+} from "@/components/ui/form"
+import { motion } from "framer-motion"
+import { Control, FieldArrayWithId, UseFormReturn } from "react-hook-form"
+import { Cross2Icon } from "@radix-ui/react-icons"
+import { ProductsComboBox } from "@components/proudcts-combo-box"
+import { ProductWithCategory, RestockingBill } from "@lib/types"
+import { RestockingComboBox } from "@components/restocking-combo-box"
+import { Input } from "@components/ui/input"
+import { Textarea } from "@components/ui/textarea"
+import { formatCurrency } from "@lib/client-helpers"
+import CurrencyInput from "react-currency-input-field"
 
 type Field = FieldArrayWithId<
   {
-    shopName: string;
+    shopName: string
     productBought: {
-      note: string;
-      productId: number;
-      pricePerUnit: number;
-      discount: number;
-      count: number;
-      productsRestockingBillId: string;
-    }[];
+      note: string
+      productId: number
+      pricePerUnit: number
+      discount: number
+      count: number
+      productsRestockingBillId: string
+    }[]
   },
   "productBought",
   "id"
->;
+>
 type FormControl = Control<
   {
     productBought: {
-      note: string;
-      productId: number;
-      pricePerUnit: number;
-      discount: number;
-      count: number;
-      productsRestockingBillId: string;
-    }[];
-    shopName: string;
+      note: string
+      productId: number
+      pricePerUnit: number
+      discount: number
+      count: number
+      productsRestockingBillId: string
+    }[]
+    shopName: string
   },
   any
->;
+>
 type Form = UseFormReturn<
   {
     productBought: {
-      note: string;
-      productId: number;
-      pricePerUnit: number;
-      discount: number;
-      count: number;
-      productsRestockingBillId: string;
-    }[];
-    shopName: string;
+      note: string
+      productId: number
+      pricePerUnit: number
+      discount: number
+      count: number
+      productsRestockingBillId: string
+    }[]
+    shopName: string
   },
   any,
   undefined
->;
+>
 const FormInventoryItem = ({
   field,
 
@@ -75,22 +75,22 @@ const FormInventoryItem = ({
   restockings,
   productBoughtArr,
 }: {
-  field: Field;
-  index: number;
-  remove: (index: number) => void;
-  isLoading: boolean;
-  form: Form;
-  products: ProductWithCategory[];
-  restockings: RestockingBill[];
-  reStockingBillId?: string;
+  field: Field
+  index: number
+  remove: (index: number) => void
+  isLoading: boolean
+  form: Form
+  products: ProductWithCategory[]
+  restockings: RestockingBill[]
+  reStockingBillId?: string
   productBoughtArr: {
-    note: string;
-    productId: number;
-    pricePerUnit: number;
-    discount: number;
-    count: number;
-    productsRestockingBillId: string;
-  }[];
+    note: string
+    productId: number
+    pricePerUnit: number
+    discount: number
+    count: number
+    productsRestockingBillId: string
+  }[]
 }) => {
   return (
     <React.Fragment>
@@ -110,26 +110,26 @@ const FormInventoryItem = ({
           y: -150,
           transition: { duration: 0.1, type: "spring" },
         }}
-        className=" space-y-4  border p-3 rounded-xl relative "
+        className="relative space-y-4 rounded-xl border p-3"
       >
         <button
           onClick={() => {
-            remove(index);
+            remove(index)
           }}
-          className="  absolute  top-3 right-4 rounded-sm outline-none opacity-70 transition-opacity hover:opacity-100 focus:outline-none disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground  "
+          className="absolute top-3 right-4 rounded-sm opacity-70 transition-opacity outline-none hover:opacity-100 focus:outline-none disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground"
           type="button"
         >
           <Cross2Icon className="h-4 w-4" />
           {/* <span className="sr-only">Close</span> */}
         </button>
 
-        <div className=" flex  flex-col gap-2 sm:flex-row">
+        <div className="flex flex-col gap-2 sm:flex-row">
           <FormField
             disabled={isLoading}
             control={form.control}
             name={`productBought.${index}.productId`}
             render={({ field }) => (
-              <FormItem className=" flex-1">
+              <FormItem className="flex-1">
                 <FormLabel>Product</FormLabel>
                 <FormControl>
                   <ProductsComboBox
@@ -137,13 +137,13 @@ const FormInventoryItem = ({
                     setValue={(value) => {
                       const proBoughtById = products.find(
                         (pro) => pro.id === value
-                      );
-                      field.onChange(value);
+                      )
+                      field.onChange(value)
                       if (proBoughtById)
                         form.setValue(
                           `productBought.${index}.pricePerUnit`,
                           proBoughtById.salePrice
-                        );
+                        )
                     }}
                     options={products}
                   />
@@ -160,7 +160,7 @@ const FormInventoryItem = ({
             control={form.control}
             name="shopName"
             render={({ field }) => (
-              <FormItem className=" flex-1">
+              <FormItem className="flex-1">
                 <FormLabel>Shop</FormLabel>
                 <FormControl>
                   {reStockingBillId ? (
@@ -186,13 +186,13 @@ const FormInventoryItem = ({
             )}
           />
         </div>
-        <div className=" flex  flex-col gap-2  sm:flex-row  ">
+        <div className="flex flex-col gap-2 sm:flex-row">
           <FormField
             disabled={isLoading}
             control={form.control}
             name={`productBought.${index}.pricePerUnit`}
             render={({ field }) => (
-              <FormItem className="  w-full mb-auto ">
+              <FormItem className="mb-auto w-full">
                 <FormLabel htmlFor="price-per-unit">Price per unit</FormLabel>
                 <FormControl>
                   <CurrencyInput
@@ -207,9 +207,9 @@ const FormInventoryItem = ({
                     onValueChange={(formattedValue, name, value) => {
                       // setFormattedListing(formattedValue || "");
 
-                      field.onChange(Number(value?.value) || 0);
+                      field.onChange(Number(value?.value) || 0)
                     }}
-                    className="input-field "
+                    className="input-field"
                   />
                 </FormControl>
                 <FormDescription>Enter the cost of each unit.</FormDescription>
@@ -222,7 +222,7 @@ const FormInventoryItem = ({
             control={form.control}
             name={`productBought.${index}.discount`}
             render={({ field }) => (
-              <FormItem className="  w-full mb-auto">
+              <FormItem className="mb-auto w-full">
                 <FormLabel htmlFor="total-discount">Total Discount</FormLabel>
                 <FormControl>
                   <CurrencyInput
@@ -237,9 +237,9 @@ const FormInventoryItem = ({
                     onValueChange={(formattedValue, name, value) => {
                       // setFormattedListing(formattedValue || "");
 
-                      field.onChange(Number(value?.value) || 0);
+                      field.onChange(Number(value?.value) || 0)
                     }}
-                    className="input-field "
+                    className="input-field"
                   />
                 </FormControl>
                 <FormDescription>
@@ -254,7 +254,7 @@ const FormInventoryItem = ({
             control={form.control}
             name={`productBought.${index}.count`}
             render={({ field }) => (
-              <FormItem className=" w-full  mb-auto">
+              <FormItem className="mb-auto w-full">
                 <FormLabel htmlFor="count">Count</FormLabel>
                 <FormControl>
                   <CurrencyInput
@@ -267,9 +267,9 @@ const FormInventoryItem = ({
                     groupSeparator="," // Use comma for thousands
                     value={field.value || ""}
                     onValueChange={(formattedValue, name, value) => {
-                      field.onChange(Number(value?.value) || 0);
+                      field.onChange(Number(value?.value) || 0)
                     }}
-                    className="input-field  "
+                    className="input-field"
                   />
                 </FormControl>
                 <FormDescription>Enter the amount you bought.</FormDescription>
@@ -284,7 +284,7 @@ const FormInventoryItem = ({
           control={form.control}
           name={`productBought.${index}.note`}
           render={({ field }) => (
-            <FormItem className=" flex-1">
+            <FormItem className="flex-1">
               <FormLabel>Notes</FormLabel>
               <FormControl>
                 <Textarea placeholder="note..." {...field} />
@@ -295,9 +295,9 @@ const FormInventoryItem = ({
           )}
         />
 
-        <p className=" text-xs text-muted-foreground">
+        <p className="text-xs text-muted-foreground">
           Total amount spent:
-          <span className=" ml-3">
+          <span className="ml-3">
             {formatCurrency(
               (productBoughtArr[index]?.pricePerUnit -
                 productBoughtArr[index]?.discount) *
@@ -307,7 +307,7 @@ const FormInventoryItem = ({
         </p>
       </motion.div>
     </React.Fragment>
-  );
-};
+  )
+}
 
-export default FormInventoryItem;
+export default FormInventoryItem

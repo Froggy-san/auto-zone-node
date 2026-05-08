@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect } from "react"
 import {
   Dialog,
   DialogClose,
@@ -8,34 +8,34 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { CarMakersData } from "@lib/types";
-import { Button } from "@components/ui/button";
-import { AnimatePresence, motion } from "framer-motion";
+} from "@/components/ui/dialog"
+import { CarMakersData } from "@lib/types"
+import { Button } from "@components/ui/button"
+import { AnimatePresence, motion } from "framer-motion"
 const MakerNote = ({
   open,
   setOpen,
   carMaker,
 }: {
-  open: boolean;
-  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  carMaker: CarMakersData | null;
+  open: boolean
+  setOpen: React.Dispatch<React.SetStateAction<boolean>>
+  carMaker: CarMakersData | null
 }) => {
   useEffect(() => {
-    const body = document.querySelector("body");
+    const body = document.querySelector("body")
 
     if (body) {
-      body.style.pointerEvents = "auto";
+      body.style.pointerEvents = "auto"
     }
     return () => {
-      if (body) body.style.pointerEvents = "auto";
-    };
-  }, [open]);
+      if (body) body.style.pointerEvents = "auto"
+    }
+  }, [open])
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent
         onClick={(e) => e.stopPropagation()}
-        className="sm:max-w-[500px]  max-h-[55vh] overflow-y-auto    "
+        className="max-h-[55vh] overflow-y-auto sm:max-w-[500px]"
       >
         <DialogHeader>
           <DialogTitle>
@@ -52,7 +52,7 @@ const MakerNote = ({
               )}
             </AnimatePresence>
           </DialogTitle>
-          <DialogDescription className=" text-left">
+          <DialogDescription className="text-left">
             <AnimatePresence>
               {carMaker?.notes && (
                 <motion.p
@@ -75,7 +75,7 @@ const MakerNote = ({
         </DialogClose>
       </DialogContent>
     </Dialog>
-  );
-};
+  )
+}
 
-export default MakerNote;
+export default MakerNote

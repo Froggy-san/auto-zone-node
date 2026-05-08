@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Button } from "@/components/ui/button";
+import React, { useState } from "react"
+import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -8,44 +8,44 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { RotateCcw, Search } from "lucide-react";
-import { DialogClose } from "@radix-ui/react-dialog";
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { RotateCcw, Search } from "lucide-react"
+import { DialogClose } from "@radix-ui/react-dialog"
 
-import { CalendarIcon } from "@radix-ui/react-icons";
-import { addDays, format } from "date-fns";
-import { DateRange } from "react-day-picker";
+import { CalendarIcon } from "@radix-ui/react-icons"
+import { addDays, format } from "date-fns"
+import { DateRange } from "react-day-picker"
 
-import { cn } from "@/lib/utils";
-import Box from "@mui/joy/Box";
-import Slider from "@mui/joy/Slider";
+import { cn } from "@/lib/utils"
+import Box from "@mui/joy/Box"
+import Slider from "@mui/joy/Slider"
 
-import { Calendar } from "@/components/ui/calendar";
+import { Calendar } from "@/components/ui/calendar"
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useToast } from "@hooks/use-toast";
+} from "@/components/ui/popover"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
+import { useToast } from "@hooks/use-toast"
 const formatCurrency = (value: number) =>
   new Intl.NumberFormat("en", { style: "currency", currency: "egp" }).format(
     value
-  );
+  )
 function valueText(value: any) {
-  return `price range ${value}`;
+  return `price range ${value}`
 }
 
 interface SearchProps {
-  currPage: string;
-  shopName: string;
-  name: string;
-  dateOfOrderFrom: string;
-  dateOfOrderTo: string;
-  minTotalPrice: string;
-  maxTotalPrice: string;
+  currPage: string
+  shopName: string
+  name: string
+  dateOfOrderFrom: string
+  dateOfOrderTo: string
+  minTotalPrice: string
+  maxTotalPrice: string
 }
 
 const SearchDialog = ({
@@ -64,153 +64,153 @@ const SearchDialog = ({
     shopName,
     dateOfOrderFrom: dateOfOrderFrom ? new Date(dateOfOrderFrom) : undefined,
     dateOfOrderTo: dateOfOrderTo ? new Date(dateOfOrderTo) : undefined,
-  };
-  const rangeValues = [initalValus.minTotalPrice, initalValus.maxTotalPrice];
-  const { toast } = useToast();
-  const [open, setOpen] = React.useState(false);
-  const [nameValue, setNameValue] = useState(initalValus.shopName);
-  const [proName, setProName] = useState(initalValus.name || "");
-  const [step, setStep] = useState(50);
+  }
+  const rangeValues = [initalValus.minTotalPrice, initalValus.maxTotalPrice]
+  const { toast } = useToast()
+  const [open, setOpen] = React.useState(false)
+  const [nameValue, setNameValue] = useState(initalValus.shopName)
+  const [proName, setProName] = useState(initalValus.name || "")
+  const [step, setStep] = useState(50)
   const [date, setDate] = React.useState<DateRange | undefined>({
     to: initalValus.dateOfOrderTo,
     from: initalValus.dateOfOrderFrom,
-  });
+  })
 
-  const [value, setValue] = React.useState(rangeValues);
-  const searchParams = useSearchParams();
-  const pathname = usePathname();
-  const router = useRouter();
+  const [value, setValue] = React.useState(rangeValues)
+  const searchParams = useSearchParams()
+  const pathname = usePathname()
+  const router = useRouter()
 
-  const page = Number(currPage);
+  const page = Number(currPage)
 
   const handleMinPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const inputValue = e.target.value;
+    const inputValue = e.target.value
     if (/^\d*$/.test(inputValue)) {
-      const newMinPrice = Number(inputValue);
+      const newMinPrice = Number(inputValue)
       if (newMinPrice <= value[1]) {
-        setValue([newMinPrice, value[1]]);
+        setValue([newMinPrice, value[1]])
       } else {
         toast({
           variant: "destructive",
           title: "Invalid value",
           description: `Min total price must be lower than ${value[1]}`,
-        });
+        })
       }
     }
-  };
+  }
 
   function handleReset() {
-    setNameValue("");
-    setStep(50);
-    setDate(undefined);
-    setValue([0, 0]);
+    setNameValue("")
+    setStep(50)
+    setDate(undefined)
+    setValue([0, 0])
   }
   const handleMaxPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const inputValue = e.target.value;
+    const inputValue = e.target.value
     if (/^\d*$/.test(inputValue)) {
-      const newMaxPrice = Number(inputValue);
+      const newMaxPrice = Number(inputValue)
       if (newMaxPrice >= value[0]) {
-        setValue([value[0], newMaxPrice]);
+        setValue([value[0], newMaxPrice])
       } else {
         toast({
           variant: "destructive",
           title: "Invalid value",
           description: `Max total price must be higher than ${value[0]}`,
-        });
+        })
       }
     }
-  };
+  }
 
   async function handleSub() {
-    const name = nameValue.trim();
-    const dateFrom = date?.from;
-    const dateTo = date?.to;
-    const minTotal = value[0];
-    const maxTotalPrice = value[1];
+    const name = nameValue.trim()
+    const dateFrom = date?.from
+    const dateTo = date?.to
+    const minTotal = value[0]
+    const maxTotalPrice = value[1]
 
-    const params = new URLSearchParams(searchParams);
+    const params = new URLSearchParams(searchParams)
 
-    if (page > 1) params.set("page", String(page - 1));
+    if (page > 1) params.set("page", String(page - 1))
 
     if (!name.length) {
-      params.delete("shopName");
+      params.delete("shopName")
     } else {
-      params.set("shopName", name);
+      params.set("shopName", name)
     }
 
     if (!proName.length) {
-      params.delete("name");
+      params.delete("name")
     } else {
-      params.set("name", proName);
+      params.set("name", proName)
     }
 
     if (!dateTo) {
-      params.delete("dateOfOrderTo");
+      params.delete("dateOfOrderTo")
     } else {
-      params.set("dateOfOrderTo", format(dateTo, "yyyy-MM-dd"));
+      params.set("dateOfOrderTo", format(dateTo, "yyyy-MM-dd"))
     }
 
     if (!dateFrom) {
-      params.delete("dateOfOrderFrom");
+      params.delete("dateOfOrderFrom")
     } else {
-      params.set("dateOfOrderFrom", format(dateFrom, "yyyy-MM-dd"));
+      params.set("dateOfOrderFrom", format(dateFrom, "yyyy-MM-dd"))
     }
 
     if (!minTotal) {
-      params.delete("minTotalPrice");
+      params.delete("minTotalPrice")
     } else {
-      params.set("minTotalPrice", minTotal.toString());
+      params.set("minTotalPrice", minTotal.toString())
     }
     if (!maxTotalPrice) {
-      params.delete("maxTotalPrice");
+      params.delete("maxTotalPrice")
     } else {
-      params.set("maxTotalPrice", maxTotalPrice.toString());
+      params.set("maxTotalPrice", maxTotalPrice.toString())
     }
 
-    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
-    setOpen(false);
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false })
+    setOpen(false)
   }
 
   const handleChange = (event: Event, newValue: number | number[]) => {
-    setValue(newValue as number[]);
-  };
+    setValue(newValue as number[])
+  }
 
   React.useEffect(() => {
     const down = (e: KeyboardEvent) => {
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault();
-        setOpen((open) => !open);
+        e.preventDefault()
+        setOpen((open) => !open)
       }
-    };
-    document.addEventListener("keydown", down);
-    return () => document.removeEventListener("keydown", down);
-  }, []);
+    }
+    document.addEventListener("keydown", down)
+    return () => document.removeEventListener("keydown", down)
+  }, [])
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <div className="text-sm border text-muted-foreground mt-7  flex items-center gap-2  py-1 px-2  rounded-sm w-full  sm:w-[250px] justify-between   ml-auto">
+        <div className="mt-7 ml-auto flex w-full items-center justify-between gap-2 rounded-sm border px-2 py-1 text-sm text-muted-foreground sm:w-[250px]">
           Search...{" "}
-          <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1  border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100 rounded-md">
+          <kbd className="pointer-events-none inline-flex h-5 items-center gap-1 rounded-md border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100 select-none">
             <span className="text-xs">⌘</span>k
           </kbd>
         </div>
       </DialogTrigger>
-      <DialogContent className="max-h-[70vh] overflow-y-auto sm:max-w-[425px] border-none">
+      <DialogContent className="max-h-[70vh] overflow-y-auto border-none sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Search for recipts</DialogTitle>
           <DialogDescription>Filter throught the inventory.</DialogDescription>
         </DialogHeader>
         <form action={handleSub}>
-          <div className=" flex flex-wrap   gap-2 gap-y-3">
+          <div className="flex flex-wrap gap-2 gap-y-3">
             <Input
               value={nameValue}
               onChange={(e) => setNameValue(e.target.value)}
-              className=" w-full sm:w-[48%]"
+              className="w-full sm:w-[48%]"
               placeholder="Shop name"
             />
 
-            <div className={cn("grid gap-2 w-full   sm:w-[48%]")}>
+            <div className={cn("grid w-full gap-2 sm:w-[48%]")}>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
@@ -218,7 +218,7 @@ const SearchDialog = ({
                     variant={"outline"}
                     type="button"
                     className={cn(
-                      "  justify-start text-left font-normal whitespace-normal break-all   text-xs gap-3",
+                      "justify-start gap-3 text-left text-xs font-normal break-all whitespace-normal",
                       !date && "text-muted-foreground"
                     )}
                   >
@@ -249,7 +249,7 @@ const SearchDialog = ({
                 </PopoverContent>
               </Popover>
             </div>
-            <div className=" space-y-2 w-full sm:w-[48%]">
+            <div className="w-full space-y-2 sm:w-[48%]">
               <Input
                 type="text"
                 value={value[0]}
@@ -257,16 +257,16 @@ const SearchDialog = ({
                 placeholder="Min price"
                 className=""
               />
-              <p className=" text-xs text-muted-foreground">Min total price.</p>
+              <p className="text-xs text-muted-foreground">Min total price.</p>
             </div>
-            <div className=" w-full sm:w-[48%] space-y-2">
+            <div className="w-full space-y-2 sm:w-[48%]">
               <Input
                 type="text"
                 value={value[1]}
                 onChange={handleMaxPriceChange}
                 placeholder="Max price"
               />
-              <p className=" text-xs text-muted-foreground">Max total price.</p>
+              <p className="text-xs text-muted-foreground">Max total price.</p>
             </div>
 
             {/* <Input
@@ -324,28 +324,28 @@ const SearchDialog = ({
                 type="text"
                 value={step}
                 onChange={(e) => {
-                  const inputValue = e.target.value;
+                  const inputValue = e.target.value
                   if (/^\d*$/.test(inputValue)) {
-                    const value = Number(inputValue);
+                    const value = Number(inputValue)
 
-                    setStep(value);
+                    setStep(value)
                   }
                 }}
                 placeholder="Max price"
-                className=" w-10 h-7  p-1  pl-[.4rem]  ml-auto"
+                className="ml-auto h-7 w-10 p-1 pl-[.4rem]"
               />
             </Box>
-            <div className=" flex items-center justify-between w-full flex-wrap gap-2">
-              <div className=" flex items-center gap-3 flex-wrap text-[10px]">
+            <div className="flex w-full flex-wrap items-center justify-between gap-2">
+              <div className="flex flex-wrap items-center gap-3 text-[10px]">
                 <div>
                   Min price:{" "}
-                  <span className=" text-muted-foreground">
+                  <span className="text-muted-foreground">
                     {formatCurrency(value[0])}
                   </span>
                 </div>
                 <div>
                   Max price:{" "}
-                  <span className="  text-muted-foreground">
+                  <span className="text-muted-foreground">
                     {formatCurrency(value[1])}
                   </span>
                 </div>
@@ -354,20 +354,20 @@ const SearchDialog = ({
               <Button
                 onClick={handleReset}
                 type="button"
-                className=" p-0 h-6 w-6 "
+                className="h-6 w-6 p-0"
                 variant="outline"
               >
-                <RotateCcw className=" w-4 h-4" />
+                <RotateCcw className="h-4 w-4" />
               </Button>
             </div>
           </div>
-          <div className=" flex flex-col-reverse gap-2 mt-4">
+          <div className="mt-4 flex flex-col-reverse gap-2">
             <DialogClose asChild>
               <Button
                 variant="secondary"
                 size="sm"
                 type="button"
-                className=" w-full"
+                className="w-full"
               >
                 Cancel
               </Button>
@@ -379,7 +379,7 @@ const SearchDialog = ({
         </form>
       </DialogContent>
     </Dialog>
-  );
-};
+  )
+}
 
-export default SearchDialog;
+export default SearchDialog

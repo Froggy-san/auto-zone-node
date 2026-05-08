@@ -1,5 +1,5 @@
-import { Input } from "@components/ui/input";
-import { Label } from "@components/ui/label";
+import { Input } from "@components/ui/input"
+import { Label } from "@components/ui/label"
 import React, {
   forwardRef,
   RefObject,
@@ -7,19 +7,19 @@ import React, {
   useEffect,
   useRef,
   useState,
-} from "react";
-import { Controller, useForm } from "react-hook-form";
-import { AnimatePresence, motion } from "framer-motion";
-import { getPhoneData, PhoneInput } from "@components/phomeInput/PhoneInput";
-import { FaCcPaypal, FaCcMastercard } from "react-icons/fa";
-import { CiDeliveryTruck } from "react-icons/ci";
+} from "react"
+import { Controller, useForm } from "react-hook-form"
+import { AnimatePresence, motion } from "framer-motion"
+import { getPhoneData, PhoneInput } from "@components/phomeInput/PhoneInput"
+import { FaCcPaypal, FaCcMastercard } from "react-icons/fa"
+import { CiDeliveryTruck } from "react-icons/ci"
 
-import { Button } from "@components/ui/button";
-import { useRouter } from "next/navigation";
-import { Calendar } from "@components/ui/calendar";
-import { differenceInDays, format, formatDistanceToNow } from "date-fns";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "@lib/store/store";
+import { Button } from "@components/ui/button"
+import { useRouter } from "next/navigation"
+import { Calendar } from "@components/ui/calendar"
+import { differenceInDays, format, formatDistanceToNow } from "date-fns"
+import { useDispatch, useSelector } from "react-redux"
+import { RootState } from "@lib/store/store"
 import {
   clearCart,
   getCart,
@@ -27,92 +27,92 @@ import {
   getTotalCartPrices,
   setClient,
   setDate,
-} from "./cartSlice";
-import { Cross2Icon } from "@radix-ui/react-icons";
-import FormErrorMessage from "@components/form-error-message";
-import useCurrUser from "@lib/queries/useCurrUser";
-import useCurrentClient from "@hooks/use-current-client";
-import { cn } from "@lib/utils";
-import { getUserLocation } from "@lib/services/helper-services";
-import { createOrderAction } from "@lib/actions/orderActions";
-import { z } from "zod";
-import { PaymentMethod } from "@lib/types";
-import { useToast } from "@hooks/use-toast";
-import { ErorrToastDescription } from "@components/toast-items";
-import supabase from "@utils/supabase";
-import { adjustProductsStockAction } from "@lib/actions/productsActions";
+} from "./cartSlice"
+import { Cross2Icon } from "@radix-ui/react-icons"
+import FormErrorMessage from "@components/form-error-message"
+import useCurrUser from "@lib/queries/useCurrUser"
+import useCurrentClient from "@hooks/use-current-client"
+import { cn } from "@lib/utils"
+import { getUserLocation } from "@lib/services/helper-services"
+import { createOrderAction } from "@lib/actions/orderActions"
+import { z } from "zod"
+import { PaymentMethod } from "@lib/types"
+import { useToast } from "@hooks/use-toast"
+import { ErorrToastDescription } from "@components/toast-items"
+import supabase from "@utils/supabase"
+import { adjustProductsStockAction } from "@lib/actions/productsActions"
 
 type Inputs = {
-  name: string;
-  email: string;
-  phone: string;
-};
+  name: string
+  email: string
+  phone: string
+}
 
 const CartClientForm = () => {
-  const { clientById, error, isLoading } = useCurrentClient();
-  const [time, setTime] = useState<string>("02:00:00");
-  const [isDisablePayment, setIsDisablePayment] = useState(false);
+  const { clientById, error, isLoading } = useCurrentClient()
+  const [time, setTime] = useState<string>("02:00:00")
+  const [isDisablePayment, setIsDisablePayment] = useState(false)
 
   // const [paymentMethod, setPaymentMethond] =
   //   useState<z.infer<typeof PaymentMethod>>("card");
 
-  const cart = useSelector(getCart);
-  const paymentMethod = useRef<z.infer<typeof PaymentMethod>>("card");
-  const total_amount = useSelector(getTotalCartPrices);
+  const cart = useSelector(getCart)
+  const paymentMethod = useRef<z.infer<typeof PaymentMethod>>("card")
+  const total_amount = useSelector(getTotalCartPrices)
   const getCombinedDateTime = () => {
-    if (!date) return null;
+    if (!date) return null
 
     // 1. Create a copy of the date to avoid mutating state
-    const combined = new Date(date);
+    const combined = new Date(date)
 
     // 2. Split the time string "14:30" into [14, 30]
-    const [hours, minutes] = time.split(":").map(Number);
+    const [hours, minutes] = time.split(":").map(Number)
 
     // 3. Set the hours and minutes
-    combined.setHours(hours);
-    combined.setMinutes(minutes);
-    combined.setSeconds(0);
-    combined.setMilliseconds(0);
+    combined.setHours(hours)
+    combined.setMinutes(minutes)
+    combined.setSeconds(0)
+    combined.setMilliseconds(0)
 
-    return combined;
-  };
+    return combined
+  }
   const date =
-    useSelector(({ cartData }: RootState) => cartData.date) ?? new Date();
+    useSelector(({ cartData }: RootState) => cartData.date) ?? new Date()
 
-  const [showCalendar, setShowCalendar] = React.useState(false);
-  const { toast } = useToast();
+  const [showCalendar, setShowCalendar] = React.useState(false)
+  const { toast } = useToast()
 
-  const currentDate = new Date();
+  const currentDate = new Date()
   // const [date, setDate] = React.useState<Date | undefined>();
-  const formRef = useRef<HTMLFormElement>(null);
-  const router = useRouter();
+  const formRef = useRef<HTMLFormElement>(null)
+  const router = useRouter()
   const submitForm = () => {
     if (formRef.current) {
       formRef.current.dispatchEvent(
-        new Event("submit", { cancelable: true, bubbles: true }),
-      );
+        new Event("submit", { cancelable: true, bubbles: true })
+      )
     }
-  };
+  }
 
-  const dateWithTime = getCombinedDateTime();
+  const dateWithTime = getCombinedDateTime()
 
   const diffInDates = dateWithTime
     ? formatDistanceToNow(dateWithTime, {
         addSuffix: true,
       })
-    : undefined;
+    : undefined
   // Calculate how many days left to the chosen date
   const diffInDays = dateWithTime
     ? differenceInDays(dateWithTime, currentDate)
-    : 0;
+    : 0
   // To know if the date seleceted exceeds the 31days.
-  const periodExceeds = 31 - diffInDays < 0;
+  const periodExceeds = 31 - diffInDays < 0
 
   const defaultValues = {
     name: clientById ? clientById.name : "",
     email: clientById ? clientById.email : "",
     phone: "",
-  };
+  }
 
   const {
     register,
@@ -130,20 +130,20 @@ const CartClientForm = () => {
   } = useForm<Inputs>({
     mode: "onChange",
     defaultValues: defaultValues,
-  });
+  })
 
   const isDisabled =
-    isSubmitting || !formIsValid || !cart.length || isDisablePayment;
-  const { phone } = watch();
+    isSubmitting || !formIsValid || !cart.length || isDisablePayment
+  const { phone } = watch()
 
-  const { isValid } = getPhoneData(phone); // Assuming this is a utility function
+  const { isValid } = getPhoneData(phone) // Assuming this is a utility function
 
   useEffect(() => {
-    reset(defaultValues);
-  }, [clientById]);
+    reset(defaultValues)
+  }, [clientById])
   useEffect(() => {
     // Get the language and locale string from the browser settings
-    const userLocale = navigator.language; // e.g., "en-US" or "en-GB"
+    const userLocale = navigator.language // e.g., "en-US" or "en-GB"
     // getUserLocation();
     // Extract the region/country code
     // const countryCode = new Intl.Locale(userLocale).region;
@@ -158,46 +158,46 @@ const CartClientForm = () => {
     //   );
     // } else {
     // }
-  }, []);
+  }, [])
 
   useEffect(() => {
-    if (!cart.length) setShowCalendar(false);
-  }, [cart.length]);
+    if (!cart.length) setShowCalendar(false)
+  }, [cart.length])
 
   async function onSubmit(data: Inputs) {
     try {
-      if (isDisablePayment) return;
+      if (isDisablePayment) return
       if (!clientById)
-        throw new Error(`Failed to get the currently logged in client`);
+        throw new Error(`Failed to get the currently logged in client`)
       // 1. Fetch current stock for items in the cart
-      const itemIds = cart.map((i) => i.id);
+      const itemIds = cart.map((i) => i.id)
 
       const { data: currentProducts, error: productStockError } = await supabase
         .from("product")
         .select("id, stock, name")
-        .in("id", itemIds);
+        .in("id", itemIds)
       if (productStockError) {
         console.error(
-          `Failed to get the available stocks of the products: ${productStockError.message}`,
-        );
-        return;
+          `Failed to get the available stocks of the products: ${productStockError.message}`
+        )
+        return
       }
       // 2. Compare cart quantity vs actual database quantity
       const outOfStockItems = cart.filter((cartItem) => {
-        const dbProduct = currentProducts?.find((p) => p.id === cartItem.id);
-        return dbProduct && dbProduct.stock < cartItem.quantity;
-      });
+        const dbProduct = currentProducts?.find((p) => p.id === cartItem.id)
+        return dbProduct && dbProduct.stock < cartItem.quantity
+      })
 
       // 3. Stop them if something is wrong
       if (outOfStockItems.length > 0) {
-        const names = outOfStockItems.map((i) => i.name).join(", ");
+        const names = outOfStockItems.map((i) => i.name).join(", ")
 
         toast({
           title: "Wait! Stock changed.",
           description: `The following items are no longer available in the requested quantity: ${names}`,
           variant: "destructive",
-        });
-        return; // STOP the checkout
+        })
+        return // STOP the checkout
       }
 
       const { data: createdOrder, error } = await createOrderAction({
@@ -212,44 +212,42 @@ const CartClientForm = () => {
         stripe_payment_id: null,
         metadata: {},
         pickupDate: dateWithTime?.toISOString() || null,
-      });
+      })
       // dispatch(setClient(data));
 
       if (error) {
-        throw new Error(error);
+        throw new Error(error)
       }
       if (!createdOrder)
-        throw new Error(`Failed to create order, Please retry again.`);
+        throw new Error(`Failed to create order, Please retry again.`)
       if (paymentMethod.current === "card") {
         // Pass the Supabase Order ID in the URL so the Stripe page knows which order it is
-        router.push(
-          `/stripe?orderId=${createdOrder.id}&amount=${total_amount}`,
-        );
+        router.push(`/stripe?orderId=${createdOrder.id}&amount=${total_amount}`)
       } else {
         // Handle COD success (e.g., clear cart and show success page)
 
-        router.push(`/orders/${createdOrder.id}`);
+        router.push(`/orders/${createdOrder.id}`)
       }
-      setIsDisablePayment(true);
+      setIsDisablePayment(true)
     } catch (error: any) {
-      console.log(`Failed to create order: ${error.message}`);
+      console.log(`Failed to create order: ${error.message}`)
 
       toast({
         variant: "destructive",
         title: "Failed to create order",
         description: <ErorrToastDescription error={error.message} />,
-      });
+      })
     }
   }
 
   return (
-    <motion.div className="  w-full sm:max-w-[600px] mx-auto  lg:w-[350px] overflow-hidden">
+    <motion.div className="mx-auto w-full overflow-hidden sm:max-w-[600px] lg:w-[350px]">
       <form
         ref={formRef}
         onSubmit={handleSubmit(onSubmit)}
         className={cn(
-          "space-y-2 p-3 rounded-md  flex-1 bg-secondary dark:bg-card/30 h-fit",
-          { " animate-pulse pointer-events-none": isLoading },
+          "h-fit flex-1 space-y-2 rounded-md bg-secondary p-3 dark:bg-card/30",
+          { "pointer-events-none animate-pulse": isLoading }
         )}
       >
         {/* Full Name Field */}
@@ -258,17 +256,17 @@ const CartClientForm = () => {
           <Input
             id="fullname"
             placeholder="Full name"
-            className=" border-none bg-background"
+            className="border-none bg-background"
             type="text"
             {...register("name", {
               required: "Please put a valid full name.",
               validate: (value) => {
-                const string = value.split(" ");
+                const string = value.split(" ")
                 const validValue =
-                  value.includes(" ") && string[string.length - 1];
+                  value.includes(" ") && string[string.length - 1]
                 return !validValue
                   ? "Please enter you first and last name."
-                  : undefined;
+                  : undefined
               },
             })}
           />
@@ -314,7 +312,7 @@ const CartClientForm = () => {
           <Input
             id="email"
             placeholder="Email"
-            className=" border-none bg-background"
+            className="border-none bg-background"
             type="text"
             {...register("email", {
               required: "Please put a valid email address.",
@@ -353,22 +351,22 @@ const CartClientForm = () => {
                 id="time-picker"
                 step="1"
                 // defaultValue="10:30:00"
-                className="bg-background appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
+                className="appearance-none bg-background [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
               />
             </div>
           </>
         )}
       </AnimatePresence>
 
-      <motion.div layout className=" flex flex-col gap-2 my-2 ">
+      <motion.div layout className="my-2 flex flex-col gap-2">
         {showCalendar ? (
           <Button
             size="sm"
             className="gap-2"
             disabled={isDisabled}
             onClick={() => {
-              paymentMethod.current = "cod";
-              submitForm();
+              paymentMethod.current = "cod"
+              submitForm()
             }}
           >
             Continue <CiDeliveryTruck size={16} />
@@ -379,7 +377,7 @@ const CartClientForm = () => {
             className="gap-2"
             disabled={isDisabled}
             onClick={() => {
-              setShowCalendar((is) => !is);
+              setShowCalendar((is) => !is)
             }}
           >
             Pay on arrival <CiDeliveryTruck size={16} />
@@ -389,12 +387,12 @@ const CartClientForm = () => {
         <Button
           size="sm"
           variant="secondary"
-          className=" gap-2"
+          className="gap-2"
           disabled={isDisabled}
           onClick={() => {
             // setPaymentMethond("card");
-            paymentMethod.current = "card";
-            submitForm();
+            paymentMethod.current = "card"
+            submitForm()
             // router.push("/stripe");
           }}
         >
@@ -402,34 +400,34 @@ const CartClientForm = () => {
         </Button>
       </motion.div>
     </motion.div>
-  );
-};
+  )
+}
 
-export default CartClientForm;
+export default CartClientForm
 
 interface PickupDateProps {
-  diffInDate?: string | undefined;
-  exceedsPeriod?: boolean;
-  date: Date | null;
-  setShowCalendar: React.Dispatch<SetStateAction<boolean>>;
+  diffInDate?: string | undefined
+  exceedsPeriod?: boolean
+  date: Date | null
+  setShowCalendar: React.Dispatch<SetStateAction<boolean>>
   // setDate: React.Dispatch<SetStateAction<Date | undefined>>;
 }
 
 const PickupDate = forwardRef<HTMLDivElement, PickupDateProps>(
   ({ exceedsPeriod, diffInDate, date, setShowCalendar }, ref) => {
-    const dispatch = useDispatch();
+    const dispatch = useDispatch()
 
-    const chosenDate = date ? format(date, "PPP hh:mm aa") : undefined;
+    const chosenDate = date ? format(date, "PPP hh:mm aa") : undefined
     const isPastDate = (date: Date) => {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0); // Remove time part to compare only dates
-      return date < today;
-    };
+      const today = new Date()
+      today.setHours(0, 0, 0, 0) // Remove time part to compare only dates
+      return date < today
+    }
     return (
       <motion.div
         // layout
         ref={ref}
-        className=" my-4  relative w-full text-center text-balance"
+        className="relative my-4 w-full text-center text-balance"
         initial={{
           opacity: 0,
         }}
@@ -442,15 +440,15 @@ const PickupDate = forwardRef<HTMLDivElement, PickupDateProps>(
       >
         <button
           onClick={() => {
-            dispatch(setDate(undefined));
-            setShowCalendar(false);
+            dispatch(setDate(undefined))
+            setShowCalendar(false)
           }}
-          className="absolute right-1 top-0 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground"
+          className="absolute top-0 right-1 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground"
         >
           <Cross2Icon className="h-4 w-4" />
           {/* <span className="sr-only">Close</span> */}
         </button>
-        <p className=" text-sm text-muted-foreground mb-1 w-full break-words  ">
+        <p className="mb-1 w-full text-sm break-words text-muted-foreground">
           What date should we expect you to arrive at?
           <br />
           {`${chosenDate || ""} ${diffInDate ? ", " + diffInDate : ""}`}
@@ -471,7 +469,7 @@ const PickupDate = forwardRef<HTMLDivElement, PickupDateProps>(
                 opacity: 0,
                 height: 0,
               }}
-              className=" text-xs text-yellow-600 mb-1 dark:text-yellow-500"
+              className="mb-1 text-xs text-yellow-600 dark:text-yellow-500"
             >
               We can&apos;t guarantee that the items in the cart will be
               available past the 31 days mark. If you want the item to be
@@ -484,11 +482,11 @@ const PickupDate = forwardRef<HTMLDivElement, PickupDateProps>(
           selected={date ? new Date(date) : undefined}
           disabled={isPastDate}
           onSelect={(value) => dispatch(setDate(value?.toISOString()))}
-          className="rounded-md border w-fit mx-auto"
+          className="mx-auto w-fit rounded-md border"
         />
       </motion.div>
-    );
-  },
-);
+    )
+  }
+)
 
-PickupDate.displayName = "PickupDate";
+PickupDate.displayName = "PickupDate"

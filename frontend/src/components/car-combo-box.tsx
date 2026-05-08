@@ -1,9 +1,8 @@
+import * as React from "react"
+import { Check, ChevronsUpDown } from "lucide-react"
 
-import * as React from "react";
-import { Check, ChevronsUpDown } from "lucide-react";
-
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
 import {
   Command,
   CommandEmpty,
@@ -11,19 +10,19 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "@/components/ui/command";
+} from "@/components/ui/command"
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
-import { CarItem, ClientWithPhoneNumbers } from "@lib/types";
+} from "@/components/ui/popover"
+import { CarItem, ClientWithPhoneNumbers } from "@lib/types"
 
 interface Props {
-  setValue: React.Dispatch<React.SetStateAction<number>>;
-  value: number;
-  options: CarItem[];
-  disabled?: boolean;
+  setValue: React.Dispatch<React.SetStateAction<number>>
+  value: number
+  options: CarItem[]
+  disabled?: boolean
 }
 
 export const CarsComboBox: React.FC<Props> = ({
@@ -32,13 +31,13 @@ export const CarsComboBox: React.FC<Props> = ({
   options,
   disabled,
 }) => {
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = React.useState(false)
   // const [value, setValue] = React.useState(0);
-  const selected = options.find((option) => option.id === value);
+  const selected = options.find((option) => option.id === value)
   const image =
     selected?.carImages.length &&
     (selected?.carImages.find((image) => image.isMain)?.imagePath ||
-      selected?.carImages[0].imagePath);
+      selected?.carImages[0].imagePath)
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -48,18 +47,18 @@ export const CarsComboBox: React.FC<Props> = ({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className=" w-full   justify-between    h-fit "
+          className="h-fit w-full justify-between"
         >
           {selected ? (
-            <div className=" flex items-center gap-2 flex-wrap">
+            <div className="flex flex-wrap items-center gap-2">
               Plate: {selected.plateNumber} /{" "}
-              <div className=" flex items-center gap-2">
+              <div className="flex items-center gap-2">
                 {" "}
                 Image:{" "}
                 {image ? (
                   <img
                     src={image}
-                    className="  max-w-7 max-h-[1.4rem] object-contain"
+                    className="max-h-[1.4rem] max-w-7 object-contain"
                     alt="Car image"
                   />
                 ) : (
@@ -73,7 +72,7 @@ export const CarsComboBox: React.FC<Props> = ({
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className=" h-[30vh] sm:h-[unset]  w-[300px] sm:w-[400px]   p-0">
+      <PopoverContent className="h-[30vh] w-[300px] p-0 sm:h-[unset] sm:w-[400px]">
         <Command>
           <CommandInput placeholder="Search client..." />
           <CommandList>
@@ -88,15 +87,15 @@ export const CarsComboBox: React.FC<Props> = ({
                 const optionImage =
                   option.carImages.length &&
                   (option?.carImages.find((image) => image.isMain)?.imagePath ||
-                    option.carImages[0].imagePath);
+                    option.carImages[0].imagePath)
 
                 return (
                   <CommandItem
                     key={option.id}
                     value={option.plateNumber + String(option.id)}
                     onSelect={() => {
-                      setValue(option.id === value ? 0 : option.id);
-                      setOpen(false);
+                      setValue(option.id === value ? 0 : option.id)
+                      setOpen(false)
                     }}
                     className="gap-2"
                   >
@@ -106,15 +105,15 @@ export const CarsComboBox: React.FC<Props> = ({
                         value === option.id ? "opacity-100" : "opacity-0"
                       )}
                     />
-                    <div className=" flex items-center gap-2  flex-wrap">
+                    <div className="flex flex-wrap items-center gap-2">
                       Plate: {option.plateNumber} /{" "}
-                      <div className=" flex items-center gap-2 justify-between  flex-1">
+                      <div className="flex flex-1 items-center justify-between gap-2">
                         {" "}
                         Image:{" "}
                         {optionImage ? (
                           <img
                             src={optionImage}
-                            className=" max-w-7 max-h-7 object-contain"
+                            className="max-h-7 max-w-7 object-contain"
                             alt="Car image"
                           />
                         ) : (
@@ -123,12 +122,12 @@ export const CarsComboBox: React.FC<Props> = ({
                       </div>
                     </div>
                   </CommandItem>
-                );
+                )
               })}
             </CommandGroup>
           </CommandList>
         </Command>
       </PopoverContent>
     </Popover>
-  );
-};
+  )
+}

@@ -1,6 +1,6 @@
-import { CategoryProps } from "@lib/types";
-import { cn } from "@lib/utils";
-import { EllipsisVertical, LayoutTemplate, X } from "lucide-react";
+import { CategoryProps } from "@lib/types"
+import { cn } from "@lib/utils"
+import { EllipsisVertical, LayoutTemplate, X } from "lucide-react"
 import {
   Dialog,
   DialogClose,
@@ -10,7 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from "@/components/ui/dialog"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,47 +18,47 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import React, { useEffect, useState } from "react";
-import { Button } from "@components/ui/button";
-import Spinner from "@components/Spinner";
+} from "@/components/ui/dropdown-menu"
+import React, { useEffect, useState } from "react"
+import { Button } from "@components/ui/button"
+import Spinner from "@components/Spinner"
 import SuccessToastDescription, {
   ErorrToastDescription,
-} from "@components/toast-items";
-import { useToast } from "@hooks/use-toast";
-import { deleteCategoryAction } from "@lib/actions/categoriesAction";
+} from "@components/toast-items"
+import { useToast } from "@hooks/use-toast"
+import { deleteCategoryAction } from "@lib/actions/categoriesAction"
 
 interface Props {
-  category: CategoryProps;
-  setCatToEdit: () => void;
-  setOpenDetails: () => void;
+  category: CategoryProps
+  setCatToEdit: () => void
+  setOpenDetails: () => void
 }
 
 const Category = ({ category, setCatToEdit, setOpenDetails }: Props) => {
-  const [deleteOpen, setDeleteOpen] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
   return (
     <li
       onClick={() => {
-        setOpenDetails();
+        setOpenDetails()
       }}
       className={cn(
-        `relative  h-fit   px-3 py-2 flex flex-col  items-center justify-between    hover:bg-accent/30  transition-all cursor-pointer  gap-2 text-sm border rounded-lg    `,
-        { "px-3 py-[0.4rem] ": !category.image }
+        `relative flex h-fit cursor-pointer flex-col items-center justify-between gap-2 rounded-lg border px-3 py-2 text-sm transition-all hover:bg-accent/30`,
+        { "px-3 py-[0.4rem]": !category.image }
       )}
     >
       {category.image ? (
         <img
           src={category.image}
           alt={`${category.name} image`}
-          className="  w-28  max-h-24 block  object-contain"
+          className="block max-h-24 w-28 object-contain"
         />
       ) : null}
 
-      <div className="flex items-center  w-full   justify-center gap-2 ">
+      <div className="flex w-full items-center justify-center gap-2">
         <p
-          className={cn("    pr-6  text-center", {
-            "max-w-[98%]   text-wrap px-3": category.image,
+          className={cn("pr-6 text-center", {
+            "max-w-[98%] px-3 text-wrap": category.image,
           })}
         >
           {category.name}
@@ -67,28 +67,28 @@ const Category = ({ category, setCatToEdit, setOpenDetails }: Props) => {
         <div
           onClick={(e) => e.stopPropagation()}
           className={cn(
-            `flex items-center absolute right-1 top-1/2 -translate-y-1/2 `,
+            `absolute top-1/2 right-1 flex -translate-y-1/2 items-center`,
             {
-              "right-1 top-[unset] -translate-y-[unset] bottom-[0.3rem]":
+              "top-[unset] right-1 bottom-[0.3rem] -translate-y-[unset]":
                 category.image,
             }
           )}
         >
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className=" p-0 h-7 w-7">
-                <EllipsisVertical className=" w-4 h-4" />
+              <Button variant="ghost" className="h-7 w-7 p-0">
+                <EllipsisVertical className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className=" mt-3">
-              <DropdownMenuItem onClick={setCatToEdit} className=" gap-2">
-                <LayoutTemplate className=" w-4 h-4" /> Edit
+            <DropdownMenuContent className="mt-3">
+              <DropdownMenuItem onClick={setCatToEdit} className="gap-2">
+                <LayoutTemplate className="h-4 w-4" /> Edit
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => setDeleteOpen(true)}
-                className=" text-red-700 gap-2  hover:!text-red-700 hover:!bg-destructive/20"
+                className="gap-2 text-red-700 hover:!bg-destructive/20 hover:!text-red-700"
               >
-                <X className=" w-4 h-4" /> Delete
+                <X className="h-4 w-4" /> Delete
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -102,8 +102,8 @@ const Category = ({ category, setCatToEdit, setOpenDetails }: Props) => {
         category={category}
       />
     </li>
-  );
-};
+  )
+}
 
 function Delete({
   category,
@@ -112,26 +112,26 @@ function Delete({
   isDeleting,
   setIsDeleting,
 }: {
-  category: CategoryProps;
-  open?: boolean;
-  setOpen?: React.Dispatch<React.SetStateAction<boolean>>;
-  isDeleting: boolean;
-  setIsDeleting: React.Dispatch<React.SetStateAction<boolean>>;
+  category: CategoryProps
+  open?: boolean
+  setOpen?: React.Dispatch<React.SetStateAction<boolean>>
+  isDeleting: boolean
+  setIsDeleting: React.Dispatch<React.SetStateAction<boolean>>
 }) {
-  const { toast } = useToast();
+  const { toast } = useToast()
   //   const { deleteGeneration, isDeleting } = useDeleteCarGenerations();
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false)
 
   useEffect(() => {
     return () => {
-      const body = document.querySelector("body");
-      if (body) body.style.pointerEvents = "auto";
-    };
-  }, [open]);
+      const body = document.querySelector("body")
+      if (body) body.style.pointerEvents = "auto"
+    }
+  }, [open])
   return (
-    <div onClick={(e) => e.stopPropagation()} className=" absolute">
+    <div onClick={(e) => e.stopPropagation()} className="absolute">
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="sm:max-w-[425px] border-none">
+        <DialogContent className="border-none sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>
               Delete categroy &apos;{category.name}&apos;
@@ -141,7 +141,7 @@ function Delete({
             </DialogDescription>
           </DialogHeader>
 
-          <DialogFooter className="   gap-2 sm:gap-0">
+          <DialogFooter className="gap-2 sm:gap-0">
             <DialogClose asChild>
               <Button size="sm" variant="secondary">
                 Cancel
@@ -152,12 +152,12 @@ function Delete({
               size="sm"
               onClick={async () => {
                 try {
-                  setIsDeleting(true);
-                  const { error } = await deleteCategoryAction(category);
+                  setIsDeleting(true)
+                  const { error } = await deleteCategoryAction(category)
 
-                  if (error) throw new Error(error);
+                  if (error) throw new Error(error)
 
-                  setOpen?.(false);
+                  setOpen?.(false)
 
                   toast({
                     className: "bg-primary  text-primary-foreground",
@@ -165,7 +165,7 @@ function Delete({
                     description: (
                       <SuccessToastDescription message="Car generation has been deleted." />
                     ),
-                  });
+                  })
                 } catch (error: any) {
                   toast({
                     variant: "destructive",
@@ -173,19 +173,19 @@ function Delete({
                     description: (
                       <ErorrToastDescription error={error.message} />
                     ),
-                  });
+                  })
                 } finally {
-                  setIsDeleting(false);
+                  setIsDeleting(false)
                 }
               }}
             >
-              {isDeleting ? <Spinner className=" h-full" /> : "Confrim"}
+              {isDeleting ? <Spinner className="h-full" /> : "Confrim"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
-  );
+  )
 }
 
-export default Category;
+export default Category

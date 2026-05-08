@@ -1,4 +1,4 @@
-import { cn } from "@lib/utils";
+import { cn } from "@lib/utils"
 import React, {
   useCallback,
   useEffect,
@@ -6,38 +6,38 @@ import React, {
   useMemo,
   useRef,
   useState,
-} from "react";
-import { AnimatePresence, motion } from "framer-motion";
-import { ArrowLeft, History } from "lucide-react";
-import { Button } from "./ui/button";
+} from "react"
+import { AnimatePresence, motion } from "framer-motion"
+import { ArrowLeft, History } from "lucide-react"
+import { Button } from "./ui/button"
 import {
   Message,
   Ticket,
   TicketHistory as TicketHistoryType,
   TicketPriority,
   TicketStatus,
-} from "@lib/types";
-import useInfiniteTicketHistory from "@lib/queries/tickets/useInfiniteTicketHistory";
-import { useInView } from "react-intersection-observer";
-import ErrorMessage from "./error-message";
-import TicketHistory from "./dashboard/tickets/ticket-history";
-import { GiTumbleweed } from "react-icons/gi";
-import Spinner from "./Spinner";
-import { TbMoodEmptyFilled } from "react-icons/tb";
-import { useScrollFade } from "@hooks/use-scroll-fade";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+} from "@lib/types"
+import useInfiniteTicketHistory from "@lib/queries/tickets/useInfiniteTicketHistory"
+import { useInView } from "react-intersection-observer"
+import ErrorMessage from "./error-message"
+import TicketHistory from "./dashboard/tickets/ticket-history"
+import { GiTumbleweed } from "react-icons/gi"
+import Spinner from "./Spinner"
+import { TbMoodEmptyFilled } from "react-icons/tb"
+import { useScrollFade } from "@hooks/use-scroll-fade"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
 interface Props {
-  isOpen: boolean;
-  ticket: Ticket;
-  ticketStatuses: TicketStatus[];
-  ticketPriorities: TicketPriority[];
-  internalActivity?: boolean;
-  className?: string;
-  selectedMessage: Message | undefined;
-  setIsOpen: (open: boolean) => void;
-  handleViewDetails: (ticketId: number, messageId?: number | undefined) => void;
-  handleFocusMessage: (messageId: number | null) => void;
-  handleSelectMessage: (id: number | null) => void;
+  isOpen: boolean
+  ticket: Ticket
+  ticketStatuses: TicketStatus[]
+  ticketPriorities: TicketPriority[]
+  internalActivity?: boolean
+  className?: string
+  selectedMessage: Message | undefined
+  setIsOpen: (open: boolean) => void
+  handleViewDetails: (ticketId: number, messageId?: number | undefined) => void
+  handleFocusMessage: (messageId: number | null) => void
+  handleSelectMessage: (id: number | null) => void
 }
 
 const ShowTicketHistory = React.forwardRef<HTMLDivElement, Props>(
@@ -55,7 +55,7 @@ const ShowTicketHistory = React.forwardRef<HTMLDivElement, Props>(
       handleViewDetails,
       handleSelectMessage,
     }: Props,
-    ref,
+    ref
   ) => {
     const {
       data,
@@ -64,59 +64,56 @@ const ShowTicketHistory = React.forwardRef<HTMLDivElement, Props>(
       isFetchingNextPage,
       hasNextPage,
       error,
-    } = useInfiniteTicketHistory({ ticketId: ticket.id });
+    } = useInfiniteTicketHistory({ ticketId: ticket.id })
 
-    const { ref: inViewElement, inView } = useInView();
-    const searchParams = useSearchParams();
-    const pathname = usePathname();
-    const params = new URLSearchParams(searchParams);
-    const router = useRouter();
+    const { ref: inViewElement, inView } = useInView()
+    const searchParams = useSearchParams()
+    const pathname = usePathname()
+    const params = new URLSearchParams(searchParams)
+    const router = useRouter()
     const historyId = searchParams.get("historyId")
       ? Number(searchParams.get("historyId"))
-      : null;
-    const sliderContainerRef = useRef<HTMLDivElement>(null);
-    const historyRefs = useRef<Record<string, HTMLLIElement>>({});
-    const listRef = useRef<HTMLDivElement>(null);
+      : null
+    const sliderContainerRef = useRef<HTMLDivElement>(null)
+    const historyRefs = useRef<Record<string, HTMLLIElement>>({})
+    const listRef = useRef<HTMLDivElement>(null)
 
     //! important note about refs: We have two refs here: 'sliderContainerRef' for internal use and the forwarded 'ref' for the parent.
     // const sliderContainerRef = ref ?? sliderContainerRef;
     // This exposes the internal DOM node to the parent's ref
-    useImperativeHandle(
-      ref,
-      () => sliderContainerRef.current as HTMLDivElement,
-    );
+    useImperativeHandle(ref, () => sliderContainerRef.current as HTMLDivElement)
 
     const ticketHistoryById: TicketHistoryType[] = useMemo(() => {
-      return data ? data.pages.flatMap((page) => page.items) : [];
-    }, [data?.pages]);
+      return data ? data.pages.flatMap((page) => page.items) : []
+    }, [data?.pages])
 
     const selectHistory = useCallback(
       (ticketId: number, ticketHisotryId: number) => {
         if (ticketHisotryId === historyId) {
-          params.delete("historyId");
-          router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+          params.delete("historyId")
+          router.replace(`${pathname}?${params.toString()}`, { scroll: false })
         } else {
-          params.set("ticket", String(ticketId));
-          params.set("historyId", String(ticketHisotryId));
+          params.set("ticket", String(ticketId))
+          params.set("historyId", String(ticketHisotryId))
           router.replace(`${pathname}?${params.toString()}`, {
             scroll: false,
-          });
+          })
         }
       },
-      [router, params, pathname, historyId],
-    );
+      [router, params, pathname, historyId]
+    )
 
     const setRef = useCallback((el: HTMLLIElement | null, id: number) => {
       if (el) {
-        historyRefs.current[id] = el;
+        historyRefs.current[id] = el
       }
       // Remove the 'delete' part unless you are worried about
       // memory leaks with thousands of items.
       //! Keeping the old ref for a moment usually helps stability.
       else {
-        delete historyRefs.current[id];
+        delete historyRefs.current[id]
       }
-    }, []);
+    }, [])
 
     //! This hook ensures that if 'ref' is a function or an object,
     // it gets updated whenever 'sliderContainerRef' changes.
@@ -131,42 +128,42 @@ const ShowTicketHistory = React.forwardRef<HTMLDivElement, Props>(
     //   }
     // }, [ref]);
     useEffect(() => {
-      if (!isFetchingNextPage && hasNextPage && inView) fetchNextPage();
-    }, [inView, hasNextPage]);
+      if (!isFetchingNextPage && hasNextPage && inView) fetchNextPage()
+    }, [inView, hasNextPage])
 
     useEffect(() => {
-      if (!historyId || !isOpen) return;
+      if (!historyId || !isOpen) return
 
       const scrollToTarget = () => {
-        const element = historyRefs.current[historyId];
+        const element = historyRefs.current[historyId]
 
         if (element) {
           element.scrollIntoView({
             behavior: "smooth",
             block: "center",
-          });
+          })
         } else if (hasNextPage && !isFetchingNextPage) {
           // If the ID isn't in our refs yet, but more pages exist,
           // scroll to bottom to trigger 'inView' and fetch more.
           listRef.current?.scrollTo({
             top: listRef.current.scrollHeight,
             behavior: "smooth",
-          });
-          fetchNextPage();
+          })
+          fetchNextPage()
         }
-      };
+      }
 
       // We use a requestAnimationFrame to ensure the DOM has
       // actually rendered the new items from the last fetch
-      const timeoutId = setTimeout(scrollToTarget, 200);
+      const timeoutId = setTimeout(scrollToTarget, 200)
 
-      return () => clearTimeout(timeoutId);
+      return () => clearTimeout(timeoutId)
     }, [
       historyId,
       isOpen,
       ticketHistoryById.length, // Trigger when new items are added
       // isFetchingNextPage,
-    ]);
+    ])
 
     // useEffect(() => {
     //   if (historyId) {
@@ -195,29 +192,29 @@ const ShowTicketHistory = React.forwardRef<HTMLDivElement, Props>(
     // ]);
 
     useEffect(() => {
-      if (historyId) setIsOpen(true);
-    }, [historyId, setIsOpen]);
+      if (historyId) setIsOpen(true)
+    }, [historyId, setIsOpen])
 
-    if (error) return <ErrorMessage>{`${error}`}</ErrorMessage>;
+    if (error) return <ErrorMessage>{`${error}`}</ErrorMessage>
 
     return (
       <div
         ref={sliderContainerRef}
         className={cn(
-          "     sticky  transition-all   ease-out     rounded-t-3xl  md:rounded-l-3xl bg-background  border-t border-x md:border-x-0 md:border-t-0 md:border-l md:border-y shadow-lg bottom-0 md:top-1   w-full  h-0    md:w-0  md:h-[99vh] ",
-          { "  h-fit md:!w-[400px]": isOpen },
-          className,
+          "sticky bottom-0 h-0 w-full rounded-t-3xl border-x border-t bg-background shadow-lg transition-all ease-out md:top-1 md:h-[99vh] md:w-0 md:rounded-l-3xl md:border-x-0 md:border-y md:border-t-0 md:border-l",
+          { "h-fit md:!w-[400px]": isOpen },
+          className
         )}
       >
-        <div className=" w-full  relative h-full  ">
+        <div className="relative h-full w-full">
           <Button
             onClick={() => setIsOpen(!isOpen)}
             variant="secondary"
-            className="  absolute left-1/2 -translate-x-1/2 rotate-90 md:rotate-0 -top-10 md:top-1/2 md:bottom-1/2 md:-left-8  border z-50  p-0   w-7 h-7 rounded-full"
+            className="absolute -top-10 left-1/2 z-50 h-7 w-7 -translate-x-1/2 rotate-90 rounded-full border p-0 md:top-1/2 md:bottom-1/2 md:-left-8 md:rotate-0"
           >
             <ArrowLeft
-              className={cn(" w-4 h-4 transition-all  ease-in duration-300", {
-                " rotate-180": isOpen,
+              className={cn("h-4 w-4 transition-all duration-300 ease-in", {
+                "rotate-180": isOpen,
               })}
             />
           </Button>
@@ -226,7 +223,7 @@ const ShowTicketHistory = React.forwardRef<HTMLDivElement, Props>(
             <motion.div
               ref={listRef}
               //show-hide-scrollbar
-              className={cn(" h-full relative  p-3   space-y-6 ")}
+              className={cn("relative h-full space-y-6 p-3")}
             >
               <AnimatePresence mode="wait">
                 {ticketHistoryById.length ? (
@@ -242,14 +239,14 @@ const ShowTicketHistory = React.forwardRef<HTMLDivElement, Props>(
                     }}
                     exit={{ y: 40, opacity: 0 }}
                     transition={{ ease: "easeOut", delay: 0.1 }}
-                    className=" flex flex-row md:flex-col justify-stretch gap-4 !h-full   max-h-full  py-3 px-1.5  overflow-y-auto history-thumb show-hide-scrollbar "
+                    className="history-thumb show-hide-scrollbar flex !h-full max-h-full flex-row justify-stretch gap-4 overflow-y-auto px-1.5 py-3 md:flex-col"
                   >
                     {ticketHistoryById.map((history) => (
                       <TicketHistory
                         key={history.id}
-                        className="  min-w-[290px] xs:min-w-[350px] "
+                        className="min-w-[290px] xs:min-w-[350px]"
                         ref={(element) => {
-                          setRef(element, history.id);
+                          setRef(element, history.id)
                         }}
                         isHistorySelected={history.id === historyId}
                         selectHistory={selectHistory}
@@ -265,18 +262,18 @@ const ShowTicketHistory = React.forwardRef<HTMLDivElement, Props>(
                     ))}
                     <li
                       ref={inViewElement}
-                      className=" flex items-center   w-[20px] sm:w-[unset] justify-center "
+                      className="flex w-[20px] items-center justify-center sm:w-[unset]"
                     >
-                      {isFetching && <Spinner className="  h-5 w-5 static" />}
+                      {isFetching && <Spinner className="static h-5 w-5" />}
                     </li>
                   </motion.ul>
                 ) : (
                   <motion.div
                     key={"not-found"}
-                    className=" text-xs my-auto w-full text-center text-muted-foreground flex flex-col justify-center items-center gap-2"
+                    className="my-auto flex w-full flex-col items-center justify-center gap-2 text-center text-xs text-muted-foreground"
                   >
-                    <p className="  text-sm sm:text-lg">No history found.</p>
-                    <History className="  w-5 h-5   sm:w-9 sm:h-9" />
+                    <p className="text-sm sm:text-lg">No history found.</p>
+                    <History className="h-5 w-5 sm:h-9 sm:w-9" />
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -284,12 +281,12 @@ const ShowTicketHistory = React.forwardRef<HTMLDivElement, Props>(
           )}
         </div>
       </div>
-    );
-  },
-);
-export default ShowTicketHistory;
+    )
+  }
+)
+export default ShowTicketHistory
 
-ShowTicketHistory.displayName = "ShowTicketHistory";
+ShowTicketHistory.displayName = "ShowTicketHistory"
 
 /*
    const measuredRef = useCallback((node: HTMLDivElement | null) => {

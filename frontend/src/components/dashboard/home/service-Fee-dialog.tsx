@@ -1,5 +1,5 @@
-import { Category, CategoryProps, Service, ServiceFee } from "@lib/types";
-import React, { useMemo, useReducer, useState } from "react";
+import { Category, CategoryProps, Service, ServiceFee } from "@lib/types"
+import React, { useMemo, useReducer, useState } from "react"
 import {
   Dialog,
   DialogClose,
@@ -9,82 +9,82 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@components/ui/input";
-import { Switch } from "@components/ui/switch";
-import { Checkbox } from "@components/ui/checkbox";
-import { Label } from "@components/ui/label";
-import { Button } from "@components/ui/button";
-import { HandPlatter, PackageMinus, Pencil } from "lucide-react";
+} from "@/components/ui/dialog"
+import { Input } from "@components/ui/input"
+import { Switch } from "@components/ui/switch"
+import { Checkbox } from "@components/ui/checkbox"
+import { Label } from "@components/ui/label"
+import { Button } from "@components/ui/button"
+import { HandPlatter, PackageMinus, Pencil } from "lucide-react"
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@components/ui/tooltip";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+} from "@components/ui/tooltip"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import SuccessToastDescription, {
   ErorrToastDescription,
-} from "@components/toast-items";
-import { useToast } from "@hooks/use-toast";
-import Spinner from "@components/Spinner";
-import { deleteServiceFeeAction } from "@lib/actions/serviceFeeAction";
+} from "@components/toast-items"
+import { useToast } from "@hooks/use-toast"
+import Spinner from "@components/Spinner"
+import { deleteServiceFeeAction } from "@lib/actions/serviceFeeAction"
 
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/components/ui/accordion";
-import { formatCurrency } from "@lib/client-helpers";
-import { cn } from "@lib/utils";
-import TagCarousel from "@components/tag-carousel";
-import ServiceDiaDetails from "./service-dia-details";
+} from "@/components/ui/accordion"
+import { formatCurrency } from "@lib/client-helpers"
+import { cn } from "@lib/utils"
+import TagCarousel from "@components/tag-carousel"
+import ServiceDiaDetails from "./service-dia-details"
 
 interface ServiceStates {
-  priceValue: string;
-  discountValue: string;
-  totalPriceAfterDiscountValue: string;
-  hasReturnedValue: boolean;
-  checked: boolean;
-  open: boolean;
-  deleteOpen: ServiceFee | null;
+  priceValue: string
+  discountValue: string
+  totalPriceAfterDiscountValue: string
+  hasReturnedValue: boolean
+  checked: boolean
+  open: boolean
+  deleteOpen: ServiceFee | null
 }
 
 type PriceAction = {
-  type: "price";
-  payload: string;
-};
+  type: "price"
+  payload: string
+}
 
 type DiscountAction = {
-  type: "discount";
-  payload: string;
-};
+  type: "discount"
+  payload: string
+}
 type TotalPriceAction = {
-  type: "total-price";
-  payload: string;
-};
+  type: "total-price"
+  payload: string
+}
 
 type HasReturnedAction = {
-  type: "has-returned";
-};
+  type: "has-returned"
+}
 
 type Checked = {
-  type: "checked";
-};
+  type: "checked"
+}
 
 type Open = {
-  type: "open";
-};
+  type: "open"
+}
 
 type DeleteOpen = {
-  type: "delete-open";
-  payload: ServiceFee | null;
-};
+  type: "delete-open"
+  payload: ServiceFee | null
+}
 
 type Reset = {
-  type: "reset";
-};
+  type: "reset"
+}
 const initalState = {
   priceValue: "",
   discountValue: "",
@@ -93,7 +93,7 @@ const initalState = {
   checked: false,
   open: false,
   deleteOpen: null,
-};
+}
 
 type Action =
   | PriceAction
@@ -103,30 +103,30 @@ type Action =
   | Checked
   | Open
   | DeleteOpen
-  | Reset;
+  | Reset
 
 function reducer(state: ServiceStates, action: Action) {
   switch (action.type) {
     case "price":
-      return { ...state, priceValue: action.payload };
+      return { ...state, priceValue: action.payload }
 
     case "discount":
-      return { ...state, discountValue: action.payload };
+      return { ...state, discountValue: action.payload }
 
     case "total-price":
-      return { ...state, totalPriceAfterDiscountValue: action.payload };
+      return { ...state, totalPriceAfterDiscountValue: action.payload }
 
     case "open":
-      return { ...state, open: !state.open };
+      return { ...state, open: !state.open }
 
     case "delete-open":
-      return { ...state, deleteOpen: action.payload };
+      return { ...state, deleteOpen: action.payload }
 
     case "checked":
-      return { ...state, checked: !state.checked, hasReturnedValue: false };
+      return { ...state, checked: !state.checked, hasReturnedValue: false }
 
     case "has-returned":
-      return { ...state, hasReturnedValue: !state.hasReturnedValue };
+      return { ...state, hasReturnedValue: !state.hasReturnedValue }
 
     case "reset":
       return {
@@ -137,7 +137,7 @@ function reducer(state: ServiceStates, action: Action) {
         hasReturnedValue: false,
         checked: false,
         deleteOpen: null,
-      };
+      }
   }
 }
 
@@ -147,10 +147,10 @@ function ServiceFeesDialog({
   categories,
   total,
 }: {
-  isAdmin: boolean;
-  service: Service;
-  categories: CategoryProps[];
-  total: number;
+  isAdmin: boolean
+  service: Service
+  categories: CategoryProps[]
+  total: number
 }) {
   const [
     {
@@ -163,24 +163,24 @@ function ServiceFeesDialog({
       totalPriceAfterDiscountValue,
     },
     dispatch,
-  ] = useReducer(reducer, initalState);
+  ] = useReducer(reducer, initalState)
 
-  const pathname = usePathname();
-  const router = useRouter();
-  const searchParam = useSearchParams();
+  const pathname = usePathname()
+  const router = useRouter()
+  const searchParam = useSearchParams()
 
-  let servicesArr = service.servicesFee;
+  let servicesArr = service.servicesFee
 
   servicesArr = servicesArr.filter((service) => {
-    let filterValue = true;
+    let filterValue = true
     if (checked)
-      filterValue = filterValue && service.isReturned === hasReturnedValue;
+      filterValue = filterValue && service.isReturned === hasReturnedValue
 
     if (priceValue !== "" && !isNaN(Number(priceValue)))
-      filterValue = filterValue && service.price === Number(priceValue);
+      filterValue = filterValue && service.price === Number(priceValue)
 
     if (discountValue !== "" && !isNaN(Number(discountValue)))
-      filterValue = filterValue && service.discount === Number(discountValue);
+      filterValue = filterValue && service.discount === Number(discountValue)
 
     if (
       totalPriceAfterDiscountValue !== "" &&
@@ -188,80 +188,79 @@ function ServiceFeesDialog({
     )
       filterValue =
         filterValue &&
-        service.totalPriceAfterDiscount ===
-          Number(totalPriceAfterDiscountValue);
+        service.totalPriceAfterDiscount === Number(totalPriceAfterDiscountValue)
 
-    return filterValue;
-  });
+    return filterValue
+  })
 
-  const fees = servicesArr.filter((serivce) => !serivce.isReturned);
-  const returnedFees = servicesArr.filter((serivce) => serivce.isReturned);
+  const fees = servicesArr.filter((serivce) => !serivce.isReturned)
+  const returnedFees = servicesArr.filter((serivce) => serivce.isReturned)
 
   function handleOpenEdit(filter: string) {
-    const params = new URLSearchParams(searchParam);
-    params.set("editFee", filter);
-    router.push(`${pathname}?${params.toString()}`, { scroll: false });
+    const params = new URLSearchParams(searchParam)
+    params.set("editFee", filter)
+    router.push(`${pathname}?${params.toString()}`, { scroll: false })
   }
 
   function handleOpenChange() {
-    dispatch({ type: "reset" });
-    dispatch({ type: "open" });
+    dispatch({ type: "reset" })
+    dispatch({ type: "open" })
   }
 
   const totals = useMemo(() => {
     return fees.reduce(
       (acc, item) => {
-        acc.totalDiscount += item.discount;
-        acc.totalPriceBeforeDiscount += item.price;
-        acc.totalPrice += item.totalPriceAfterDiscount;
-        return acc;
+        acc.totalDiscount += item.discount
+        acc.totalPriceBeforeDiscount += item.price
+        acc.totalPrice += item.totalPriceAfterDiscount
+        return acc
       },
       { totalPriceBeforeDiscount: 0, totalDiscount: 0, totalPrice: 0 }
-    );
-  }, [fees]);
+    )
+  }, [fees])
 
   const totalReturns = useMemo(() => {
     return returnedFees.reduce(
       (acc, item) => {
-        acc.totalDiscount += item.discount;
-        acc.totalPriceBeforeDiscount += item.price;
-        acc.totalPrice += item.totalPriceAfterDiscount;
-        return acc;
+        acc.totalDiscount += item.discount
+        acc.totalPriceBeforeDiscount += item.price
+        acc.totalPrice += item.totalPriceAfterDiscount
+        return acc
       },
       { totalPriceBeforeDiscount: 0, totalDiscount: 0, totalPrice: 0 }
-    );
-  }, [returnedFees]);
+    )
+  }, [returnedFees])
 
   if (!service.servicesFee.length)
     return (
       <TooltipProvider delayDuration={500}>
         <Tooltip>
           <TooltipTrigger>
-            <span className="  inline-flex items-center justify-center whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring pointer-events-none opacity-50 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground rounded-md h-6 px-2 py-3 text-xs">
+            <span className="pointer-events-none inline-flex h-6 items-center justify-center rounded-md border border-input bg-background px-2 py-3 text-xs font-medium whitespace-nowrap opacity-50 shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none">
               Show
             </span>
           </TooltipTrigger>
           <TooltipContent>No services were preformed.</TooltipContent>
         </Tooltip>
       </TooltipProvider>
-    );
+    )
 
   return (
-    <div onClick={(e) => e.stopPropagation()} className=" w-fit">
+    <div onClick={(e) => e.stopPropagation()} className="w-fit">
       <Dialog open={open} onOpenChange={handleOpenChange}>
         <Button
           onClick={handleOpenChange}
           size="sm"
-          className="   h-6 px-2 py-3 text-xs"
+          className="h-6 px-2 py-3 text-xs"
           variant="outline"
         >
           Show
         </Button>
 
-        <DialogContent className=" border-none p-4  sm:p-6  !pb-0  flex flex-col  overflow-y-auto max-h-[81vh]     max-w-[900px] !rounded-none lg:!rounded-lg">
-          <DialogHeader className=" hidden  invisible">
+        <DialogContent className="flex max-h-[81vh] max-w-[900px] flex-col overflow-y-auto !rounded-none border-none p-4 !pb-0 sm:p-6 lg:!rounded-lg">
+          <DialogHeader className="invisible hidden">
             <DialogTitle>{`'s phome numbers`}</DialogTitle>
-            <DialogDescription className=" hidden">
+            <DialogDescription className="hidden">
               This action cannot be undone. This will permanently delete your
               account and remove your data from our servers.
             </DialogDescription>
@@ -270,18 +269,18 @@ function ServiceFeesDialog({
           {/* <main className="  gap-6  flex flex-col max-h-[90%]  h-full relative   "> */}
 
           <Accordion type="single" collapsible>
-            <AccordionItem value="item-1" className=" border-none">
-              <div className=" relative w-[98%] mx-auto">
-                <AccordionTrigger className=" flex    rounded-full bg-secondary/50 dark:bg-card/20   gap-1 px-3  py-2 text-[.7rem] mb-1">
+            <AccordionItem value="item-1" className="border-none">
+              <div className="relative mx-auto w-[98%]">
+                <AccordionTrigger className="mb-1 flex gap-1 rounded-full bg-secondary/50 px-3 py-2 text-[.7rem] dark:bg-card/20">
                   Filters
                 </AccordionTrigger>
               </div>
 
-              <AccordionContent className=" pb-0">
-                <div className="   flex flex-wrap gap-2 xs:gap-3 bg-secondary/50 dark:bg-card/20 rounded-md  justify-center p-2 sm:p-3 text-sm">
+              <AccordionContent className="pb-0">
+                <div className="flex flex-wrap justify-center gap-2 rounded-md bg-secondary/50 p-2 text-sm xs:gap-3 sm:p-3 dark:bg-card/20">
                   {/* <div className=" flex  flex-col sm:flex-row items-center  gap-3 "> */}
-                  <div className=" space-y-2  w-[48%] sm:w-[32%]  mb-auto">
-                    <label className=" text-xs " htmlFor="price">
+                  <div className="mb-auto w-[48%] space-y-2 sm:w-[32%]">
+                    <label className="text-xs" htmlFor="price">
                       Price
                     </label>
                     <Input
@@ -294,8 +293,8 @@ function ServiceFeesDialog({
                       }
                     />
                   </div>
-                  <div className=" space-y-2  w-[48%] sm:w-[32%]  mb-auto">
-                    <label className=" text-xs " htmlFor="discount">
+                  <div className="mb-auto w-[48%] space-y-2 sm:w-[32%]">
+                    <label className="text-xs" htmlFor="discount">
                       Discount
                     </label>
                     <Input
@@ -308,8 +307,8 @@ function ServiceFeesDialog({
                     />
                   </div>
 
-                  <div className=" space-y-2  w-[48%] sm:w-[32%]  mb-auto">
-                    <label className=" text-xs " htmlFor="totalPrice">
+                  <div className="mb-auto w-[48%] space-y-2 sm:w-[32%]">
+                    <label className="text-xs" htmlFor="totalPrice">
                       Total after discount
                     </label>
                     <Input
@@ -325,7 +324,7 @@ function ServiceFeesDialog({
                     />
                   </div>
 
-                  <div className="flex items-center   justify-end space-x-2    flex-1 ">
+                  <div className="flex flex-1 items-center justify-end space-x-2">
                     <Switch
                       id="airplane-mode"
                       checked={hasReturnedValue}
@@ -333,7 +332,7 @@ function ServiceFeesDialog({
                       onClick={() => dispatch({ type: "has-returned" })}
                       disabled={!checked}
                     />
-                    <Label className=" text-xs " htmlFor="airplane-mode">
+                    <Label className="text-xs" htmlFor="airplane-mode">
                       Has it returned
                     </Label>
                     <Checkbox
@@ -341,7 +340,7 @@ function ServiceFeesDialog({
                       onClick={() => {
                         //   if (hasReturnedValue) setHasReturnedValue(false);
                         //   setChecked((is) => !is);
-                        dispatch({ type: "checked" });
+                        dispatch({ type: "checked" })
                       }}
                     />
                   </div>
@@ -350,10 +349,10 @@ function ServiceFeesDialog({
             </AccordionItem>
           </Accordion>
 
-          <div className=" space-y-4    sm:flex-1  sm:px-2 pb-1   sm:overflow-y-auto">
-            <div className=" flex items-center justify-between">
-              <h2 className=" font-semibold text-xl   whitespace-nowrap">
-                <span className=" text-primary"> {servicesArr.length}</span>{" "}
+          <div className="space-y-4 pb-1 sm:flex-1 sm:overflow-y-auto sm:px-2">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold whitespace-nowrap">
+                <span className="text-primary"> {servicesArr.length}</span>{" "}
                 Service Fees.
               </h2>
               <ServiceDiaDetails service={service} isAdmin={isAdmin} />
@@ -370,7 +369,7 @@ function ServiceFeesDialog({
             {/* FEES --------------------------------------------------------------- FEES */}
 
             {fees.length ? (
-              <ul className=" space-y-4">
+              <ul className="space-y-4">
                 {fees.map((serviceFee, i) => (
                   <FeesItem
                     key={i}
@@ -386,18 +385,18 @@ function ServiceFeesDialog({
                 ))}
               </ul>
             ) : hasReturnedValue ? null : (
-              <div className="  flex items-center justify-center gap-2   py-3">
+              <div className="flex items-center justify-center gap-2 py-3">
                 {" "}
-                <HandPlatter size={30} className=" text-primary" /> No service
+                <HandPlatter size={30} className="text-primary" /> No service
                 Fees.
               </div>
             )}
             {/* FEES --------------------------------------------------------------- FEES */}
 
             {returnedFees.length ? (
-              <ul className="  space-y-4 p-3 rounded-xl border  ">
-                <h2 className=" font-semibold text-xl   whitespace-nowrap">
-                  <span className=" text-destructive">
+              <ul className="space-y-4 rounded-xl border p-3">
+                <h2 className="text-xl font-semibold whitespace-nowrap">
+                  <span className="text-destructive">
                     {" "}
                     {returnedFees.length}
                   </span>{" "}
@@ -421,8 +420,8 @@ function ServiceFeesDialog({
                 <Accordion type="single" collapsible>
                   <AccordionItem value="item-1">
                     <AccordionTrigger>Total returns:</AccordionTrigger>
-                    <AccordionContent className="   flex text-xs gap-x-2 gap-y-2 flex-wrap items-center ">
-                      <div className=" py-1 px-2 bg-chart-1  hover:opacity-90 transition-opacity text-[.7rem] flex items-center gap-1 justify-center rounded-full ">
+                    <AccordionContent className="flex flex-wrap items-center gap-x-2 gap-y-2 text-xs">
+                      <div className="flex items-center justify-center gap-1 rounded-full bg-chart-1 px-2 py-1 text-[.7rem] transition-opacity hover:opacity-90">
                         Total Price:
                         <span>
                           {formatCurrency(
@@ -431,14 +430,14 @@ function ServiceFeesDialog({
                         </span>
                       </div>
 
-                      <div className=" py-1 px-2 bg-chart-4 hover:opacity-90 transition-opacity rounded-full text-[.7rem] gap-1 flex items-center justify-center ">
+                      <div className="flex items-center justify-center gap-1 rounded-full bg-chart-4 px-2 py-1 text-[.7rem] transition-opacity hover:opacity-90">
                         Total discount:{" "}
                         <span>
                           {formatCurrency(totalReturns.totalDiscount)}
                         </span>
                       </div>
 
-                      <div className=" py-1 px-2 bg-chart-5 rounded-full hover:opacity-90  transition-opacity  text-[.7rem] gap-1 flex items-center justify-center ">
+                      <div className="flex items-center justify-center gap-1 rounded-full bg-chart-5 px-2 py-1 text-[.7rem] transition-opacity hover:opacity-90">
                         Total after discount:{" "}
                         <span>{formatCurrency(totalReturns.totalPrice)}</span>
                       </div>
@@ -449,9 +448,9 @@ function ServiceFeesDialog({
             ) : null}
           </div>
           {/* </main> */}
-          <div className=" sticky pb-6 pt-4 sm:pt-0 bottom-0 left-0 bg-background  space-y-3">
+          <div className="sticky bottom-0 left-0 space-y-3 bg-background pt-4 pb-6 sm:pt-0">
             <DialogClose asChild>
-              <Button size="sm" className=" w-full" variant="secondary">
+              <Button size="sm" className="w-full" variant="secondary">
                 Close
               </Button>
             </DialogClose>
@@ -465,12 +464,12 @@ function ServiceFeesDialog({
         serviceId={service.id}
         total={total}
         handleClose={() => {
-          dispatch({ type: "delete-open", payload: null });
-          dispatch({ type: "open" });
+          dispatch({ type: "delete-open", payload: null })
+          dispatch({ type: "open" })
         }}
       />
     </div>
-  );
+  )
 }
 
 function DeleteFee({
@@ -480,18 +479,18 @@ function DeleteFee({
   serviceId,
   total,
 }: {
-  deleteOpen: boolean;
-  fee: ServiceFee | null;
-  handleClose: () => void;
-  serviceId: number;
-  total: number;
+  deleteOpen: boolean
+  fee: ServiceFee | null
+  handleClose: () => void
+  serviceId: number
+  total: number
 }) {
-  const [isDeleting, setIsDeleting] = useState(false);
-  const { toast } = useToast();
-  const serviceTotalAfterDelete = fee ? total - fee.totalPriceAfterDiscount : 0;
+  const [isDeleting, setIsDeleting] = useState(false)
+  const { toast } = useToast()
+  const serviceTotalAfterDelete = fee ? total - fee.totalPriceAfterDiscount : 0
   return (
     <Dialog open={deleteOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[425px] border-none">
+      <DialogContent className="border-none sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Delete fee.</DialogTitle>
           <DialogDescription>
@@ -510,19 +509,19 @@ function DeleteFee({
             variant="destructive"
             size="sm"
             onClick={async () => {
-              setIsDeleting(true);
+              setIsDeleting(true)
               try {
                 if (fee) {
                   const { error } = await deleteServiceFeeAction(
                     String(fee.id),
                     serviceTotalAfterDelete,
                     serviceId
-                  );
+                  )
 
-                  if (error) throw new Error(error);
+                  if (error) throw new Error(error)
                 }
-                setIsDeleting(false);
-                handleClose();
+                setIsDeleting(false)
+                handleClose()
                 toast({
                   className: "bg-primary  text-primary-foreground",
                   title: `Data deleted!.`,
@@ -531,22 +530,22 @@ function DeleteFee({
                       message={`Service fee has been deleted.`}
                     />
                   ),
-                });
+                })
               } catch (error: any) {
                 toast({
                   variant: "destructive",
                   title: "Faild to delete service fee data.",
                   description: <ErorrToastDescription error={error.message} />,
-                });
+                })
               }
             }}
           >
-            {isDeleting ? <Spinner className=" h-full" /> : "Confrim"}
+            {isDeleting ? <Spinner className="h-full" /> : "Confrim"}
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  );
+  )
 }
 
 function FeesItem({
@@ -557,26 +556,26 @@ function FeesItem({
   handleOpenEdit,
   dispatch,
 }: {
-  returned?: boolean;
-  isAdmin: boolean;
-  serviceFee: ServiceFee;
-  category: string;
-  handleOpenEdit: (filter: string) => void;
-  dispatch: React.Dispatch<Action>;
+  returned?: boolean
+  isAdmin: boolean
+  serviceFee: ServiceFee
+  category: string
+  handleOpenEdit: (filter: string) => void
+  dispatch: React.Dispatch<Action>
 }) {
   return (
     <li
       className={cn(
-        "inline-flex w-full items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground px-4 py-2",
+        "inline-flex w-full items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium whitespace-nowrap shadow-sm transition-all hover:bg-accent hover:text-accent-foreground focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50",
         {
-          " bg-accent hover:bg-muted-foreground/30  dark:bg-card/25 dark:hover:bg-card/10 border-none ":
+          "border-none bg-accent hover:bg-muted-foreground/30 dark:bg-card/25 dark:hover:bg-card/10":
             returned,
         }
       )}
     >
       <div
         // href={`/serviceFees/${serviceFee.serviceFeeId}`}
-        className="flex text-sm  h-fit flex-wrap  font-semibold !text-primary  !justify-start  items-center  max-w-full    gap-x-6 gap-y-3"
+        className="flex h-fit max-w-full flex-wrap items-center !justify-start gap-x-6 gap-y-3 text-sm font-semibold !text-primary"
       >
         <div>
           {" "}
@@ -585,7 +584,7 @@ function FeesItem({
         </div>
         <div className=" ">
           Price:{" "}
-          <span className=" text-xs text-muted-foreground">{` ${formatCurrency(
+          <span className="text-xs text-muted-foreground">{` ${formatCurrency(
             serviceFee.price
           )}`}</span>{" "}
         </div>
@@ -605,70 +604,70 @@ function FeesItem({
         </div> */}
         <div>
           Total after discount:{" "}
-          <span className="text-xs text-muted-foreground   break-all whitespace-normal">{` ${formatCurrency(
+          <span className="text-xs break-all whitespace-normal text-muted-foreground">{` ${formatCurrency(
             serviceFee.totalPriceAfterDiscount
           )}`}</span>
         </div>
 
         {isAdmin && (
-          <div className=" flex items-center gap-2 ml-auto">
+          <div className="ml-auto flex items-center gap-2">
             <Button
               variant="outline"
               onClick={(e) => {
-                e.preventDefault();
-                handleOpenEdit(String(serviceFee.id));
-                dispatch({ type: "open" });
+                e.preventDefault()
+                handleOpenEdit(String(serviceFee.id))
+                dispatch({ type: "open" })
               }}
-              className=" p-0 w-8 h-8"
+              className="h-8 w-8 p-0"
             >
-              <Pencil className=" h-4 w-4" />
+              <Pencil className="h-4 w-4" />
             </Button>
             <Button
               onClick={(e) => {
-                e.preventDefault();
-                dispatch({ type: "open" });
+                e.preventDefault()
+                dispatch({ type: "open" })
                 dispatch({
                   type: "delete-open",
                   payload: serviceFee,
-                });
+                })
                 // setDeleteOpen(serviceFee.id);
                 //   setOpen(false);
               }}
               variant="destructive"
               size="sm"
-              className=" p-0 w-8 h-8"
+              className="h-8 w-8 p-0"
             >
-              <PackageMinus className=" h-4 w-4" />
+              <PackageMinus className="h-4 w-4" />
             </Button>
           </div>
         )}
       </div>
     </li>
-  );
+  )
 }
 
 interface SummaryProps {
-  totalPriceBeforeDiscount: number;
-  totalDiscount: number;
-  totalPrice: number;
+  totalPriceBeforeDiscount: number
+  totalDiscount: number
+  totalPrice: number
 }
 function Summary({
   totals,
   TotalNumFees,
 }: {
-  totals: SummaryProps;
-  TotalNumFees: number;
+  totals: SummaryProps
+  TotalNumFees: number
 }) {
   return (
     <TagCarousel>
       <TooltipProvider delayDuration={500}>
         <Tooltip>
-          <TooltipTrigger className=" hover:cursor-default">
+          <TooltipTrigger className="hover:cursor-default">
             {" "}
-            <div className=" relative h-fit w-fit text-xs">
+            <div className="relative h-fit w-fit text-xs">
               <div className="embla__slide">
                 {" "}
-                <span className=" h-5 w-5 bg-chart-5 rounded-full flex items-center justify-center">
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-chart-5">
                   {TotalNumFees}
                 </span>
               </div>
@@ -680,39 +679,39 @@ function Summary({
         </Tooltip>
       </TooltipProvider>
 
-      <div className=" relative">
+      <div className="relative">
         <div className="embla__slide">
           {" "}
-          <div className=" py-1 px-2 bg-chart-1  text-nowrap break-keep   hover:opacity-90 transition-opacity text-[.7rem] flex items-center gap-1 justify-center rounded-full ">
+          <div className="flex items-center justify-center gap-1 rounded-full bg-chart-1 px-2 py-1 text-[.7rem] text-nowrap break-keep transition-opacity hover:opacity-90">
             Total Price:
             <span>{formatCurrency(totals.totalPriceBeforeDiscount)}</span>
           </div>
         </div>
       </div>
 
-      <div className=" relative">
+      <div className="relative">
         <div className="embla__slide">
           {" "}
-          <div className=" py-1 px-2 bg-chart-4  text-nowrap break-keep  hover:opacity-90 transition-opacity rounded-full text-[.7rem] gap-1 flex items-center justify-center ">
+          <div className="flex items-center justify-center gap-1 rounded-full bg-chart-4 px-2 py-1 text-[.7rem] text-nowrap break-keep transition-opacity hover:opacity-90">
             Total discount: <span>{formatCurrency(totals.totalDiscount)}</span>
           </div>
         </div>
       </div>
 
-      <div className=" relative">
+      <div className="relative">
         <div className="embla__slide">
           {" "}
-          <div className=" py-1 px-2 bg-chart-5 rounded-full text-nowrap  hover:opacity-90  transition-opacity  text-[.7rem] gap-1 flex items-center justify-center ">
+          <div className="flex items-center justify-center gap-1 rounded-full bg-chart-5 px-2 py-1 text-[.7rem] text-nowrap transition-opacity hover:opacity-90">
             Total after discount:{" "}
             <span>{formatCurrency(totals.totalPrice)}</span>
           </div>
         </div>
       </div>
     </TagCarousel>
-  );
+  )
 }
 
-export default ServiceFeesDialog;
+export default ServiceFeesDialog
 // <div
 //   key={i}
 //   className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground px-4 py-2"

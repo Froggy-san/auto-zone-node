@@ -3,13 +3,13 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from "@/components/ui/tooltip"
 
-import { Badge } from "@components/ui/badge";
-import { ServiceStatus } from "@lib/types";
-import { cn } from "@lib/utils";
-import React, { SetStateAction, useCallback, useState } from "react";
-import { Button } from "@/components/ui/button";
+import { Badge } from "@components/ui/badge"
+import { ServiceStatus } from "@lib/types"
+import { cn } from "@lib/utils"
+import React, { SetStateAction, useCallback, useState } from "react"
+import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogClose,
@@ -19,32 +19,32 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { useToast } from "@hooks/use-toast";
+} from "@/components/ui/dialog"
+import { useToast } from "@hooks/use-toast"
 import SuccessToastDescription, {
   ErorrToastDescription,
-} from "@components/toast-items";
-import { deleteServiceStatus } from "@lib/actions/serviceStatusAction";
-import Spinner from "@components/Spinner";
-import { Cross2Icon } from "@radix-ui/react-icons";
-import StatusFormDialog from "./insert-data/status-form-dialog";
-import { RiCircleLine, RiProgress3Line, RiProgress4Line } from "react-icons/ri";
+} from "@components/toast-items"
+import { deleteServiceStatus } from "@lib/actions/serviceStatusAction"
+import Spinner from "@components/Spinner"
+import { Cross2Icon } from "@radix-ui/react-icons"
+import StatusFormDialog from "./insert-data/status-form-dialog"
+import { RiCircleLine, RiProgress3Line, RiProgress4Line } from "react-icons/ri"
 
-import { useTheme } from "next-themes";
+import { useTheme } from "next-themes"
 import {
   CircleCheck,
   CircleCheckBig,
   CircleDashed,
   Clock4,
   ClockAlert,
-} from "lucide-react";
+} from "lucide-react"
 type Status =
   | "Pending"
   | "InProgress"
   | "Done"
   | "Canceled"
   | string
-  | undefined;
+  | undefined
 const StatusBadge = ({
   // theme = "dark",
   disableToolTip = false,
@@ -53,29 +53,29 @@ const StatusBadge = ({
   status,
 }: {
   // theme: string;
-  disableToolTip?: boolean;
-  className?: string;
-  status: ServiceStatus;
-  controls?: boolean;
+  disableToolTip?: boolean
+  className?: string
+  status: ServiceStatus
+  controls?: boolean
 }) => {
-  const { theme } = useTheme();
+  const { theme } = useTheme()
 
   const prefered = window.matchMedia("(prefers-color-scheme: dark)").matches
     ? "dark"
-    : "light";
+    : "light"
 
-  const [isEditing, setisEditing] = useState(false);
-  const [isLoading, setisLoading] = useState(false);
+  const [isEditing, setisEditing] = useState(false)
+  const [isLoading, setisLoading] = useState(false)
 
-  const chosenTheme = theme === "system" ? prefered : theme;
-  const darkModelColor = JSON.parse(status.colorDark);
-  const lightModeColor = JSON.parse(status.colorLight);
+  const chosenTheme = theme === "system" ? prefered : theme
+  const darkModelColor = JSON.parse(status.colorDark)
+  const lightModeColor = JSON.parse(status.colorLight)
   const isNotDarkColor = Object.values(darkModelColor).every(
     (item) => item === 0
-  );
+  )
   const isNotLightColor = Object.values(lightModeColor).every(
     (item) => item === 0
-  );
+  )
 
   // console.log(isNotDarkColor, isNotLightColor);
   // const light = `hsl(${lightModeColor.h} ${lightModeColor.s} ${lightModeColor.l})`;
@@ -88,19 +88,19 @@ const StatusBadge = ({
             <TooltipTrigger asChild>
               <div
                 onClick={() => {
-                  if (controls) setisEditing((is) => !is);
+                  if (controls) setisEditing((is) => !is)
                 }}
                 className={cn(
-                  "text-xs select-none w-fit font-semibold flex items-center justify-center gap-1  px-2.5 py-[0.15rem]  whitespace-nowrap text-center rounded-full bg-primary text-primary-foreground  transition-all",
+                  "flex w-fit items-center justify-center gap-1 rounded-full bg-primary px-2.5 py-[0.15rem] text-center text-xs font-semibold whitespace-nowrap text-primary-foreground transition-all select-none",
 
                   {
                     "bg-dashboard-blue text-dashboard-text-blue":
                       status.name.toLowerCase() === "pending",
-                    "  bg-dashboard-orange text-dashboard-text-orange ":
+                    "bg-dashboard-orange text-dashboard-text-orange":
                       status.name.toLowerCase() === "in progress",
-                    " text-red-800  dark:text-red-200  bg-destructive/70":
+                    "bg-destructive/70 text-red-800 dark:text-red-200":
                       status.name.toLowerCase() === "canceled",
-                    " bg-dashboard-green text-dashboard-text-green":
+                    "bg-dashboard-green text-dashboard-text-green":
                       status.name.toLowerCase() === "done",
                   },
                   className
@@ -110,8 +110,8 @@ const StatusBadge = ({
                     !isNotLightColor && chosenTheme === "light"
                       ? `hsla(${lightModeColor?.h}, ${lightModeColor?.s}%, ${lightModeColor?.l}%, 0.4)`
                       : !isNotDarkColor && chosenTheme === "dark"
-                      ? `hsl(${darkModelColor?.h}, ${darkModelColor?.s}%, ${darkModelColor?.l}%)`
-                      : "  primary ",
+                        ? `hsl(${darkModelColor?.h}, ${darkModelColor?.s}%, ${darkModelColor?.l}%)`
+                        : "  primary ",
 
                   color:
                     !isNotLightColor && chosenTheme === "light"
@@ -119,24 +119,24 @@ const StatusBadge = ({
                           lightModeColor?.s + 90
                         }%, ${lightModeColor?.l - 33}%)`
                       : !isNotDarkColor && chosenTheme === "dark"
-                      ? `hsla(${darkModelColor?.h}, ${
-                          darkModelColor?.s + 55
-                        }%, ${darkModelColor?.l + 55}%)`
-                      : "  primary-foreground",
+                        ? `hsla(${darkModelColor?.h}, ${
+                            darkModelColor?.s + 55
+                          }%, ${darkModelColor?.l + 55}%)`
+                        : "  primary-foreground",
                 }}
               >
                 {status.name.toLocaleLowerCase() == "in progress" && (
-                  <RiProgress4Line className=" w-4 h-4" />
+                  <RiProgress4Line className="h-4 w-4" />
                 )}
                 {status.name.toLocaleLowerCase() == "pending" && (
-                  <Clock4 className=" w-4 h-4" />
+                  <Clock4 className="h-4 w-4" />
                 )}
                 {status.name.toLocaleLowerCase() == "canceled" && (
-                  <RiCircleLine className=" w-4 h-4" />
+                  <RiCircleLine className="h-4 w-4" />
                 )}
                 {status.name.toLocaleLowerCase() == "done" && (
                   // <CircleCheckBig className=" w-4 h-4" />
-                  <CircleCheck className=" w-4 h-4" />
+                  <CircleCheck className="h-4 w-4" />
                 )}
                 {status.name}
                 {controls ? (
@@ -165,8 +165,8 @@ const StatusBadge = ({
         />
       ) : null}
     </>
-  );
-};
+  )
+}
 
 function DeleteBtn({
   item,
@@ -174,22 +174,22 @@ function DeleteBtn({
   setIsDeleting,
   handleResetPage,
 }: {
-  item: ServiceStatus;
-  handleResetPage?: () => void;
-  isDeleting: boolean;
-  setIsDeleting: React.Dispatch<SetStateAction<boolean>>;
+  item: ServiceStatus
+  handleResetPage?: () => void
+  isDeleting: boolean
+  setIsDeleting: React.Dispatch<SetStateAction<boolean>>
 }) {
-  const { toast } = useToast();
+  const { toast } = useToast()
   // const { deleteCargeneration, isDeleting } = useDeleteCarGenerations();
 
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(false)
 
   const handleDelete = useCallback(async () => {
     try {
-      setIsDeleting(true);
-      const {} = await deleteServiceStatus(item.id);
-      setOpen(false);
-      handleResetPage?.();
+      setIsDeleting(true)
+      const {} = await deleteServiceStatus(item.id)
+      setOpen(false)
+      handleResetPage?.()
 
       toast({
         className: "bg-primary  text-primary-foreground",
@@ -199,35 +199,35 @@ function DeleteBtn({
             message={`Service status has been deleted.`}
           />
         ),
-      });
+      })
     } catch (error: any) {
       toast({
         variant: "destructive",
         title: "Something went wrong.",
         description: <ErorrToastDescription error={error.message} />,
-      });
+      })
     } finally {
-      setIsDeleting(false);
+      setIsDeleting(false)
     }
-  }, [item]);
+  }, [item])
 
   return (
     <div
       onClick={(e) => e.stopPropagation()}
-      className=" flex items-center justify-center"
+      className="flex items-center justify-center"
     >
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
-          <button className="  rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground  -mr-1">
+          <button className="-mr-1 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
             {isDeleting ? (
-              <Spinner className=" h-full" size={14} />
+              <Spinner className="h-full" size={14} />
             ) : (
               <Cross2Icon className="h-3 w-3" />
             )}
             {/* <span className="sr-only">Close</span> */}
           </button>
         </DialogTrigger>
-        <DialogContent className="sm:max-w-[425px] border-none">
+        <DialogContent className="border-none sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>
               You are about to delete a status badge &apos;{item.name}&apos;.
@@ -237,7 +237,7 @@ function DeleteBtn({
             </DialogDescription>
           </DialogHeader>
 
-          <DialogFooter className="   gap-2 sm:gap-0">
+          <DialogFooter className="gap-2 sm:gap-0">
             <DialogClose asChild>
               <Button size="sm" variant="secondary">
                 Cancel
@@ -248,13 +248,13 @@ function DeleteBtn({
               size="sm"
               onClick={async () => handleDelete()}
             >
-              {isDeleting ? <Spinner className=" h-full" /> : "Confrim"}
+              {isDeleting ? <Spinner className="h-full" /> : "Confrim"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
-  );
+  )
 }
 
-export default StatusBadge;
+export default StatusBadge

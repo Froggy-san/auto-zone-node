@@ -37,7 +37,7 @@ export const processCarImages = catchAsync(
 
     req.body.carImages = [];
     const filePromises = files.map(async (file) => {
-      const imageName = `car-${Date.now}-${Math.round(Math.random() * 1e9)}.jpeg`;
+      const imageName = `car-${Date.now()}-${Math.round(Math.random() * 1e9)}.jpeg`;
 
       await sharp(file.buffer)
         .toFormat("jpeg")
@@ -58,6 +58,7 @@ export const processCarImages = catchAsync(
 
 export const createCar = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
+    console.log(req.body, "BODY FROM THE REQUEST");
     const carImages = (req.body.carImages || []) as CarImage[];
     const car = await CarModel.create(req.body);
 

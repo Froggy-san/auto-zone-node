@@ -1,29 +1,29 @@
-"use server";
+"use server"
 
-import { PAGE_SIZE } from "@lib/constants";
-import { getToken } from "@lib/helper";
-import { ServiceStatus, ServiceStatusForm } from "@lib/types";
-import { createClient } from "@utils/supabase/server";
-import { revalidatePath, revalidateTag } from "next/cache";
-import { redirect } from "next/navigation";
+import { PAGE_SIZE } from "@lib/constants"
+import { getToken } from "@lib/helper"
+import { ServiceStatus, ServiceStatusForm } from "@lib/types"
+import { createClient } from "@utils/supabase/server"
+import { revalidatePath, revalidateTag } from "next/cache"
+import { redirect } from "next/navigation"
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
 interface GetRestockingProps {
-  pageNumber?: string;
-  dateFrom?: string;
-  dateTo?: string;
-  clientId?: string;
-  carId?: string;
-  serviceStatusId?: string;
-  minPrice?: string;
-  maxPrice?: string;
+  pageNumber?: string
+  dateFrom?: string
+  dateTo?: string
+  clientId?: string
+  carId?: string
+  serviceStatusId?: string
+  minPrice?: string
+  maxPrice?: string
 }
 
 interface servicesReturns {
-  data: ServiceStatus[] | null;
-  error: string;
+  data: ServiceStatus[] | null
+  error: string
 }
 
 export async function getServiceStatusAction(): Promise<servicesReturns> {
@@ -39,79 +39,76 @@ export async function getServiceStatusAction(): Promise<servicesReturns> {
         next: {
           tags: ["serviceStatus"],
         },
-      },
-    );
+      }
+    )
 
     if (!response.ok) {
       const error =
         (await response.json()).message ||
-        "Something went wrong while trying to fetch services status data.";
+        "Something went wrong while trying to fetch services status data."
 
-      throw new Error(error);
-      console.log(error);
+      throw new Error(error)
+      console.log(error)
     }
 
-    const data = await response.json();
-    return { data, error: "" };
+    const data = await response.json()
+    return { data, error: "" }
   } catch (error: any) {
-    console.log(`Failed to get serivce statuses: ${error.message}`);
-    return { data: null, error: error.message };
+    console.log(`Failed to get serivce statuses: ${error.message}`)
+    return { data: null, error: error.message }
   }
 }
 
 interface ServiceStatusProps {
-  colorLight: string;
-  colorDark: string;
-  name: string;
-  description: string;
+  colorLight: string
+  colorDark: string
+  name: string
+  description: string
 }
 
 export async function createStatus(formData: ServiceStatusProps) {
-  const supabase = await createClient();
-  const { error } = await supabase.from("serviceStatuses").insert([formData]);
+  const supabase = await createClient()
+  const { error } = await supabase.from("serviceStatuses").insert([formData])
 
   if (error) {
-    console.log(error.message);
-    return { data: null, error: error.message };
+    console.log(error.message)
+    return { data: null, error: error.message }
   }
 
   //   revalidatePath("/dashboard/insert-data");
-  revalidateTag("serviceStatus");
-  return { data: null, error: "" };
+  revalidateTag("serviceStatus")
+  return { data: null, error: "" }
 }
 
 interface EditProps {
-  statusToEdit: ServiceStatusProps;
-  id: number;
+  statusToEdit: ServiceStatusProps
+  id: number
 }
 
 export async function editServiceStatus({ statusToEdit, id }: EditProps) {
-  const supabase = await createClient();
+  const supabase = await createClient()
   const { error } = await supabase
     .from("serviceStatuses")
     .update(statusToEdit)
-    .eq("id", id);
+    .eq("id", id)
 
-  if (error) return { data: null, error: error.message };
+  if (error) return { data: null, error: error.message }
 
-  revalidateTag("serviceStatus");
+  revalidateTag("serviceStatus")
   // const data = await response.json();
   // return data;
 
-  return { data: null, error: "" };
+  return { data: null, error: "" }
 }
 
 export async function deleteServiceStatus(id: number) {
-  const supabase = await createClient();
-  const { error } = await supabase
-    .from("serviceStatuses")
-    .delete()
-    .eq("id", id);
+  const supabase = await createClient()
+  const { error } = await supabase.from("serviceStatuses").delete().eq("id", id)
 
-  if (error) return { data: null, error: error.message };
-  revalidateTag("serviceStatus");
+  if (error) return { data: null, error: error.message }
+  revalidateTag("serviceStatus")
 
-  return { data: null, error: "" };
+  return { data: null, error: "" }
 }
 
 export async function getServicesCountAction({
@@ -121,45 +118,45 @@ export async function getServicesCountAction({
   maxTotalPrice,
   minTotalPrice,
 }: {
-  shopName?: string;
-  dateOfOrderFrom?: string;
-  dateOfOrderTo?: string;
-  minTotalPrice?: string;
-  maxTotalPrice?: string;
+  shopName?: string
+  dateOfOrderFrom?: string
+  dateOfOrderTo?: string
+  minTotalPrice?: string
+  maxTotalPrice?: string
 }) {
-  const token = getToken();
+  const token = getToken()
 
   if (!token)
-    return { data: null, error: "You are not authorized to make this action." };
+    return { data: null, error: "You are not authorized to make this action." }
 
-  let query = `${process.env.API_URL}/api/Services/count?`;
+  let query = `${process.env.API_URL}/api/Services/count?`
 
-  if (shopName) query = query + `&shopName=${shopName}`;
+  if (shopName) query = query + `&shopName=${shopName}`
 
-  if (dateOfOrderFrom) query = query + `&dateOfOrderFrom=${dateOfOrderFrom}`;
+  if (dateOfOrderFrom) query = query + `&dateOfOrderFrom=${dateOfOrderFrom}`
 
-  if (dateOfOrderTo) query = query + `&dateOfOrderTo=${dateOfOrderTo}`;
+  if (dateOfOrderTo) query = query + `&dateOfOrderTo=${dateOfOrderTo}`
 
-  if (minTotalPrice) query = query + `&minTotalPrice=${minTotalPrice}`;
+  if (minTotalPrice) query = query + `&minTotalPrice=${minTotalPrice}`
 
-  if (maxTotalPrice) query = query + `&maxTotalPrice=${maxTotalPrice}`;
+  if (maxTotalPrice) query = query + `&maxTotalPrice=${maxTotalPrice}`
   const response = await fetch(query, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${token}`,
     },
-  });
+  })
 
   if (!response.ok) {
-    console.log("Something went wrong while trying to fetch Services count.");
+    console.log("Something went wrong while trying to fetch Services count.")
     return {
       data: null,
       error: "Something went wrong while trying to fetch Services count.",
-    };
+    }
   }
 
-  const data = await response.json();
-  return { data, error: "" };
+  const data = await response.json()
+  return { data, error: "" }
 }
 
 // 00000000000000000000

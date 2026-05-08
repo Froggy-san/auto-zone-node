@@ -36,7 +36,11 @@ export const carGenerationSchema = new Schema(
     toObject: { virtuals: true },
   },
 );
-
+// carGenerationSchema.virtual("carModel", {
+//   ref: "carModels", // The model to link to
+//   foreignField: "carGeneration", // The field name in ProductType that holds the ID
+//   localField: "_id", // The field name in this Category model
+// });
 export const CarGeneration = model<ICarGeneration>(
   "carGenerations",
   carGenerationSchema,

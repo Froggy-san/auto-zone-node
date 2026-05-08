@@ -1,20 +1,20 @@
-import { cn } from "@/lib/utils";
-import React, { createContext,  type CSSProperties, useContext } from "react";
+import { cn } from "@/lib/utils"
+import React, { createContext, type CSSProperties, useContext } from "react"
 
 interface ContextProps {
-  value: number;
-  maxValue: number;
+  value: number
+  maxValue: number
 }
 
 const ProgressContext = createContext<ContextProps>({
   value: 0,
   maxValue: 0,
-});
+})
 
 interface ProgressProps {
-  children: React.ReactNode;
-  value: number;
-  maxValue: number;
+  children: React.ReactNode
+  value: number
+  maxValue: number
 }
 
 function Progress({ value, maxValue, children }: ProgressProps) {
@@ -22,13 +22,12 @@ function Progress({ value, maxValue, children }: ProgressProps) {
     <ProgressContext.Provider value={{ value, maxValue }}>
       {children}
     </ProgressContext.Provider>
-  );
+  )
 }
 
 // Define your custom props
-interface ProgressBarContainerProps
-  extends React.HTMLAttributes<HTMLDivElement> {
-  customProp?: string; // Add any additional props you want
+interface ProgressBarContainerProps extends React.HTMLAttributes<HTMLDivElement> {
+  customProp?: string // Add any additional props you want
 }
 const ProgressBarContainer: React.FC<ProgressBarContainerProps> =
   React.forwardRef<
@@ -38,7 +37,7 @@ const ProgressBarContainer: React.FC<ProgressBarContainerProps> =
     return (
       <div
         className={cn(
-          "relative w-full overflow-hidden h-[0.3rem] rounded-full border",
+          "relative h-[0.3rem] w-full overflow-hidden rounded-full border",
           className
         )}
         ref={ref}
@@ -46,48 +45,48 @@ const ProgressBarContainer: React.FC<ProgressBarContainerProps> =
       >
         {children}
       </div>
-    );
-  });
+    )
+  })
 
 type ColorValue = {
-  whenValueIs: number;
-  color: string;
-};
+  whenValueIs: number
+  color: string
+}
 
 interface ProgressMeterProps {
-  className?: string;
-  style?: CSSProperties;
-  colorArr?: ColorValue[];
+  className?: string
+  style?: CSSProperties
+  colorArr?: ColorValue[]
 }
 
 function ProgressMeter({ className, style }: ProgressMeterProps) {
-  const { value, maxValue } = useContext(ProgressContext);
-  const progressPercentage = Math.min((value / maxValue) * 100, 100);
+  const { value, maxValue } = useContext(ProgressContext)
+  const progressPercentage = Math.min((value / maxValue) * 100, 100)
   return (
     <div
       className={cn(
-        "absolute  top-0 w-full h-full bg-primary rounded-full transition-all duration-500 ",
+        "absolute top-0 h-full w-full rounded-full bg-primary transition-all duration-500",
         className
       )}
       style={{ left: `${progressPercentage - 100}%`, ...style }}
     />
-  );
+  )
 }
 
-ProgressBarContainer.displayName = "ProgressBarContainer";
-ProgressMeter.displayName = "ProgressMeter";
-Progress.ProgressBarContainer = ProgressBarContainer;
-Progress.ProgressMeter = ProgressMeter;
+ProgressBarContainer.displayName = "ProgressBarContainer"
+ProgressMeter.displayName = "ProgressMeter"
+Progress.ProgressBarContainer = ProgressBarContainer
+Progress.ProgressMeter = ProgressMeter
 
-export { Progress, ProgressBarContainer, ProgressMeter };
+export { Progress, ProgressBarContainer, ProgressMeter }
 
 export function useProgress() {
-  const context = useContext(ProgressContext);
+  const context = useContext(ProgressContext)
   if (!context)
     throw new Error(
       `you have used the Progress context outside of it's providor.`
-    );
-  return context;
+    )
+  return context
 }
 // Use Cases
 

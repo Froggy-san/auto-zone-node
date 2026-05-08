@@ -1,8 +1,8 @@
 import {
   getAllCarModelsAction,
   getCarModelsCountAction,
-} from "@lib/actions/carModelsActions";
-import { useQuery } from "@tanstack/react-query";
+} from "@lib/actions/carModelsActions"
+import { useQuery } from "@tanstack/react-query"
 
 export default function useCarModels(pageNumber: number) {
   const {
@@ -14,15 +14,15 @@ export default function useCarModels(pageNumber: number) {
       const [carModelData, countData] = await Promise.all([
         getAllCarModelsAction(pageNumber),
         getCarModelsCountAction(),
-      ]);
+      ])
 
-      const { data: models, error: modelError } = carModelData;
-      const { data: count, error: countError } = countData;
-      const error = modelError || countError || "";
-      const data = { models, count };
-      return { data, error };
+      const { data: models, error: modelError } = carModelData
+      const { data: count, error: countError } = countData
+      const error = modelError || countError || ""
+      const data = { models, count }
+      return { data, error }
     },
     queryKey: ["carModels", pageNumber],
-  });
-  return { data, isLoading, apiError, error };
+  })
+  return { data, isLoading, apiError, error }
 }

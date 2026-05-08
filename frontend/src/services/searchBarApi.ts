@@ -37,8 +37,6 @@ export async function searchBarResults(searchTerm: string) {
     safeFetch(catUrl),
   ])
 
-  console.log(categories, productTypes, products, "SSSSSSSSSSSS")
-
   return {
     categories,
     productTypes,

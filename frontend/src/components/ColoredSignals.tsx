@@ -1,15 +1,15 @@
-import { cn } from "@lib/utils";
-import React, { SVGProps } from "react";
+import { cn } from "@lib/utils"
+import React, { SVGProps } from "react"
 
 // Define the interface for our component's props
 interface ColoredSignalIconProps extends SVGProps<SVGSVGElement> {
   // Custom props for the three distinct bar colors
-  bar1Color?: string;
-  bar2Color?: string;
-  bar3Color?: string;
+  bar1Color?: string
+  bar2Color?: string
+  bar3Color?: string
 
   // Custom size prop (can accept CSS values like '24px' or '2em')
-  size?: string | number;
+  size?: string | number
 }
 // The actual SVG for PiCellSignalMediumBold with dynamic fill props.
 const ColoredSignalIcon = ({
@@ -34,7 +34,7 @@ const ColoredSignalIcon = ({
       strokeLinecap="round"
       strokeLinejoin="round"
       className={cn(
-        "lucide lucide-signal-medium-icon lucide-signal-medium w-14 h-14",
+        "lucide lucide-signal-medium-icon lucide-signal-medium h-14 w-14",
         className
       )}
     >
@@ -44,7 +44,7 @@ const ColoredSignalIcon = ({
 
       <path d="M12 20v-8" stroke={bar3Color || "currentColor"} />
     </svg>
-  );
-};
+  )
+}
 
-export default ColoredSignalIcon;
+export default ColoredSignalIcon

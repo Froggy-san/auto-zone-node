@@ -1,19 +1,19 @@
-import React from "react";
-import PaginationControl from "../../pagination-controls";
-import { getClientsCountAction } from "@lib/actions/clientActions";
-import { getProductBrandsCountAction } from "@lib/actions/productBrandsActions";
-import { getProductsRestockingBillsCountAction } from "@lib/actions/restockingBillActions";
-import { getServicesCountAction } from "@lib/actions/serviceActions";
+import React from "react"
+import PaginationControl from "../../pagination-controls"
+import { getClientsCountAction } from "@lib/actions/clientActions"
+import { getProductBrandsCountAction } from "@lib/actions/productBrandsActions"
+import { getProductsRestockingBillsCountAction } from "@lib/actions/restockingBillActions"
+import { getServicesCountAction } from "@lib/actions/serviceActions"
 
 interface ServicePaginationProps {
-  pageNumber: string;
-  dateFrom?: string;
-  dateTo?: string;
-  clientId?: string;
-  carId?: string;
-  serviceStatusId?: string;
-  minPrice?: string;
-  maxPrice?: string;
+  pageNumber: string
+  dateFrom?: string
+  dateTo?: string
+  clientId?: string
+  carId?: string
+  serviceStatusId?: string
+  minPrice?: string
+  maxPrice?: string
 }
 const ServicePagination = ({
   pageNumber,
@@ -33,10 +33,10 @@ const ServicePagination = ({
     minPrice,
     maxPrice,
     serviceStatusId,
-  });
+  })
 
-  if (error) return <p>{error}</p>;
-  return <PaginationControl count={data} currPage={pageNumber} />;
-};
+  if (error) return <p>{error}</p>
+  return <PaginationControl count={data} currPage={pageNumber} />
+}
 
-export default ServicePagination;
+export default ServicePagination

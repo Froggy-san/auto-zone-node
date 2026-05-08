@@ -1,5 +1,4 @@
-import { AUTH_TOEKN_NAME } from "./constants";
-
+import { AUTH_TOEKN_NAME } from "./constants"
 
 // export function getToken() {
 //   const cookie = cookies();
@@ -35,7 +34,7 @@ export const formatCurrency = (value: number | null | undefined) =>
   new Intl.NumberFormat("en", {
     style: "currency",
     currency: "egp",
-  }).format(value || 0);
+  }).format(value || 0)
 
 export const formatNumber = (value: number) =>
-  new Intl.NumberFormat("en", { style: "decimal" }).format(value);
+  new Intl.NumberFormat("en", { style: "decimal" }).format(value)

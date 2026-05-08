@@ -1,5 +1,5 @@
-import { TicketCategory } from "@lib/types";
-import React from "react";
+import { TicketCategory } from "@lib/types"
+import React from "react"
 import {
   Command,
   CommandEmpty,
@@ -7,14 +7,14 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "@/components/ui/command";
-import { Check } from "lucide-react";
+} from "@/components/ui/command"
+import { Check } from "lucide-react"
 interface TicketCategoryListProps {
-  ticketCategories?: TicketCategory[];
-  value?: TicketCategory | null;
-  className?: string;
-  setOpen?: (open: boolean) => void;
-  onSelect?: (category: TicketCategory | null) => void;
+  ticketCategories?: TicketCategory[]
+  value?: TicketCategory | null
+  className?: string
+  setOpen?: (open: boolean) => void
+  onSelect?: (category: TicketCategory | null) => void
 }
 
 const TicketCategoryList = React.forwardRef<
@@ -40,24 +40,24 @@ const TicketCategoryList = React.forwardRef<
             {ticketCategories?.map((category) => (
               <CommandItem
                 key={category.id}
-                className="w-full  justify-between gap-2"
+                className="w-full justify-between gap-2"
                 value={`${category.name}-${category.id}`}
                 onSelect={() => {
-                  onSelect?.(value?.id === category.id ? null : category);
-                  setOpen?.(false);
+                  onSelect?.(value?.id === category.id ? null : category)
+                  setOpen?.(false)
                 }}
               >
                 {category.name}{" "}
                 {value?.id === category.id && (
-                  <Check className=" ml-2 h-4 w-4" />
+                  <Check className="ml-2 h-4 w-4" />
                 )}
               </CommandItem>
             ))}
           </CommandGroup>
         </CommandList>
       </Command>
-    );
+    )
   }
-);
-export default TicketCategoryList;
-TicketCategoryList.displayName = "TicketCategoryList";
+)
+export default TicketCategoryList
+TicketCategoryList.displayName = "TicketCategoryList"

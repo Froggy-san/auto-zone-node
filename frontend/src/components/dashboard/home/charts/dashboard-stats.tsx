@@ -7,20 +7,20 @@ import {
   CreditCard,
   AlertCircle,
   RotateCcw,
-} from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
+} from "lucide-react"
+import { Card, CardContent } from "@/components/ui/card"
+import { cn } from "@/lib/utils"
 
 interface StatsCardProps {
-  title: string;
-  value: string | number;
-  subtitle?: string;
-  icon: React.ElementType;
+  title: string
+  value: string | number
+  subtitle?: string
+  icon: React.ElementType
   trend?: {
-    value: string;
-    isPositive: boolean;
-  };
-  variant?: "default" | "success" | "warning" | "danger";
+    value: string
+    isPositive: boolean
+  }
+  variant?: "default" | "success" | "warning" | "danger"
 }
 
 function StatsCard({
@@ -36,35 +36,33 @@ function StatsCard({
     success: "bg-action-resolved/10 text-action-resolved",
     warning: "bg-action-reopened/10 text-action-reopened",
     danger: "bg-destructive/10 text-destructive",
-  };
+  }
 
   return (
     <Card className="overflow-hidden">
       <CardContent className="p-5">
-        <div className="flex gap-2 items-start justify-between">
+        <div className="flex items-start justify-between gap-2">
           <div className="flex-1">
-            <p className=" text-xs sm:text-sm font-medium text-muted-foreground">
+            <p className="text-xs font-medium text-muted-foreground sm:text-sm">
               {title}
             </p>
-            <p className=" text-lg  sm:text-2xl font-bold mt-1">
+            <p className="mt-1 text-lg font-bold sm:text-2xl">
               {typeof value === "number" ? value.toLocaleString() : value}
             </p>
             {subtitle && (
-              <p className="text-xs text-muted-foreground mt-1">{subtitle}</p>
+              <p className="mt-1 text-xs text-muted-foreground">{subtitle}</p>
             )}
             {trend && (
               <div
                 className={cn(
-                  "flex items-center gap-1 mt-2 text-xs font-medium",
-                  trend.isPositive
-                    ? "text-action-resolved"
-                    : "text-destructive",
+                  "mt-2 flex items-center gap-1 text-xs font-medium",
+                  trend.isPositive ? "text-action-resolved" : "text-destructive"
                 )}
               >
                 {trend.isPositive ? (
-                  <TrendingUp className="w-3 h-3" />
+                  <TrendingUp className="h-3 w-3" />
                 ) : (
-                  <TrendingDown className="w-3 h-3" />
+                  <TrendingDown className="h-3 w-3" />
                 )}
                 {trend.value}
               </div>
@@ -72,27 +70,27 @@ function StatsCard({
           </div>
           <div
             className={cn(
-              "w-10 h-10 rounded-lg shrink-0 flex items-center justify-center",
-              variantStyles[variant],
+              "flex h-10 w-10 shrink-0 items-center justify-center rounded-lg",
+              variantStyles[variant]
             )}
           >
-            <Icon className="w-5 h-5" />
+            <Icon className="h-5 w-5" />
           </div>
         </div>
       </CardContent>
     </Card>
-  );
+  )
 }
 
 interface DashboardStatsGridProps {
-  totalRevenue: number;
-  ordersRevenue: number;
-  servicesRevenue: number;
-  ordersCount: number;
-  servicesCount: number;
-  paidAmount: number;
-  unpaidAmount: number;
-  refundedAmount: number;
+  totalRevenue: number
+  ordersRevenue: number
+  servicesRevenue: number
+  ordersCount: number
+  servicesCount: number
+  paidAmount: number
+  unpaidAmount: number
+  refundedAmount: number
 }
 
 export function DashboardStatsGrid({
@@ -106,7 +104,7 @@ export function DashboardStatsGrid({
   refundedAmount,
 }: DashboardStatsGridProps) {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2  lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
       <StatsCard
         title="Total Revenue"
         value={`EGP${totalRevenue.toLocaleString()}`}
@@ -147,5 +145,5 @@ export function DashboardStatsGrid({
         variant="danger"
       />
     </div>
-  );
+  )
 }

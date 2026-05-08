@@ -46,7 +46,7 @@ const ProductManagement = ({
   return (
     <div
       className={cn(
-        "xs:flex-row  xs:items-center flex flex-col justify-between gap-x-7 gap-y-2 rounded-lg border p-3 shadow-sm",
+        "flex flex-col justify-between gap-x-7 gap-y-2 rounded-lg border p-3 shadow-sm xs:flex-row xs:items-center",
         className
       )}
     >

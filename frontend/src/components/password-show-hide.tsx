@@ -1,129 +1,97 @@
-import React, { SetStateAction, useCallback, useState } from "react";
-import { Control, FieldValues, Path } from "react-hook-form";
-import {
-  FormField,
-  FormItem,
-  FormLabel,
-  FormControl,
-  FormMessage,
-  FormDescription,
-} from "@/components/ui/form";
+import React, { useCallback, useState, type SetStateAction } from "react"
 
-import { Input } from "./ui/input";
-import { Eye, EyeOff } from "lucide-react";
-import { Button } from "./ui/button";
+import { Input } from "./ui/input"
+import { Eye, EyeOff } from "lucide-react"
+import { Button } from "./ui/button"
+import type { FieldValues } from "react-hook-form"
+import { cn } from "@/lib/utils"
 
 const PasswordShowHide = <TFieldValues extends FieldValues>({
-  control,
-  labelText,
+  id,
   disabled,
-  fieldName,
   className,
-  description,
   placeholder,
-  onChange,
+  onShow,
   show,
+  value,
+  onChange,
+  ...props
 }: {
-  fieldName: Path<TFieldValues>;
-  control: Control<TFieldValues>;
-  labelText: string;
-  disabled?: boolean;
-  className?: string;
-  placeholder?: string;
-  description?: string;
-  onChange?: React.Dispatch<SetStateAction<boolean>>;
-  show?: boolean;
+  id?: string
+  disabled?: boolean
+  className?: string
+  placeholder?: string
+  value?: string
+  onChange?: (value: string) => void
+  onShow?: React.Dispatch<SetStateAction<boolean>>
+  show?: boolean
 }) => {
-  const [isShowPass, setIsShowPass] = useState(false);
+  const [isShowPass, setIsShowPass] = useState(false)
 
   const handleHideAndShow = useCallback(
     function () {
-      if (onChange) {
-        onChange((is) => !is);
+      if (onShow) {
+        onShow((is) => !is)
       } else {
-        setIsShowPass((is) => !is);
+        setIsShowPass((is) => !is)
       }
     },
-    [onChange]
-  );
+    [onShow]
+  )
 
   return (
     <>
       {(show ? !show : !isShowPass) ? (
-        <FormField
-          control={control}
-          name={fieldName}
-          render={({ field }) => (
-            <FormItem className={className}>
-              <FormLabel>{labelText}</FormLabel>
-              <FormControl>
-                <div className=" relative ">
-                  <Input
-                    autoComplete="current-password"
-                    className=" pr-10"
-                    disabled={disabled}
-                    type="password"
-                    placeholder={placeholder || "Placeholder"}
-                    {...field}
-                  />
-                  <Button
-                    type="button"
-                    size="icon"
-                    aria-label="Show password"
-                    variant="secondary"
-                    className="  absolute w-7 h-7 right-3 top-1/2 translate-y-[-50%]"
-                    onClick={handleHideAndShow}
-                  >
-                    <Eye size={17} />
-                  </Button>
-                </div>
-              </FormControl>
-              {description ? (
-                <FormDescription>{description}</FormDescription>
-              ) : null}
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div className={cn("relative", className)}>
+          <Input
+            id={id}
+            autoComplete="current-password"
+            className="pr-10"
+            disabled={disabled}
+            type="password"
+            placeholder={placeholder}
+            value={value}
+            onChange={(e) => onChange?.(e.target.value)}
+            {...props}
+          />
+          <Button
+            type="button"
+            size="icon"
+            aria-label="Show password"
+            variant="secondary"
+            className="absolute top-1/2 right-3 h-7 w-7 translate-y-[-50%] active:!translate-y-[-50%]"
+            onClick={handleHideAndShow}
+          >
+            <Eye size={17} />
+          </Button>
+        </div>
       ) : (
-        <FormField
-          control={control}
-          name={fieldName}
-          render={({ field }) => (
-            <FormItem className={className}>
-              <FormLabel>{labelText}</FormLabel>
-              <FormControl>
-                <div className=" relative ">
-                  <Input
-                    autoComplete="current-password"
-                    className=" pr-10"
-                    disabled={disabled}
-                    type="text"
-                    placeholder={placeholder || "Placeholder"}
-                    {...field}
-                  />
-                  <Button
-                    type="button"
-                    size="icon"
-                    aria-label="Hide password"
-                    variant="secondary"
-                    className="  absolute w-7 h-7 right-3 top-1/2 translate-y-[-50%]"
-                    onClick={handleHideAndShow}
-                  >
-                    <EyeOff size={17} />
-                  </Button>
-                </div>
-              </FormControl>
-              {description ? (
-                <FormDescription>{description}</FormDescription>
-              ) : null}
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div className={cn("relative", className)}>
+          <Input
+            id={id}
+            autoComplete="current-password"
+            className="pr-10"
+            disabled={disabled}
+            type="text"
+            placeholder={placeholder}
+            value={value}
+            onChange={(e) => onChange?.(e.target.value)}
+            {...props}
+          />
+          <Button
+            type="button"
+            size="icon"
+            aria-label="Hide password"
+            variant="secondary"
+            className="absolute top-1/2 right-3 h-7 w-7 translate-y-[-50%] active:!translate-y-[-50%]"
+            onClick={handleHideAndShow}
+          >
+            <EyeOff size={17} />
+          </Button>
+        </div>
       )}
     </>
-  );
-};
+  )
+}
 
-export default PasswordShowHide;
+export default PasswordShowHide

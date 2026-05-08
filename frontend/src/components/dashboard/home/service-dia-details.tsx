@@ -1,24 +1,24 @@
-import { Service } from "@lib/types";
-import { cn } from "@lib/utils";
-import Link from "next/link";
-import React from "react";
+import { Service } from "@lib/types"
+import { cn } from "@lib/utils"
+import Link from "next/link"
+import React from "react"
 
 const ServiceDiaDetails = ({
   service,
   isAdmin,
   className,
 }: {
-  service: Service;
-  isAdmin: boolean;
-  className?: string;
+  service: Service
+  isAdmin: boolean
+  className?: string
 }) => {
-  const plateNumber = service.cars.plateNumber;
-  const client = service.clients;
+  const plateNumber = service.cars.plateNumber
+  const client = service.clients
 
   return (
     <div
       className={cn(
-        " text-xs   justify-end flex items-center gap-y-1 gap-x-3 flex-wrap text-muted-foreground  ",
+        "flex flex-wrap items-center justify-end gap-x-3 gap-y-1 text-xs text-muted-foreground",
         className
       )}
     >
@@ -45,7 +45,7 @@ const ServiceDiaDetails = ({
         Date: <span>{service.created_at}</span>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default ServiceDiaDetails;
+export default ServiceDiaDetails

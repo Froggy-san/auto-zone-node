@@ -1,5 +1,5 @@
-import { CarGenerationProps, CarModelProps } from "@lib/types";
-import React, { useMemo, useState } from "react";
+import { CarGenerationProps, CarModelProps } from "@lib/types"
+import React, { useMemo, useState } from "react"
 import {
   Dialog,
   DialogClose,
@@ -9,19 +9,19 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from "@/components/ui/dialog"
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/components/ui/accordion";
-import { NotepadText } from "lucide-react";
-import GenerationItem from "./generation-item";
-import { GiTumbleweed } from "react-icons/gi";
-import { Button } from "@components/ui/button";
-import { GenerationForm } from "./generation-form";
-import { AnimatePresence, motion } from "framer-motion";
+} from "@/components/ui/accordion"
+import { NotepadText } from "lucide-react"
+import GenerationItem from "./generation-item"
+import { GiTumbleweed } from "react-icons/gi"
+import { Button } from "@components/ui/button"
+import { GenerationForm } from "./generation-form"
+import { AnimatePresence, motion } from "framer-motion"
 export default function MoreDetails({
   open,
   setOpen,
@@ -30,35 +30,31 @@ export default function MoreDetails({
   setGentoEdit,
   setAddGenOpen,
 }: {
-  open: boolean;
-  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  item: CarModelProps | undefined;
-  disabled?: boolean;
+  open: boolean
+  setOpen: React.Dispatch<React.SetStateAction<boolean>>
+  item: CarModelProps | undefined
+  disabled?: boolean
   setGentoEdit: React.Dispatch<
     React.SetStateAction<{
-      modelId: number;
-      genId: number;
+      modelId: number
+      genId: number
     } | null>
-  >;
+  >
 
-  setAddGenOpen: React.Dispatch<React.SetStateAction<number | null>>;
+  setAddGenOpen: React.Dispatch<React.SetStateAction<number | null>>
 }) {
   // const [open, setOpen] = useState(false);
   // const [genToEdit, setGenToEdit] = useState<CarGenerationProps | null>(null);
   // const [addGenOpen, setAddGenOpen] = useState(false);
   const generations = useMemo(() => {
-    return item?.carGenerations.sort((a, b) => a.id - b.id);
-  }, [item?.carGenerations]);
+    return item?.carGenerations.sort((a, b) => a.id - b.id)
+  }, [item?.carGenerations])
   return (
-    <div className=" absolute">
+    <div className="absolute">
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent
-          className="max-w-[500px]  max-h-[55vh]
-        overflow-y-auto
-        border-none"
-        >
+        <DialogContent className="max-h-[55vh] max-w-[500px] overflow-y-auto border-none">
           <DialogHeader>
-            <DialogTitle className=" break-all  pr-5">
+            <DialogTitle className="pr-5 break-all">
               <AnimatePresence mode="wait">
                 {item?.name && (
                   <motion.span
@@ -82,13 +78,13 @@ export default function MoreDetails({
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.09 }}
-                className="grid gap-2 p-2  rounded-md bg-accent/50 overflow-hidden  text-center sm:text-left break-all"
+                className="grid gap-2 overflow-hidden rounded-md bg-accent/50 p-2 text-center break-all sm:text-left"
               >
-                <h2 className=" text-md font-semibold flex items-center gap-1">
+                <h2 className="text-md flex items-center gap-1 font-semibold">
                   {" "}
                   <NotepadText className="h-5 w-5" /> Note.
                 </h2>
-                <p className="     indent-5  "> {item.notes}</p>
+                <p className="indent-5"> {item.notes}</p>
               </motion.div>
             )}
           </AnimatePresence>
@@ -104,7 +100,7 @@ export default function MoreDetails({
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
                       transition={{ duration: 0.09 }}
-                      className=" grid  grid-cols-2 sm:grid-cols-3  gap-2"
+                      className="grid grid-cols-2 gap-2 sm:grid-cols-3"
                     >
                       {generations.map((gen) => (
                         <GenerationItem
@@ -122,10 +118,10 @@ export default function MoreDetails({
                   ) : (
                     <motion.div
                       key="empty"
-                      className=" flex   justify-center item-center gap-1"
+                      className="item-center flex justify-center gap-1"
                     >
                       {" "}
-                      Empty <GiTumbleweed className=" w-4 h-4" />{" "}
+                      Empty <GiTumbleweed className="h-4 w-4" />{" "}
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -135,10 +131,10 @@ export default function MoreDetails({
           <DialogClose asChild>
             <Button
               onClick={() => {
-                if (item) setAddGenOpen(item.id);
+                if (item) setAddGenOpen(item.id)
               }}
               size="sm"
-              className=" w-full"
+              className="w-full"
             >
               Add a new generation
             </Button>
@@ -160,5 +156,5 @@ export default function MoreDetails({
         />
       )} */}
     </div>
-  );
+  )
 }

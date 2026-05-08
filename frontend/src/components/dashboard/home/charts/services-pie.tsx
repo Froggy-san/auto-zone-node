@@ -1,5 +1,5 @@
-import * as React from "react";
-import { Label, Pie, PieChart, TooltipProps } from "recharts";
+import * as React from "react"
+import { Label, Pie, PieChart, TooltipProps } from "recharts"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -7,8 +7,8 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Check, Ellipsis } from "lucide-react";
+} from "@/components/ui/dropdown-menu"
+import { Check, Ellipsis } from "lucide-react"
 import {
   Card,
   CardContent,
@@ -16,19 +16,19 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "@/components/ui/card"
 import {
   ChartConfig,
   ChartContainer,
   ChartTooltip,
-} from "@/components/ui/chart";
-import { Category, CategoryProps, Service } from "@lib/types";
-import { formatCurrency } from "@lib/client-helpers";
-import { cn } from "@lib/utils";
+} from "@/components/ui/chart"
+import { Category, CategoryProps, Service } from "@lib/types"
+import { formatCurrency } from "@lib/client-helpers"
+import { cn } from "@lib/utils"
 
-import { Button } from "@components/ui/button";
-import { GiTumbleweed } from "react-icons/gi";
-import FeesMoreDetails from "./fees-more-details";
+import { Button } from "@components/ui/button"
+import { GiTumbleweed } from "react-icons/gi"
+import FeesMoreDetails from "./fees-more-details"
 
 const chartData = [
   { browser: "chrome", visitors: 275, fill: "var(--color-chrome)" },
@@ -36,7 +36,7 @@ const chartData = [
   { browser: "firefox", visitors: 287, fill: "var(--color-firefox)" },
   { browser: "edge", visitors: 173, fill: "var(--color-edge)" },
   { browser: "other", visitors: 190, fill: "var(--color-other)" },
-];
+]
 
 const chartConfig = {
   visitors: {
@@ -63,7 +63,7 @@ const chartConfig = {
     label: "Other",
     color: "hsl(var(--chart-5))",
   },
-} satisfies ChartConfig;
+} satisfies ChartConfig
 
 const colors = [
   "hsl(var(--chart-1))",
@@ -72,22 +72,22 @@ const colors = [
   "hsl(var(--chart-4))",
   "hsl(var(--chart-5))",
   "var(--dashboard-orange)",
-];
+]
 
 interface ServiceFee {
-  id: number;
-  name: string | number;
-  totalPrice: number;
-  totalCount: number;
-  totalDiscount: number;
-  totalPriceAfterDiscount: number;
+  id: number
+  name: string | number
+  totalPrice: number
+  totalCount: number
+  totalDiscount: number
+  totalPriceAfterDiscount: number
 }
 
 interface Props {
-  serviceFeesData: ServiceFee[];
-  date: (string | Date | undefined)[];
-  description: string;
-  categories: CategoryProps[];
+  serviceFeesData: ServiceFee[]
+  date: (string | Date | undefined)[]
+  description: string
+  categories: CategoryProps[]
 }
 export function ServicePie({
   serviceFeesData,
@@ -97,7 +97,7 @@ export function ServicePie({
 }: Props) {
   const [sortDataBy, setSortDataBy] = React.useState<
     "totalPriceAfterDiscount" | "totalCount"
-  >("totalCount");
+  >("totalCount")
   // const flatData = salesData.flat();
   // const services = flatData.map((item) => item.servicesFee).flat();
   // const productIds = Array.from(
@@ -138,23 +138,23 @@ export function ServicePie({
   const servicePie = serviceFeesData
     .sort((a, b) => b[sortDataBy] - a[sortDataBy])
     .map((fee, index) => {
-      return { ...fee, fill: colors[index] || "hsl(0deg 0% 50.2%)" };
-    });
+      return { ...fee, fill: colors[index] || "hsl(0deg 0% 50.2%)" }
+    })
   const servicesMoreThanSix = React.useMemo(() => {
     if (servicePie.length > 6) {
       const firstSix = servicePie.slice(0, 6).map((item, index) => {
-        return { ...item, fill: colors[index] };
-      });
-      const fromSix = servicePie.slice(6);
+        return { ...item, fill: colors[index] }
+      })
+      const fromSix = servicePie.slice(6)
 
       const theTotalsFromSix = fromSix.reduce(
         (acc, currItem) => {
-          acc.totalCount += currItem.totalCount;
-          acc.totalPrice += currItem.totalPrice;
-          acc.totalDiscount += currItem.totalDiscount;
-          acc.totalPriceAfterDiscount += currItem.totalPriceAfterDiscount;
+          acc.totalCount += currItem.totalCount
+          acc.totalPrice += currItem.totalPrice
+          acc.totalDiscount += currItem.totalDiscount
+          acc.totalPriceAfterDiscount += currItem.totalPriceAfterDiscount
 
-          return acc;
+          return acc
         },
         {
           name: "Other",
@@ -162,64 +162,64 @@ export function ServicePie({
           totalCount: 0,
           totalDiscount: 0,
           totalPriceAfterDiscount: 0,
-        },
-      );
-      return [...firstSix, theTotalsFromSix];
-    } else return [];
-  }, [servicePie]);
+        }
+      )
+      return [...firstSix, theTotalsFromSix]
+    } else return []
+  }, [servicePie])
 
   const servicesPreformed = servicesMoreThanSix.length
     ? servicesMoreThanSix
-    : servicePie;
+    : servicePie
 
   const finalTotals = React.useMemo(() => {
     return servicesPreformed.reduce(
       (acc, curr) => {
-        acc.totalPriceAfterDiscount += curr.totalPriceAfterDiscount;
-        acc.totalCount += curr.totalCount;
+        acc.totalPriceAfterDiscount += curr.totalPriceAfterDiscount
+        acc.totalCount += curr.totalCount
 
-        return acc;
+        return acc
       },
-      { totalCount: 0, totalPriceAfterDiscount: 0 },
-    );
-  }, [servicesPreformed]);
+      { totalCount: 0, totalPriceAfterDiscount: 0 }
+    )
+  }, [servicesPreformed])
 
   return (
-    <Card className="flex flex-col  relative  w-full">
+    <Card className="relative flex w-full flex-col">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
             disabled={!servicesPreformed.length}
             variant="outline"
             size="icon"
-            className="      absolute right-5 top-5  p-0 h-6 w-6"
+            className="absolute top-5 right-5 h-6 w-6 p-0"
           >
-            <Ellipsis className=" w-4 h-4" />
+            <Ellipsis className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className=" w-52">
+        <DropdownMenuContent className="w-52">
           <DropdownMenuLabel>Sort by</DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuItem
-            className=" justify-between"
+            className="justify-between"
             onClick={() => {
-              if (sortDataBy !== "totalCount") setSortDataBy("totalCount");
+              if (sortDataBy !== "totalCount") setSortDataBy("totalCount")
             }}
           >
             Total services preformed
-            {sortDataBy === "totalCount" && <Check className=" w-3 h-3" />}
+            {sortDataBy === "totalCount" && <Check className="h-3 w-3" />}
           </DropdownMenuItem>
 
           <DropdownMenuItem
-            className=" justify-between"
+            className="justify-between"
             onClick={() => {
               if (sortDataBy !== "totalPriceAfterDiscount")
-                setSortDataBy("totalPriceAfterDiscount");
+                setSortDataBy("totalPriceAfterDiscount")
             }}
           >
             Total fees revenue generated
             {sortDataBy === "totalPriceAfterDiscount" && (
-              <Check className=" w-3 h-3" />
+              <Check className="h-3 w-3" />
             )}
           </DropdownMenuItem>
         </DropdownMenuContent>
@@ -232,8 +232,8 @@ export function ServicePie({
       </CardHeader>
       <CardContent className="flex-1 pb-0">
         {!servicesPreformed.length ? (
-          <div className="   flex   justify-center my-7 items-center gap-1 ">
-            No data <GiTumbleweed className=" w-4 h-4" />
+          <div className="my-7 flex items-center justify-center gap-1">
+            No data <GiTumbleweed className="h-4 w-4" />
           </div>
         ) : (
           <ChartContainer
@@ -274,7 +274,7 @@ export function ServicePie({
                             {sortDataBy === "totalCount" ? "Services" : "EGP"}
                           </tspan>
                         </text>
-                      );
+                      )
                     }
                   }}
                 />
@@ -287,42 +287,42 @@ export function ServicePie({
         {/* <div className="flex items-center gap-2 font-medium leading-none">
           Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
         </div> */}
-        <div className="leading-none text-muted-foreground text-center">
+        <div className="text-center leading-none text-muted-foreground">
           Showing total services preformed {description}
         </div>
         <FeesMoreDetails fees={servicePie} date={date} />
       </CardFooter>
     </Card>
-  );
+  )
 }
 
 interface ServicesPayload {
-  id: number;
-  name?: string;
-  totalPrice: number;
-  totalCount: number;
-  totalDiscount: number;
-  fill?: string;
-  totalPriceAfterDiscount: number;
-  [key: string]: any;
+  id: number
+  name?: string
+  totalPrice: number
+  totalCount: number
+  totalDiscount: number
+  fill?: string
+  totalPriceAfterDiscount: number
+  [key: string]: any
 }
 interface ChartTooltipContentProps extends TooltipProps<number, string> {
-  payload?: { payload: ServicesPayload }[];
-  label?: string;
+  payload?: { payload: ServicesPayload }[]
+  label?: string
 }
 const ServicesTooltip: React.FC<ChartTooltipContentProps> = ({
   payload,
   label,
 }) => {
-  if (!payload || payload.length === 0) return null;
-  const data = payload[0].payload;
+  if (!payload || payload.length === 0) return null
+  const data = payload[0].payload
   return (
-    <div className=" grid min-w-[8rem] items-start gap-1.5 rounded-lg border border-border/50 bg-background px-2.5 py-1.5 text-xs shadow-xl">
+    <div className="grid min-w-[8rem] items-start gap-1.5 rounded-lg border border-border/50 bg-background px-2.5 py-1.5 text-xs shadow-xl">
       {" "}
-      <div className=" flex items-center gap-1">
+      <div className="flex items-center gap-1">
         <div
           className={cn(
-            `shrink-0 rounded-[2px] border-[--color-border]  h-2.5 w-2.5`,
+            `h-2.5 w-2.5 shrink-0 rounded-[2px] border-[--color-border]`
           )}
           style={{ backgroundColor: `${data.fill} ` }}
         />
@@ -331,50 +331,50 @@ const ServicesTooltip: React.FC<ChartTooltipContentProps> = ({
       </div>{" "}
       <div
         className={cn(
-          "flex flex-1 gap-1 justify-between leading-none items-center",
+          "flex flex-1 items-center justify-between gap-1 leading-none"
         )}
       >
         <span className="text-muted-foreground">Total count:</span>
 
-        <span className="font-mono font-medium tabular-nums text-foreground">
+        <span className="font-mono font-medium text-foreground tabular-nums">
           {data.totalCount} units
         </span>
       </div>
       <div
         className={cn(
-          "flex flex-1 gap-1 justify-between leading-none items-center",
+          "flex flex-1 items-center justify-between gap-1 leading-none"
         )}
       >
         <div className="grid gap-1.5">
           <span className="text-muted-foreground">Total price:</span>
         </div>
 
-        <span className="font-mono font-medium tabular-nums text-foreground">
+        <span className="font-mono font-medium text-foreground tabular-nums">
           {formatCurrency(data.totalPrice)}
         </span>
       </div>
       <div
         className={cn(
-          "flex flex-1 gap-1 justify-between leading-none items-center",
+          "flex flex-1 items-center justify-between gap-1 leading-none"
         )}
       >
         <span className="text-muted-foreground">Total Discount:</span>
 
-        <span className="font-mono font-medium tabular-nums text-foreground">
+        <span className="font-mono font-medium text-foreground tabular-nums">
           {formatCurrency(data.totalDiscount)}
         </span>
       </div>
       <div
         className={cn(
-          "flex flex-1 gap-1 justify-between leading-none items-center",
+          "flex flex-1 items-center justify-between gap-1 leading-none"
         )}
       >
         <span className="text-muted-foreground">Net:</span>
 
-        <span className="font-mono font-medium tabular-nums text-foreground">
+        <span className="font-mono font-medium text-foreground tabular-nums">
           {formatCurrency(data.totalPriceAfterDiscount)}
         </span>
       </div>
     </div>
-  );
-};
+  )
+}

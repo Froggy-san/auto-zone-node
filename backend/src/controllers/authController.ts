@@ -5,13 +5,15 @@ import jwt from "jsonwebtoken";
 import { AppError } from "../utils/appError";
 import { promisify } from "util";
 
+import { Email } from "../utils/email";
+import crypto from "crypto";
 interface TokenPayload extends jwt.JwtPayload {
   id: string;
   iat: number;
 }
 
 const JWT_EXPIRES_IN = (process.env.JWT_EXPIRES_IN || "90d") as any;
-
+const cookieExpiresInDays = Number(process.env.JWT_COOKIE_EXPIRES_IN) || 90;
 const JWT_SECRET = process.env.JWT_SECRET!;
 const signToken = (id: string): string => {
   return jwt.sign(
@@ -29,7 +31,7 @@ const createSendToken = (user: any, statusCode: number, res: Response) => {
   const token = signToken(user.id);
 
   res.cookie("autoZoneToken", token, {
-    expires: new Date(Date.now() + JWT_EXPIRES_IN * 24 * 60 * 60 * 1000),
+    expires: new Date(Date.now() + cookieExpiresInDays * 24 * 60 * 60 * 1000),
     httpOnly: true,
   });
 
@@ -44,6 +46,8 @@ const createSendToken = (user: any, statusCode: number, res: Response) => {
 
 export const signup = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
+    console.log("[SIGNUP STARTED-----------]");
+    console.log(req.body, "BODDDY");
     const user = await User.create(req.body);
 
     if (!user)
@@ -62,10 +66,11 @@ export const login = catchAsync(
     if (!user)
       return next(new AppError(`No user found with that email: ${email}`, 404));
 
-    const isCorrectPassword = user.isCorrectPassword(
+    const isCorrectPassword = await user.isCorrectPassword(
       password,
       user.password as string,
     );
+    console.log(isCorrectPassword, password, "AYOOOOO");
     if (!isCorrectPassword)
       return next(new AppError("Incorrect password", 400));
     createSendToken(user, 200, res);
@@ -86,8 +91,8 @@ export const logout = catchAsync(
 export const protect = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const { authorization } = req.headers;
-    const tokenFromCookie = req.cookies.autoZoneToken;
 
+    const tokenFromCookie = req.cookies.autoZoneToken;
     let token = "";
     if (authorization && authorization.startsWith("Bearer")) {
       token = authorization.split(" ")[1] || "";
@@ -118,7 +123,7 @@ export const protect = catchAsync(
     }
 
     const isChanged = user.isPassChangedAfterJWT(decoded.iat);
-
+    console.log(isChanged, "IS CHANGGEEDDDD");
     if (isChanged) {
       return next(
         new AppError(
@@ -186,3 +191,113 @@ export const restrictTo = (...roles: string[]) => {
     next();
   };
 };
+
+export const forgotPassword = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    console.log("[FORGOT PASSWORD STARTED]");
+
+    const { email } = req.body;
+
+    const userByEmail = await User.findOne({ email }).select("-password");
+
+    if (!userByEmail)
+      return next(
+        new AppError(
+          "User doesn't exist, Please make sure your email is correct",
+          404,
+        ),
+      );
+
+    const resetToken = userByEmail.createPasswordResetToken();
+    await userByEmail.save({ validateBeforeSave: false });
+
+    try {
+      const resetURL = `${req.protocol}://${req.get("host")}/api/v1/users/resetPassword/${resetToken}`;
+      await new Email(userByEmail, resetURL).sendPasswordResetToken();
+      console.log(`TOKEN URL: ${resetURL}`);
+      console.log("[FORGOT PASSWORD ENDED]");
+      res.status(200).json({
+        status: "success",
+        message: "Token sent to your email!",
+      });
+    } catch (err: any) {
+      // 4. If email fails, reset the token fields in the DB (Cleanup)
+      userByEmail.passwordResetToken = undefined;
+      userByEmail.passwordResetExpires = undefined;
+      await userByEmail.save({ validateBeforeSave: false });
+
+      return next(
+        new AppError(
+          "There was an error sending the email. Try again later!",
+          500,
+        ),
+      );
+    }
+  },
+);
+
+export const resetPassword = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    console.log(`[RESET CONTROLLER STARTED]`);
+
+    const unHashedToken = req.params.token as string;
+    const { password } = req.body;
+    if (!unHashedToken) return next(new AppError("Invaild reset token", 400));
+
+    const hashedToken = crypto
+      .createHash("sh256")
+      .update(unHashedToken)
+      .digest("hex");
+
+    const user = await User.findOne({
+      passwordResetToken: hashedToken,
+      passwordResetExpires: { $gt: Date.now() },
+    });
+
+    // 2) If the token is not expired, and there is user, set the new password
+
+    if (!user)
+      return next(new AppError("Token is invalid or has expired", 400));
+
+    user.password = password;
+    user.passwordChangedAt = new Date(Date.now());
+    user.passwordResetToken = undefined;
+    user.passwordResetExpires = undefined;
+    await user.save();
+    console.log(`UPDATED USER: ${user}`);
+    console.log(`[RESET CONTROLLER ENDED]`);
+    createSendToken(user, 200, res);
+  },
+);
+
+export const updatePassword = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    console.log("[UPDATED PASSWORD STARTED]");
+    const user = req.user as IUser;
+    const { password, currentPassword } = req.body;
+
+    const currentUser = await User.findById(user.id).select("+password");
+
+    if (!currentUser)
+      return next(
+        new AppError("User not found, Please make usre you are logged in", 404),
+      );
+
+    const isCorrectPassword = await user.isCorrectPassword(
+      currentPassword,
+      currentUser.password!,
+    );
+
+    if (!isCorrectPassword)
+      return next(new AppError("current pasword is incorrect", 401));
+
+    currentUser.password = password;
+
+    await currentUser.save();
+
+    // You are sending the user with the password here i think, you need to double check that.
+    console.log(`UPDATED USER: ${currentUser}`);
+    console.log("[UPDATED PASSWORD ENDED]");
+    createSendToken(currentUser, 200, res);
+  },
+);

@@ -242,7 +242,6 @@ export const createProduct = catchAsync(
 
 export const getProduct = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    console.log(req.params.id, "ID----------------------");
     const product = await Product.findById(req.params.id).populate([
       { path: "category", model: "categories" },
       { path: "productType", model: "productTypes" },
@@ -343,9 +342,6 @@ export const updateProduct = catchAsync(
         isMain: cleanImg.filename === req.body.mainImageName,
       };
     });
-
-    console.log(req.body.imagesToDelete, "UPDATED DATA");
-    console.log(req.body, "INCOMEING DATA");
     // console.log(req.body, "UPDATED DATA");
 
     // 4) Update the product

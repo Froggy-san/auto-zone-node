@@ -1,13 +1,13 @@
-import React, { createContext } from "react";
+import React, { createContext } from "react"
 
 interface SearchCommand {}
 
-const SearchCommandContext = createContext<SearchCommand>({});
+const SearchCommandContext = createContext<SearchCommand>({})
 
 interface SearchProps {
-  children: React.ReactNode;
-  value: string;
-  onValueChange: React.SetStateAction<React.Dispatch<string>>;
+  children: React.ReactNode
+  value: string
+  onValueChange: React.SetStateAction<React.Dispatch<string>>
 }
 
 function Search({ children }: SearchProps) {
@@ -15,15 +15,15 @@ function Search({ children }: SearchProps) {
     <SearchCommandContext.Provider value={{}}>
       {children}
     </SearchCommandContext.Provider>
-  );
+  )
 }
 
 // 1. Use React.ComponentPropsWithRef<'button'> to include the 'ref' prop
 type ButtonProps = React.ComponentPropsWithRef<"button"> & {
   // 2. Add your custom properties here
-  variant?: "primary" | "secondary" | "danger";
-  isLoading?: boolean;
-};
+  variant?: "primary" | "secondary" | "danger"
+  isLoading?: boolean
+}
 
 // 3. Use React.forwardRef and explicitly type the ref (HTMLButtonElement)
 //    and the component's props (ButtonProps)
@@ -38,14 +38,14 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     },
     ref // This is the ref passed by the parent component
   ) => {
-    const baseClasses = "px-4 py-2 rounded font-semibold";
+    const baseClasses = "px-4 py-2 rounded font-semibold"
     const variantClasses = {
       primary: "bg-blue-500 text-white hover:bg-blue-600",
       secondary: "bg-gray-200 text-gray-800 hover:bg-gray-300",
       danger: "bg-red-500 text-white hover:bg-red-600",
-    }[variant];
+    }[variant]
 
-    const loadingClasses = isLoading ? "opacity-70 cursor-not-allowed" : "";
+    const loadingClasses = isLoading ? "opacity-70 cursor-not-allowed" : ""
 
     return (
       <button
@@ -58,11 +58,11 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       >
         {isLoading ? "Loading..." : children}
       </button>
-    );
+    )
   }
-);
+)
 
 // 5. Add a displayName for better debugging in React DevTools
-Button.displayName = "Button";
+Button.displayName = "Button"
 
-export default Button;
+export default Button

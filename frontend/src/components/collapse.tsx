@@ -7,20 +7,20 @@ import React, {
   useContext,
   useEffect,
   useState,
-} from "react";
-import useMediaQuery from "@mui/material/useMediaQuery";
-export const LENGHT_OF_STRING = 500;
+} from "react"
+import useMediaQuery from "@mui/material/useMediaQuery"
+export const LENGHT_OF_STRING = 500
 
-import { Link } from "react-scroll";
-import { ChevronDown, ChevronUp } from "lucide-react";
-import { Button } from "./ui/button";
+import { Link } from "react-scroll"
+import { ChevronDown, ChevronUp } from "lucide-react"
+import { Button } from "./ui/button"
 
 interface CollapseContextValue {
-  setIsOpen: Dispatch<SetStateAction<boolean>>;
-  setShowCollapseBtn: Dispatch<SetStateAction<boolean>>;
-  isOpen: boolean;
-  showCollapseBtn: boolean;
-  textLenght?: number;
+  setIsOpen: Dispatch<SetStateAction<boolean>>
+  setShowCollapseBtn: Dispatch<SetStateAction<boolean>>
+  isOpen: boolean
+  showCollapseBtn: boolean
+  textLenght?: number
 }
 
 const CollapseContext = createContext<CollapseContextValue>({
@@ -29,15 +29,15 @@ const CollapseContext = createContext<CollapseContextValue>({
   setShowCollapseBtn: () => {},
   showCollapseBtn: false,
   textLenght: LENGHT_OF_STRING,
-});
+})
 
 interface CollapseProps {
-  children: ReactNode;
-  textLenght?: number;
-  onClick?: (e?: MouseEvent) => void;
-  className?: string;
-  style?: React.CSSProperties;
-  scrollOnCollapse?: boolean;
+  children: ReactNode
+  textLenght?: number
+  onClick?: (e?: MouseEvent) => void
+  className?: string
+  style?: React.CSSProperties
+  scrollOnCollapse?: boolean
 }
 
 const Collapse = function ({
@@ -48,14 +48,14 @@ const Collapse = function ({
   scrollOnCollapse = true,
   style,
 }: CollapseProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [showCollapseBtn, setShowCollapseBtn] = useState(false);
+  const [isOpen, setIsOpen] = useState(false)
+  const [showCollapseBtn, setShowCollapseBtn] = useState(false)
   // we need to know if the user is using a bigger screen or not, because if not, and the text length is too big the text will look bad and too much, thus we need to make the text more appealing by dividing the text length by 2, the number 2 it self is a random number i picked up feel free to change it.
 
-  const isBigScreen = useMediaQuery("(min-width: 768px)");
-  const isTextBig = textLenght > 600;
+  const isBigScreen = useMediaQuery("(min-width: 768px)")
+  const isTextBig = textLenght > 600
   const textLenghtinScreen =
-    !isBigScreen && isTextBig ? textLenght / 2 : textLenght;
+    !isBigScreen && isTextBig ? textLenght / 2 : textLenght
   return (
     <CollapseContext.Provider
       value={{
@@ -81,8 +81,8 @@ const Collapse = function ({
         </div>
       </Link>
     </CollapseContext.Provider>
-  );
-};
+  )
+}
 
 ///           Contant
 
@@ -95,37 +95,37 @@ const CollapseContant = forwardRef(
       className,
       style,
     }: {
-      children: ReactNode;
-      onClick?: (e?: MouseEvent) => void;
-      ariaLabel?: string;
-      className?: string;
-      style?: React.CSSProperties;
+      children: ReactNode
+      onClick?: (e?: MouseEvent) => void
+      ariaLabel?: string
+      className?: string
+      style?: React.CSSProperties
     },
     ref?: React.Ref<HTMLParagraphElement>
   ) => {
     const { isOpen, setIsOpen, textLenght, setShowCollapseBtn } =
-      useContext(CollapseContext);
+      useContext(CollapseContext)
 
-    const isString = typeof children === "string";
+    const isString = typeof children === "string"
 
     if (!isString)
       console.error(
         "inside the CollapsibleContant must be a string not a component nor an element."
-      );
+      )
 
     const isBigEnough =
-      isString && children.length > (textLenght || LENGHT_OF_STRING);
+      isString && children.length > (textLenght || LENGHT_OF_STRING)
 
     const text =
-      isBigEnough && !isOpen ? children.slice(0, textLenght) + "..." : children;
+      isBigEnough && !isOpen ? children.slice(0, textLenght) + "..." : children
 
     useEffect(() => {
       if (isBigEnough) {
-        setShowCollapseBtn(true);
+        setShowCollapseBtn(true)
       } else {
-        setShowCollapseBtn(false);
+        setShowCollapseBtn(false)
       } // when ever changing the textLenght refresh the page in order for this state to take effect.
-    }, [isBigEnough]);
+    }, [isBigEnough])
 
     // // Separate components from text
     // const components = React.Children.toArray(children).filter((child) =>
@@ -137,18 +137,18 @@ const CollapseContant = forwardRef(
         ref={ref}
         id="collapse-contant"
         onClick={() => {
-          if (isOpen) setIsOpen(false);
-          onClick?.();
+          if (isOpen) setIsOpen(false)
+          onClick?.()
         }}
         aria-label={ariaLabel}
-        className={`mt-5 whitespace-pre-wrap break-all ${className}`}
+        className={`mt-5 break-all whitespace-pre-wrap ${className}`}
         style={style}
       >
         {isString ? text : children}
       </p>
-    );
+    )
   }
-);
+)
 
 ///           Button
 export type variant =
@@ -159,17 +159,17 @@ export type variant =
   | "secondary"
   | "ghost"
   | null
-  | undefined;
+  | undefined
 
 interface CollapseButtonProps {
-  className?: string;
-  arrowPositionX?: "right" | "left" | null | undefined;
-  arrowPositionY?: "top" | "bottom" | null | undefined;
-  onClick?: (e?: MouseEvent) => void;
-  variant?: variant;
-  style?: React.CSSProperties;
-  buttonTextWhenOpen?: string | ReactNode;
-  buttonTextWhenClosed?: string | ReactNode;
+  className?: string
+  arrowPositionX?: "right" | "left" | null | undefined
+  arrowPositionY?: "top" | "bottom" | null | undefined
+  onClick?: (e?: MouseEvent) => void
+  variant?: variant
+  style?: React.CSSProperties
+  buttonTextWhenOpen?: string | ReactNode
+  buttonTextWhenClosed?: string | ReactNode
 }
 
 const CollapseButton = forwardRef(
@@ -187,18 +187,18 @@ const CollapseButton = forwardRef(
     }: CollapseButtonProps,
     ref?: React.Ref<HTMLButtonElement>
   ) => {
-    const { showCollapseBtn, isOpen, setIsOpen } = useContext(CollapseContext);
+    const { showCollapseBtn, isOpen, setIsOpen } = useContext(CollapseContext)
     return (
       <>
         {showCollapseBtn && (
           <Button
             ref={ref}
-            className={`absolute  p-0 h-6 w-6 bottom-[-45px] z-20 ${arrowPositionY}-0 ${arrowPositionX}-0 ${className}`}
+            className={`absolute bottom-[-45px] z-20 h-6 w-6 p-0 ${arrowPositionY}-0 ${arrowPositionX}-0 ${className}`}
             style={style}
             variant={variant || "ghost"}
             onClick={() => {
-              onClick?.();
-              setIsOpen((is) => !is);
+              onClick?.()
+              setIsOpen((is) => !is)
             }}
           >
             {buttonTextWhenClosed || buttonTextWhenOpen ? (
@@ -212,20 +212,20 @@ const CollapseButton = forwardRef(
           </Button>
         )}
       </>
-    );
+    )
   }
-);
+)
 
 export function useCollapse() {
-  const context = useContext(CollapseContext);
-  if (!context) throw new Error(`you have used the SearchContext wrong`);
-  return context;
+  const context = useContext(CollapseContext)
+  if (!context) throw new Error(`you have used the SearchContext wrong`)
+  return context
 }
 
-CollapseButton.displayName = "CollapseButton";
-CollapseContant.displayName = "CollapseContant";
-Collapse.CollapseContant = CollapseContant;
-Collapse.CollapseButton = CollapseButton;
+CollapseButton.displayName = "CollapseButton"
+CollapseContant.displayName = "CollapseContant"
+Collapse.CollapseContant = CollapseContant
+Collapse.CollapseButton = CollapseButton
 
-export { CollapseButton, CollapseContant };
-export default Collapse;
+export { CollapseButton, CollapseContant }
+export default Collapse

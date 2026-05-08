@@ -1,11 +1,10 @@
-
 import {
   Ticket,
   TicketCategory,
   TicketPriority,
   TicketStatus as TicketStatusType,
-} from "@lib/types";
-import React, { useCallback, useEffect, useState } from "react";
+} from "@lib/types"
+import React, { useCallback, useEffect, useState } from "react"
 import {
   Table,
   TableBody,
@@ -14,11 +13,11 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { formatDate } from "date-fns";
+} from "@/components/ui/table"
+import { formatDate } from "date-fns"
 
-import { Priority } from "./priority-select";
-import { copyTextToClipboard } from "@lib/client-helpers";
+import { Priority } from "./priority-select"
+import { copyTextToClipboard } from "@lib/client-helpers"
 import {
   ArrowDownToLine,
   Check,
@@ -33,7 +32,7 @@ import {
   TicketIcon,
   Ticket as ticketIcon,
   Trash2,
-} from "lucide-react";
+} from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -45,7 +44,7 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@/components/ui/dropdown-menu"
 import {
   Dialog,
   DialogContent,
@@ -54,39 +53,39 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { AnimatePresence, motion } from "framer-motion";
-import { useToast } from "@hooks/use-toast";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+} from "@/components/ui/dialog"
+import { AnimatePresence, motion } from "framer-motion"
+import { useToast } from "@hooks/use-toast"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import {
   deleteTicketAction,
   editTicketAction,
-} from "@lib/actions/tickets-actions";
-import SuccessToastDescription, { ErorrToastDescription } from "./toast-items";
-import Spinner from "./Spinner";
-import { Button } from "./ui/button";
-import { FaArrowUpWideShort } from "react-icons/fa6";
-import TicketStatus from "./ticket-status";
-import TicketForm from "./dashboard/tickets/ticket-form";
-import NoteDialog from "./garage/note-dialog";
-import { TbFileDescription } from "react-icons/tb";
-import ImageView from "./image-view";
-import TicketDetails from "./ticket-details";
-import { cn } from "@lib/utils";
+} from "@lib/actions/tickets-actions"
+import SuccessToastDescription, { ErorrToastDescription } from "./toast-items"
+import Spinner from "./Spinner"
+import { Button } from "./ui/button"
+import { FaArrowUpWideShort } from "react-icons/fa6"
+import TicketStatus from "./ticket-status"
+import TicketForm from "./dashboard/tickets/ticket-form"
+import NoteDialog from "./garage/note-dialog"
+import { TbFileDescription } from "react-icons/tb"
+import ImageView from "./image-view"
+import TicketDetails from "./ticket-details"
+import { cn } from "@lib/utils"
 
 interface Props {
-  tickets: Ticket[];
-  ticketStatuses: TicketStatusType[];
-  ticketCategories: TicketCategory[];
-  ticketPriorities: TicketPriority[];
-  isAdmin?: boolean;
+  tickets: Ticket[]
+  ticketStatuses: TicketStatusType[]
+  ticketCategories: TicketCategory[]
+  ticketPriorities: TicketPriority[]
+  isAdmin?: boolean
 }
 
-type Selected = number | null;
-type SetSelected = React.Dispatch<React.SetStateAction<Selected>>;
-type Open = "edit" | "delete" | "description" | null;
-type SetOpen = React.Dispatch<React.SetStateAction<Open>>;
-type HandleOpen = (open: Open, selected?: Selected) => void;
+type Selected = number | null
+type SetSelected = React.Dispatch<React.SetStateAction<Selected>>
+type Open = "edit" | "delete" | "description" | null
+type SetOpen = React.Dispatch<React.SetStateAction<Open>>
+type HandleOpen = (open: Open, selected?: Selected) => void
 const TicketTable = ({
   tickets,
   ticketCategories,
@@ -94,45 +93,45 @@ const TicketTable = ({
   ticketStatuses,
   isAdmin = false,
 }: Props) => {
-  const [open, setOpen] = useState<Open>(null);
-  const [selectedId, setSelectedId] = useState<Selected>(null);
-  const [isLoading, setIsLoading] = useState<number | false>(false);
-  const [image, setImage] = useState<string | null>(null);
+  const [open, setOpen] = useState<Open>(null)
+  const [selectedId, setSelectedId] = useState<Selected>(null)
+  const [isLoading, setIsLoading] = useState<number | false>(false)
+  const [image, setImage] = useState<string | null>(null)
 
-  const selectedTicket = tickets.find((ticket) => ticket.id === selectedId);
-  const searchParam = useSearchParams();
-  const pathname = usePathname();
-  const router = useRouter();
-  const params = new URLSearchParams(searchParam);
+  const selectedTicket = tickets.find((ticket) => ticket.id === selectedId)
+  const searchParam = useSearchParams()
+  const pathname = usePathname()
+  const router = useRouter()
+  const params = new URLSearchParams(searchParam)
 
   const handleDetails = useCallback(
     (id: number) => {
-      params.set("ticket", String(id));
+      params.set("ticket", String(id))
       router.push(`${pathname}?${params.toString()}`, {
         scroll: false,
-      });
+      })
     },
     [params, router]
-  );
+  )
   const handleOpen = useCallback((open: Open, selected?: Selected) => {
-    setOpen(open);
-    setSelectedId(selected || null);
-  }, []);
+    setOpen(open)
+    setSelectedId(selected || null)
+  }, [])
 
   useEffect(() => {
-    const body = document.querySelector("body");
+    const body = document.querySelector("body")
 
     if (body) {
-      body.style.pointerEvents = "auto";
+      body.style.pointerEvents = "auto"
     }
     return () => {
-      if (body) body.style.pointerEvents = "auto";
-    };
-  }, [open]);
+      if (body) body.style.pointerEvents = "auto"
+    }
+  }, [open])
   return (
     <div
       className={cn(
-        "mt-10 p-3 border rounded-3xl shadow-lg "
+        "mt-10 rounded-3xl border p-3 shadow-lg"
         //    {
         //   " max-w-[1200px] mx-auto": !isAdmin,
         // }
@@ -142,23 +141,23 @@ const TicketTable = ({
         <TableCaption>A list of the tickets issues.</TableCaption>
         <TableHeader>
           <TableRow>
-            <TableHead className="text-nowrap min-w-36">SUBJECT</TableHead>
-            <TableHead className="text-nowrap  min-w-36">CATEGORY</TableHead>
+            <TableHead className="min-w-36 text-nowrap">SUBJECT</TableHead>
+            <TableHead className="min-w-36 text-nowrap">CATEGORY</TableHead>
             <TableHead className="w-[100px] text-nowrap">ID</TableHead>
             {isAdmin && (
-              <TableHead className=" min-w-36 text-nowrap">CLIENT</TableHead>
+              <TableHead className="min-w-36 text-nowrap">CLIENT</TableHead>
             )}
 
             <TableHead className="text-nowrap">STATUS</TableHead>
             {isAdmin && <TableHead className="text-nowrap">PRIORITY</TableHead>}
             <TableHead className="text-nowrap">ISSUE DATE</TableHead>
             <TableHead
-              className={cn("text-nowrap", { " text-right": !isAdmin })}
+              className={cn("text-nowrap", { "text-right": !isAdmin })}
             >
               UPDATED AT
             </TableHead>
             {isAdmin && (
-              <TableHead className="text-right text-nowrap  w-11 ">
+              <TableHead className="w-11 text-right text-nowrap">
                 ASSIGNED TO
               </TableHead>
             )}
@@ -218,22 +217,22 @@ const TicketTable = ({
         ticketPriorities={ticketPriorities}
       />
     </div>
-  );
-};
+  )
+}
 
 interface RowProps {
-  isAdmin: boolean;
-  ticket: Ticket;
-  ticketStatuses: TicketStatusType[];
-  setSelected: SetSelected;
-  open: Open;
-  setOpen: SetOpen;
-  isLoading: boolean;
-  setIsLoading: React.Dispatch<React.SetStateAction<number | false>>;
-  handleOpen: HandleOpen;
-  setImage: React.Dispatch<React.SetStateAction<string | null>>;
-  priorities: TicketPriority[];
-  handleDetails: (id: number) => void;
+  isAdmin: boolean
+  ticket: Ticket
+  ticketStatuses: TicketStatusType[]
+  setSelected: SetSelected
+  open: Open
+  setOpen: SetOpen
+  isLoading: boolean
+  setIsLoading: React.Dispatch<React.SetStateAction<number | false>>
+  handleOpen: HandleOpen
+  setImage: React.Dispatch<React.SetStateAction<string | null>>
+  priorities: TicketPriority[]
+  handleDetails: (id: number) => void
 }
 function Row({
   ticket,
@@ -249,35 +248,35 @@ function Row({
   handleDetails,
   isAdmin,
 }: RowProps) {
-  const [copied, setCopied] = useState(false);
+  const [copied, setCopied] = useState(false)
 
   useEffect(() => {
-    if (!copied) return;
+    if (!copied) return
 
     const timer = setTimeout(() => {
-      setCopied(false);
-    }, 1200);
+      setCopied(false)
+    }, 1200)
 
-    return () => clearTimeout(timer);
-  }, [copied]);
+    return () => clearTimeout(timer)
+  }, [copied])
 
   async function handleCopy() {
-    await copyTextToClipboard(`${ticket.id}`);
-    setCopied(true);
+    await copyTextToClipboard(`${ticket.id}`)
+    setCopied(true)
   }
 
   return (
-    <TableRow className=" background-transition ">
+    <TableRow className="background-transition">
       <TableCell
         onClick={() => handleDetails(ticket.id)}
-        className="  font-semibold underline underline-offset-4 cursor-pointer"
+        className="cursor-pointer font-semibold underline underline-offset-4"
       >
-        <p className=" line-clamp-3"> {ticket.subject}</p>
+        <p className="line-clamp-3"> {ticket.subject}</p>
       </TableCell>
       <TableCell>{ticket.ticketCategory_id.name}</TableCell>
       <TableCell>
         <div
-          className="font-medium hover:cursor-copy flex items-center justify-start relative"
+          className="relative flex items-center justify-start font-medium hover:cursor-copy"
           onClick={handleCopy}
         >
           <AnimatePresence mode="wait">
@@ -288,12 +287,9 @@ function Row({
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.5, opacity: 0 }}
                 transition={{ duration: 0.2, type: "spring" }}
-                className=" pl-1"
+                className="pl-1"
               >
-                <Copy
-                  className=" w-[19px] h-[19px]
-                "
-                />
+                <Copy className="h-[19px] w-[19px]" />
               </motion.span>
             ) : (
               <motion.span
@@ -304,7 +300,7 @@ function Row({
                 transition={{ duration: 0.2, type: "spring" }}
               >
                 {" "}
-                <span className=" text-muted-foreground">#</span>
+                <span className="text-muted-foreground">#</span>
                 {ticket.id}
               </motion.span>
             )}
@@ -313,18 +309,18 @@ function Row({
       </TableCell>
       {isAdmin && (
         <TableCell>
-          <div className=" flex items-center  gap-2">
+          <div className="flex items-center gap-2">
             {ticket?.client?.picture && (
               <img
                 onClick={() => setImage(ticket?.client?.picture || null)}
                 src={ticket.client.picture}
                 alt="img"
-                className=" w-7  h-7 object-cover rounded-full hover:opacity-90 hover:contrast-75 transition-all"
+                className="h-7 w-7 rounded-full object-cover transition-all hover:opacity-90 hover:contrast-75"
               />
             )}
             <span
-              className={cn(" text-nowrap text-sm text-muted-foreground", {
-                "text-wrap ": ticket.client && ticket.client.name.length > 10,
+              className={cn("text-sm text-nowrap text-muted-foreground", {
+                "text-wrap": ticket.client && ticket.client.name.length > 10,
               })}
             >
               {ticket.client?.name}
@@ -340,16 +336,16 @@ function Row({
           <Priority priority={ticket.ticketPriority_id.name} />
         </TableCell>
       )}
-      <TableCell className=" text-nowrap">
+      <TableCell className="text-nowrap">
         {formatDate(ticket.created_at, "MMMM d, yyyy h:mm aa")}
       </TableCell>
-      <TableCell className={cn("text-nowrap", { " text-right": !isAdmin })}>
+      <TableCell className={cn("text-nowrap", { "text-right": !isAdmin })}>
         {formatDate(ticket.updated_at, "MMMM d, yyyy h:mm aa")}
       </TableCell>
       {isAdmin && (
         <TableCell>
           <div
-            className={`text-right flex items-center   gap-2 ${
+            className={`flex items-center gap-2 text-right ${
               !ticket.admin_assigned_to && "text-muted-foreground"
             }`}
           >
@@ -370,7 +366,7 @@ function Row({
         </TableCell>
       )}
     </TableRow>
-  );
+  )
 }
 
 function TableActions({
@@ -387,36 +383,36 @@ function TableActions({
   handleDetails,
   priorities,
 }: {
-  ticket: Ticket;
-  isClientPage?: boolean;
-  open: Open;
-  setOpen: SetOpen;
-  isAdmin?: boolean;
-  setSelected: SetSelected;
-  handleOpen: HandleOpen;
-  status: TicketStatusType[];
-  currPage?: string;
-  isLoading: boolean;
-  setIsLoading: React.Dispatch<React.SetStateAction<number | false>>;
-  currPageSize?: number;
-  handleDetails: (id: number) => void;
-  priorities: TicketPriority[];
+  ticket: Ticket
+  isClientPage?: boolean
+  open: Open
+  setOpen: SetOpen
+  isAdmin?: boolean
+  setSelected: SetSelected
+  handleOpen: HandleOpen
+  status: TicketStatusType[]
+  currPage?: string
+  isLoading: boolean
+  setIsLoading: React.Dispatch<React.SetStateAction<number | false>>
+  currPageSize?: number
+  handleDetails: (id: number) => void
+  priorities: TicketPriority[]
 }) {
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false)
 
-  const { toast } = useToast();
+  const { toast } = useToast()
   // const searchParam = useSearchParams();
   // const pathname = usePathname();
   // const router = useRouter();
   // const params = new URLSearchParams(searchParam);
 
   const handleChangePriority = async (id: number) => {
-    setIsLoading(ticket.id);
+    setIsLoading(ticket.id)
     try {
       await editTicketAction({
         ticketPriority_id: id,
         id: ticket.id,
-      });
+      })
 
       toast({
         className: "bg-primary  text-primary-foreground",
@@ -426,27 +422,27 @@ function TableActions({
             message={`Service priority has been uptated.'`}
           />
         ),
-      });
+      })
     } catch (error: any) {
       toast({
         variant: "destructive",
         title: "Faild to update the service priority.",
         description: <ErorrToastDescription error={error.message} />,
-      });
+      })
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   const handleChangeStatus = async (id: number) => {
-    setIsLoading(ticket.id);
+    setIsLoading(ticket.id)
     try {
       const { error } = await editTicketAction({
         id: ticket.id,
         ticketStatus_id: id,
-      });
+      })
 
-      if (error) throw new Error(error.message);
+      if (error) throw new Error(error.message)
       // handleClose();
       toast({
         className: "bg-primary  text-primary-foreground",
@@ -456,55 +452,55 @@ function TableActions({
             message={`Service status has been uptated.'`}
           />
         ),
-      });
+      })
     } catch (error: any) {
-      console.log(error);
+      console.log(error)
       toast({
         variant: "destructive",
         title: "Faild to update the service status.",
         description: <ErorrToastDescription error={error.message} />,
-      });
+      })
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   if (isLoading)
     return (
-      <Spinner className="  w-4 h-4 flex items-center  mr-1 justify-center  ml-auto" />
-    );
+      <Spinner className="mr-1 ml-auto flex h-4 w-4 items-center justify-center" />
+    )
 
   return (
-    <div onClick={(e) => e.stopPropagation()} className=" w-fit ml-auto ">
+    <div onClick={(e) => e.stopPropagation()} className="ml-auto w-fit">
       <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="icon" className="     p-0 h-6 w-6">
-            <Ellipsis className=" w-4 h-4" />
+          <Button variant="outline" size="icon" className="h-6 w-6 p-0">
+            <Ellipsis className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className=" min-w-[200px] mr-5 ">
+        <DropdownMenuContent className="mr-5 min-w-[200px]">
           {/* <DropdownMenuLabel>My Account</DropdownMenuLabel> */}
           {/* <DropdownMenuSeparator /> */}
           <DropdownMenuItem
-            className=" gap-2"
+            className="gap-2"
             onClick={(e) => {
-              e.stopPropagation();
-              handleOpen("edit", ticket.id);
+              e.stopPropagation()
+              handleOpen("edit", ticket.id)
             }}
           >
-            <TicketIcon className="w-4 h-4" />
+            <TicketIcon className="h-4 w-4" />
             Edit Ticket
           </DropdownMenuItem>
 
           <DropdownMenuItem
             disabled={!ticket.description}
-            className=" gap-2"
+            className="gap-2"
             onClick={(e) => {
-              e.stopPropagation();
-              handleOpen("description", ticket.id);
+              e.stopPropagation()
+              handleOpen("description", ticket.id)
             }}
           >
-            <TbFileDescription className=" w-4 h-4" /> View description
+            <TbFileDescription className="h-4 w-4" /> View description
           </DropdownMenuItem>
 
           <DropdownMenuSub
@@ -514,28 +510,28 @@ function TableActions({
           //   setOpen("delete");
           // }}
           >
-            <DropdownMenuSubTrigger className=" gap-2">
+            <DropdownMenuSubTrigger className="gap-2">
               {" "}
               <FaArrowUpWideShort /> Change priority
             </DropdownMenuSubTrigger>
 
             <DropdownMenuPortal>
-              <DropdownMenuSubContent className=" max-h-[170px] overflow-y-auto">
+              <DropdownMenuSubContent className="max-h-[170px] overflow-y-auto">
                 {priorities.length ? (
                   priorities.map((prio) => (
                     <DropdownMenuItem
                       key={prio.id}
-                      className=" gap-2 justify-between"
+                      className="justify-between gap-2"
                       onClick={async () => {
-                        if (ticket.ticketPriority_id.id === prio.id) return;
-                        await handleChangePriority(prio.id);
+                        if (ticket.ticketPriority_id.id === prio.id) return
+                        await handleChangePriority(prio.id)
                       }}
                     >
                       <Priority priority={prio.name} />
                     </DropdownMenuItem>
                   ))
                 ) : (
-                  <p className=" text-center text-sm text-muted-foreground">
+                  <p className="text-center text-sm text-muted-foreground">
                     No priorities.
                   </p>
                 )}
@@ -555,29 +551,29 @@ function TableActions({
             </DropdownMenuPortal>
           </DropdownMenuSub>
           <DropdownMenuSub>
-            <DropdownMenuSubTrigger className=" gap-2">
+            <DropdownMenuSubTrigger className="gap-2">
               {" "}
-              <Replace className=" w-4 h-4" /> Change status
+              <Replace className="h-4 w-4" /> Change status
             </DropdownMenuSubTrigger>
 
             <DropdownMenuPortal>
-              <DropdownMenuSubContent className=" max-h-[170px] overflow-y-auto">
+              <DropdownMenuSubContent className="max-h-[170px] overflow-y-auto">
                 {status.map((status, i) => (
                   <DropdownMenuItem
                     key={i}
-                    className=" gap-2 justify-between"
+                    className="justify-between gap-2"
                     onClick={async () => {
                       // setChosenStatus(status.id)
                       // if (status.id === service.serviceStatuses.id) return;
-                      await handleChangeStatus(status.id);
+                      await handleChangeStatus(status.id)
                     }}
                   >
                     <TicketStatus
                       ticketStatus={status}
-                      className=" py-[.1rem]"
+                      className="py-[.1rem]"
                     />
                     {ticket.ticketStatus_id.id === status.id && (
-                      <Check className=" w-3 h-3" />
+                      <Check className="h-3 w-3" />
                     )}
                   </DropdownMenuItem>
                 ))}
@@ -587,20 +583,20 @@ function TableActions({
           <DropdownMenuSeparator />
 
           <DropdownMenuItem
-            className=" gap-2  "
+            className="gap-2"
             onClick={() => handleDetails(ticket.id)}
           >
-            <MessagesSquare className=" w-4 h-4" />
+            <MessagesSquare className="h-4 w-4" />
             Address ticket
           </DropdownMenuItem>
           <DropdownMenuItem
-            className=" gap-2  !text-red-900  dark:!text-red-300 hover:!bg-destructive/70"
+            className="gap-2 !text-red-900 hover:!bg-destructive/70 dark:!text-red-300"
             onClick={(e) => {
-              e.stopPropagation();
-              handleOpen("delete", ticket.id);
+              e.stopPropagation()
+              handleOpen("delete", ticket.id)
             }}
           >
-            <Trash2 className=" w-4 h-4" />
+            <Trash2 className="h-4 w-4" />
             Delete Ticket
           </DropdownMenuItem>
         </DropdownMenuContent>
@@ -639,16 +635,16 @@ function TableActions({
         setIsDeleting={setIsLoading}
       /> */}
     </div>
-  );
+  )
 }
 
 interface DeleteProps {
-  open: boolean;
+  open: boolean
 
-  handleOpen: HandleOpen;
-  ticket?: Ticket;
-  isLoading: boolean;
-  setIsLoading: React.Dispatch<React.SetStateAction<number | false>>;
+  handleOpen: HandleOpen
+  ticket?: Ticket
+  isLoading: boolean
+  setIsLoading: React.Dispatch<React.SetStateAction<number | false>>
 }
 
 function DeleteDialog({
@@ -659,15 +655,15 @@ function DeleteDialog({
   setIsLoading,
   ticket,
 }: DeleteProps) {
-  const { toast } = useToast();
+  const { toast } = useToast()
 
   async function handelDelete() {
-    if (!ticket) return;
-    setIsLoading(ticket.id);
+    if (!ticket) return
+    setIsLoading(ticket.id)
     try {
-      await deleteTicketAction(ticket.id);
+      await deleteTicketAction(ticket.id)
 
-      handleOpen(null);
+      handleOpen(null)
       toast({
         className: "bg-primary  text-primary-foreground",
         title: `Data updated!.`,
@@ -676,15 +672,15 @@ function DeleteDialog({
             message={`Service status has been uptated.'`}
           />
         ),
-      });
+      })
     } catch (error: any) {
       toast({
         variant: "destructive",
         title: "Faild to update the service status.",
         description: <ErorrToastDescription error={error.message} />,
-      });
+      })
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
   }
 
@@ -698,7 +694,7 @@ function DeleteDialog({
             {ticket?.id}&apos;.
           </DialogDescription>
         </DialogHeader>
-        <DialogFooter className=" gap-y-2">
+        <DialogFooter className="gap-y-2">
           <Button variant="secondary" size="sm">
             Close
           </Button>
@@ -714,7 +710,7 @@ function DeleteDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  );
+  )
 }
 
-export default TicketTable;
+export default TicketTable

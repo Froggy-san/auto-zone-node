@@ -1,22 +1,22 @@
-import React, { useEffect } from "react";
-import CloseButton from "./close-button";
-import { Button } from "./ui/button";
-import { formatBytes } from "@lib/client-helpers";
-import { File, FileAudio } from "lucide-react";
-import { cn } from "@lib/utils";
-import { useAnimate, usePresence, motion } from "framer-motion";
+import React, { useEffect } from "react"
+import CloseButton from "./close-button"
+import { Button } from "./ui/button"
+import { formatBytes } from "@lib/client-helpers"
+import { File, FileAudio } from "lucide-react"
+import { cn } from "@lib/utils"
+import { useAnimate, usePresence, motion } from "framer-motion"
 
 interface Props {
   // file: FileWithPreview;
-  isUploaded?: boolean;
-  isSetToBeDeleted?: boolean;
-  fileUrl: string;
-  fileType: string;
-  fileName: string;
-  fileSize?: number;
-  handleRemove: () => void;
-  className?: string;
-  index: number;
+  isUploaded?: boolean
+  isSetToBeDeleted?: boolean
+  fileUrl: string
+  fileType: string
+  fileName: string
+  fileSize?: number
+  handleRemove: () => void
+  className?: string
+  index: number
 }
 
 export const AcceptedFile = React.forwardRef<HTMLDivElement, Props>(
@@ -34,8 +34,8 @@ export const AcceptedFile = React.forwardRef<HTMLDivElement, Props>(
     },
     ref
   ) => {
-    const [isPresent, safeToRemove] = usePresence();
-    const [scope, animate] = useAnimate();
+    const [isPresent, safeToRemove] = usePresence()
+    const [scope, animate] = useAnimate()
 
     useEffect(() => {
       if (!isPresent) {
@@ -45,7 +45,7 @@ export const AcceptedFile = React.forwardRef<HTMLDivElement, Props>(
 
             { scale: 1.025 },
             { ease: "easeIn", duration: 0.125 }
-          );
+          )
 
           await animate(
             scope.current,
@@ -56,24 +56,24 @@ export const AcceptedFile = React.forwardRef<HTMLDivElement, Props>(
             {
               delay: 0.75,
             }
-          );
-          safeToRemove();
-        };
+          )
+          safeToRemove()
+        }
 
-        exitAnimation();
+        exitAnimation()
       }
-    }, [isPresent]);
+    }, [isPresent])
     return (
       <motion.div
         layout
         ref={scope}
         className={cn(
-          "flex w-full max-w-full items-center gap-x-4 border-b py-2 first:mt-4   relative ",
+          "relative flex w-full max-w-full items-center gap-x-4 border-b py-2 first:mt-4",
           // last:mb-4
           className
         )}
       >
-        <div className="h-10 w-10 rounded border overflow-hidden shrink-0 bg-muted flex items-center justify-center">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded border bg-muted">
           {fileType?.startsWith("image/") ? (
             <img
               src={fileUrl}
@@ -82,7 +82,7 @@ export const AcceptedFile = React.forwardRef<HTMLDivElement, Props>(
               // onLoad={() => URL.revokeObjectURL(file.preview)}
             />
           ) : fileType?.startsWith("video/") || fileType.endsWith(".mp4") ? (
-            <video src={fileUrl} className="object-contian  h-full ">
+            <video src={fileUrl} className="object-contian h-full">
               <source
                 src={fileUrl}
                 type={fileType}
@@ -90,16 +90,16 @@ export const AcceptedFile = React.forwardRef<HTMLDivElement, Props>(
               />
             </video>
           ) : fileType?.startsWith("audio/") || fileType.endsWith(".mp3") ? (
-            <FileAudio className=" w-4 h-4" />
+            <FileAudio className="h-4 w-4" />
           ) : (
-            <File className=" w-4 h-4" />
+            <File className="h-4 w-4" />
           )}
         </div>
-        <div className=" flex flex-col items-start relative   ">
+        <div className="relative flex flex-col items-start">
           {" "}
           <p
             title={fileName}
-            className="text-sm w-full break-all max-w-full  line-clamp-1 "
+            className="line-clamp-1 w-full max-w-full text-sm break-all"
           >
             {fileName}
           </p>
@@ -116,20 +116,20 @@ export const AcceptedFile = React.forwardRef<HTMLDivElement, Props>(
           <Button
             onClick={handleRemove}
             variant="secondary"
-            className=" h-fit ml-auto py-1 px-2 text-xs"
+            className="ml-auto h-fit px-2 py-1 text-xs"
           >
             Undo
           </Button>
         ) : (
           <CloseButton
-            className=" static ml-auto"
+            className="static ml-auto"
             onClick={(e) => {
-              handleRemove();
+              handleRemove()
             }}
           />
         )}
       </motion.div>
-    );
+    )
   }
-);
-AcceptedFile.displayName = "AcceptedFile";
+)
+AcceptedFile.displayName = "AcceptedFile"

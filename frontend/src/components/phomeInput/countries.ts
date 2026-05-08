@@ -12965,4 +12965,4 @@ export const countries = [
     emoji: "🇿🇼",
     emojiU: "U+1F1FF U+1F1FC",
   },
-];
+]

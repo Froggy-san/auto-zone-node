@@ -1,4 +1,4 @@
-import { SUPABASE_URL } from "@lib/constants";
+import { SUPABASE_URL } from "@lib/constants"
 import {
   Attachment,
   Client,
@@ -15,51 +15,51 @@ import {
   User,
   TicketPriority,
   EditMessageProps,
-} from "@lib/types";
-import { PostgrestError } from "@supabase/supabase-js";
-import supabase from "@utils/supabase";
-import { z } from "zod";
-import { deleteImageFromBucket } from "./helper-services";
-import { revalidateTickets } from "@lib/actions/tickets-actions";
-import { getTicketStatuses } from "./ticket-statuses";
+} from "@lib/types"
+import { PostgrestError } from "@supabase/supabase-js"
+import supabase from "@utils/supabase"
+import { z } from "zod"
+import { deleteImageFromBucket } from "./helper-services"
+import { revalidateTickets } from "@lib/actions/tickets-actions"
+import { getTicketStatuses } from "./ticket-statuses"
 
 export async function getTickets(userId?: string): Promise<{
-  tickets: Ticket[] | null;
-  error: PostgrestError | null;
-  count: number | null;
-  status: number;
-  statusText: string;
+  tickets: Ticket[] | null
+  error: PostgrestError | null
+  count: number | null
+  status: number
+  statusText: string
 }> {
   let query = supabase
     .from("tickets")
     .select(
       "*,ticketPriority_id(*),ticketPriority_id(*),ticketCategory_id(*)",
       { count: "exact" }
-    );
+    )
 
-  if (userId) query = query.eq("user_id", userId);
+  if (userId) query = query.eq("user_id", userId)
 
-  const { data: tickets, error, status, statusText, count } = await query;
+  const { data: tickets, error, status, statusText, count } = await query
 
-  return { tickets, count, status, statusText, error };
+  return { tickets, count, status, statusText, error }
 }
 
 interface CreateProps extends CreateTicket {
-  user_id: string;
-  updated_at: string;
-  admin_assigned_to: string;
+  user_id: string
+  updated_at: string
+  admin_assigned_to: string
 }
 
 export async function createTicket(data: CreateProps) {
   const { data: createdTicket, error } = await supabase
     .from("tickets")
     .insert(data)
-    .select();
+    .select()
 
-  if (error) throw new Error(error.message);
+  if (error) throw new Error(error.message)
   if (!createdTicket || createdTicket.length === 0)
-    throw new Error("Could not create ticket");
-  console.log("Created Ticket:", createdTicket[0]);
+    throw new Error("Could not create ticket")
+  console.log("Created Ticket:", createdTicket[0])
   await logTicketActions([
     {
       ticket_id: createdTicket[0].id,
@@ -76,8 +76,8 @@ export async function createTicket(data: CreateProps) {
         ticket_cotent: data.description,
       },
     },
-  ]);
-  return createdTicket[0];
+  ])
+  return createdTicket[0]
 }
 
 type Reason =
@@ -92,27 +92,27 @@ type Reason =
   | "Awaiting client's response"
   | "Ticket has been successfully addressed"
   | "Ticket has been closed"
-  | "Client responeded, and awaiting admin's response";
+  | "Client responeded, and awaiting admin's response"
 
 interface EditProps {
-  id: number;
-  subject?: string;
-  description?: string;
-  client_id?: number;
-  updated_at?: string;
-  admin_assigned_to?: number | null;
-  ticketStatus_id?: number;
-  ticketPriority_id?: number;
-  ticketCategory_id?: number;
+  id: number
+  subject?: string
+  description?: string
+  client_id?: number
+  updated_at?: string
+  admin_assigned_to?: number | null
+  ticketStatus_id?: number
+  ticketPriority_id?: number
+  ticketCategory_id?: number
 }
 
 // Define a type for a single history entry to be generated
 interface LogEntry {
-  action: z.infer<typeof TicketHistoryAction>;
-  details: z.infer<typeof TicektHistoryDetials>;
+  action: z.infer<typeof TicketHistoryAction>
+  details: z.infer<typeof TicektHistoryDetials>
 }
 
-type ActionType = z.infer<typeof TicketHistoryAction>;
+type ActionType = z.infer<typeof TicketHistoryAction>
 // Assume the existing functions like getTicketStatuses, revalidateTickets, and types (EditProps, Ticket, User, TicketStatus, etc.) are available globally.
 function generateHistoryLogs(
   oldTicket: Ticket,
@@ -121,29 +121,29 @@ function generateHistoryLogs(
   ticketStatuses: TicketStatus[],
   TicketPriorities: TicketPriority[]
 ): LogEntry[] {
-  const logs: LogEntry[] = [];
-  const dateNow = new Date().toISOString();
-  const userRole = currentUser.user_metadata?.role?.toLowerCase() || "user";
+  const logs: LogEntry[] = []
+  const dateNow = new Date().toISOString()
+  const userRole = currentUser.user_metadata?.role?.toLowerCase() || "user"
 
   const previousStatus = ticketStatuses.find(
     (status) => status.id === oldTicket.ticketStatus_id.id
-  );
+  )
   const newStatus = ticketStatuses.find(
     (status) => status.id === newTicket.ticketStatus_id
-  );
+  )
 
   // --- A. Status Change Detection ---
   if (previousStatus && newStatus && previousStatus.id !== newStatus.id) {
-    let actionLabel: ActionType;
-    const newStatusName = newStatus.name.toLowerCase();
-    const oldStatusName = previousStatus.name.toLowerCase();
+    let actionLabel: ActionType
+    const newStatusName = newStatus.name.toLowerCase()
+    const oldStatusName = previousStatus.name.toLowerCase()
     switch (newStatusName) {
       case "solved":
-        actionLabel = "solved";
-        break;
+        actionLabel = "solved"
+        break
       case "closed":
-        actionLabel = "closed";
-        break;
+        actionLabel = "closed"
+        break
       // case "open":
       //   actionLabel = "reopened";
       //   break;
@@ -153,7 +153,7 @@ function generateHistoryLogs(
           oldStatusName === "closed" ||
           (oldStatusName === "solved" && newStatusName === "open")
             ? "reopened"
-            : "Status Changed";
+            : "Status Changed"
     }
 
     // PUSH LOG: Status Change
@@ -164,16 +164,16 @@ function generateHistoryLogs(
         old_status: { id: previousStatus.id, name: previousStatus.name },
         new_status: { id: newStatus.id, name: newStatus.name },
       },
-    });
+    })
   }
 
   // --- B. Admin Assignment/Reassignment Detection ---
-  const oldAdminId = oldTicket.admin_assigned_to?.id || null;
-  const newAdminId = newTicket.admin_assigned_to || null;
+  const oldAdminId = oldTicket.admin_assigned_to?.id || null
+  const newAdminId = newTicket.admin_assigned_to || null
 
   if (userRole === "admin" && oldAdminId !== newAdminId) {
     const actionLabel: ActionType =
-      oldAdminId === null ? "assigned" : "reassigned";
+      oldAdminId === null ? "assigned" : "reassigned"
 
     // PUSH LOG: Assignment Change
     logs.push({
@@ -183,7 +183,7 @@ function generateHistoryLogs(
         old_admin_id: oldAdminId,
         new_admin_id: newAdminId,
       },
-    });
+    })
   }
 
   // --- C. Priority/Category Change Detection (Add as needed) ---
@@ -196,10 +196,10 @@ function generateHistoryLogs(
   ) {
     const oldPrio = TicketPriorities.find(
       (p) => p.id === oldTicket.ticketPriority_id.id
-    );
+    )
     const newPrio = TicketPriorities.find(
       (p) => p.id === newTicket.ticketPriority_id
-    );
+    )
     logs.push({
       action: "Priority Changed",
       details: {
@@ -207,10 +207,10 @@ function generateHistoryLogs(
         old_priority: oldPrio,
         new_proiority: newPrio,
       },
-    });
+    })
   }
 
-  return logs;
+  return logs
 }
 
 export async function editTicket({
@@ -223,29 +223,29 @@ export async function editTicket({
   message,
   messageToEdit,
 }: {
-  newTicketData: EditProps;
-  oldTicketData: Ticket;
-  currentUser: User;
-  currentClient: Client;
-  ticketStatuses: TicketStatus[];
-  ticketPriorities: TicketPriority[];
-  message?: Message;
-  messageToEdit?: EditMessageProps;
+  newTicketData: EditProps
+  oldTicketData: Ticket
+  currentUser: User
+  currentClient: Client
+  ticketStatuses: TicketStatus[]
+  ticketPriorities: TicketPriority[]
+  message?: Message
+  messageToEdit?: EditMessageProps
 }) {
   try {
     // 1. Data Preparation: Fetch statuses if not provided (keeping the original logic for simplicity)
     // NOTE: In a production app, pass ticketStatuses in props to avoid this fetch.
 
     if (!ticketStatuses || !ticketStatuses.length)
-      throw new Error("Could not load ticket statuses data.");
+      throw new Error("Could not load ticket statuses data.")
 
-    const dateNow = new Date().toISOString();
-    let resolveTime = oldTicketData.resolveTime;
-    let firstResponseTime = oldTicketData.firstResponseTime;
-    const userRole = currentUser.user_metadata?.role?.toLowerCase() || "user";
+    const dateNow = new Date().toISOString()
+    let resolveTime = oldTicketData.resolveTime
+    let firstResponseTime = oldTicketData.firstResponseTime
+    const userRole = currentUser.user_metadata?.role?.toLowerCase() || "user"
     const newStatus = ticketStatuses.find(
       (s) => s.id === newTicketData.ticketStatus_id
-    );
+    )
 
     // 2. Pre-Update Calculations (Resolve Time & First Response Time)
 
@@ -255,12 +255,12 @@ export async function editTicket({
       newStatus?.name.toLowerCase() === "solved" &&
       !resolveTime
     ) {
-      resolveTime = dateNow;
+      resolveTime = dateNow
     }
 
     // Calculate First Response Time (Assuming any Admin action triggers this)
     if (userRole === "admin" && !firstResponseTime) {
-      firstResponseTime = dateNow;
+      firstResponseTime = dateNow
     }
 
     // 3. Generate History Logs (before the update)
@@ -270,14 +270,14 @@ export async function editTicket({
       currentUser,
       ticketStatuses,
       ticketPriorities
-    );
+    )
 
     // 4. Handle Message/Note Log (Independent Action)
     if (message && !messageToEdit) {
-      const isInternal = message.is_internal_note;
+      const isInternal = message.is_internal_note
       const reason = isInternal
         ? "Admin added internal note"
-        : ` ${userRole === "admin" ? "Admin" : "Cutomer"} added public message`;
+        : ` ${userRole === "admin" ? "Admin" : "Cutomer"} added public message`
       historyLogs.push({
         action: isInternal ? "Internal Note" : "message",
         details: {
@@ -286,16 +286,14 @@ export async function editTicket({
           content: message.content, // Includes the "reason" text
           attachment_count: message.attachments.length,
         },
-      });
+      })
     }
 
     if (message && messageToEdit) {
-      const isInternal = messageToEdit.editMessage.is_internal_note;
+      const isInternal = messageToEdit.editMessage.is_internal_note
       const reason = isInternal
         ? "Admin edited internal note"
-        : ` ${
-            userRole === "admin" ? "Admin" : "Cutomer"
-          } edited public message`;
+        : ` ${userRole === "admin" ? "Admin" : "Cutomer"} edited public message`
       historyLogs.push({
         action: isInternal ? "Internal Note Edited" : "message edited",
         details: {
@@ -312,7 +310,7 @@ export async function editTicket({
             messageToEdit.attachmentsToDelete?.length || 0,
           added_attachment_count: messageToEdit.newFiles?.length || 0,
         },
-      });
+      })
     }
 
     // 5. PRIMARY DATABASE UPDATE
@@ -324,16 +322,16 @@ export async function editTicket({
         resolveTime,
         firstResponseTime,
       })
-      .eq("id", newTicketData.id);
+      .eq("id", newTicketData.id)
 
     if (updateError) {
-      console.error(updateError.message);
-      throw new Error(updateError.message);
+      console.error(updateError.message)
+      throw new Error(updateError.message)
     }
 
     // 6. HISTORY LOGGING (Execute all collected logs)
-    const actorId = currentClient.id; // Use the current user's ID as the actor
-    const ticketId = newTicketData.id;
+    const actorId = currentClient.id // Use the current user's ID as the actor
+    const ticketId = newTicketData.id
 
     // Map the LogEntry objects into the full database object structure
     const finalLogsToInsert: TicketLogData[] = historyLogs.map((log) => ({
@@ -347,28 +345,28 @@ export async function editTicket({
         log.action.toLowerCase().includes("internal")
           ? message?.id
           : null,
-    }));
+    }))
 
     // Log all other state changes
     // Final step of editTicket:
     if (finalLogsToInsert.length > 0) {
-      await logTicketActions(finalLogsToInsert); // Single bulk insert
+      await logTicketActions(finalLogsToInsert) // Single bulk insert
     }
     // 7. FINAL STEP
-    await revalidateTickets();
+    await revalidateTickets()
   } catch (error: any) {
-    throw new Error(`Failed to edit ticket: ${error.message}`);
+    throw new Error(`Failed to edit ticket: ${error.message}`)
   }
 }
 
 // Define a type for the data structure required for a single log entry
 interface TicketLogData {
-  ticket_id: number;
-  actor_id: number; // Assuming actor_id is a string/UUID based on previous discussion
-  action: string;
-  details: object;
-  message_id?: number | null;
-  created_at?: string; // We'll set this automatically
+  ticket_id: number
+  actor_id: number // Assuming actor_id is a string/UUID based on previous discussion
+  action: string
+  details: object
+  message_id?: number | null
+  created_at?: string // We'll set this automatically
 }
 
 export async function logTicketActions(logs: TicketLogData[]) {
@@ -379,14 +377,14 @@ export async function logTicketActions(logs: TicketLogData[]) {
   // }));
 
   // Perform a single bulk insert
-  const { error } = await supabase.from("ticketHistory").insert(logs);
+  const { error } = await supabase.from("ticketHistory").insert(logs)
 
   if (error) {
     // IMPORTANT: Only log the critical error. Do not throw, as the main ticket update succeeded.
     console.error(
       "CRITICAL HISTORY ERROR: Failed to bulk log ticket history:",
       error
-    );
+    )
     // You might integrate with a monitoring tool like Sentry here.
   }
 }
@@ -422,9 +420,9 @@ export async function getTicketById(
       "*,admin_assigned_to(*),ticketStatus_id(*),ticketPriority_id(*),ticketCategory_id(*),client:client_id(*)"
     )
     .eq("id", id)
-    .single();
+    .single()
 
-  return { ticket, error };
+  return { ticket, error }
 }
 export async function getMessages(
   id: string
@@ -433,57 +431,57 @@ export async function getMessages(
     .from("messages")
     .select("*,attachments(*),client:client_id(*)")
     .eq("ticket_id", id)
-    .order("created_at", { ascending: true });
+    .order("created_at", { ascending: true })
 
-  return { messages, error };
+  return { messages, error }
 }
 
 export async function deleteTicket(id: number) {
-  const { error } = await supabase.from("tickets").delete().eq("id", id);
+  const { error } = await supabase.from("tickets").delete().eq("id", id)
 
-  if (error) throw new Error(error.message);
+  if (error) throw new Error(error.message)
 }
 type BucketPromiseType = Promise<
   | {
       data: {
-        id: string;
-        path: string;
-        fullPath: string;
-      };
-      error: null;
+        id: string
+        path: string
+        fullPath: string
+      }
+      error: null
     }
   | {
-      data: null;
+      data: null
       error: {
-        message: string;
-        statusCode?: number | null;
-        error?: string | null;
-        details?: any | null;
-      };
+        message: string
+        statusCode?: number | null
+        error?: string | null
+        details?: any | null
+      }
     }
->;
+>
 
 interface Create {
-  data: z.infer<typeof MessageSchema>;
-  files: FileWithPreview[];
-  client: Client;
+  data: z.infer<typeof MessageSchema>
+  files: FileWithPreview[]
+  client: Client
 }
 
 async function uploadFiles(message: Message, files: FileWithPreview[]) {
-  const bucketPromises: BucketPromiseType[] = [];
-  const attachmentsData: Omit<CreateAttachment, "file">[] = [];
+  const bucketPromises: BucketPromiseType[] = []
+  const attachmentsData: Omit<CreateAttachment, "file">[] = []
 
   // 1. Extract the data needed from teh attachments data.
   files.forEach((file) => {
-    const file_name = file.name;
-    const file_type = file.type;
+    const file_name = file.name
+    const file_type = file.type
 
     // Make sure that no file has the same name in the bucket.
     const nameInBucket = `${crypto.randomUUID()}-${file.name}`.replace(
       /\//g,
       ""
-    );
-    const file_url = `${SUPABASE_URL}/storage/v1/object/public/attachments/${nameInBucket}`;
+    )
+    const file_url = `${SUPABASE_URL}/storage/v1/object/public/attachments/${nameInBucket}`
 
     // Push all the file data for the attachment bucket.
     bucketPromises.push(
@@ -491,7 +489,7 @@ async function uploadFiles(message: Message, files: FileWithPreview[]) {
         cacheControl: "3600",
         upsert: false, // Prevent overwriting if UUID collision somehow happens
       })
-    );
+    )
 
     // Push the data needed for the attachments table.
     attachmentsData.push({
@@ -502,34 +500,34 @@ async function uploadFiles(message: Message, files: FileWithPreview[]) {
       file_type,
       client_id: message.client_id,
       uploaded_by: message.senderId,
-    });
-  });
+    })
+  })
 
   // 2. Upload all files to the bucket.
 
-  const results = await Promise.allSettled(bucketPromises);
+  const results = await Promise.allSettled(bucketPromises)
 
   // 3.  Make sure that there were no errors while uploading the files to the backend.
   results.forEach((result, index) => {
     if (result.status === "rejected") {
-      console.error(`File upload at index ${index} failed:`, result.reason);
+      console.error(`File upload at index ${index} failed:`, result.reason)
     } else {
       // result.status is 'fulfilled'
       console.log(
         `File at index ${index} uploaded successfully:`,
         result.value.data
-      );
+      )
     }
-  });
+  })
 
   // 4. Upload all attachment data for each file to attachment Table.
   const { data: returnedAttchments, error: attachmentsError } = await supabase
     .from("attachments")
     .insert(attachmentsData)
-    .select();
+    .select()
 
   // 5. If an error occurred while uploading the attachment data throw an error.
-  if (attachmentsError) throw new Error(attachmentsError.message);
+  if (attachmentsError) throw new Error(attachmentsError.message)
   // attachments = returnedAttchments;
 }
 
@@ -633,36 +631,35 @@ export async function createMessage({
   const { data: message, error } = await supabase
     .from("messages")
     .insert([data])
-    .select();
+    .select()
 
-  if (error) throw new Error(error.message);
+  if (error) throw new Error(error.message)
 
-  if (!message)
-    throw new Error("Something went wrong while creating a message");
+  if (!message) throw new Error("Something went wrong while creating a message")
 
-  const senderId = message[0].senderId;
-  const message_id = message[0].id;
-  const ticket_id = data.ticket_id;
-  const client_id = data.client_id;
+  const senderId = message[0].senderId
+  const message_id = message[0].id
+  const ticket_id = data.ticket_id
+  const client_id = data.client_id
 
-  let attachments: Attachment[] = [];
+  let attachments: Attachment[] = []
 
   // https://umkyoinqpknmedkowqva.supabase.co/storage/v1/object/public/attachments/G4OrcuxWsAA8iDj.jpeg
   if (files.length) {
-    const bucketPromises: BucketPromiseType[] = [];
-    const attachmentsData: Omit<CreateAttachment, "file">[] = [];
+    const bucketPromises: BucketPromiseType[] = []
+    const attachmentsData: Omit<CreateAttachment, "file">[] = []
 
     // 1. Extract the data needed from teh attachments data.
     files.forEach((file) => {
-      const file_name = file.name;
-      const file_type = file.type;
+      const file_name = file.name
+      const file_type = file.type
 
       // Make sure that no file has the same name in the bucket.
       const nameInBucket = `${crypto.randomUUID()}-${file.name}`.replace(
         /\//g,
         ""
-      );
-      const file_url = `${SUPABASE_URL}/storage/v1/object/public/attachments/${nameInBucket}`;
+      )
+      const file_url = `${SUPABASE_URL}/storage/v1/object/public/attachments/${nameInBucket}`
 
       // Push all the file data for the attachment bucket.
       bucketPromises.push(
@@ -670,7 +667,7 @@ export async function createMessage({
           cacheControl: "3600",
           upsert: false, // Prevent overwriting if UUID collision somehow happens
         })
-      );
+      )
 
       // Push the data needed for the attachments table.
       attachmentsData.push({
@@ -681,38 +678,38 @@ export async function createMessage({
         file_type,
         client_id,
         uploaded_by: senderId,
-      });
-    });
+      })
+    })
 
     // 2. Upload all files to the bucket.
 
-    const results = await Promise.allSettled(bucketPromises);
+    const results = await Promise.allSettled(bucketPromises)
 
     // 3.  Make sure that there were no errors while uploading the files to the backend.
     results.forEach((result, index) => {
       if (result.status === "rejected") {
-        console.error(`File upload at index ${index} failed:`, result.reason);
+        console.error(`File upload at index ${index} failed:`, result.reason)
       } else {
         // result.status is 'fulfilled'
         console.log(
           `File at index ${index} uploaded successfully:`,
           result.value.data
-        );
+        )
       }
-    });
+    })
 
     // 4. Upload all attachment data for each file to attachment Table.
     const { data: returnedAttchments, error: attachmentsError } = await supabase
       .from("attachments")
       .insert(attachmentsData)
-      .select();
+      .select()
 
     // 5. If an error occurred while uploading the attachment data throw an error.
-    if (attachmentsError) throw new Error(attachmentsError.message);
-    attachments = returnedAttchments;
+    if (attachmentsError) throw new Error(attachmentsError.message)
+    attachments = returnedAttchments
   }
 
-  return { ...message[0], client, attachments };
+  return { ...message[0], client, attachments }
 }
 
 export async function editMessages({
@@ -724,38 +721,38 @@ export async function editMessages({
     .from("messages")
     .update({ ...editMessage })
     .eq("id", editMessage.id)
-    .select();
+    .select()
 
   if (error) {
-    throw new Error(error.message);
+    throw new Error(error.message)
   }
-  if (!message) throw new Error("Something went wrong while editing message.");
+  if (!message) throw new Error("Something went wrong while editing message.")
 
   if (newFiles?.length) {
-    await uploadFiles(message[0], newFiles);
+    await uploadFiles(message[0], newFiles)
   }
 
   if (attachmentsToDelete?.length) {
-    const imageUrl: string[] = [];
-    const attachmentIds: number[] = [];
+    const imageUrl: string[] = []
+    const attachmentIds: number[] = []
 
     attachmentsToDelete.forEach((attachment) => {
-      imageUrl.push(attachment.file_url);
-      attachmentIds.push(attachment.id);
-    });
+      imageUrl.push(attachment.file_url)
+      attachmentIds.push(attachment.id)
+    })
 
     const { error: bucketError } = await deleteImageFromBucket({
       bucketName: "attachments",
       imagePaths: imageUrl,
-    });
+    })
 
-    if (bucketError) throw new Error(bucketError.message);
+    if (bucketError) throw new Error(bucketError.message)
 
     const { error } = await supabase
       .from("attachments")
       .delete()
-      .in("id", attachmentIds);
-    if (error) throw new Error(error.message);
+      .in("id", attachmentIds)
+    if (error) throw new Error(error.message)
   }
 
   // await logTicketActions([
@@ -777,39 +774,39 @@ export async function editMessages({
 
 export async function deleteMessage(message: Message) {
   if (message.attachments.length) {
-    const imagePaths: string[] = [];
-    const attachmentIds: number[] = [];
+    const imagePaths: string[] = []
+    const attachmentIds: number[] = []
     message.attachments.forEach((attachment) => {
-      imagePaths.push(attachment.file_url);
-      attachmentIds.push(attachment.id);
-    });
+      imagePaths.push(attachment.file_url)
+      attachmentIds.push(attachment.id)
+    })
 
     const { error: bucketError } = await deleteImageFromBucket({
       imagePaths,
       bucketName: "attachments",
-    });
+    })
 
-    if (bucketError) throw new Error(bucketError.message);
+    if (bucketError) throw new Error(bucketError.message)
 
     const { error } = await supabase
       .from("attachments")
       .delete()
-      .in("id", attachmentIds);
+      .in("id", attachmentIds)
 
     if (error) {
-      console.log(error.message);
-      throw new Error(error.message);
+      console.log(error.message)
+      throw new Error(error.message)
     }
   }
 
   const { error } = await supabase
     .from("messages")
     .delete()
-    .eq("id", message.id);
+    .eq("id", message.id)
 
   if (error) {
-    console.log(error.message);
-    throw new Error(error.message);
+    console.log(error.message)
+    throw new Error(error.message)
   }
 
   await logTicketActions([
@@ -825,22 +822,22 @@ export async function deleteMessage(message: Message) {
         message_id: `#${message.id}`,
       },
     },
-  ]);
+  ])
 }
 
 export async function deleteAttachment(attachment: Attachment) {
   const { error: bucketError } = await deleteImageFromBucket({
     bucketName: "attachments",
     imagePaths: [attachment.file_url],
-  });
-  if (bucketError) throw new Error(bucketError.message);
+  })
+  if (bucketError) throw new Error(bucketError.message)
 
   const { error } = await supabase
     .from("attachments")
     .delete()
-    .eq("id", attachment.id);
+    .eq("id", attachment.id)
 
-  if (error) throw new Error(error.message);
+  if (error) throw new Error(error.message)
 }
 
 /// ---------------------------------------------------------------  old edit ticket function.

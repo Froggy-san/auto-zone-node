@@ -1,11 +1,11 @@
 import {
   GetInfiniteOrderAction,
   getInfiniteOrdersAction,
-} from "@lib/actions/orderActions";
-import { useInfiniteQuery } from "@tanstack/react-query";
+} from "@lib/actions/orderActions"
+import { useInfiniteQuery } from "@tanstack/react-query"
 
 export default function useInfiniteOrders(
-  filters: Omit<GetInfiniteOrderAction, "pageParam">,
+  filters: Omit<GetInfiniteOrderAction, "pageParam">
 ) {
   // Ensure we return the result of the hook!
   return useInfiniteQuery({
@@ -16,12 +16,12 @@ export default function useInfiniteOrders(
       const result = await getInfiniteOrdersAction({
         pageParam: pageParam as number,
         ...filters,
-      });
+      })
 
-      if (result.error) throw new Error(result.error);
+      if (result.error) throw new Error(result.error)
 
-      return result;
+      return result
     },
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
-  });
+  })
 }

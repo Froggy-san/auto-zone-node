@@ -1,7 +1,7 @@
-import SubmitButton from "@components/submit-button";
+import SubmitButton from "@components/submit-button"
 import SuccessToastDescription, {
   ErorrToastDescription,
-} from "@components/toast-items";
+} from "@components/toast-items"
 import {
   Dialog,
   DialogClose,
@@ -11,7 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from "@/components/ui/dialog"
 import {
   Form,
   FormControl,
@@ -20,21 +20,21 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
+} from "@/components/ui/form"
 
-import { Input } from "@components/ui/input";
-import { zodResolver } from "@hookform/resolvers/zod";
-import useObjectCompare from "@hooks/use-compare-objs";
-import { useToast } from "@hooks/use-toast";
-import { Category, CategoryProps, CategorySchema } from "@lib/types";
+import { Input } from "@components/ui/input"
+import { zodResolver } from "@hookform/resolvers/zod"
+import useObjectCompare from "@hooks/use-compare-objs"
+import { useToast } from "@hooks/use-toast"
+import { Category, CategoryProps, CategorySchema } from "@lib/types"
 
-import React, { useCallback, useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { Button } from "@components/ui/button";
-import { FileUploader } from "@components/file-uploader";
-import Spinner from "@components/Spinner";
-import { createCategory, editCategory } from "@lib/services/categories";
+import React, { useCallback, useEffect, useState } from "react"
+import { useForm } from "react-hook-form"
+import { z } from "zod"
+import { Button } from "@components/ui/button"
+import { FileUploader } from "@components/file-uploader"
+import Spinner from "@components/Spinner"
+import { createCategory, editCategory } from "@lib/services/categories"
 
 const CategroyForm = ({
   categoryToEdit,
@@ -42,41 +42,41 @@ const CategroyForm = ({
   open,
   setOpen,
 }: {
-  categoryToEdit?: CategoryProps;
-  showBtn?: boolean;
-  open?: boolean;
-  setOpen?: React.Dispatch<React.SetStateAction<boolean>>;
+  categoryToEdit?: CategoryProps
+  showBtn?: boolean
+  open?: boolean
+  setOpen?: React.Dispatch<React.SetStateAction<boolean>>
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false)
 
-  const diaOpen = open !== undefined ? open : isOpen;
-  const { toast } = useToast();
+  const diaOpen = open !== undefined ? open : isOpen
+  const { toast } = useToast()
 
   const defaultValues = {
     name: categoryToEdit?.name || "",
     image: [],
-  };
+  }
   const form = useForm<z.infer<typeof CategorySchema>>({
     resolver: zodResolver(CategorySchema),
     defaultValues,
-  });
+  })
 
-  const isEqual = useObjectCompare(form.getValues(), defaultValues);
-  const isLoading = form.formState.isSubmitting;
-  const disabled = isEqual || isLoading;
+  const isEqual = useObjectCompare(form.getValues(), defaultValues)
+  const isLoading = form.formState.isSubmitting
+  const disabled = isEqual || isLoading
 
   const handleOpenChange = useCallback(() => {
-    setIsOpen((open) => !open);
-    setOpen?.((open) => !open);
-  }, [setIsOpen, setOpen]);
+    setIsOpen((open) => !open)
+    setOpen?.((open) => !open)
+  }, [setIsOpen, setOpen])
 
   useEffect(() => {
-    form.reset(defaultValues);
+    form.reset(defaultValues)
     return () => {
-      const body = document.querySelector("body");
-      if (body) body.style.pointerEvents = "auto";
-    };
-  }, [diaOpen, form]);
+      const body = document.querySelector("body")
+      if (body) body.style.pointerEvents = "auto"
+    }
+  }, [diaOpen, form])
 
   async function onSubmit(category: Category) {
     try {
@@ -86,24 +86,24 @@ const CategroyForm = ({
           ...category,
           imageToDelete: categoryToEdit.image || "",
           id: categoryToEdit.id,
-        });
+        })
       } else {
-        await createCategory(category);
+        await createCategory(category)
       }
-      handleOpenChange();
+      handleOpenChange()
       toast({
         className: "bg-primary  text-primary-foreground",
         title: "Done.",
         description: (
           <SuccessToastDescription message="A new category has been created." />
         ),
-      });
+      })
     } catch (error: any) {
       toast({
         variant: "destructive",
         title: "Something went wrong.",
         description: <ErorrToastDescription error={error.message} />,
-      });
+      })
     }
   }
   return (
@@ -112,16 +112,16 @@ const CategroyForm = ({
         <Button
           size="sm"
           onClick={() => {
-            setIsOpen(true);
-            setOpen?.(true);
+            setIsOpen(true)
+            setOpen?.(true)
           }}
-          className=" w-full break-all text-left"
+          className="w-full text-left break-all"
         >
           {categoryToEdit ? "Edit Category" : "Create Categroy"}
         </Button>
       )}
 
-      <DialogContent className=" max-h-[76vh]  overflow-y-auto max-w-[450px]">
+      <DialogContent className="max-h-[76vh] max-w-[450px] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             {categoryToEdit ? "Edit car Generation" : `Add a new generation`}
@@ -133,13 +133,13 @@ const CategroyForm = ({
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 ">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
               disabled={isLoading}
               control={form.control}
               name="name"
               render={({ field }) => (
-                <FormItem className=" w-full mb-auto">
+                <FormItem className="mb-auto w-full">
                   <FormLabel>Name</FormLabel>
                   <FormControl>
                     <Input disabled={isLoading} placeholder="name" {...field} />
@@ -173,17 +173,17 @@ const CategroyForm = ({
               )}
             />
 
-            <div className=" flex flex-col-reverse sm:flex-row items-center justify-end  gap-3">
+            <div className="flex flex-col-reverse items-center justify-end gap-3 sm:flex-row">
               <Button
                 onClick={() => {
-                  setOpen?.(false);
-                  setIsOpen(false);
+                  setOpen?.(false)
+                  setIsOpen(false)
                 }}
                 disabled={isLoading}
                 type="reset"
                 variant="secondary"
                 size="sm"
-                className=" w-full sm:w-[unset]"
+                className="w-full sm:w-[unset]"
               >
                 Cancel
               </Button>
@@ -191,10 +191,10 @@ const CategroyForm = ({
                 type="submit"
                 size="sm"
                 disabled={isLoading || isEqual}
-                className=" w-full sm:w-[unset]"
+                className="w-full sm:w-[unset]"
               >
                 {isLoading ? (
-                  <Spinner className=" h-full" />
+                  <Spinner className="h-full" />
                 ) : categoryToEdit ? (
                   "Update"
                 ) : (
@@ -206,7 +206,7 @@ const CategroyForm = ({
         </Form>
       </DialogContent>
     </Dialog>
-  );
-};
+  )
+}
 
-export default CategroyForm;
+export default CategroyForm

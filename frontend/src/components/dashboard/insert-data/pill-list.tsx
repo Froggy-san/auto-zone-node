@@ -1,46 +1,45 @@
-
-import { ProductType } from "@lib/types";
-import React, { useCallback, useState } from "react";
+import { ProductType } from "@lib/types"
+import React, { useCallback, useState } from "react"
 
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@components/ui/accordion";
-import { Button } from "@components/ui/button";
-import { MoveLeft, MoveRight } from "lucide-react";
-import useLocalPagination from "@hooks/use-local-pagination";
-import PillITem from "./PillItem";
-import ErrorMessage from "@components/error-message";
-type ItemType = "category" | "productType" | "productBrand";
+} from "@components/ui/accordion"
+import { Button } from "@components/ui/button"
+import { MoveLeft, MoveRight } from "lucide-react"
+import useLocalPagination from "@hooks/use-local-pagination"
+import PillITem from "./PillItem"
+import ErrorMessage from "@components/error-message"
+type ItemType = "category" | "productType" | "productBrand"
 const PillList = ({
   itemType,
   items,
 }: {
-  itemType: ItemType;
-  items: ProductType[];
+  itemType: ItemType
+  items: ProductType[]
 }) => {
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(1)
 
   const { result, totalPages } = useLocalPagination({
     currPage: page,
     pageSize: 32,
     arr: items,
-  });
+  })
 
   const handleResetPage = useCallback(() => {
     if (result.length === 1 && page > 1) {
-      setPage((page) => page - 1);
+      setPage((page) => page - 1)
     }
-  }, [result.length, setPage]);
+  }, [result.length, setPage])
 
   if (!items.length)
     return (
-      <ErrorMessage className=" !my-10  ">
+      <ErrorMessage className="!my-10">
         No product types were found.
       </ErrorMessage>
-    );
+    )
   return (
     <Accordion
       key={items.length}
@@ -48,10 +47,10 @@ const PillList = ({
       collapsible
       defaultValue="item-1"
     >
-      <AccordionItem value="item-1" className=" border-none">
+      <AccordionItem value="item-1" className="border-none">
         <AccordionTrigger>
           {" "}
-          <h3 className=" tracking-wider font-semibold text-2xl">
+          <h3 className="text-2xl font-semibold tracking-wider">
             {itemType === "category" && "Category"}
             {itemType === "productType" && "Product Types"}
             {itemType === "productBrand" && "Product Brands"}
@@ -59,7 +58,7 @@ const PillList = ({
         </AccordionTrigger>
 
         <AccordionContent>
-          <ul className=" flex gap-2  max-h-[50Vh] overflow-y-auto  flex-wrap">
+          <ul className="flex max-h-[50Vh] flex-wrap gap-2 overflow-y-auto">
             {result.map((item) => (
               <PillITem
                 itemType={itemType}
@@ -69,11 +68,11 @@ const PillList = ({
               />
             ))}
           </ul>
-          <div className=" flex  my-4 justify-end gap-3">
+          <div className="my-4 flex justify-end gap-3">
             <Button
               onClick={() => {
-                if (page === 1) return;
-                setPage((page) => page - 1);
+                if (page === 1) return
+                setPage((page) => page - 1)
               }}
               size="icon"
               variant="secondary"
@@ -83,9 +82,9 @@ const PillList = ({
             </Button>
             <Button
               onClick={() => {
-                if (page === totalPages) return;
+                if (page === totalPages) return
 
-                setPage((page) => page + 1);
+                setPage((page) => page + 1)
               }}
               variant="secondary"
               size="icon"
@@ -97,7 +96,7 @@ const PillList = ({
         </AccordionContent>
       </AccordionItem>
     </Accordion>
-  );
-};
+  )
+}
 
-export default PillList;
+export default PillList

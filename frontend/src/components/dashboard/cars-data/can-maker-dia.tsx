@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState } from "react"
 import {
   Dialog,
   DialogClose,
@@ -8,45 +8,45 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from "@/components/ui/dialog"
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/components/ui/accordion";
-import { CarMakersData, CarModelProps } from "@lib/types";
-import { Button } from "@components/ui/button";
-import { MoveLeft } from "lucide-react";
-import ModelItem from "./model-item";
-import GenerationItem from "./generation-item";
-import CarModelForm from "@components/car-model-form";
-import { AnimatePresence, motion } from "framer-motion";
-import ModelsList from "./models-list";
-import GenerationsList from "./generations-list";
+} from "@/components/ui/accordion"
+import { CarMakersData, CarModelProps } from "@lib/types"
+import { Button } from "@components/ui/button"
+import { MoveLeft } from "lucide-react"
+import ModelItem from "./model-item"
+import GenerationItem from "./generation-item"
+import CarModelForm from "@components/car-model-form"
+import { AnimatePresence, motion } from "framer-motion"
+import ModelsList from "./models-list"
+import GenerationsList from "./generations-list"
 interface Props {
-  carMaker: CarMakersData | null;
+  carMaker: CarMakersData | null
 
-  setCarMakerId: React.Dispatch<React.SetStateAction<number | null>>;
+  setCarMakerId: React.Dispatch<React.SetStateAction<number | null>>
 }
 const CarMakerDia = ({ carMaker, setCarMakerId }: Props) => {
-  const [model, setModel] = useState<CarModelProps | null>(null);
+  const [model, setModel] = useState<CarModelProps | null>(null)
   const [modelToEdit, setModelToEdit] = useState<CarModelProps | undefined>(
     undefined
-  );
-  const [modelOpen, setModelOpen] = useState(false);
+  )
+  const [modelOpen, setModelOpen] = useState(false)
   // const chosenModel = carMaker?.carModels.find((model) => model.id === modelId);
   const generaitons = useMemo(() => {
-    return carMaker?.carModels.flatMap((item) => item.carGenerations) || [];
+    return carMaker?.carModels.flatMap((item) => item.carGenerations) || []
     // flatMap(carMaker.carModels.map((item) => item.carGenerations));
-  }, [carMaker]);
+  }, [carMaker])
 
   return (
     <>
       <Dialog open={!!carMaker} onOpenChange={() => setCarMakerId(null)}>
-        <DialogContent className="  sm:p-14 max-h-[65vh]  sm:max-h-[76vh] overflow-y-auto  rounded-none sm:rounded-none  lg:rounded-lg space-y-4  max-w-[1000px]">
+        <DialogContent className="max-h-[65vh] max-w-[1000px] space-y-4 overflow-y-auto rounded-none sm:max-h-[76vh] sm:rounded-none sm:p-14 lg:rounded-lg">
           <DialogHeader>
-            <DialogTitle className=" flex items-center gap-3 bg-card rounded-lg p-2 ">
+            <DialogTitle className="flex items-center gap-3 rounded-lg bg-card p-2">
               <AnimatePresence mode="wait">
                 {carMaker?.logo ? (
                   <motion.img
@@ -57,7 +57,7 @@ const CarMakerDia = ({ carMaker, setCarMakerId }: Props) => {
                     key="image"
                     src={carMaker.logo}
                     alt={`${carMaker.name} logo`}
-                    className=" w-14 h-14 object-contain"
+                    className="h-14 w-14 object-contain"
                   />
                 ) : null}
               </AnimatePresence>
@@ -83,17 +83,17 @@ const CarMakerDia = ({ carMaker, setCarMakerId }: Props) => {
               setModelToEdit={setModelToEdit}
             />
             <GenerationsList generations={generaitons} carMaker={carMaker} />
-            <div className="flex  flex-col  gap-y-2 xs:flex-row xs:items-center justify-between rounded-lg border p-3 shadow-sm gap-x-7">
-              <div className="space-y-0.5   ">
-                <label className=" font-semibold">Add car models</label>
-                <p className=" text-muted-foreground text-sm">
+            <div className="flex flex-col justify-between gap-x-7 gap-y-2 rounded-lg border p-3 shadow-sm xs:flex-row xs:items-center">
+              <div className="space-y-0.5">
+                <label className="font-semibold">Add car models</label>
+                <p className="text-sm text-muted-foreground">
                   Add a new car model to {carMaker?.name}&apos;s list.
                 </p>
               </div>
-              <div className="  sm:pr-2">
+              <div className="sm:pr-2">
                 <Button
                   size="sm"
-                  className=" w-full"
+                  className="w-full"
                   onClick={() => setModelOpen(true)}
                 >
                   Create car model
@@ -108,15 +108,15 @@ const CarMakerDia = ({ carMaker, setCarMakerId }: Props) => {
         <CarModelForm
           open={!!modelToEdit || modelOpen}
           setOpen={() => {
-            setModelToEdit(undefined);
-            setModelOpen(false);
+            setModelToEdit(undefined)
+            setModelOpen(false)
           }}
           modelToEdit={modelToEdit}
           carMaker={carMaker}
         />
       )}
     </>
-  );
-};
+  )
+}
 
-export default CarMakerDia;
+export default CarMakerDia

@@ -141,7 +141,7 @@ function StepTwo({
           size="sm"
           type="button"
           onClick={() => {
-            append({  
+            append({
               title: "",
               description: "",
               table: [],

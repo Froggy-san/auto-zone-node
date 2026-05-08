@@ -1,39 +1,35 @@
-import React from "react";
+import React from "react"
 
-import GarageFilter from "./garage-fiter";
-import {
-  CarGenerationProps,
-  CarMaker,
-  CarMakersData,
-  CarModelProps,
-  ClientWithPhoneNumbers,
-} from "@lib/types";
+import GarageFilter from "./garage-fiter"
+import type { CarMaker, User } from "@/types"
+import useCars from "@/features/cars/useCars"
 
 interface CarsListProps {
-  color: string;
-  plateNumber: string;
-  chassisNumber: string;
-  motorNumber: string;
-  clientId: string;
-  carGenerationId: string;
+  color: string
+  plateNumber: string
+  chassisNumber: string
+  motorNumber: string
+  clientId: string
+  carGenerationId: string
   // carGenerations: CarGenerationProps[] | null;
-  clients: ClientWithPhoneNumbers[];
-  carMakers: CarMakersData[];
+  // clients: User[]
+  // carMakers: CarMaker[]
   // carModels: CarModelProps[];
-  pageNumber: string;
-  count: number;
-  carMakerId: string;
-  carModelId: string;
+  pageNumber: string
+
+  carMakerId: string
+  carModelId: string
 }
-const GarageFilterbar: React.FC<CarsListProps> = async ({
-  clients,
+const GarageFilterbar: React.FC<CarsListProps> = ({
+  // clients,
   ...props
 }) => {
+  const { data } = useCars()
   return (
-    <aside className={`sm:w-[210px] 3xl:w-[300px]    sm:border-t sm:border-r `}>
-      <GarageFilter clients={clients} {...props} />
+    <aside className={`sm:w-[210px] sm:border-t sm:border-r 3xl:w-[300px]`}>
+      <GarageFilter count={data?.pagination.totalCount || 0} {...props} />
     </aside>
-  );
-};
+  )
+}
 
-export default GarageFilterbar;
+export default GarageFilterbar

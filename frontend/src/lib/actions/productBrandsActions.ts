@@ -1,10 +1,10 @@
-"use server";
+"use server"
 
-import { getToken } from "@lib/helper";
-import { revalidateTag } from "next/cache";
+import { getToken } from "@lib/helper"
+import { revalidateTag } from "next/cache"
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 export async function getAllProductBrandsAction() {
   // const token = getToken();
 
@@ -20,22 +20,22 @@ export async function getAllProductBrandsAction() {
       next: {
         tags: ["productBrands"],
       },
-    });
+    })
 
     if (!response.ok) {
       const error =
         (await response.json()).message ||
-        "Something went wrong while grabbing the product brands.";
+        "Something went wrong while grabbing the product brands."
 
-      throw new Error(`Faield to get the product brands data: ${error}`);
+      throw new Error(`Faield to get the product brands data: ${error}`)
     }
 
-    const data = await response.json();
+    const data = await response.json()
 
-    return { data, error: "" };
+    return { data, error: "" }
   } catch (error: any) {
-    console.log(`Error in getAllProductBrandsAction: ${error.message}`);
-    return { data: null, error: error.message };
+    console.log(`Error in getAllProductBrandsAction: ${error.message}`)
+    return { data: null, error: error.message }
   }
 }
 
@@ -49,29 +49,29 @@ export async function createProductBrandAction(productBrand: string) {
       Prefer: "return=minimal",
     },
     body: JSON.stringify({ name: productBrand }),
-  });
+  })
   if (!response.ok) {
     const error =
       (await response.json()).message ||
-      "Something went wrong while creating the a new product type.";
+      "Something went wrong while creating the a new product type."
 
     return {
       data: null,
       error,
-    };
+    }
   }
   // revalidatePath("/dashboard/insert-data");
-  revalidateTag("productBrands");
+  revalidateTag("productBrands")
   // const data = await response.json();
-  return { data: null, error: "" };
+  return { data: null, error: "" }
 }
 
 export async function editProductBrandAction({
   productBrand,
   id,
 }: {
-  productBrand: string;
-  id: number;
+  productBrand: string
+  id: number
 }) {
   const response = await fetch(
     `${supabaseUrl}/rest/v1/productBrands?id=eq.${id}`,
@@ -84,21 +84,21 @@ export async function editProductBrandAction({
         Prefer: "return=minimal",
       },
       body: JSON.stringify({ name: productBrand }),
-    },
-  );
+    }
+  )
   if (!response.ok) {
     const error =
       (await response.json()).message ||
-      "Something went wrong while creating the category.";
+      "Something went wrong while creating the category."
 
     return {
       data: null,
       error,
-    };
+    }
   }
-  revalidateTag("productBrands");
+  revalidateTag("productBrands")
   // const data = await response.json();
-  return { data: null, error: "" };
+  return { data: null, error: "" }
 }
 
 export async function deleteProductBrandAction(id: number) {
@@ -112,28 +112,28 @@ export async function deleteProductBrandAction(id: number) {
 
         Prefer: "return=minimal",
       },
-    },
-  );
+    }
+  )
   if (!response.ok) {
     const error =
       (await response.json()).message ||
-      "Something went wrong while creating the category.";
+      "Something went wrong while creating the category."
 
     return {
       data: null,
       error,
-    };
+    }
   }
-  revalidateTag("productBrands");
+  revalidateTag("productBrands")
   // const data = await response.json();
-  return { data: null, error: "" };
+  return { data: null, error: "" }
 }
 
 export async function getProductBrandsCountAction() {
-  const token = getToken();
+  const token = getToken()
 
   if (!token)
-    return { data: null, error: "You are not authorized to make this action." };
+    return { data: null, error: "You are not authorized to make this action." }
   const response = await fetch(
     `${process.env.API_URL}/api/productbrands/count`,
     {
@@ -141,21 +141,21 @@ export async function getProductBrandsCountAction() {
       headers: {
         Authorization: `Bearer ${token}`,
       },
-    },
-  );
+    }
+  )
 
   if (!response.ok) {
     console.log(
-      "Something went wrong while trying to fetch product brands count.",
-    );
+      "Something went wrong while trying to fetch product brands count."
+    )
     return {
       data: null,
       error: "Something went wrong while trying to fetch product brands count.",
-    };
+    }
   }
 
-  const data = await response.json();
-  return { data, error: "" };
+  const data = await response.json()
+  return { data, error: "" }
 }
 
 // import { getToken } from "@lib/helper";

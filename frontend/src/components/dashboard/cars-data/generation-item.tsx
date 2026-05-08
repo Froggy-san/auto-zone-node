@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogClose,
@@ -8,17 +8,17 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from "@/components/ui/dialog"
 
-import Spinner from "@components/Spinner";
-import { useToast } from "@hooks/use-toast";
+import Spinner from "@components/Spinner"
+import { useToast } from "@hooks/use-toast"
 import SuccessToastDescription, {
   ErorrToastDescription,
-} from "@components/toast-items";
-import useDeleteCarGenerations from "@lib/queries/car-generation/useDeleteCarGenerations";
-import { CarGenerationProps, CarModelProps } from "@lib/types";
-import { Cross2Icon } from "@radix-ui/react-icons";
-import { EllipsisVertical, NotepadText, X } from "lucide-react";
+} from "@components/toast-items"
+import useDeleteCarGenerations from "@lib/queries/car-generation/useDeleteCarGenerations"
+import { CarGenerationProps, CarModelProps } from "@lib/types"
+import { Cross2Icon } from "@radix-ui/react-icons"
+import { EllipsisVertical, NotepadText, X } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,10 +26,10 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import React, { useCallback, useState } from "react";
-import { cn } from "@lib/utils";
-import { GenerationForm } from "@components/dashboard/cars-data/generation-form";
+} from "@/components/ui/dropdown-menu"
+import React, { useCallback, useState } from "react"
+import { cn } from "@lib/utils"
+import { GenerationForm } from "@components/dashboard/cars-data/generation-form"
 
 const GenerationItem = ({
   setOpen,
@@ -39,42 +39,40 @@ const GenerationItem = ({
   model,
   withForm = true,
 }: {
-  setOpen?: React.Dispatch<React.SetStateAction<boolean>>;
-  setGenToEdit?: React.Dispatch<
-    React.SetStateAction<CarGenerationProps | null>
-  >;
-  className?: string;
-  handleResetPage?: () => void;
-  item: CarGenerationProps;
-  model: CarModelProps;
-  withForm?: boolean;
+  setOpen?: React.Dispatch<React.SetStateAction<boolean>>
+  setGenToEdit?: React.Dispatch<React.SetStateAction<CarGenerationProps | null>>
+  className?: string
+  handleResetPage?: () => void
+  item: CarGenerationProps
+  model: CarModelProps
+  withForm?: boolean
 }) => {
-  const [openGen, setOpenGen] = useState(false);
-  const [deleteOpen, setDeleteOpen] = useState(false);
-  const [noteOpen, setNoteOpen] = useState(false);
+  const [openGen, setOpenGen] = useState(false)
+  const [deleteOpen, setDeleteOpen] = useState(false)
+  const [noteOpen, setNoteOpen] = useState(false)
   return (
     <li
       onClick={() => {
-        setOpen?.(false);
-        setGenToEdit?.(item);
-        if (withForm) setOpenGen(true);
+        setOpen?.(false)
+        setGenToEdit?.(item)
+        if (withForm) setOpenGen(true)
       }}
       className={cn(
-        `relative  h-fit   px-3 py-2 flex flex-col  items-center justify-between    hover:bg-accent/30  transition-all cursor-pointer  gap-2 text-sm border rounded-lg `,
-        { "px-3 py-[0.4rem] ": !item.image }
+        `relative flex h-fit cursor-pointer flex-col items-center justify-between gap-2 rounded-lg border px-3 py-2 text-sm transition-all hover:bg-accent/30`,
+        { "px-3 py-[0.4rem]": !item.image }
       )}
     >
       {item.image ? (
         <img
           src={item.image}
           alt={`${item.name} image`}
-          className=" w-20 max-h-16 block  object-contain"
+          className="block max-h-16 w-20 object-contain"
         />
       ) : null}
-      <div className="flex items-center  w-full  justify-center gap-2 ">
+      <div className="flex w-full items-center justify-center gap-2">
         <p
-          className={cn("    pr-6  text-center", {
-            "max-w-[90%]  pr-0": item.image,
+          className={cn("pr-6 text-center", {
+            "max-w-[90%] pr-0": item.image,
           })}
         >
           {item.name}
@@ -83,22 +81,22 @@ const GenerationItem = ({
         <div
           onClick={(e) => e.stopPropagation()}
           className={cn(
-            `flex items-center absolute right-1 top-1/2 -translate-y-1/2 `,
+            `absolute top-1/2 right-1 flex -translate-y-1/2 items-center`,
             {
-              "right-1 top-[unset] -translate-y-[unset] bottom-[0.4rem]":
+              "top-[unset] right-1 bottom-[0.4rem] -translate-y-[unset]":
                 item.image,
             }
           )}
         >
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className=" p-0 h-7 w-7">
-                <EllipsisVertical className=" w-4 h-4" />
+              <Button variant="ghost" className="h-7 w-7 p-0">
+                <EllipsisVertical className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className=" mt-3">
+            <DropdownMenuContent className="mt-3">
               <DropdownMenuItem
-                className=" gap-2"
+                className="gap-2"
                 disabled={!item.notes.length}
                 onClick={() => setNoteOpen(true)}
               >
@@ -106,9 +104,9 @@ const GenerationItem = ({
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => setDeleteOpen(true)}
-                className=" text-red-700 gap-2  hover:!text-red-700 hover:!bg-destructive/20"
+                className="gap-2 text-red-700 hover:!bg-destructive/20 hover:!text-red-700"
               >
-                <X className=" w-4 h-4" /> Delete
+                <X className="h-4 w-4" /> Delete
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -122,7 +120,7 @@ const GenerationItem = ({
         <DeleteBtn item={item} open={deleteOpen} setOpen={setDeleteOpen} />
       </div>
       {withForm && (
-        <div onClick={(e) => e.stopPropagation()} className=" absolute">
+        <div onClick={(e) => e.stopPropagation()} className="absolute">
           <GenerationForm
             genToEdit={item}
             open={openGen}
@@ -132,8 +130,8 @@ const GenerationItem = ({
         </div>
       )}
     </li>
-  );
-};
+  )
+}
 
 function DeleteBtn({
   item,
@@ -141,22 +139,22 @@ function DeleteBtn({
   open,
   setOpen,
 }: {
-  item: CarGenerationProps;
-  open?: boolean;
-  setOpen?: React.Dispatch<React.SetStateAction<boolean>>;
+  item: CarGenerationProps
+  open?: boolean
+  setOpen?: React.Dispatch<React.SetStateAction<boolean>>
 }) {
-  const { toast } = useToast();
-  const { deleteGeneration, isDeleting } = useDeleteCarGenerations();
-  const [isOpen, setIsOpen] = useState(false);
+  const { toast } = useToast()
+  const { deleteGeneration, isDeleting } = useDeleteCarGenerations()
+  const [isOpen, setIsOpen] = useState(false)
 
-  const diaOpen = open || isOpen;
+  const diaOpen = open || isOpen
 
   const handleClose = useCallback(() => {
-    setIsOpen(false);
-    setOpen?.(false);
-  }, [setOpen, setIsOpen]);
+    setIsOpen(false)
+    setOpen?.(false)
+  }, [setOpen, setIsOpen])
   return (
-    <div onClick={(e) => e.stopPropagation()} className=" absolute">
+    <div onClick={(e) => e.stopPropagation()} className="absolute">
       <Dialog open={diaOpen} onOpenChange={handleClose}>
         {/* <DialogTrigger asChild>
         <button className=" absolute right-2 top-2  rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground  -mr-1">
@@ -169,7 +167,7 @@ function DeleteBtn({
             </button>
       </DialogTrigger> */}
 
-        <DialogContent className="sm:max-w-[425px] border-none">
+        <DialogContent className="border-none sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Delete car generation</DialogTitle>
             <DialogDescription>
@@ -177,7 +175,7 @@ function DeleteBtn({
             </DialogDescription>
           </DialogHeader>
 
-          <DialogFooter className="   gap-2 sm:gap-0">
+          <DialogFooter className="gap-2 sm:gap-0">
             <DialogClose asChild>
               <Button size="sm" variant="secondary">
                 Cancel
@@ -191,7 +189,7 @@ function DeleteBtn({
                   { id: item.id, imageToDelete: item.image || "" },
                   {
                     onSuccess: () => {
-                      handleClose();
+                      handleClose()
 
                       toast({
                         className: "bg-primary  text-primary-foreground",
@@ -199,7 +197,7 @@ function DeleteBtn({
                         description: (
                           <SuccessToastDescription message="Car generation has been deleted." />
                         ),
-                      });
+                      })
                     },
                     onError: (error: any) => {
                       toast({
@@ -208,19 +206,19 @@ function DeleteBtn({
                         description: (
                           <ErorrToastDescription error={error.message} />
                         ),
-                      });
+                      })
                     },
                   }
-                );
+                )
               }}
             >
-              {isDeleting ? <Spinner className=" h-full" /> : "Confrim"}
+              {isDeleting ? <Spinner className="h-full" /> : "Confrim"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
-  );
+  )
 }
 
 function NoteDialog({
@@ -229,13 +227,13 @@ function NoteDialog({
   open,
   setOpen,
 }: {
-  item: CarGenerationProps;
-  disabled?: boolean;
-  open: boolean;
-  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  item: CarGenerationProps
+  disabled?: boolean
+  open: boolean
+  setOpen: React.Dispatch<React.SetStateAction<boolean>>
 }) {
   return (
-    <div onClick={(e) => e.stopPropagation()} className=" absolute">
+    <div onClick={(e) => e.stopPropagation()} className="absolute">
       <Dialog open={open} onOpenChange={setOpen}>
         {/* <TooltipProvider>
         <Tooltip>
@@ -255,30 +253,26 @@ function NoteDialog({
         </Tooltip>
         </TooltipProvider> */}
 
-        <DialogContent
-          className="sm:max-w-[500px]  max-h-[55vh]
-        overflow-y-auto
-        border-none"
-        >
+        <DialogContent className="max-h-[55vh] overflow-y-auto border-none sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle className=" break-all  pr-5">
+            <DialogTitle className="pr-5 break-all">
               {item.name}&apos;s note.
             </DialogTitle>
             <DialogDescription className="hidden"></DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-4  overflow-hidden  text-center sm:text-left break-all">
+          <div className="grid gap-4 overflow-hidden py-4 text-center break-all sm:text-left">
             {item.notes}
           </div>
 
           <DialogClose asChild>
-            <Button size="sm" variant="secondary" className=" w-full">
+            <Button size="sm" variant="secondary" className="w-full">
               Cancel
             </Button>
           </DialogClose>
         </DialogContent>
       </Dialog>
     </div>
-  );
+  )
 }
 
-export default GenerationItem;
+export default GenerationItem

@@ -1,32 +1,32 @@
-"use server";
+"use server"
 
-import { PAGE_SIZE } from "@lib/constants";
-import { getToken } from "@lib/helper";
+import { PAGE_SIZE } from "@lib/constants"
+import { getToken } from "@lib/helper"
 import {
   EditServiceFee,
   Product,
   ProductSold,
   ProductToSell,
   ProductWithCategory,
-} from "@lib/types";
-import { createClient } from "@utils/supabase/server";
-import { revalidatePath, revalidateTag } from "next/cache";
-import { redirect } from "next/navigation";
-import { editServiceAction } from "./serviceActions";
+} from "@lib/types"
+import { createClient } from "@utils/supabase/server"
+import { revalidatePath, revalidateTag } from "next/cache"
+import { redirect } from "next/navigation"
+import { editServiceAction } from "./serviceActions"
 import {
   adjustProductsStockAction,
   editProductAction,
   editProductsStockAction,
-} from "./productsActions";
+} from "./productsActions"
 
 interface GetProps {
-  pageNumber?: string;
-  price?: string;
-  discount?: string;
-  isReturned?: string;
-  notes?: string;
-  categoryId?: string;
-  serviceId?: string;
+  pageNumber?: string
+  price?: string
+  discount?: string
+  isReturned?: string
+  notes?: string
+  categoryId?: string
+  serviceId?: string
 }
 
 export async function getServiceFeesAction({
@@ -39,25 +39,25 @@ export async function getServiceFeesAction({
   serviceId,
 }: GetProps) {
   //   await new Promise((res) => setTimeout(res, 9000));
-  const token = getToken();
+  const token = getToken()
 
   if (!token)
-    return { data: null, error: "You are not authorized to make this action." };
-  let query = `${process.env.API_URL}/api/ServicesFee?&PageSize=${PAGE_SIZE}`;
+    return { data: null, error: "You are not authorized to make this action." }
+  let query = `${process.env.API_URL}/api/ServicesFee?&PageSize=${PAGE_SIZE}`
 
-  if (pageNumber) query = query + `&PageNumber=${pageNumber}`;
+  if (pageNumber) query = query + `&PageNumber=${pageNumber}`
 
-  if (price) query = query + `&price=${price}`;
+  if (price) query = query + `&price=${price}`
 
-  if (discount) query = query + `&discount=${discount}`;
+  if (discount) query = query + `&discount=${discount}`
 
-  if (isReturned) query = query + `&isReturned=${isReturned}`;
+  if (isReturned) query = query + `&isReturned=${isReturned}`
 
-  if (notes) query = query + `&notes=${notes}`;
+  if (notes) query = query + `&notes=${notes}`
 
-  if (categoryId) query = query + `&categoryId=${categoryId}`;
+  if (categoryId) query = query + `&categoryId=${categoryId}`
 
-  if (serviceId) query = query + `&serviceId=${serviceId}`;
+  if (serviceId) query = query + `&serviceId=${serviceId}`
 
   const response = await fetch(query, {
     method: "GET",
@@ -67,77 +67,75 @@ export async function getServiceFeesAction({
     next: {
       tags: ["services"],
     },
-  });
+  })
 
   if (!response.ok) {
-    console.log(
-      "Something went wrong while trying to fetch Service fees data.",
-    );
+    console.log("Something went wrong while trying to fetch Service fees data.")
     return {
       data: null,
       error: "Something went wrong while trying to fetch Service fees data.",
-    };
+    }
   }
 
-  const data = await response.json();
-  return { data, error: "" };
+  const data = await response.json()
+  return { data, error: "" }
 }
 
 // The service fees are created in the service actions.
 
-type CreateProps = ProductSold & { totalPriceAfterDiscount: number };
+type CreateProps = ProductSold & { totalPriceAfterDiscount: number }
 export async function createProductToSellAction(
   productToSell: CreateProps,
-  totalPrice: number,
+  totalPrice: number
 ) {
   try {
-    const supabase = await createClient();
+    const supabase = await createClient()
     // 1. Add new product sold.
     const { error } = await supabase
       .from("productsToSell")
-      .insert([productToSell]);
-    if (error) throw new Error(error.message);
+      .insert([productToSell])
+    if (error) throw new Error(error.message)
 
     // 2. Update the total price after discound of the related service.
     const { data, error: serviceError } = await editServiceAction({
       id: productToSell.serviceId,
       totalPrice,
-    });
+    })
 
     // 3. Update the number of stocks available for the product sold.
 
     const { error: adjustError } = await adjustProductsStockAction(
       "decrement",
-      [{ id: productToSell.productId, quantity: productToSell.count }],
-    );
+      [{ id: productToSell.productId, quantity: productToSell.count }]
+    )
     // const update = productToSell.
     // const stockError = await editProductsStockAction([stocksUpdates]);
-    if (adjustError) return { data, error: adjustError };
-    if (serviceError) return { data, error: serviceError };
+    if (adjustError) return { data, error: adjustError }
+    if (serviceError) return { data, error: serviceError }
 
-    revalidateTag("services");
+    revalidateTag("services")
 
-    return { data: null, error: "" };
+    return { data: null, error: "" }
   } catch (error: any) {
-    console.log(`Failed to create product sold entry: ${error.message}`);
-    return { data: null, error: error.message };
+    console.log(`Failed to create product sold entry: ${error.message}`)
+    return { data: null, error: error.message }
   }
 }
 
 export async function getProductToSellById(
-  id: string,
+  id: string
 ): Promise<{ data: ProductToSell | null; error: string }> {
-  const supabase = await createClient();
+  const supabase = await createClient()
   const { data: productsToSell, error } = await supabase
     .from("productsToSell")
     .select("*,product(*)")
-    .eq("id", id);
+    .eq("id", id)
 
-  if (error) return { data: null, error: error.message };
+  if (error) return { data: null, error: error.message }
 
   if (!productsToSell)
-    return { data: null, error: `Couldn't find product sold data '${id}'` };
-  return { data: productsToSell[0], error: "" };
+    return { data: null, error: `Couldn't find product sold data '${id}'` }
+  return { data: productsToSell[0], error: "" }
 }
 // export async function getProductToSellById(id: string) {
 //   const token = getToken();
@@ -164,63 +162,63 @@ export async function getProductToSellById(
 // }
 
 interface EditProps {
-  pricePerUnit: number;
-  discount: number;
-  count: number;
-  isReturned: boolean;
-  note: string;
-  totalPriceAfterDiscount: number;
+  pricePerUnit: number
+  discount: number
+  count: number
+  isReturned: boolean
+  note: string
+  totalPriceAfterDiscount: number
 }
 
 interface ServiceProps {
-  id: number;
-  totalPrice: number;
-  isEqual: boolean;
+  id: number
+  totalPrice: number
+  isEqual: boolean
 }
 export async function editProductToSellAction(
   {
     productToSell,
     id,
   }: {
-    productToSell: EditProps;
-    id: number;
+    productToSell: EditProps
+    id: number
   },
   { id: serviceId, totalPrice, isEqual }: ServiceProps,
-  stocksUpdates: Product,
+  stocksUpdates: Product
 ) {
-  const supabase = await createClient();
+  const supabase = await createClient()
 
   // 1. Update the product sold entry.
   const { error } = await supabase
     .from("productsToSell")
     .update(productToSell)
-    .eq("id", id);
+    .eq("id", id)
 
-  if (error) return { data: null, error: error.message };
+  if (error) return { data: null, error: error.message }
 
   // 2. Update the total service price after discount for the related song.
   if (!isEqual) {
     const { data, error } = await editServiceAction({
       id: serviceId,
       totalPrice,
-    });
-    if (error) return { data, error };
+    })
+    if (error) return { data, error }
   }
 
   // 3. Update the stock availbe for the related product sold.
-  const stockError = await editProductsStockAction([stocksUpdates]);
-  if (stockError) return { data: null, error: stockError };
-  revalidatePath(`/products/${stocksUpdates.id}`);
-  revalidateTag("services");
+  const stockError = await editProductsStockAction([stocksUpdates])
+  if (stockError) return { data: null, error: stockError }
+  revalidatePath(`/products/${stocksUpdates.id}`)
+  revalidateTag("services")
 
-  return { data: null, error: "" };
+  return { data: null, error: "" }
 }
 
 interface Delete {
-  proSold: ProductToSell;
-  serviceId: number;
-  totalPrice: number;
-  shouldUpdateStock?: boolean;
+  proSold: ProductToSell
+  serviceId: number
+  totalPrice: number
+  shouldUpdateStock?: boolean
 }
 
 export async function deleteProductToSellAction({
@@ -230,37 +228,37 @@ export async function deleteProductToSellAction({
   shouldUpdateStock = false,
 }: Delete) {
   try {
-    const supabase = await createClient();
+    const supabase = await createClient()
 
     // 1. Delete the product sold entry.
     const { error } = await supabase
       .from("productsToSell")
       .delete()
-      .eq("id", proSold.id);
+      .eq("id", proSold.id)
 
     if (error)
-      throw new Error(`Failed to delete product sold: ${error.message}`);
+      throw new Error(`Failed to delete product sold: ${error.message}`)
 
     const { data, error: serviceError } = await editServiceAction({
       id: serviceId,
       totalPrice,
-    });
-    if (serviceError) throw new Error(serviceError);
+    })
+    if (serviceError) throw new Error(serviceError)
 
     // 2. If the user wants to update the stock of the product after deleting the product sold entry.
     if (shouldUpdateStock) {
       const { error } = await adjustProductsStockAction("increment", [
         { id: proSold.productId, quantity: proSold.count },
-      ]);
+      ])
 
-      if (error) throw new Error(error);
+      if (error) throw new Error(error)
     }
-    revalidateTag("services");
+    revalidateTag("services")
 
-    return { data: null, error: "" };
+    return { data: null, error: "" }
   } catch (error: any) {
-    console.log(error.message);
-    return { data: null, error: error.message };
+    console.log(error.message)
+    return { data: null, error: error.message }
   }
 }
 
@@ -272,48 +270,48 @@ export async function getServiceFeesCountAction({
   categoryId,
   serviceId,
 }: {
-  price?: string;
-  discount?: string;
-  isReturned?: string;
-  notes?: string;
-  categoryId?: string;
-  serviceId?: string;
+  price?: string
+  discount?: string
+  isReturned?: string
+  notes?: string
+  categoryId?: string
+  serviceId?: string
 }) {
-  const token = getToken();
+  const token = getToken()
 
   if (!token)
-    return { data: null, error: "You are not authorized to make this action." };
-  let query = `${process.env.API_URL}/api/ServicesFee?&PageSize=${PAGE_SIZE}`;
+    return { data: null, error: "You are not authorized to make this action." }
+  let query = `${process.env.API_URL}/api/ServicesFee?&PageSize=${PAGE_SIZE}`
 
-  if (price) query = query + `&price=${price}`;
+  if (price) query = query + `&price=${price}`
 
-  if (discount) query = query + `&discount=${discount}`;
+  if (discount) query = query + `&discount=${discount}`
 
-  if (isReturned) query = query + `&isReturned=${isReturned}`;
+  if (isReturned) query = query + `&isReturned=${isReturned}`
 
-  if (notes) query = query + `&notes=${notes}`;
+  if (notes) query = query + `&notes=${notes}`
 
-  if (categoryId) query = query + `&categoryId=${categoryId}`;
+  if (categoryId) query = query + `&categoryId=${categoryId}`
 
-  if (serviceId) query = query + `&serviceId=${serviceId}`;
+  if (serviceId) query = query + `&serviceId=${serviceId}`
 
   const response = await fetch(query, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${token}`,
     },
-  });
+  })
 
   if (!response.ok) {
-    console.log("Something went wrong while trying to fetch Services count.");
+    console.log("Something went wrong while trying to fetch Services count.")
     return {
       data: null,
       error: "Something went wrong while trying to fetch Services count.",
-    };
+    }
   }
 
-  const data = await response.json();
-  return { data, error: "" };
+  const data = await response.json()
+  return { data, error: "" }
 }
 
 /*

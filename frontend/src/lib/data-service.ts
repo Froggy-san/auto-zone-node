@@ -1,5 +1,5 @@
-import { getAllCarGenerationsAction } from "./actions/carGenerationsActions";
-import { getToken } from "./helper";
+import { getAllCarGenerationsAction } from "./actions/carGenerationsActions"
+import { getToken } from "./helper"
 
 export async function getAllCategories() {
   // await new Promise((res) => setTimeout(res, 9000));
@@ -11,79 +11,79 @@ export async function getAllCategories() {
     // headers: {
     //   Authorization: `Bearer ${token}`,
     // },
-  });
+  })
 
   if (!response.ok) {
     throw new Error(
       "Something went wrong while trying to fetch categories data."
-    );
+    )
   }
 
-  const data = await response.json();
-  return data;
+  const data = await response.json()
+  return data
 }
 
 export async function getAllCarsInfo() {
-  const token = getToken();
+  const token = getToken()
 
-  if (!token) throw new Error("You are not authorized to make this action.");
+  if (!token) throw new Error("You are not authorized to make this action.")
   const response = await fetch(`${process.env.API_URL}/api/carinfos`, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${token}`,
     },
-  });
+  })
 
   if (!response.ok) {
     throw new Error(
       "Something went wrong while trying to fetch cars info data."
-    );
+    )
   }
 
-  const data = await response.json();
-  return data;
+  const data = await response.json()
+  return data
 }
 
 export async function getAllProductTypes() {
-  const token = getToken();
+  const token = getToken()
 
-  if (!token) throw new Error("You are not authorized to make this action.");
+  if (!token) throw new Error("You are not authorized to make this action.")
   const response = await fetch(`${process.env.API_URL}/api/producttypes`, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${token}`,
     },
-  });
+  })
 
   if (!response.ok) {
     throw new Error(
       "Something went wrong while trying to fetch product types data."
-    );
+    )
   }
 
-  const data = await response.json();
-  return data;
+  const data = await response.json()
+  return data
 }
 
 export async function getAllProductBrands() {
-  const token = getToken();
+  const token = getToken()
 
-  if (!token) throw new Error("You are not authorized to make this action.");
+  if (!token) throw new Error("You are not authorized to make this action.")
   const response = await fetch(`${process.env.API_URL}/api/productbrands`, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${token}`,
     },
-  });
+  })
 
   if (!response.ok) {
     throw new Error(
       "Something went wrong while trying to fetch product brands data."
-    );
+    )
   }
 
-  const data = await response.json();
-  return data;
+  const data = await response.json()
+  return data
 }
 
 export async function getProductFormReleventData() {
@@ -93,18 +93,18 @@ export async function getProductFormReleventData() {
       getAllCarsInfo(),
       getAllProductBrands(),
       getAllProductTypes(),
-    ]);
+    ])
 
-    return { categories, carInfos, carBrands, brandTypes };
+    return { categories, carInfos, carBrands, brandTypes }
   } catch (error) {
-    console.error("Error fetching product form relevant data:", error);
-    throw new Error("Failed to fetch product form relevant data.");
+    console.error("Error fetching product form relevant data:", error)
+    throw new Error("Failed to fetch product form relevant data.")
   }
 }
 
 export async function createCarMakerAction(formData: FormData) {
-  const token = getToken();
-  if (!token) throw new Error("You are not Authorized to make this action.");
+  const token = getToken()
+  if (!token) throw new Error("You are not Authorized to make this action.")
 
   const response = await fetch(`${process.env.API_URL}/api/carmakers`, {
     method: "POST",
@@ -112,13 +112,13 @@ export async function createCarMakerAction(formData: FormData) {
       Authorization: `Bearer ${token}`,
     },
     body: formData,
-  });
+  })
   if (!response.ok) {
-    throw new Error("Something went wrong!");
+    throw new Error("Something went wrong!")
   }
 
-  const data = await response.json();
-  return data;
+  const data = await response.json()
+  return data
 }
 
 // export async function getCarGenerations(page: number) {

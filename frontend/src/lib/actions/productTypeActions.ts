@@ -1,13 +1,13 @@
-"use server";
+"use server"
 
-import { getToken } from "@lib/helper";
-import { deleteImageFromBucketAction } from "@lib/services/server-helpers";
-import { ProductType } from "@lib/types";
-import { revalidateTag } from "next/cache";
-import { redirect } from "next/navigation";
+import { getToken } from "@lib/helper"
+import { deleteImageFromBucketAction } from "@lib/services/server-helpers"
+import { ProductType } from "@lib/types"
+import { revalidateTag } from "next/cache"
+import { redirect } from "next/navigation"
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 export async function getAllProductTypesAction() {
   const response = await fetch(`${supabaseUrl}/rest/v1/productTypes`, {
     method: "GET",
@@ -18,18 +18,18 @@ export async function getAllProductTypesAction() {
     next: {
       tags: ["productTypes"],
     },
-  });
+  })
 
   if (!response.ok) {
     return {
       data: null,
       error: "Something went wrong while trying to fetch categories data.",
-    };
+    }
   }
 
-  const data = await response.json();
+  const data = await response.json()
 
-  return { data, error: "" };
+  return { data, error: "" }
 }
 
 export async function createProductTypeAction(productType: string) {
@@ -45,29 +45,29 @@ export async function createProductTypeAction(productType: string) {
       Prefer: "return=minimal",
     },
     body: JSON.stringify({ name: productType }),
-  });
+  })
   if (!response.ok) {
     const error =
       (await response.json()).message ||
-      "Something went wrong while creating the a new product type.";
+      "Something went wrong while creating the a new product type."
 
     return {
       data: null,
       error,
-    };
+    }
   }
   // revalidatePath("/dashboard/insert-data");
-  revalidateTag("productTypes");
+  revalidateTag("productTypes")
   // const data = await response.json();
-  return { data: null, error: "" };
+  return { data: null, error: "" }
 }
 
 export async function editProductTypeAction({
   productType,
   id,
 }: {
-  productType: string;
-  id: number;
+  productType: string
+  id: number
 }) {
   const response = await fetch(
     `${supabaseUrl}/rest/v1/productTypes?id=eq.${id}`,
@@ -81,35 +81,35 @@ export async function editProductTypeAction({
       },
       body: JSON.stringify({ name: productType }),
     }
-  );
+  )
   if (!response.ok) {
     const error =
       (await response.json()).message ||
-      "Something went wrong while creating the category.";
+      "Something went wrong while creating the category."
 
     return {
       data: null,
       error,
-    };
+    }
   }
-  revalidateTag("productTypes");
+  revalidateTag("productTypes")
   // const data = await response.json();
-  return { data: null, error: "" };
+  return { data: null, error: "" }
 }
 
 export async function deleteProductTypeAction(productTypes: ProductType[]) {
   const imagesToDelete = productTypes
     .map((item) => item.image)
-    .filter((item) => item !== null);
+    .filter((item) => item !== null)
 
-  const ids = productTypes.map((item) => item.id);
+  const ids = productTypes.map((item) => item.id)
   if (imagesToDelete.length) {
     const { error } = await deleteImageFromBucketAction({
       bucketName: "productType",
       imagePaths: imagesToDelete,
-    });
-    if (error) return { data: null, error: error.message };
-    revalidateTag("categories");
+    })
+    if (error) return { data: null, error: error.message }
+    revalidateTag("categories")
   }
 
   const response = await fetch(
@@ -122,27 +122,27 @@ export async function deleteProductTypeAction(productTypes: ProductType[]) {
         Prefer: "return=minimal",
       },
     }
-  );
+  )
   if (!response.ok) {
     const error =
       (await response.json()).message ||
-      "Something went wrong while creating the category.";
+      "Something went wrong while creating the category."
 
     return {
       data: null,
       error,
-    };
+    }
   }
-  revalidateTag("productTypes");
+  revalidateTag("productTypes")
   // const data = await response.json();
-  return { data: null, error: "" };
+  return { data: null, error: "" }
 }
 
 export async function getproducttypesCountAction() {
-  const token = getToken();
+  const token = getToken()
 
   if (!token)
-    return { data: null, error: "You are not authorized to make this action." };
+    return { data: null, error: "You are not authorized to make this action." }
   const response = await fetch(
     `${process.env.API_URL}/api/producttypes/count`,
     {
@@ -151,20 +151,20 @@ export async function getproducttypesCountAction() {
         Authorization: `Bearer ${token}`,
       },
     }
-  );
+  )
 
   if (!response.ok) {
     console.log(
       "Something went wrong while trying to fetch product types count."
-    );
+    )
     return {
       data: null,
       error: "Something went wrong while trying to fetch product types count.",
-    };
+    }
   }
 
-  const data = await response.json();
-  return { data, error: "" };
+  const data = await response.json()
+  return { data, error: "" }
 }
 
 // import { getToken } from "@lib/helper";

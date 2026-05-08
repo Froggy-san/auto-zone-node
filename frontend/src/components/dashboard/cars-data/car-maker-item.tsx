@@ -1,10 +1,10 @@
-import { Button } from "@components/ui/button";
-import { Card } from "@components/ui/card";
-import { CarMaker, CarMakersData, CarModelProps } from "@lib/types";
+import { Button } from "@components/ui/button"
+import { Card } from "@components/ui/card"
+import { CarMaker, CarMakersData, CarModelProps } from "@lib/types"
 
 import SuccessToastDescription, {
   ErorrToastDescription,
-} from "@components/toast-items";
+} from "@components/toast-items"
 import {
   Dialog,
   DialogClose,
@@ -14,8 +14,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { useToast } from "@hooks/use-toast";
+} from "@/components/ui/dialog"
+import { useToast } from "@hooks/use-toast"
 import {
   Car,
   EllipsisVertical,
@@ -24,37 +24,37 @@ import {
   MoveLeft,
   NotepadTextDashed,
   Trash2,
-} from "lucide-react";
-import React, { SetStateAction, useEffect, useMemo, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+} from "lucide-react"
+import React, { SetStateAction, useEffect, useMemo, useState } from "react"
+import { AnimatePresence, motion } from "framer-motion"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@/components/ui/dropdown-menu"
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/components/ui/accordion";
-import Spinner from "@components/Spinner";
-import { useQueryClient } from "@tanstack/react-query";
-import { deleteCarMakerAction } from "@lib/actions/carMakerActions";
-import useDeleteCarMaker from "@lib/queries/useDeleteCarMakers";
+} from "@/components/ui/accordion"
+import Spinner from "@components/Spinner"
+import { useQueryClient } from "@tanstack/react-query"
+import { deleteCarMakerAction } from "@lib/actions/carMakerActions"
+import useDeleteCarMaker from "@lib/queries/useDeleteCarMakers"
 
-const SLIDE_TRANSITION = { ease: "backInOut" };
+const SLIDE_TRANSITION = { ease: "backInOut" }
 
 interface CarMakerItem {
-  className?: string;
-  carMaker: CarMakersData;
-  handleResetPage: () => void;
-  carMakerToEdit?: CarMakersData;
-  setCarMakerToEdit?: React.Dispatch<SetStateAction<CarMakersData | undefined>>;
-  setCarMaker: React.Dispatch<SetStateAction<number | null>>;
+  className?: string
+  carMaker: CarMakersData
+  handleResetPage: () => void
+  carMakerToEdit?: CarMakersData
+  setCarMakerToEdit?: React.Dispatch<SetStateAction<CarMakersData | undefined>>
+  setCarMaker: React.Dispatch<SetStateAction<number | null>>
 
-  setNoteOpen: React.Dispatch<React.SetStateAction<number | null>>;
+  setNoteOpen: React.Dispatch<React.SetStateAction<number | null>>
 }
 
 const CarMakerItem = ({
@@ -66,72 +66,72 @@ const CarMakerItem = ({
   setCarMaker,
   setNoteOpen,
 }: CarMakerItem) => {
-  const [loading, setLoading] = useState(false);
-  const [openDelete, setOpenDelete] = useState(false);
+  const [loading, setLoading] = useState(false)
+  const [openDelete, setOpenDelete] = useState(false)
   // const [noteOpen, setNoteOpen] = useState(false);
   return (
     <div
       onClick={() => setCarMaker(carMaker.id)}
-      className=" group flex flex-col relative "
+      className="group relative flex flex-col"
     >
       {carMaker.logo ? (
         <img
           src={carMaker.logo}
           alt=" Maker logo "
-          className=" h-[80px] xs:h-[100px] object-contain  rounded-t-sm group-hover:scale-95 transition-all ease-in   select-none"
+          className="h-[80px] rounded-t-sm object-contain transition-all ease-in select-none group-hover:scale-95 xs:h-[100px]"
         />
       ) : (
-        <div className=" h-[150px] xs:h-[200px] flex items-center justify-center  bg-foreground/10   rounded-t-sm ">
-          <ImageOff className=" w-20 h-20" />
+        <div className="flex h-[150px] items-center justify-center rounded-t-sm bg-foreground/10 xs:h-[200px]">
+          <ImageOff className="h-20 w-20" />
         </div>
       )}
-      <div className="    py-3">
-        <p className=" font-semibold text-sm text-muted-foreground  text-center px-8   break-all">
+      <div className="py-3">
+        <p className="px-8 text-center text-sm font-semibold break-all text-muted-foreground">
           {carMaker.name}
         </p>
 
         {/* <NoteDialog content={carMaker.notes} /> */}
         {loading ? (
-          <Spinner className=" w-7 h-7  absolute right-2 bottom-2" size={15} />
+          <Spinner className="absolute right-2 bottom-2 h-7 w-7" size={15} />
         ) : (
           <div
             onClick={(e) => {
-              e.stopPropagation();
+              e.stopPropagation()
             }}
-            className=" absolute right-2 bottom-2     "
+            className="absolute right-2 bottom-2"
           >
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
                   type="button"
                   variant="outline"
-                  className=" w-6 h-6 rounded-full p-0    "
+                  className="h-6 w-6 rounded-full p-0"
                 >
-                  <EllipsisVertical className=" w-4 h-4" />
+                  <EllipsisVertical className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
                 <DropdownMenuItem
                   disabled={!carMaker.notes}
-                  className=" gap-2"
+                  className="gap-2"
                   onClick={() => {
-                    if (!carMaker.notes.length) return;
-                    setNoteOpen(carMaker.id);
+                    if (!carMaker.notes.length) return
+                    setNoteOpen(carMaker.id)
                   }}
                 >
-                  <NotepadTextDashed className=" h-4 w-4 " /> Show note
+                  <NotepadTextDashed className="h-4 w-4" /> Show note
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                  className=" gap-2"
+                  className="gap-2"
                   onClick={() => setCarMakerToEdit?.(carMaker)}
                 >
-                  <Car className=" h-4 w-4 " /> Edit car maker
+                  <Car className="h-4 w-4" /> Edit car maker
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                  className=" gap-2"
+                  className="gap-2"
                   onClick={() => setOpenDelete(true)}
                 >
-                  <Trash2 className=" h-4 w-4 " /> Delete{" "}
+                  <Trash2 className="h-4 w-4" /> Delete{" "}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -149,8 +149,8 @@ const CarMakerItem = ({
       />
       {/* <NoteDialog carMaker={carMaker} open={noteOpen} setOpen={setNoteOpen} /> */}
     </div>
-  );
-};
+  )
+}
 
 function DeleteDialog({
   open,
@@ -160,24 +160,24 @@ function DeleteDialog({
   setLoading,
   handleResetPage,
 }: {
-  loading: boolean;
-  setLoading: React.Dispatch<SetStateAction<boolean>>;
-  open: boolean;
-  setOpen: React.Dispatch<SetStateAction<boolean>>;
-  carMaker: CarMakersData | null;
-  handleResetPage: () => void;
+  loading: boolean
+  setLoading: React.Dispatch<SetStateAction<boolean>>
+  open: boolean
+  setOpen: React.Dispatch<SetStateAction<boolean>>
+  carMaker: CarMakersData | null
+  handleResetPage: () => void
 }) {
-  const { deleteMaker } = useDeleteCarMaker();
-  const { toast } = useToast();
+  const { deleteMaker } = useDeleteCarMaker()
+  const { toast } = useToast()
 
   async function handleDelete() {
     try {
-      setLoading(true);
+      setLoading(true)
       if (carMaker) {
-        await deleteMaker(carMaker);
+        await deleteMaker(carMaker)
       }
-      handleResetPage();
-      setOpen(false);
+      handleResetPage()
+      setOpen(false)
 
       toast({
         className: "bg-primary  text-primary-foreground",
@@ -187,29 +187,29 @@ function DeleteDialog({
             message={`'${carMaker?.name}'s data has been deleted`}
           />
         ),
-      });
+      })
     } catch (error: any) {
       toast({
         variant: "destructive",
         title: "Faild to delete car maker data",
         description: <ErorrToastDescription error={error.message} />,
-      });
+      })
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
   }
   useEffect(() => {
-    const body = document.querySelector("body");
+    const body = document.querySelector("body")
 
     if (body) {
-      body.style.pointerEvents = "auto";
+      body.style.pointerEvents = "auto"
     }
     return () => {
-      if (body) body.style.pointerEvents = "auto";
-    };
-  }, [open]);
+      if (body) body.style.pointerEvents = "auto"
+    }
+  }, [open])
   return (
-    <div onClick={(e) => e.stopPropagation()} className="  absolute">
+    <div onClick={(e) => e.stopPropagation()} className="absolute">
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader>
@@ -220,7 +220,7 @@ function DeleteDialog({
             </DialogDescription>
           </DialogHeader>
 
-          <DialogFooter className="   gap-2 sm:gap-0">
+          <DialogFooter className="gap-2 sm:gap-0">
             <DialogClose asChild>
               <Button size="sm" variant="secondary">
                 Cancel
@@ -232,16 +232,16 @@ function DeleteDialog({
               size="sm"
               onClick={async () => handleDelete()}
             >
-              {loading ? <Spinner className=" h-full" /> : "Confrim"}
+              {loading ? <Spinner className="h-full" /> : "Confrim"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
-  );
+  )
 }
 
-export default CarMakerItem;
+export default CarMakerItem
 
 /*
 

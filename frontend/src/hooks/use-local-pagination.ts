@@ -1,9 +1,9 @@
-import { useMemo } from "react";
+import { useMemo } from "react"
 
 interface UseLocalPaginationProps<T> {
-  pageSize?: number;
-  currPage: number;
-  arr: T[];
+  pageSize?: number
+  currPage: number
+  arr: T[]
 }
 
 export default function useLocalPagination<T>({
@@ -11,17 +11,17 @@ export default function useLocalPagination<T>({
   currPage,
   arr,
 }: UseLocalPaginationProps<T>) {
-  const totalItems = arr.length;
-  const totalPages = Math.ceil(totalItems / pageSize);
+  const totalItems = arr.length
+  const totalPages = Math.ceil(totalItems / pageSize)
 
   const result = useMemo(() => {
-    const pageFrom = pageSize * (currPage - 1);
-    return arr.slice(pageFrom, pageFrom + pageSize);
-  }, [pageSize, currPage, arr]);
+    const pageFrom = pageSize * (currPage - 1)
+    return arr.slice(pageFrom, pageFrom + pageSize)
+  }, [pageSize, currPage, arr])
 
   return {
     result,
     totalPages,
     totalItems,
-  };
+  }
 }

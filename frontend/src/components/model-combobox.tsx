@@ -1,4 +1,3 @@
-
 import * as React from "react"
 import { Check, ChevronsUpDown } from "lucide-react"
 
@@ -47,7 +46,10 @@ export const ModelCombobox: React.FC<CarModelComboBoxProps> = ({
           variant="outline"
           role="CarModelComboBox"
           aria-expanded={open}
-          className={cn("w-full h-fit min-h-9  justify-between select-none", className)}
+          className={cn(
+            "h-fit min-h-9 w-full justify-between select-none",
+            className
+          )}
         >
           {selectedItem ? (
             <div className="flex items-center gap-2 text-left text-wrap break-all">
@@ -55,7 +57,7 @@ export const ModelCombobox: React.FC<CarModelComboBoxProps> = ({
                 <img
                   loading="lazy"
                   src={selectedItem.image}
-                  className="3xl:max-w-16 3xl:h-11 h-7 max-w-12 object-contain"
+                  className="h-7 max-w-12 object-contain 3xl:h-11 3xl:max-w-16"
                   alt="Car image"
                 />
               ) : null}
@@ -92,11 +94,11 @@ export const ModelCombobox: React.FC<CarModelComboBoxProps> = ({
                     <img
                       loading="lazy"
                       src={option.image}
-                      className="3xl:max-w-16 3xl:h-11 mr-2 h-7 max-w-12 object-contain"
+                      className="mr-2 h-7 max-w-12 object-contain 3xl:h-11 3xl:max-w-16"
                       alt="Car image"
                     />
                   ) : null}
-                  <span className="3xl:text-lg flex-1 break-all">
+                  <span className="flex-1 break-all 3xl:text-lg">
                     {option.name}
                   </span>{" "}
                 </CommandItem>

@@ -1,4 +1,4 @@
-import { Order } from "@lib/types";
+import { Order } from "@lib/types"
 import {
   Document,
   Page,
@@ -10,13 +10,13 @@ import {
   Rect,
   Circle,
   Polyline,
-} from "@react-pdf/renderer";
-import { Calendar } from "lucide-react";
+} from "@react-pdf/renderer"
+import { Calendar } from "lucide-react"
 
-const MUTED_TEXT = "#71717a";
-const TEXT_COLOR = "#18181b";
-const backgroundColor = "#f4f4f5";
-const borderColor = "#e4e4e7";
+const MUTED_TEXT = "#71717a"
+const TEXT_COLOR = "#18181b"
+const backgroundColor = "#f4f4f5"
+const borderColor = "#e4e4e7"
 {
   /* <svg
   xmlns="http://www.w3.org/2000/svg"
@@ -62,7 +62,7 @@ const PackageIcon = ({ color = MUTED_TEXT, size = 24 }) => (
     {/* Accent line on the lid */}
     <Path d="m7.5 4.27 9 5.15" fill="none" />
   </Svg>
-);
+)
 
 const ClockIcon = ({ color = MUTED_TEXT, size = 24 }) => (
   <Svg
@@ -81,7 +81,7 @@ const ClockIcon = ({ color = MUTED_TEXT, size = 24 }) => (
     {/* The clock hands (L-shape) */}
     <Path d="M12 6v6l4 2" fill="none" />
   </Svg>
-);
+)
 const CalendarIcon = ({ color = TEXT_COLOR, size = 24 }) => (
   <Svg
     width={size}
@@ -105,7 +105,7 @@ const CalendarIcon = ({ color = TEXT_COLOR, size = 24 }) => (
     {/* Right prong */}
     <Path d="M16 2v4" fill="none" />
   </Svg>
-);
+)
 const styles = StyleSheet.create({
   page: {
     padding: 40,
@@ -316,14 +316,14 @@ const styles = StyleSheet.create({
     fontSize: 10,
     color: "#666",
   },
-});
+})
 
 const formatCurrency = (amount: number) => {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
-  }).format(amount);
-};
+  }).format(amount)
+}
 
 const formatDate = (date: Date) => {
   return date.toLocaleDateString("en-US", {
@@ -331,31 +331,31 @@ const formatDate = (date: Date) => {
     year: "numeric",
     month: "long",
     day: "numeric",
-  });
-};
+  })
+}
 
 const formatTime = (date: Date) => {
   return date.toLocaleTimeString("en-US", {
     hour: "numeric",
     minute: "2-digit",
     hour12: true,
-  });
-};
+  })
+}
 
 interface OrderItem {
-  name: string;
-  quantity: number;
-  price: number;
-  discount: number;
+  name: string
+  quantity: number
+  price: number
+  discount: number
 }
 
 interface OrderReceiptPDFProps {
-  order: Order;
+  order: Order
 }
 
 const OrderReceiptPDF = ({ order }: OrderReceiptPDFProps) => {
-  const pickupDate = order.pickupDate ? new Date(order.pickupDate) : new Date();
-  const orderDate = new Date(order.created_at);
+  const pickupDate = order.pickupDate ? new Date(order.pickupDate) : new Date()
+  const orderDate = new Date(order.created_at)
 
   return (
     <Document>
@@ -417,9 +417,9 @@ const OrderReceiptPDF = ({ order }: OrderReceiptPDFProps) => {
             <Text style={styles.sectionTitle}> Order Summary</Text>
           </View>
           {order.items?.items.map((item: any, index: number) => {
-            const originalTotal = item.listPrice * item.quantity;
-            const discountTotal = item.salePrice * item.quantity;
-            const finalTotal = originalTotal - discountTotal;
+            const originalTotal = item.listPrice * item.quantity
+            const discountTotal = item.salePrice * item.quantity
+            const finalTotal = originalTotal - discountTotal
             // const isLast = index === order.items.length - 1;
 
             return (
@@ -436,7 +436,7 @@ const OrderReceiptPDF = ({ order }: OrderReceiptPDFProps) => {
                         <Text style={styles.discountText}>
                           {" "}
                           (-{formatCurrency(
-                            item.listPrice - item.salePrice,
+                            item.listPrice - item.salePrice
                           )}{" "}
                           discount)
                         </Text>
@@ -461,7 +461,7 @@ const OrderReceiptPDF = ({ order }: OrderReceiptPDFProps) => {
                   )}
                 </View>
               </View>
-            );
+            )
           })}
           <View style={styles.totalRow}>
             <Text style={styles.totalLabel}>Total</Text>
@@ -540,7 +540,7 @@ const OrderReceiptPDF = ({ order }: OrderReceiptPDFProps) => {
         </View>
       </Page>
     </Document>
-  );
-};
+  )
+}
 
-export default OrderReceiptPDF;
+export default OrderReceiptPDF

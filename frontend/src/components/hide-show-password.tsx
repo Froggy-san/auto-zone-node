@@ -1,37 +1,37 @@
-import React, { forwardRef, SetStateAction, useState } from "react";
-import { Input } from "./ui/input";
-import { Button } from "./ui/button";
-import { Eye, EyeOff } from "lucide-react";
+import React, { forwardRef, SetStateAction, useState } from "react"
+import { Input } from "./ui/input"
+import { Button } from "./ui/button"
+import { Eye, EyeOff } from "lucide-react"
 interface HideShowPasswordProps {
-  setShow?: React.Dispatch<SetStateAction<boolean>>;
-  show?: boolean;
-  value: string;
-  disabled?: boolean;
-  onChange: React.Dispatch<SetStateAction<string>>;
+  setShow?: React.Dispatch<SetStateAction<boolean>>
+  show?: boolean
+  value: string
+  disabled?: boolean
+  onChange: React.Dispatch<SetStateAction<string>>
 }
 const HideShowPassword: React.FC<HideShowPasswordProps> = forwardRef(
   (
     { show, setShow, value, onChange, disabled },
     ref?: React.Ref<HTMLInputElement>
   ) => {
-    const [isShow, setIsShow] = useState(false);
+    const [isShow, setIsShow] = useState(false)
 
     function handleShow() {
       if (setShow) {
-        setShow((is) => !is);
+        setShow((is) => !is)
       } else {
-        setIsShow((is) => !is);
+        setIsShow((is) => !is)
       }
     }
     return (
       <>
         {!(show || !isShow) ? (
-          <div className=" relative ">
+          <div className="relative">
             <Input
               ref={ref}
               value={value}
               onChange={(e) => onChange(e.target.value)}
-              className=" pr-10"
+              className="pr-10"
               disabled={disabled}
               type="text"
               placeholder="Confirm password"
@@ -41,19 +41,19 @@ const HideShowPassword: React.FC<HideShowPasswordProps> = forwardRef(
               size="icon"
               aria-label="Hide password"
               variant="secondary"
-              className="  absolute w-7 h-7 right-3 top-1/2 translate-y-[-50%]"
+              className="absolute top-1/2 right-3 h-7 w-7 translate-y-[-50%]"
               onClick={handleShow}
             >
               <EyeOff size={17} />
             </Button>
           </div>
         ) : (
-          <div className=" relative ">
+          <div className="relative">
             <Input
               ref={ref}
               value={value}
               onChange={(e) => onChange(e.target.value)}
-              className=" pr-10"
+              className="pr-10"
               disabled={disabled}
               type="password"
               placeholder="Password"
@@ -63,7 +63,7 @@ const HideShowPassword: React.FC<HideShowPasswordProps> = forwardRef(
               size="icon"
               aria-label="Show password"
               variant="secondary"
-              className="  absolute w-7 h-7 right-3 top-1/2 translate-y-[-50%]"
+              className="absolute top-1/2 right-3 h-7 w-7 translate-y-[-50%]"
               onClick={handleShow}
             >
               <Eye size={17} />
@@ -71,8 +71,8 @@ const HideShowPassword: React.FC<HideShowPasswordProps> = forwardRef(
           </div>
         )}
       </>
-    );
+    )
   }
-);
-HideShowPassword.displayName = "HideShowPassword";
-export default HideShowPassword;
+)
+HideShowPassword.displayName = "HideShowPassword"
+export default HideShowPassword

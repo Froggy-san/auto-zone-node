@@ -1,5 +1,5 @@
-import { getProductFormReleventData } from "@lib/data-service";
-import { useQuery } from "@tanstack/react-query";
+import { getProductFormReleventData } from "@lib/data-service"
+import { useQuery } from "@tanstack/react-query"
 
 export default function useProductFormData() {
   const {
@@ -9,7 +9,7 @@ export default function useProductFormData() {
   } = useQuery({
     queryFn: getProductFormReleventData,
     queryKey: ["ProductFormReleventData"],
-  });
+  })
 
-  return { categories, carInfos, carBrands, brandTypes, error, isLoading };
+  return { categories, carInfos, carBrands, brandTypes, error, isLoading }
 }

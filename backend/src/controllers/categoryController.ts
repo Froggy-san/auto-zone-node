@@ -57,6 +57,7 @@ export const createCategory = catchAsync(
 export const getCategories = getAll(Category);
 
 export const getCategory = getOne(Category);
+
 export const updateCategory = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const previousData = await Category.findById(req.params.id);

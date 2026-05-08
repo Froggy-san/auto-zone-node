@@ -1,36 +1,35 @@
-
-import React, { useState } from "react";
-import { Button } from "./ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import ProgressBar from "./progress-bar";
-import { Progress, ProgressBarContainer, ProgressMeter } from "./progress";
+import React, { useState } from "react"
+import { Button } from "./ui/button"
+import { ChevronLeft, ChevronRight } from "lucide-react"
+import ProgressBar from "./progress-bar"
+import { Progress, ProgressBarContainer, ProgressMeter } from "./progress"
 
 interface Props {
-  numberOfSteps: number;
-  step?: number;
-  setStemp?: React.Dispatch<React.SetStateAction<number>>;
+  numberOfSteps: number
+  step?: number
+  setStemp?: React.Dispatch<React.SetStateAction<number>>
 }
 
 const StepperProgress = ({ step, setStemp, numberOfSteps }: Props) => {
-  const [stepNum, setStepNum] = useState(0);
-  const currStep = step || stepNum;
-  console.log(currStep);
+  const [stepNum, setStepNum] = useState(0)
+  const currStep = step || stepNum
+  console.log(currStep)
   function handlePrevStep() {
     if (currStep > 0) {
-      setStepNum((step) => step - 1);
-      setStemp?.((step) => step - 1);
+      setStepNum((step) => step - 1)
+      setStemp?.((step) => step - 1)
     }
   }
 
   function handleNextStep() {
     if (currStep < numberOfSteps) {
-      setStepNum((step) => step + 1);
-      setStemp?.((step) => step + 1);
+      setStepNum((step) => step + 1)
+      setStemp?.((step) => step + 1)
     }
   }
 
   return (
-    <div className=" flex items-center justify-between gap-5">
+    <div className="flex items-center justify-between gap-5">
       <Button
         onClick={handlePrevStep}
         size="sm"
@@ -39,11 +38,11 @@ const StepperProgress = ({ step, setStemp, numberOfSteps }: Props) => {
       >
         <ChevronLeft />{" "}
       </Button>
-      <div className=" space-y-5 flex-1">
-        <div className=" bg-background     rounded-md p-5 ">
+      <div className="flex-1 space-y-5">
+        <div className="rounded-md bg-background p-5">
           <ProgressBar value={currStep} maxValue={numberOfSteps} />
         </div>
-        <div className=" bg-background     rounded-md p-5 flex-1">
+        <div className="flex-1 rounded-md bg-background p-5">
           <Progress value={currStep} maxValue={numberOfSteps}>
             <ProgressBarContainer>
               <ProgressMeter
@@ -63,7 +62,7 @@ const StepperProgress = ({ step, setStemp, numberOfSteps }: Props) => {
         <ChevronRight />
       </Button>
     </div>
-  );
-};
+  )
+}
 
-export default StepperProgress;
+export default StepperProgress

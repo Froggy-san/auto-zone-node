@@ -1,16 +1,16 @@
-import { createMessage as createMessageService } from "@lib/services/ticket";
-import { Message } from "@lib/types";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { createMessage as createMessageService } from "@lib/services/ticket"
+import { Message } from "@lib/types"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 
 export default function useCreateMessage() {
-  const queryClient = useQueryClient();
+  const queryClient = useQueryClient()
   const { mutateAsync: createMessage, isPending } = useMutation({
     mutationFn: createMessageService,
     onSuccess: (newMessage: Message | null) => {
-      if (!newMessage) return;
+      if (!newMessage) return
 
       // 1. Get the relevant ticket ID
-      const ticketId = newMessage.ticket_id;
+      const ticketId = newMessage.ticket_id
 
       // 2. Use setQueryData to update the existing message list for that ticket
 
@@ -19,7 +19,7 @@ export default function useCreateMessage() {
         (oldMessages: any) => {
           // If the old data doesn't exist, just return the new message as an array
           if (!oldMessages.messages.length) {
-            return { ...oldMessages, messages: [newMessage] };
+            return { ...oldMessages, messages: [newMessage] }
           }
 
           // 3. Append the new message to the existing list
@@ -44,21 +44,21 @@ export default function useCreateMessage() {
 
           const oldmesasgesArr = oldMessages.messages.filter(
             (msg: Message) => msg.id !== newMessage.id
-          );
+          )
           return {
             ...oldMessages,
             messages: [...oldmesasgesArr, newMessage].sort(
               (a, b) => a.id - b.id
             ),
-          };
+          }
         }
-      );
+      )
     },
     onError: (error: any) => {
-      console.log("Message creation error:", error);
-      throw new Error(error);
+      console.log("Message creation error:", error)
+      throw new Error(error)
     },
-  });
+  })
 
-  return { createMessage, isLoading: isPending };
+  return { createMessage, isLoading: isPending }
 }

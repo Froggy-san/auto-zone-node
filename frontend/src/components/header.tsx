@@ -6,7 +6,7 @@ import NavDrawer from "./nav-drawer"
 import { ModeToggle } from "./theme-switch"
 import Search from "./home/search"
 import { cn } from "@/lib/utils"
-
+import UserUi from "./user-ui"
 const Header = ({
   showSearch = false,
   className,
@@ -14,7 +14,6 @@ const Header = ({
   showSearch?: boolean
   className?: string
 }) => {
-  // const user = await getCurrentUser();
   return (
     <header
       className={cn(
@@ -37,7 +36,7 @@ const Header = ({
       {showSearch && <Search className="bg-card shadow-sm" />}
       {/* </div> */}
       <div className="flex items-center gap-3">
-        {/* <UserUi /> */}
+        <UserUi />
         {/* <UserHeaderBtn user={user} /> */}
         <ModeToggle />
       </div>

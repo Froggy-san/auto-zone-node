@@ -1,8 +1,8 @@
-import DialogComponent from "@components/dialog-component";
+import DialogComponent from "@components/dialog-component"
 import SuccessToastDescription, {
   ErorrToastDescription,
-} from "@components/toast-items";
-import { Button } from "@components/ui/button";
+} from "@components/toast-items"
+import { Button } from "@components/ui/button"
 import {
   Form,
   FormControl,
@@ -11,11 +11,11 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@components/ui/input";
-import { zodResolver } from "@hookform/resolvers/zod";
-import useObjectCompare from "@hooks/use-compare-objs";
-import { useToast } from "@hooks/use-toast";
+} from "@/components/ui/form"
+import { Input } from "@components/ui/input"
+import { zodResolver } from "@hookform/resolvers/zod"
+import useObjectCompare from "@hooks/use-compare-objs"
+import { useToast } from "@hooks/use-toast"
 import {
   CarItem,
   Category,
@@ -26,42 +26,42 @@ import {
   Product,
   ProductWithCategory,
   ServiceStatus,
-} from "@lib/types";
-import React, { useEffect, useMemo, useState } from "react";
-import { useFieldArray, useForm, useWatch } from "react-hook-form";
-import { RotateCcw } from "lucide-react";
-import Spinner from "@components/Spinner";
-import { Textarea } from "@components/ui/textarea";
+} from "@lib/types"
+import React, { useEffect, useMemo, useState } from "react"
+import { useFieldArray, useForm, useWatch } from "react-hook-form"
+import { RotateCcw } from "lucide-react"
+import Spinner from "@components/Spinner"
+import { Textarea } from "@components/ui/textarea"
 
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
 
-import { ServiceStatusCombobox } from "@components/service-status-combobox";
+import { ServiceStatusCombobox } from "@components/service-status-combobox"
 
-import { motion } from "framer-motion";
-import { Cross2Icon } from "@radix-ui/react-icons";
-import { Label } from "@components/ui/label";
-import { cn } from "@lib/utils";
-import { ComboBox } from "@components/combo-box";
-import { ProductsComboBox } from "@components/proudcts-combo-box";
-import { createServiceAction } from "@lib/actions/serviceActions";
+import { motion } from "framer-motion"
+import { Cross2Icon } from "@radix-ui/react-icons"
+import { Label } from "@components/ui/label"
+import { cn } from "@lib/utils"
+import { ComboBox } from "@components/combo-box"
+import { ProductsComboBox } from "@components/proudcts-combo-box"
+import { createServiceAction } from "@lib/actions/serviceActions"
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/components/ui/accordion";
-import Alert from "@components/alert";
-import { isNull } from "lodash";
-import { formatCurrency } from "@lib/client-helpers";
-import CurrencyInput from "react-currency-input-field";
-import PrioritySelect from "@components/priority-select";
-import { checkStock } from "@lib/services/products";
+} from "@/components/ui/accordion"
+import Alert from "@components/alert"
+import { isNull } from "lodash"
+import { formatCurrency } from "@lib/client-helpers"
+import CurrencyInput from "react-currency-input-field"
+import PrioritySelect from "@components/priority-select"
+import { checkStock } from "@lib/services/products"
 
 interface Client {
-  name: string;
-  email: string;
-  id: number | undefined;
-  phones: PhoneNumber[];
+  name: string
+  email: string
+  id: number | undefined
+  phones: PhoneNumber[]
 }
 const ServicesForm = ({
   useParams,
@@ -74,23 +74,23 @@ const ServicesForm = ({
   open,
   handleClose: handleCloseExternal,
 }: {
-  useParams?: boolean;
-  carToEdit?: CarItem;
-  car?: CarItem;
-  client?: Client;
-  categories: CategoryProps[];
-  products: ProductWithCategory[];
-  serviceStatus: ServiceStatus[];
-  open?: boolean;
-  handleClose?: () => void;
+  useParams?: boolean
+  carToEdit?: CarItem
+  car?: CarItem
+  client?: Client
+  categories: CategoryProps[]
+  products: ProductWithCategory[]
+  serviceStatus: ServiceStatus[]
+  open?: boolean
+  handleClose?: () => void
 }) => {
-  const searchParam = useSearchParams();
-  const router = useRouter();
-  const pathname = usePathname();
-  const serivceParam = searchParam.get("service");
-  const [isOpen, setIsOpen] = useState(!isNull(serivceParam) ? true : false);
-  const [currTab, setCurrTab] = useState("item-1");
-  const { toast } = useToast();
+  const searchParam = useSearchParams()
+  const router = useRouter()
+  const pathname = usePathname()
+  const serivceParam = searchParam.get("service")
+  const [isOpen, setIsOpen] = useState(!isNull(serivceParam) ? true : false)
+  const [currTab, setCurrTab] = useState("item-1")
+  const { toast } = useToast()
 
   const defaultValues = {
     clientId: (client && client.id) || 0,
@@ -101,35 +101,35 @@ const ServicesForm = ({
     priority: "",
     productsToSell: [],
     serviceFees: [{ price: 0, discount: 0, categoryId: 0, notes: "" }],
-  };
+  }
   const form = useForm<CreateService>({
     mode: "onChange",
     resolver: zodResolver(CreateServiceSchema),
     defaultValues,
-  });
+  })
 
   const serviceFees = useWatch({
     control: form.control,
     name: "serviceFees",
-  });
+  })
 
   const productsToSell = useWatch({
     control: form.control,
     name: "productsToSell",
-  });
+  })
 
   const { fields, append, prepend, remove, swap, move, insert } = useFieldArray(
-    { rules: { minLength: 1 }, name: "serviceFees", control: form.control },
-  );
+    { rules: { minLength: 1 }, name: "serviceFees", control: form.control }
+  )
   const {
     fields: productsToSellFields,
     append: appendProduct,
     remove: removeProduct,
-  } = useFieldArray({ name: "productsToSell", control: form.control });
+  } = useFieldArray({ name: "productsToSell", control: form.control })
 
-  const errors = form.formState.errors;
+  const errors = form.formState.errors
   // checking if the user changet the forms data in order to enable the user to change it. if not we check if they deleted any images as shown below in the (disabled variable).
-  const isEqual = useObjectCompare(defaultValues, form.getValues());
+  const isEqual = useObjectCompare(defaultValues, form.getValues())
   // if the user didn't change the form's data nor did he delete any already uploaded images we want the submit button to be disabled to prevent any unnecessary api calls.
 
   const checkIfErrors =
@@ -137,97 +137,96 @@ const ServicesForm = ({
     errors.serviceFees?.length ||
     errors.productsToSell?.length
       ? true
-      : false;
-  const disabled = isEqual || checkIfErrors;
+      : false
+  const disabled = isEqual || checkIfErrors
 
-  const isLoading = form.formState.isSubmitting;
+  const isLoading = form.formState.isSubmitting
 
   const totalFees = serviceFees.reduce(
     (acc, curr) => {
-      acc.totalPrice += curr.price;
-      acc.totalDiscount += curr.discount;
+      acc.totalPrice += curr.price
+      acc.totalDiscount += curr.discount
 
-      return acc;
+      return acc
     },
     {
       totalPrice: 0,
       totalDiscount: 0,
-    },
-  );
+    }
+  )
 
   const totalProductSoldAmounts = productsToSell.reduce(
     (acc, curr) => {
-      acc.totalPrice += curr.pricePerUnit * curr.count;
-      acc.totalDiscount += curr.discount * curr.count;
-      acc.totalCount += curr.count;
-      return acc;
+      acc.totalPrice += curr.pricePerUnit * curr.count
+      acc.totalDiscount += curr.discount * curr.count
+      acc.totalCount += curr.count
+      return acc
     },
-    { totalPrice: 0, totalDiscount: 0, totalCount: 0 },
-  );
+    { totalPrice: 0, totalDiscount: 0, totalCount: 0 }
+  )
 
-  const params = new URLSearchParams(searchParam);
+  const params = new URLSearchParams(searchParam)
 
   useEffect(() => {
     serviceFees.forEach((item, index) => {
       if (item.price > item.discount) {
-        form.clearErrors(`serviceFees.${index}.discount`);
+        form.clearErrors(`serviceFees.${index}.discount`)
       }
-    });
-  }, [serviceFees, form]);
+    })
+  }, [serviceFees, form])
 
   useEffect(() => {
     productsToSell.forEach((item, index) => {
       if (item.pricePerUnit * item.count - item.discount > 0) {
-        form.clearErrors(`productsToSell.${index}.discount`);
+        form.clearErrors(`productsToSell.${index}.discount`)
       }
-    });
-  }, [productsToSell, form]);
+    })
+  }, [productsToSell, form])
 
   function handleOpen(filter: string) {
     if (!isNull(serivceParam)) {
-      params.set("edit", filter);
-      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+      params.set("edit", filter)
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false })
     } else {
-      setIsOpen(true);
+      setIsOpen(true)
     }
   }
 
   function handleClose() {
     if (!isNull(serivceParam)) {
-      const params = new URLSearchParams(searchParam);
-      params.delete("service");
-      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+      const params = new URLSearchParams(searchParam)
+      params.delete("service")
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false })
     }
-    setIsOpen(false);
+    setIsOpen(false)
 
-    if (isLoading) return;
-    setCurrTab("item-1");
-    form.reset(defaultValues);
+    if (isLoading) return
+    setCurrTab("item-1")
+    form.reset(defaultValues)
   }
 
   async function onSubmit(data: CreateService) {
-    const totalFeesAfterDis = totalFees.totalPrice - totalFees.totalDiscount;
+    const totalFeesAfterDis = totalFees.totalPrice - totalFees.totalDiscount
     const totalSoldAfterDis =
-      totalProductSoldAmounts.totalPrice -
-      totalProductSoldAmounts.totalDiscount;
-    const totalPrice = totalFeesAfterDis + totalSoldAfterDis;
+      totalProductSoldAmounts.totalPrice - totalProductSoldAmounts.totalDiscount
+    const totalPrice = totalFeesAfterDis + totalSoldAfterDis
     try {
       //! This code originally was used to recalculate the stock but we refactored it by creating the adjust_stock_batch in supabase.
 
       //! We are keeping it still because even though we disabled the selection of any already selected product, users still can disable that feature maliciously and add the item more than once so here we are still making sure that the product stocks are being calculated correctly.
-      const soldQuantities: Map<number, number> = new Map();
+      const soldQuantities: Map<number, number> = new Map()
 
       if (data.productsToSell.length) {
         data.productsToSell.forEach((pro) => {
-          const currentSold = soldQuantities.get(pro.productId) || 0;
-          soldQuantities.set(pro.productId, currentSold + pro.count);
-        });
+          const currentSold = soldQuantities.get(pro.productId) || 0
+          soldQuantities.set(pro.productId, currentSold + pro.count)
+        })
       }
 
-      const stocksUpdates: { id: number; quantity: number }[] = [];
+      const stocksUpdates: { id: number; quantity: number }[] = []
       // Calculate the new stock for each unique product
       for (const [productId, totalSoldCount] of soldQuantities.entries()) {
-        stocksUpdates.push({ id: productId, quantity: totalSoldCount });
+        stocksUpdates.push({ id: productId, quantity: totalSoldCount })
         // const currentProduct = products.find((prod) => prod.id === productId);
 
         // if (!currentProduct) {
@@ -254,23 +253,23 @@ const ServicesForm = ({
         // }
       }
 
-      const { isOutOfStock, names } = await checkStock(stocksUpdates);
+      const { isOutOfStock, names } = await checkStock(stocksUpdates)
 
       if (isOutOfStock) {
         toast({
           title: "Wait! Stock changed.",
           description: `The following items are no longer available in the requested quantity: ${names}`,
           variant: "destructive",
-        });
+        })
 
-        return;
+        return
       }
 
       const { error } = await createServiceAction(
         { ...data, totalPrice },
-        stocksUpdates,
-      );
-      if (error) throw new Error(error);
+        stocksUpdates
+      )
+      if (error) throw new Error(error)
       toast({
         className: "bg-primary  text-primary-foreground",
         title: carToEdit ? "Data updated." : "A new car has been created",
@@ -283,15 +282,15 @@ const ServicesForm = ({
             }
           />
         ),
-      });
-      handleClose();
+      })
+      handleClose()
     } catch (error: any) {
-      console.error(error);
+      console.error(error)
       toast({
         variant: "destructive",
         title: "Faild to create a new car.",
         description: <ErorrToastDescription error={error.message} />,
-      });
+      })
     }
   }
   return (
@@ -301,15 +300,15 @@ const ServicesForm = ({
           onClick={() => handleOpen("open")}
           variant="orange"
           size="sm"
-          className=" w-full bg-dashboard-orange hover:bg-dashboard-orange/50 text-dashboard-text-orange"
+          className="bg-dashboard-orange hover:bg-dashboard-orange/50 text-dashboard-text-orange w-full"
         >
           {carToEdit ? "Edit car" : "Issue service"}
         </Button>
       )}
 
-      <DialogComponent.Content className="   max-h-[76vh]    overflow-y-auto max-w-[1000px]  sm:px-12">
+      <DialogComponent.Content className="max-h-[76vh] max-w-[1000px] overflow-y-auto sm:px-12">
         <DialogComponent.Header>
-          <DialogComponent.Title className=" text-2xl">
+          <DialogComponent.Title className="text-2xl">
             Service
           </DialogComponent.Title>
           <DialogComponent.Description>
@@ -320,25 +319,25 @@ const ServicesForm = ({
         </DialogComponent.Header>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 ">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <Accordion
               type="single"
               collapsible
-              className="w-full "
+              className="w-full"
               // defaultValue="item-1"
               value={currTab}
               onValueChange={(value) => setCurrTab(value)}
             >
               <AccordionItem value="item-1">
-                <AccordionTrigger className="text-xl sm:text-2xl font-semibold">
+                <AccordionTrigger className="text-xl font-semibold sm:text-2xl">
                   Service detials
                 </AccordionTrigger>
                 {errors.serviceStatusId && currTab !== "item-1" && (
-                  <Alert className=" mb-4">Attention needed!</Alert>
+                  <Alert className="mb-4">Attention needed!</Alert>
                 )}
-                <AccordionContent className=" px-1 space-y-4">
-                  <div className=" flex flex-col sm:flex-row  gap-2   space-y-4 sm:space-y-0">
-                    <FormItem className=" w-full  mb-auto">
+                <AccordionContent className="space-y-4 px-1">
+                  <div className="flex flex-col gap-2 space-y-4 sm:flex-row sm:space-y-0">
+                    <FormItem className="mb-auto w-full">
                       <Label>Client</Label>
                       <FormControl>
                         <Input
@@ -346,8 +345,7 @@ const ServicesForm = ({
                           disabled
                           placeholder="Client's data"
                           value={`Name: ${client?.name}`}
-                          className=" flex-1
-                          "
+                          className="flex-1"
                           // {...field}
                         />
                       </FormControl>
@@ -358,7 +356,7 @@ const ServicesForm = ({
                       <FormMessage />
                     </FormItem>
 
-                    <FormItem className=" w-full mb-auto">
+                    <FormItem className="mb-auto w-full">
                       <FormLabel>Car</FormLabel>
                       <FormControl>
                         <Input
@@ -379,7 +377,7 @@ const ServicesForm = ({
                       control={form.control}
                       name="serviceStatusId"
                       render={({ field }) => (
-                        <FormItem className=" w-full mb-auto">
+                        <FormItem className="mb-auto w-full">
                           <FormLabel>Service status</FormLabel>
                           <FormControl>
                             <ServiceStatusCombobox
@@ -397,13 +395,13 @@ const ServicesForm = ({
                     />
                   </div>
 
-                  <div className="flex flex-col sm:flex-row  gap-2   space-y-4 sm:space-y-0">
+                  <div className="flex flex-col gap-2 space-y-4 sm:flex-row sm:space-y-0">
                     <FormField
                       disabled={isLoading}
                       control={form.control}
                       name="kmCount"
                       render={({ field }) => (
-                        <FormItem className=" w-full mb-auto">
+                        <FormItem className="mb-auto w-full">
                           <FormLabel htmlFor="km-count">Km Count</FormLabel>
                           <FormControl>
                             <CurrencyInput
@@ -418,9 +416,9 @@ const ServicesForm = ({
                               onValueChange={(formattedValue, name, value) => {
                                 // setFormattedListing(formattedValue || "");
 
-                                field.onChange(formattedValue || "");
+                                field.onChange(formattedValue || "")
                               }}
-                              className="input-field "
+                              className="input-field"
                             />
                           </FormControl>
                           <FormDescription>
@@ -436,7 +434,7 @@ const ServicesForm = ({
                       control={form.control}
                       name="priority"
                       render={({ field }) => (
-                        <FormItem className=" w-full mb-auto">
+                        <FormItem className="mb-auto w-full">
                           <FormLabel htmlFor="km-count">
                             Service Priority
                           </FormLabel>
@@ -444,7 +442,7 @@ const ServicesForm = ({
                             <PrioritySelect
                               value={field.value}
                               onChange={field.onChange}
-                              className=" w-full flex items-center"
+                              className="flex w-full items-center"
                             />
                           </FormControl>
                           <FormDescription>
@@ -461,7 +459,7 @@ const ServicesForm = ({
                     control={form.control}
                     name="note"
                     render={({ field }) => (
-                      <FormItem className=" w-full mb-auto">
+                      <FormItem className="mb-auto w-full">
                         <FormLabel>Notes</FormLabel>
                         <FormControl>
                           <Textarea
@@ -480,15 +478,15 @@ const ServicesForm = ({
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="item-2">
-                <AccordionTrigger className="  text-xl sm:text-2xl font-semibold">
+                <AccordionTrigger className="text-xl font-semibold sm:text-2xl">
                   Add service fees
                 </AccordionTrigger>
                 {errors.serviceFees?.length && currTab !== "item-2" && (
-                  <Alert className=" mb-4">Attention needed!</Alert>
+                  <Alert className="mb-4">Attention needed!</Alert>
                 )}
-                <AccordionContent className=" px-1  space-y-5">
+                <AccordionContent className="space-y-5 px-1">
                   {/* Service fees starts */}
-                  <div className=" py-10 space-y-8">
+                  <div className="space-y-8 py-10">
                     {/* <h2 className=" font-semibold text-3xl">Service fees</h2> */}
                     {/* <div className="   flex  items-center py-2  justify-between">
                       <h2 className=" font-semibold text-2xl xs:text-3xl">
@@ -512,7 +510,7 @@ const ServicesForm = ({
                       </Button>
                     </div> */}
 
-                    <ul className=" space-y-10">
+                    <ul className="space-y-10">
                       {fields.map((item, i) => (
                         <motion.li
                           initial={{
@@ -530,32 +528,32 @@ const ServicesForm = ({
                             transition: { duration: 0.1, type: "spring" },
                           }}
                           key={item.id}
-                          className=" space-y-6"
+                          className="space-y-6"
                         >
                           <h2>{i + 1}.</h2>
                           <div
-                            className={cn("space-y-4  relative ", {
-                              " border p-3 rounded-xl ": i !== 0,
+                            className={cn("relative space-y-4", {
+                              "rounded-xl border p-3": i !== 0,
                             })}
                           >
                             {i !== 0 && (
                               <button
                                 onClick={() => {
-                                  remove(i);
+                                  remove(i)
                                 }}
-                                className="  absolute  top-5 right-5 rounded-sm outline-none    opacity-70 transition-opacity hover:opacity-100 focus:outline-none disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground  "
+                                className="absolute top-5 right-5 rounded-sm opacity-70 transition-opacity outline-none hover:opacity-100 focus:outline-none disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground"
                                 type="button"
                               >
                                 <Cross2Icon className="h-4 w-4" />
                               </button>
                             )}
-                            <div className=" flex  flex-col gap-2  sm:flex-row  ">
+                            <div className="flex flex-col gap-2 sm:flex-row">
                               <FormField
                                 disabled={isLoading}
                                 control={form.control}
                                 name={`serviceFees.${i}.price`}
                                 render={({ field }) => (
-                                  <FormItem className="  w-full mb-auto ">
+                                  <FormItem className="mb-auto w-full">
                                     <FormLabel htmlFor="fees-price">
                                       Price
                                     </FormLabel>
@@ -572,15 +570,15 @@ const ServicesForm = ({
                                         onValueChange={(
                                           formattedValue,
                                           name,
-                                          value,
+                                          value
                                         ) => {
                                           // setFormattedListing(formattedValue || "");
 
                                           field.onChange(
-                                            Number(value?.value) || 0,
-                                          );
+                                            Number(value?.value) || 0
+                                          )
                                         }}
-                                        className="input-field "
+                                        className="input-field"
                                       />
                                     </FormControl>
                                     <FormDescription>
@@ -595,7 +593,7 @@ const ServicesForm = ({
                                 control={form.control}
                                 name={`serviceFees.${i}.discount`}
                                 render={({ field }) => (
-                                  <FormItem className="  w-full mb-auto">
+                                  <FormItem className="mb-auto w-full">
                                     <FormLabel htmlFor="disocunt">
                                       Discount
                                     </FormLabel>
@@ -612,15 +610,15 @@ const ServicesForm = ({
                                         onValueChange={(
                                           formattedValue,
                                           name,
-                                          value,
+                                          value
                                         ) => {
                                           // setFormattedListing(formattedValue || "");
 
                                           field.onChange(
-                                            Number(value?.value) || 0,
-                                          );
+                                            Number(value?.value) || 0
+                                          )
                                         }}
-                                        className="input-field "
+                                        className="input-field"
                                       />
                                     </FormControl>
                                     <FormDescription>
@@ -635,7 +633,7 @@ const ServicesForm = ({
                                 control={form.control}
                                 name={`serviceFees.${i}.categoryId`}
                                 render={({ field }) => (
-                                  <FormItem className=" w-full  mb-auto">
+                                  <FormItem className="mb-auto w-full">
                                     <FormLabel>Category</FormLabel>
                                     <FormControl>
                                       <ComboBox
@@ -658,7 +656,7 @@ const ServicesForm = ({
                               control={form.control}
                               name={`serviceFees.${i}.notes`}
                               render={({ field }) => (
-                                <FormItem className=" w-full mb-auto">
+                                <FormItem className="mb-auto w-full">
                                   <FormLabel>Notes</FormLabel>
                                   <FormControl>
                                     <Textarea
@@ -675,11 +673,10 @@ const ServicesForm = ({
                                 </FormItem>
                               )}
                             />
-                            <div className=" text-sm text-muted-foreground">
+                            <div className="text-sm text-muted-foreground">
                               Total:{" "}
                               {formatCurrency(
-                                serviceFees[i]?.price -
-                                  serviceFees[i]?.discount,
+                                serviceFees[i]?.price - serviceFees[i]?.discount
                               )}
                             </div>
                           </div>
@@ -690,7 +687,7 @@ const ServicesForm = ({
                           size="sm"
                           variant="orange"
                           type="button"
-                          className="  w-full"
+                          className="w-full"
                           onClick={() =>
                             append({
                               price: 0,
@@ -705,11 +702,11 @@ const ServicesForm = ({
                       )}
 
                       <div className="w-[280px]">
-                        <h3 className=" text-sm">Total:</h3>
-                        <div className=" py-2  border-b border-t space-y-2 text-xs text-muted-foreground">
+                        <h3 className="text-sm">Total:</h3>
+                        <div className="space-y-2 border-t border-b py-2 text-xs text-muted-foreground">
                           <div>
                             Total fees:{" "}
-                            <span className=" relative after:content-['fees'] after:absolute after:-right-7 after:-top-1 after:text-orange-400 dark:after:text-dashboard-orange ">
+                            <span className="dark:after:text-dashboard-orange relative after:absolute after:-top-1 after:-right-7 after:text-orange-400 after:content-['fees']">
                               {formatCurrency(totalFees.totalPrice)}
                             </span>
                           </div>
@@ -717,10 +714,10 @@ const ServicesForm = ({
                             Total fees discount:{" "}
                             {formatCurrency(totalFees.totalDiscount)}
                           </div>
-                          <div className=" border-t pt-1">
+                          <div className="border-t pt-1">
                             Net:{" "}
                             {formatCurrency(
-                              totalFees.totalPrice - totalFees.totalDiscount,
+                              totalFees.totalPrice - totalFees.totalDiscount
                             )}
                           </div>
                         </div>
@@ -731,22 +728,22 @@ const ServicesForm = ({
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="item-3">
-                <AccordionTrigger className="  text-xl sm:text-2xl font-semibold">
+                <AccordionTrigger className="text-xl font-semibold sm:text-2xl">
                   Add product sold
                 </AccordionTrigger>
                 {errors.productsToSell?.length && currTab !== "item-3" && (
-                  <Alert className=" mb-4">Attention needed!</Alert>
+                  <Alert className="mb-4">Attention needed!</Alert>
                 )}
-                <AccordionContent className=" px-1 space-y-5">
+                <AccordionContent className="space-y-5 px-1">
                   {/* products to sell starts */}
-                  <div className=" py-10 space-y-8">
-                    <ul className=" space-y-10">
+                  <div className="space-y-8 py-10">
+                    <ul className="space-y-10">
                       {productsToSellFields.map((item, i) => {
                         const maxAmount =
                           products.find(
                             (product) =>
-                              product.id === productsToSell[i]?.productId,
-                          )?.stock || 0;
+                              product.id === productsToSell[i]?.productId
+                          )?.stock || 0
 
                         return (
                           <motion.li
@@ -765,19 +762,19 @@ const ServicesForm = ({
                               transition: { duration: 0.1, type: "spring" },
                             }}
                             key={item.id}
-                            className=" space-y-6"
+                            className="space-y-6"
                           >
                             <h2>{i + 1}.</h2>
                             <div
                               className={cn(
-                                "space-y-4 border p-3 rounded-xl  relative ",
+                                "relative space-y-4 rounded-xl border p-3"
                               )}
                             >
                               <button
                                 onClick={() => {
-                                  removeProduct(i);
+                                  removeProduct(i)
                                 }}
-                                className="  absolute  top-5 right-5 rounded-sm outline-none    opacity-70 transition-opacity hover:opacity-100 focus:outline-none disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground  "
+                                className="absolute top-5 right-5 rounded-sm opacity-70 transition-opacity outline-none hover:opacity-100 focus:outline-none disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground"
                                 type="button"
                               >
                                 <Cross2Icon className="h-4 w-4" />
@@ -787,29 +784,29 @@ const ServicesForm = ({
                                 control={form.control}
                                 name={`productsToSell.${i}.productId`}
                                 render={({ field }) => (
-                                  <FormItem className=" w-full mb-auto">
+                                  <FormItem className="mb-auto w-full">
                                     <FormLabel>Product</FormLabel>
                                     <FormControl>
                                       <ProductsComboBox
                                         productToSell={productsToSell}
                                         setValue={(value) => {
-                                          field.onChange(value);
+                                          field.onChange(value)
                                           if (value) {
                                             const product = products.find(
-                                              (product) => product.id === value,
-                                            );
+                                              (product) => product.id === value
+                                            )
                                             if (product) {
                                               form.setValue(
                                                 `productsToSell.${i}.pricePerUnit`,
-                                                product.listPrice,
-                                              );
-                                              console.log(product.listPrice);
+                                                product.listPrice
+                                              )
+                                              console.log(product.listPrice)
 
                                               form.setValue(
                                                 `productsToSell.${i}.discount`,
                                                 product.listPrice -
-                                                  product.salePrice,
-                                              );
+                                                  product.salePrice
+                                              )
                                             }
                                           }
                                         }}
@@ -824,13 +821,13 @@ const ServicesForm = ({
                                   </FormItem>
                                 )}
                               />
-                              <div className=" flex  flex-col gap-2  sm:flex-row  ">
+                              <div className="flex flex-col gap-2 sm:flex-row">
                                 <FormField
                                   disabled={isLoading}
                                   control={form.control}
                                   name={`productsToSell.${i}.pricePerUnit`}
                                   render={({ field }) => (
-                                    <FormItem className="  w-full mb-auto ">
+                                    <FormItem className="mb-auto w-full">
                                       <FormLabel htmlFor="price-per-unit">
                                         Price per unit
                                       </FormLabel>
@@ -847,15 +844,15 @@ const ServicesForm = ({
                                           onValueChange={(
                                             formattedValue,
                                             name,
-                                            value,
+                                            value
                                           ) => {
                                             // setFormattedListing(formattedValue || "");
 
                                             field.onChange(
-                                              Number(value?.value) || 0,
-                                            );
+                                              Number(value?.value) || 0
+                                            )
                                           }}
-                                          className="input-field "
+                                          className="input-field"
                                         />
                                       </FormControl>
                                       <FormDescription>
@@ -870,7 +867,7 @@ const ServicesForm = ({
                                   control={form.control}
                                   name={`productsToSell.${i}.discount`}
                                   render={({ field }) => (
-                                    <FormItem className="  w-full mb-auto">
+                                    <FormItem className="mb-auto w-full">
                                       <FormLabel htmlFor="discount-per-unit">
                                         Discount per unit
                                       </FormLabel>
@@ -887,15 +884,15 @@ const ServicesForm = ({
                                           onValueChange={(
                                             formattedValue,
                                             name,
-                                            value,
+                                            value
                                           ) => {
                                             // setFormattedListing(formattedValue || "");
 
                                             field.onChange(
-                                              Number(value?.value) || 0,
-                                            );
+                                              Number(value?.value) || 0
+                                            )
                                           }}
-                                          className="input-field "
+                                          className="input-field"
                                         />
                                       </FormControl>
                                       <FormDescription>
@@ -910,7 +907,7 @@ const ServicesForm = ({
                                   control={form.control}
                                   name={`productsToSell.${i}.count`}
                                   render={({ field }) => (
-                                    <FormItem className=" w-full  mb-auto">
+                                    <FormItem className="mb-auto w-full">
                                       <FormLabel>Count</FormLabel>
                                       <FormControl>
                                         <CurrencyInput
@@ -925,18 +922,16 @@ const ServicesForm = ({
                                           onValueChange={(
                                             formattedValue,
                                             name,
-                                            value,
+                                            value
                                           ) => {
                                             const newValue = value
                                               ? Number(value.value)
-                                              : 0;
+                                              : 0
                                             const isMaxAmount =
-                                              newValue > maxAmount;
+                                              newValue > maxAmount
                                             field.onChange(
-                                              isMaxAmount
-                                                ? maxAmount
-                                                : newValue,
-                                            );
+                                              isMaxAmount ? maxAmount : newValue
+                                            )
                                             if (isMaxAmount) {
                                               toast({
                                                 variant: "destructive",
@@ -946,10 +941,10 @@ const ServicesForm = ({
                                                     error={`Count number must be lower than ${maxAmount}`}
                                                   />
                                                 ),
-                                              });
+                                              })
                                             }
                                           }}
-                                          className="input-field  "
+                                          className="input-field"
                                         />
                                       </FormControl>
                                       <FormDescription>
@@ -966,7 +961,7 @@ const ServicesForm = ({
                                 control={form.control}
                                 name={`productsToSell.${i}.note`}
                                 render={({ field }) => (
-                                  <FormItem className=" w-full mb-auto">
+                                  <FormItem className="mb-auto w-full">
                                     <FormLabel>Notes</FormLabel>
                                     <FormControl>
                                       <Textarea
@@ -983,26 +978,26 @@ const ServicesForm = ({
                                 )}
                               />
 
-                              <div className=" text-sm text-muted-foreground">
+                              <div className="text-sm text-muted-foreground">
                                 Total amount spent:
-                                <span className=" ml-3">
+                                <span className="ml-3">
                                   {formatCurrency(
                                     (productsToSell[i]?.pricePerUnit -
                                       productsToSell[i]?.discount) *
-                                      productsToSell[i]?.count,
+                                      productsToSell[i]?.count
                                   )}
                                 </span>
                               </div>
                             </div>
                           </motion.li>
-                        );
+                        )
                       })}
 
                       <Button
                         size="sm"
                         variant="secondary"
                         type="button"
-                        className="  w-full"
+                        className="w-full"
                         onClick={() =>
                           appendProduct({
                             pricePerUnit: 0,
@@ -1017,11 +1012,11 @@ const ServicesForm = ({
                       </Button>
 
                       <div className="w-[280px]">
-                        <h3 className=" text-sm">Total:</h3>
-                        <div className=" py-2  border-b border-t space-y-2 text-xs text-muted-foreground">
+                        <h3 className="text-sm">Total:</h3>
+                        <div className="space-y-2 border-t border-b py-2 text-xs text-muted-foreground">
                           <div>
                             Amount:{" "}
-                            <span className=" relative after:content-['units'] after:absolute after:-right-8 after:-top-1 after:text-indigo-800 dark:after:text-dashboard-indigo ">
+                            <span className="dark:after:text-dashboard-indigo relative after:absolute after:-top-1 after:-right-8 after:text-indigo-800 after:content-['units']">
                               {totalProductSoldAmounts.totalCount}
                             </span>
                           </div>
@@ -1032,14 +1027,14 @@ const ServicesForm = ({
                           <div>
                             Total discount:{" "}
                             {formatCurrency(
-                              totalProductSoldAmounts.totalDiscount,
+                              totalProductSoldAmounts.totalDiscount
                             )}
                           </div>
-                          <div className=" border-t pt-1">
+                          <div className="border-t pt-1">
                             Net:{" "}
                             {formatCurrency(
                               totalProductSoldAmounts.totalPrice -
-                                totalProductSoldAmounts.totalDiscount,
+                                totalProductSoldAmounts.totalDiscount
                             )}
                           </div>
                         </div>
@@ -1051,18 +1046,18 @@ const ServicesForm = ({
               </AccordionItem>
 
               <AccordionItem value="item-4">
-                <AccordionTrigger className=" text-xl sm:text-2xl font-semibold">
+                <AccordionTrigger className="text-xl font-semibold sm:text-2xl">
                   Summary
                 </AccordionTrigger>
                 <AccordionContent>
-                  <div className="max-w-[500px] mx-auto">
-                    <h3 className=" text-sm">Total:</h3>
-                    <div className=" py-2   border-t space-y-2 text-xs text-muted-foreground">
-                      <div className=" flex  flex-col xs:flex-row  gap-5 xs:items-center  justify-between">
-                        <div className=" space-y-2  ">
+                  <div className="mx-auto max-w-[500px]">
+                    <h3 className="text-sm">Total:</h3>
+                    <div className="space-y-2 border-t py-2 text-xs text-muted-foreground">
+                      <div className="flex flex-col justify-between gap-5 xs:flex-row xs:items-center">
+                        <div className="space-y-2">
                           <div>
                             Products amount:{" "}
-                            <span className=" relative after:content-['units'] after:absolute after:-right-8 after:-top-1 after:text-indigo-800 dark:after:text-dashboard-indigo ">
+                            <span className="dark:after:text-dashboard-indigo relative after:absolute after:-top-1 after:-right-8 after:text-indigo-800 after:content-['units']">
                               {totalProductSoldAmounts.totalCount}
                             </span>
                           </div>
@@ -1073,24 +1068,24 @@ const ServicesForm = ({
                           <div>
                             Total product discount:{" "}
                             {formatCurrency(
-                              totalProductSoldAmounts.totalDiscount,
+                              totalProductSoldAmounts.totalDiscount
                             )}
                           </div>
-                          <div className="  py-2 border-y w-fit text-xs">
+                          <div className="w-fit border-y py-2 text-xs">
                             Net products sold:{" "}
-                            <span className="text-indigo-800 dark:text-dashboard-indigo">
+                            <span className="dark:text-dashboard-indigo text-indigo-800">
                               {" "}
                               {formatCurrency(
                                 totalProductSoldAmounts.totalPrice -
-                                  totalProductSoldAmounts.totalDiscount,
+                                  totalProductSoldAmounts.totalDiscount
                               )}
                             </span>
                           </div>
                         </div>
-                        <div className=" space-y-2">
+                        <div className="space-y-2">
                           <div>
                             Fees amount:{" "}
-                            <span className=" relative after:content-['fees'] after:absolute after:-right-7 after:-top-1 text-orange-400 dark:after:text-dashboard-orange ">
+                            <span className="dark:after:text-dashboard-orange relative text-orange-400 after:absolute after:-top-1 after:-right-7 after:content-['fees']">
                               {serviceFees.length}
                             </span>
                           </div>
@@ -1102,24 +1097,24 @@ const ServicesForm = ({
                             Total fees discount:{" "}
                             {formatCurrency(totalFees.totalDiscount)}
                           </div>
-                          <div className="  py-2 border-y  w-fit">
+                          <div className="w-fit border-y py-2">
                             Net fees:{" "}
-                            <span className=" text-orange-400 dark:text-dashboard-orange text-xs">
+                            <span className="dark:text-dashboard-orange text-xs text-orange-400">
                               {" "}
                               {formatCurrency(
-                                totalFees.totalPrice - totalFees.totalDiscount,
+                                totalFees.totalPrice - totalFees.totalDiscount
                               )}
                             </span>
                           </div>
                         </div>
                       </div>
-                      <div className=" border-t pt-1">
+                      <div className="border-t pt-1">
                         <div>
                           {" "}
                           Total Revenue:{" "}
                           {formatCurrency(
                             totalFees.totalPrice +
-                              totalProductSoldAmounts.totalPrice,
+                              totalProductSoldAmounts.totalPrice
                           )}
                         </div>
                         <div>
@@ -1127,7 +1122,7 @@ const ServicesForm = ({
                           Total discount:{" "}
                           {formatCurrency(
                             totalFees.totalDiscount +
-                              totalProductSoldAmounts.totalDiscount,
+                              totalProductSoldAmounts.totalDiscount
                           )}
                         </div>
                         <div>
@@ -1136,7 +1131,7 @@ const ServicesForm = ({
                             totalProductSoldAmounts.totalPrice +
                               totalFees.totalPrice -
                               (totalProductSoldAmounts.totalDiscount +
-                                totalFees.totalDiscount),
+                                totalFees.totalDiscount)
                           )}
                         </div>
                       </div>
@@ -1228,14 +1223,14 @@ const ServicesForm = ({
                 </div>
               </div>
             </div> */}
-            <div className=" relative flex flex-col-reverse sm:flex-row items-center justify-end  gap-3">
+            <div className="relative flex flex-col-reverse items-center justify-end gap-3 sm:flex-row">
               <Button
                 onClick={() => form.reset()}
                 type="button"
-                className=" p-0 h-6 w-6  hidden sm:flex  absolute left-5 bottom-0"
+                className="absolute bottom-0 left-5 hidden h-6 w-6 p-0 sm:flex"
                 variant="outline"
               >
-                <RotateCcw className=" w-4 h-4" />
+                <RotateCcw className="h-4 w-4" />
               </Button>
               <Button
                 onClick={handleClose}
@@ -1243,7 +1238,7 @@ const ServicesForm = ({
                 type="reset"
                 variant="secondary"
                 size="sm"
-                className=" w-full sm:w-[unset]"
+                className="w-full sm:w-[unset]"
               >
                 Cancel
               </Button>
@@ -1251,10 +1246,10 @@ const ServicesForm = ({
                 type="submit"
                 size="sm"
                 disabled={disabled || isLoading}
-                className=" w-full sm:w-[unset]"
+                className="w-full sm:w-[unset]"
               >
                 {isLoading ? (
-                  <Spinner className=" h-full" />
+                  <Spinner className="h-full" />
                 ) : carToEdit ? (
                   "Edit"
                 ) : (
@@ -1266,10 +1261,10 @@ const ServicesForm = ({
         </Form>
       </DialogComponent.Content>
     </DialogComponent>
-  );
-};
+  )
+}
 
-export default ServicesForm;
+export default ServicesForm
 
 // const stocksUpdates: { id: number; stock: number }[] = [];
 

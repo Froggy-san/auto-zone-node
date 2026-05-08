@@ -1,9 +1,9 @@
-import { useState, useEffect, useCallback, RefObject } from "react";
+import { useState, useEffect, useCallback, RefObject } from "react"
 
 // Define the state of the fade effect
 interface ScrollFadeState {
-  fadeClass: "no-fade" | "fade-top" | "fade-bottom" | "fade-both";
-  isScrollable: boolean;
+  fadeClass: "no-fade" | "fade-top" | "fade-bottom" | "fade-both"
+  isScrollable: boolean
 }
 
 /**
@@ -14,69 +14,69 @@ interface ScrollFadeState {
 export function useScrollFade(
   scrollRef: RefObject<HTMLElement>
 ): ScrollFadeState {
-  const [isAtStart, setIsAtStart] = useState(true);
-  const [isAtEnd, setIsAtEnd] = useState(true);
-  const [isScrollable, setIsScrollable] = useState(false);
+  const [isAtStart, setIsAtStart] = useState(true)
+  const [isAtEnd, setIsAtEnd] = useState(true)
+  const [isScrollable, setIsScrollable] = useState(false)
 
   // Function to determine the fade state
   const checkScrollPosition = useCallback(() => {
-    const el = scrollRef.current;
-    if (!el) return;
+    const el = scrollRef.current
+    if (!el) return
 
     // Check if the scroll bar is visible (content is scrollable)
-    const currentIsScrollable = el.scrollHeight > el.clientHeight;
-    setIsScrollable(currentIsScrollable);
+    const currentIsScrollable = el.scrollHeight > el.clientHeight
+    setIsScrollable(currentIsScrollable)
 
     if (!currentIsScrollable) {
       // If not scrollable, set to 'no-fade' state
-      setIsAtStart(true);
-      setIsAtEnd(true);
-      return;
+      setIsAtStart(true)
+      setIsAtEnd(true)
+      return
     }
 
     // Check scroll position
-    const newIsAtStart = el.scrollTop === 0;
+    const newIsAtStart = el.scrollTop === 0
     // The content is scrolled to the end if scrollTop + clientHeight >= scrollHeight
     const newIsAtEnd =
-      Math.ceil(el.scrollTop + el.clientHeight) >= el.scrollHeight;
+      Math.ceil(el.scrollTop + el.clientHeight) >= el.scrollHeight
 
-    setIsAtStart(newIsAtStart);
-    setIsAtEnd(newIsAtEnd);
-  }, [scrollRef]);
+    setIsAtStart(newIsAtStart)
+    setIsAtEnd(newIsAtEnd)
+  }, [scrollRef])
 
   // Attach listeners on mount
   useEffect(() => {
-    const el = scrollRef.current;
+    const el = scrollRef.current
     if (el) {
       // 1. Initial check
-      checkScrollPosition();
+      checkScrollPosition()
 
       // 2. Attach scroll listener
-      el.addEventListener("scroll", checkScrollPosition);
+      el.addEventListener("scroll", checkScrollPosition)
 
       // 3. Re-check on window resize, as content/container height might change
-      window.addEventListener("resize", checkScrollPosition);
+      window.addEventListener("resize", checkScrollPosition)
 
       // Cleanup function
       return () => {
-        el.removeEventListener("scroll", checkScrollPosition);
-        window.removeEventListener("resize", checkScrollPosition);
-      };
+        el.removeEventListener("scroll", checkScrollPosition)
+        window.removeEventListener("resize", checkScrollPosition)
+      }
     }
-  }, [checkScrollPosition]);
+  }, [checkScrollPosition])
 
   // Determine the CSS class based on the state
-  let fadeClass: ScrollFadeState["fadeClass"] = "no-fade";
+  let fadeClass: ScrollFadeState["fadeClass"] = "no-fade"
 
   if (!isScrollable || (isAtStart && isAtEnd)) {
-    fadeClass = "no-fade";
+    fadeClass = "no-fade"
   } else if (isAtStart && !isAtEnd) {
-    fadeClass = "fade-bottom";
+    fadeClass = "fade-bottom"
   } else if (!isAtStart && isAtEnd) {
-    fadeClass = "fade-top";
+    fadeClass = "fade-top"
   } else if (!isAtStart && !isAtEnd) {
-    fadeClass = "fade-both";
+    fadeClass = "fade-both"
   }
 
-  return { fadeClass, isScrollable };
+  return { fadeClass, isScrollable }
 }

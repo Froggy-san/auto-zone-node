@@ -1,6 +1,6 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Button } from "@components/ui/button";
+import React, { useCallback, useEffect, useState } from "react"
+import { motion, AnimatePresence } from "framer-motion"
+import { Button } from "@components/ui/button"
 import {
   Dialog,
   DialogClose,
@@ -10,17 +10,17 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Download, Trash2 } from "lucide-react";
-import { useToast } from "@hooks/use-toast";
+} from "@/components/ui/dialog"
+import { Download, Trash2 } from "lucide-react"
+import { useToast } from "@hooks/use-toast"
 import SuccessToastDescription, {
   ErorrToastDescription,
-} from "@components/toast-items";
-import downloadAsPdf from "@lib/services/download-pdf";
-import CloseButton from "@components/close-button";
-import { deleteMultiServicesAction } from "@lib/actions/serviceActions";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useQueryClient } from "@tanstack/react-query";
+} from "@components/toast-items"
+import downloadAsPdf from "@lib/services/download-pdf"
+import CloseButton from "@components/close-button"
+import { deleteMultiServicesAction } from "@lib/actions/serviceActions"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
+import { useQueryClient } from "@tanstack/react-query"
 const ServiceSelectControls = ({
   isAdmin,
   selected,
@@ -29,29 +29,29 @@ const ServiceSelectControls = ({
   pageSize,
   setLoadingIds,
 }: {
-  isAdmin: boolean;
-  selected: number[];
-  setSelected: React.Dispatch<React.SetStateAction<number[]>>;
-  currentPage: number;
-  pageSize: number;
-  setLoadingIds: React.Dispatch<React.SetStateAction<number[]>>;
+  isAdmin: boolean
+  selected: number[]
+  setSelected: React.Dispatch<React.SetStateAction<number[]>>
+  currentPage: number
+  pageSize: number
+  setLoadingIds: React.Dispatch<React.SetStateAction<number[]>>
 }) => {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false)
   const handleRemove = useCallback(
     (e: KeyboardEvent) => {
       if (e.code === "Escape") {
-        setSelected([]);
+        setSelected([])
       }
     },
-    [setSelected],
-  );
+    [setSelected]
+  )
   useEffect(() => {
-    document.addEventListener("keydown", handleRemove);
+    document.addEventListener("keydown", handleRemove)
 
     return () => {
-      document.removeEventListener("keydown", handleRemove);
-    };
-  }, [handleRemove]);
+      document.removeEventListener("keydown", handleRemove)
+    }
+  }, [handleRemove])
 
   return (
     <AnimatePresence>
@@ -62,9 +62,9 @@ const ServiceSelectControls = ({
           animate={{ x: 0, opacity: 1 }}
           exit={{ x: 10, opacity: 0.5 }}
           transition={{ ease: "easeIn", duration: 0.07 }}
-          className=" flex items-center gap-1"
+          className="flex items-center gap-1"
         >
-          <p className=" flex text-muted-foreground  text-xs xs:text-sm items-center gap-1 mr-1 xs:mr-3  ">
+          <p className="mr-1 flex items-center gap-1 text-xs text-muted-foreground xs:mr-3 xs:text-sm">
             <span>SELECTED</span>{" "}
             <AnimatePresence mode="wait">
               <motion.span
@@ -99,13 +99,13 @@ const ServiceSelectControls = ({
 
           <CloseButton
             onClick={() => setSelected([])}
-            className=" static  sm:pl-3"
+            className="static sm:pl-3"
           />
         </motion.div>
       )}
     </AnimatePresence>
-  );
-};
+  )
+}
 
 function DeleteDia({
   currentPage,
@@ -116,50 +116,50 @@ function DeleteDia({
   setIsLoading,
   setLoadingIds,
 }: {
-  currentPage: number;
-  pageSize: number;
-  selected: number[];
-  isLoading: boolean;
-  setSelected: React.Dispatch<React.SetStateAction<number[]>>;
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
-  setLoadingIds: React.Dispatch<React.SetStateAction<number[]>>;
+  currentPage: number
+  pageSize: number
+  selected: number[]
+  isLoading: boolean
+  setSelected: React.Dispatch<React.SetStateAction<number[]>>
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
+  setLoadingIds: React.Dispatch<React.SetStateAction<number[]>>
 }) {
-  const [open, setOpen] = useState(false);
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
-  const router = useRouter();
-  const searchParam = useSearchParams();
-  const pathname = usePathname();
+  const [open, setOpen] = useState(false)
+  const { toast } = useToast()
+  const queryClient = useQueryClient()
+  const router = useRouter()
+  const searchParam = useSearchParams()
+  const pathname = usePathname()
 
   function checkIfLastItem() {
-    const params = new URLSearchParams(searchParam);
+    const params = new URLSearchParams(searchParam)
     if (pageSize === selected.length) {
       if (Number(currentPage) === 1 && pageSize === selected.length) {
-        params.delete("dateFrom");
-        params.delete("dateTo");
-        params.delete("clientId");
-        params.delete("carId");
-        params.delete("serviceStatusId");
-        params.delete("minPrice");
-        params.delete("maxPrice");
+        params.delete("dateFrom")
+        params.delete("dateTo")
+        params.delete("clientId")
+        params.delete("carId")
+        params.delete("serviceStatusId")
+        params.delete("minPrice")
+        params.delete("maxPrice")
       }
       if (Number(currentPage) > 1) {
-        params.set("page", String(Number(currentPage) - 1));
+        params.set("page", String(Number(currentPage) - 1))
       }
-      router.push(`${pathname}?${params.toString()}`, { scroll: false });
+      router.push(`${pathname}?${params.toString()}`, { scroll: false })
     }
   }
   async function handleDelete() {
     try {
-      setIsLoading(true);
-      setLoadingIds(selected);
-      const { error } = await deleteMultiServicesAction(selected);
+      setIsLoading(true)
+      setLoadingIds(selected)
+      const { error } = await deleteMultiServicesAction(selected)
 
-      if (error) throw new Error(error);
-      setSelected([]);
-      setOpen(false);
-      checkIfLastItem();
-      queryClient.removeQueries({ queryKey: ["servicesStats"] });
+      if (error) throw new Error(error)
+      setSelected([])
+      setOpen(false)
+      checkIfLastItem()
+      queryClient.removeQueries({ queryKey: ["servicesStats"] })
       toast({
         className: "bg-primary  text-primary-foreground",
         title: `Done.`,
@@ -168,18 +168,18 @@ function DeleteDia({
             message={`Receipt data is ready to be downloaded as a PDF.`}
           />
         ),
-      });
+      })
     } catch (error: any) {
-      console.error(error);
+      console.error(error)
 
       toast({
         variant: "destructive",
         title: "Failed to download.",
         description: <ErorrToastDescription error={error.message} />,
-      });
+      })
     } finally {
-      setIsLoading(false);
-      setLoadingIds([]);
+      setIsLoading(false)
+      setLoadingIds([])
     }
   }
 
@@ -189,11 +189,11 @@ function DeleteDia({
         {" "}
         <Button
           variant="destructive"
-          className="  mb-1 text-[0.7rem] xs:text-xs gap-1 h-fit px-2.5 py-1"
+          className="mb-1 h-fit gap-1 px-2.5 py-1 text-[0.7rem] xs:text-xs"
         >
           {" "}
           <span className=" ">{selected.length}</span> Delete{" "}
-          <Trash2 className=" w-3 h-3 xs:w-4 xs:h-4" />
+          <Trash2 className="h-3 w-3 xs:h-4 xs:w-4" />
         </Button>
       </DialogTrigger>
       <DialogContent>
@@ -201,7 +201,7 @@ function DeleteDia({
           <DialogTitle>Are you absolutely sure?</DialogTitle>
           <DialogDescription>{`Delete ${selected.length} service receipts and all it's related data.`}</DialogDescription>
         </DialogHeader>
-        <DialogFooter className=" gap-y-2">
+        <DialogFooter className="gap-y-2">
           <DialogClose asChild>
             <Button variant="outline" size="sm">
               Cancel
@@ -220,7 +220,7 @@ function DeleteDia({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  );
+  )
 }
 
 function DownloadPdfDia({
@@ -230,25 +230,25 @@ function DownloadPdfDia({
   setIsLoading,
   setLoadingIds,
 }: {
-  selected: number[];
-  isLoading: boolean;
-  setSelected: React.Dispatch<React.SetStateAction<number[]>>;
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
-  setLoadingIds: React.Dispatch<React.SetStateAction<number[]>>;
+  selected: number[]
+  isLoading: boolean
+  setSelected: React.Dispatch<React.SetStateAction<number[]>>
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
+  setLoadingIds: React.Dispatch<React.SetStateAction<number[]>>
 }) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(false)
 
-  const { toast } = useToast();
+  const { toast } = useToast()
   async function handleDownloadSeparately() {
     try {
-      setIsLoading(true);
-      setLoadingIds(selected);
+      setIsLoading(true)
+      setLoadingIds(selected)
       for (const id of selected) {
-        await downloadAsPdf([id]);
+        await downloadAsPdf([id])
       }
 
-      setSelected([]);
-      setOpen(false);
+      setSelected([])
+      setOpen(false)
       toast({
         className: "bg-primary  text-primary-foreground",
         title: `Done.`,
@@ -257,29 +257,29 @@ function DownloadPdfDia({
             message={`Receipt data is ready to be downloaded as a PDF.`}
           />
         ),
-      });
+      })
     } catch (error: any) {
-      console.error(error);
+      console.error(error)
 
       toast({
         variant: "destructive",
         title: "Failed to download.",
         description: <ErorrToastDescription error={error.message} />,
-      });
+      })
     } finally {
-      setIsLoading(false);
-      setLoadingIds([]);
+      setIsLoading(false)
+      setLoadingIds([])
     }
   }
 
   async function handleDownloadSameFile() {
     try {
-      setIsLoading(true);
+      setIsLoading(true)
 
-      await downloadAsPdf(selected, "inSamePage");
+      await downloadAsPdf(selected, "inSamePage")
 
       // setSelected([]);
-      setOpen(false);
+      setOpen(false)
       toast({
         className: "bg-primary  text-primary-foreground",
         title: `Done.`,
@@ -288,17 +288,17 @@ function DownloadPdfDia({
             message={`Receipt data is ready to be downloaded as a PDF.`}
           />
         ),
-      });
+      })
     } catch (error: any) {
-      console.error(error);
+      console.error(error)
 
       toast({
         variant: "destructive",
         title: "Failed to download.",
         description: <ErorrToastDescription error={error.message} />,
-      });
+      })
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
   }
   return (
@@ -307,10 +307,10 @@ function DownloadPdfDia({
         {" "}
         <Button
           variant="secondary"
-          className=" mb-1 text-[0.7rem] xs:text-xs gap-1 h-fit px-2.5 py-1"
+          className="mb-1 h-fit gap-1 px-2.5 py-1 text-[0.7rem] xs:text-xs"
         >
           {" "}
-          Download as pdf <Download className=" w-3 h-3 xs:w-4 xs:h-4" />
+          Download as pdf <Download className="h-3 w-3 xs:h-4 xs:w-4" />
         </Button>
       </DialogTrigger>
       <DialogContent>
@@ -318,7 +318,7 @@ function DownloadPdfDia({
           <DialogTitle>Download services as pdf</DialogTitle>
           <DialogDescription>{`You are about to Download ${selected.length} service receipts as a PDF. You can choose how you prefer to download multiple receipts, whether you want them all in the same PDF file or in separate files."`}</DialogDescription>
         </DialogHeader>
-        <DialogFooter className=" gap-y-2">
+        <DialogFooter className="gap-y-2">
           <DialogClose asChild>
             <Button variant="outline" size="sm">
               Cancel
@@ -343,7 +343,7 @@ function DownloadPdfDia({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  );
+  )
 }
 
-export default ServiceSelectControls;
+export default ServiceSelectControls

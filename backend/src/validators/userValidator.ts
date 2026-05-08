@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { objectIdSchema } from "./commen";
 
 export const createUserSchema = z.object({
   body: z.object({
@@ -18,12 +19,36 @@ export const createUserSchema = z.object({
 });
 
 export const updateUserSchema = z.object({
+  // params: z.object({ id: objectIdSchema }),
   body: z.object({
     username: z.string().min(4).optional(),
     email: z.string().email().optional(),
     picture: z.string().optional(),
     provider: z.enum(["email", "google"]).optional(),
     isDeleted: z.coerce.boolean().optional(),
-    role: z.enum(["admin", "user"]).optional(),
   }),
+});
+export const forgotPasswordSchema = z.object({
+  body: z.object({
+    email: z.string().email(),
+  }),
+});
+export const updatePasswordSchema = z.object({
+  body: z.object({
+    password: z.string().min(8, "Password must be at least 8 characters"),
+    currentPassword: z
+      .string()
+      .min(8, "Password must be at least 8 characters"),
+  }),
+});
+
+export const resetPasswordSchema = z.object({
+  body: z.object({
+    password: z.string().min(8, "Password must be at least 8 characters"),
+  }),
+});
+
+export const updateUserByAdminSchema = createUserSchema.partial().extend({
+  params: z.object({ id: objectIdSchema }),
+  body: createUserSchema.shape.body.partial(),
 });

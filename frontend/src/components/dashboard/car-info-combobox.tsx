@@ -1,9 +1,8 @@
+import * as React from "react"
+import { Check, ChevronsUpDown } from "lucide-react"
 
-import * as React from "react";
-import { Check, ChevronsUpDown } from "lucide-react";
-
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
 import {
   Command,
   CommandEmpty,
@@ -11,14 +10,14 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "@/components/ui/command";
+} from "@/components/ui/command"
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
-import { CarInfoProps } from "@lib/types";
-import { DEFAULT_CAR_LOGO } from "@lib/constants";
+} from "@/components/ui/popover"
+import { CarInfoProps } from "@lib/types"
+import { DEFAULT_CAR_LOGO } from "@lib/constants"
 
 // const frameworks = [
 //   {
@@ -44,10 +43,10 @@ import { DEFAULT_CAR_LOGO } from "@lib/constants";
 // ];
 
 interface ComboBoxProps {
-  setValue: React.Dispatch<React.SetStateAction<number>>;
-  value: number;
-  options: CarInfoProps[];
-  disabled?: boolean;
+  setValue: React.Dispatch<React.SetStateAction<number>>
+  value: number
+  options: CarInfoProps[]
+  disabled?: boolean
 }
 
 export const CarInfoComboBox: React.FC<ComboBoxProps> = ({
@@ -56,9 +55,9 @@ export const CarInfoComboBox: React.FC<ComboBoxProps> = ({
   options,
   disabled,
 }) => {
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = React.useState(false)
   // const [value, setValue] = React.useState(0);
-  const selected = options.find((option) => option.id === value);
+  const selected = options.find((option) => option.id === value)
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -68,18 +67,18 @@ export const CarInfoComboBox: React.FC<ComboBoxProps> = ({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className=" w-full   justify-between   h-fit "
+          className="h-fit w-full justify-between"
         >
           {selected ? (
-            <div className=" flex flex-1 break-all items-center">
-              <p className=" text-wrap  text-left ">
+            <div className="flex flex-1 items-center break-all">
+              <p className="text-left text-wrap">
                 Make: {selected.carMaker.name} / Model: {selected.carModel.name}{" "}
                 / Gen: {selected.carGeneration.name}{" "}
               </p>
               <img
                 src={selected.carMaker.logo || DEFAULT_CAR_LOGO}
                 alt="Car logo"
-                className="  object-cover   max-w-[100%]   h-9 w-9  ml-[5px]  rounded-sm "
+                className="ml-[5px] h-9 w-9 max-w-[100%] rounded-sm object-cover"
               />
             </div>
           ) : (
@@ -88,7 +87,7 @@ export const CarInfoComboBox: React.FC<ComboBoxProps> = ({
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className=" h-[30vh] sm:h-[unset]  w-[300px] sm:w-[400px]   p-0">
+      <PopoverContent className="h-[30vh] w-[300px] p-0 sm:h-[unset] sm:w-[400px]">
         <Command>
           <CommandInput placeholder="Search option..." />
           <CommandList>
@@ -104,8 +103,8 @@ export const CarInfoComboBox: React.FC<ComboBoxProps> = ({
                     String(option.id)
                   } // to avoid selecting two or more items that has the same name proprty.
                   onSelect={() => {
-                    setValue(option.id === value ? 0 : option.id);
-                    setOpen(false);
+                    setValue(option.id === value ? 0 : option.id)
+                    setOpen(false)
                   }}
                   className="gap-2"
                 >
@@ -115,14 +114,14 @@ export const CarInfoComboBox: React.FC<ComboBoxProps> = ({
                       value === option.id ? "opacity-100" : "opacity-0"
                     )}
                   />
-                  <p className=" break-all flex-1">
+                  <p className="flex-1 break-all">
                     Make: {option.carMaker.name} / Model: {option.carModel.name}{" "}
                     / Gen: {option.carGeneration.name}{" "}
                   </p>
                   <img
                     src={option.carMaker.logo || DEFAULT_CAR_LOGO}
                     alt="Car logo"
-                    className="  object-cover    max-w-9  max-h-9 ml-auto  rounded-sm "
+                    className="ml-auto max-h-9 max-w-9 rounded-sm object-cover"
                   />
                 </CommandItem>
               ))}
@@ -131,5 +130,5 @@ export const CarInfoComboBox: React.FC<ComboBoxProps> = ({
         </Command>
       </PopoverContent>
     </Popover>
-  );
-};
+  )
+}

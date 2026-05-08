@@ -1,8 +1,8 @@
-import { getInfiniteClients } from "@lib/services/client";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { getInfiniteClients } from "@lib/services/client"
+import { useInfiniteQuery } from "@tanstack/react-query"
 
 interface GetInfiniteClientsProps {
-  name?: string;
+  name?: string
 }
 export default function useInfiniteClients(filters: GetInfiniteClientsProps) {
   const {
@@ -18,14 +18,14 @@ export default function useInfiniteClients(filters: GetInfiniteClientsProps) {
     queryKey: ["infiniteClients", filters],
     queryFn: ({ queryKey, pageParam = 1 }) =>
       getInfiniteClients({ pageParam, queryKey } as {
-        pageParam?: number;
-        queryKey: [string, GetInfiniteClientsProps];
+        pageParam?: number
+        queryKey: [string, GetInfiniteClientsProps]
       }),
 
     getNextPageParam: (lastPage) => {
-      return lastPage.nextPageParam;
+      return lastPage.nextPageParam
     },
-  });
+  })
 
   return {
     isFetched,
@@ -36,5 +36,5 @@ export default function useInfiniteClients(filters: GetInfiniteClientsProps) {
     fetchNextPage,
     data,
     status,
-  };
+  }
 }

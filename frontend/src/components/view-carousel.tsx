@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import React, { useCallback, useEffect, useRef, useState } from "react"
+import { Card, CardContent } from "@/components/ui/card"
 import {
   Carousel,
   CarouselContent,
@@ -7,61 +7,66 @@ import {
   CarouselNext,
   CarouselPrevious,
   type CarouselApi,
-} from "@/components/ui/carousel";
-import { motion } from "framer-motion";
-import { ClickAwayListener } from "@mui/material";
-import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
-import { createPortal } from "react-dom";
+} from "@/components/ui/carousel"
+import { motion } from "framer-motion"
+import { ClickAwayListener } from "@mui/material"
+import { Button } from "@/components/ui/button"
+import { X } from "lucide-react"
+import { createPortal } from "react-dom"
 
 interface ViewCarouselProps {
-  images: string[];
-  index?: number;
-  closeFunction: () => void;
-  shouldHideScrollBar?: boolean;
+  images: string[]
+  index?: number
+  closeFunction: () => void
+  shouldHideScrollBar?: boolean
 }
 
-const ViewCarousel = ({ images, index, closeFunction , shouldHideScrollBar }: ViewCarouselProps) => {
-  const [api, setApi] = React.useState<CarouselApi>();
-  const [current, setCurrent] = React.useState(index || 0);
-  const [count, setCount] = React.useState(0);
+const ViewCarousel = ({
+  images,
+  index,
+  closeFunction,
+  shouldHideScrollBar,
+}: ViewCarouselProps) => {
+  const [api, setApi] = React.useState<CarouselApi>()
+  const [current, setCurrent] = React.useState(index || 0)
+  const [count, setCount] = React.useState(0)
 
   React.useEffect(() => {
     if (!api) {
-      return;
+      return
     }
 
-    setCount(api.scrollSnapList().length);
-    if (index) api.scrollTo(index, true);
-    setCurrent(api.selectedScrollSnap());
+    setCount(api.scrollSnapList().length)
+    if (index) api.scrollTo(index, true)
+    setCurrent(api.selectedScrollSnap())
 
     api.on("select", () => {
-      setCurrent(api.selectedScrollSnap());
-    });
-  }, [api, index, setCurrent]);
+      setCurrent(api.selectedScrollSnap())
+    })
+  }, [api, index, setCurrent])
 
   React.useEffect(() => {
     const onEsc = (key: KeyboardEvent) => {
       if (key.code === "Escape") {
-        closeFunction();
+        closeFunction()
       }
-    };
-    document.addEventListener("keydown", onEsc);
-    return () => document.removeEventListener("keydown", onEsc);
-  }, [closeFunction]);
+    }
+    document.addEventListener("keydown", onEsc)
+    return () => document.removeEventListener("keydown", onEsc)
+  }, [closeFunction])
 
   React.useEffect(() => {
-  if(!shouldHideScrollBar) return
-    const body = document.querySelector("body");
+    if (!shouldHideScrollBar) return
+    const body = document.querySelector("body")
     if (body) {
-      if (index !== undefined) body.style.overflow = "hidden";
-      else body.style.overflow = "auto";
+      if (index !== undefined) body.style.overflow = "hidden"
+      else body.style.overflow = "auto"
     }
 
     return () => {
-      if (body) body.style.overflow = "auto";
-    };
-  }, [index,shouldHideScrollBar]);
+      if (body) body.style.overflow = "auto"
+    }
+  }, [index, shouldHideScrollBar])
 
   return createPortal(
     <motion.div
@@ -76,7 +81,7 @@ const ViewCarousel = ({ images, index, closeFunction , shouldHideScrollBar }: Vi
       <Carousel id="carousel" setApi={setApi}>
         <Button
           variant="secondary"
-          className="absolute right-1 top-5 z-50 h-7 w-7 cursor-pointer rounded-full bg-muted p-0"
+          className="absolute top-5 right-1 z-50 h-7 w-7 cursor-pointer rounded-full bg-muted p-0"
           onClick={closeFunction} // Ensure this button calls the handleClose function
         >
           <X size={16} />
@@ -88,7 +93,7 @@ const ViewCarousel = ({ images, index, closeFunction , shouldHideScrollBar }: Vi
                 <CarouselItem id="carousel-item" key={i}>
                   <div
                     key="container"
-                    className="z-50 flex h-[100dvh] w-full select-none items-center justify-center"
+                    className="z-50 flex h-[100dvh] w-full items-center justify-center select-none"
                   >
                     <VideoSlide url={image} i={i} index={current} />
                     {/* <motion.video
@@ -104,13 +109,13 @@ const ViewCarousel = ({ images, index, closeFunction , shouldHideScrollBar }: Vi
                     /> */}
                   </div>
                 </CarouselItem>
-              );
+              )
             } else {
               return (
                 <CarouselItem id="carousel-item" key={i}>
                   <div
                     key="container"
-                    className="z-50 flex h-[100dvh] w-full select-none items-center justify-center"
+                    className="z-50 flex h-[100dvh] w-full items-center justify-center select-none"
                   >
                     <motion.img
                       src={image}
@@ -126,7 +131,7 @@ const ViewCarousel = ({ images, index, closeFunction , shouldHideScrollBar }: Vi
                     />
                   </div>
                 </CarouselItem>
-              );
+              )
             }
           })}
         </CarouselContent>
@@ -138,40 +143,40 @@ const ViewCarousel = ({ images, index, closeFunction , shouldHideScrollBar }: Vi
       </Carousel>
     </motion.div>,
     document.body
-  );
-};
+  )
+}
 
-export default ViewCarousel;
+export default ViewCarousel
 interface VideoSlideProps {
-  index: number;
-  i: number;
-  url: string;
+  index: number
+  i: number
+  url: string
 }
 
 const VideoSlide: React.FC<VideoSlideProps> = ({ index, i, url }) => {
   // 1. Create a ref to hold the video element
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null)
 
   // 2. Use useEffect to control playback whenever the 'index' changes
   useEffect(() => {
-    const video = videoRef.current;
+    const video = videoRef.current
 
     // Check if this slide is the currently focused one
-    const isFocused = index === i;
+    const isFocused = index === i
 
     if (video) {
       if (isFocused) {
         // Play the video when the slide is focused
         video.play().catch((error) => {
           // Important: Catch and handle potential Autoplay Policy errors
-          console.warn("Video playback blocked by browser policy:", error);
-        });
+          console.warn("Video playback blocked by browser policy:", error)
+        })
       } else {
         // Pause and reset (optional: video.currentTime = 0;) when the slide moves out
-        video.pause();
+        video.pause()
       }
     }
-  }, [index, i]); // Re-run this effect whenever the global 'index' changes
+  }, [index, i]) // Re-run this effect whenever the global 'index' changes
 
   return (
     <motion.video
@@ -189,5 +194,5 @@ const VideoSlide: React.FC<VideoSlideProps> = ({ index, i, url }) => {
       transition={{ duration: 0.2, ease: "linear" }}
       className="max-h-[90%] max-w-[100%] object-contain sm:max-h-[100%]"
     />
-  );
-};
+  )
+}

@@ -1,38 +1,38 @@
-import React, { useEffect, useState } from "react";
-import { Elements } from "@stripe/react-stripe-js";
-import { loadStripe, StripeElementsOptions } from "@stripe/stripe-js";
-import convertToSubcurrency from "@lib/convertToSubcurrency";
-import CheckoutPage from "./checkout-page";
-import { useSelector } from "react-redux";
-import { getCart, getTotalCartPrices } from "@components/cart/cartSlice";
-import { formatCurrency } from "@lib/client-helpers";
-import { Button } from "@components/ui/button";
-import Link from "next/link";
-import { Store } from "lucide-react";
-import { useSearchParams } from "next/navigation";
-import useInitializeCart from "@hooks/use-initailize-cart";
-import Spinner from "@components/Spinner";
+import React, { useEffect, useState } from "react"
+import { Elements } from "@stripe/react-stripe-js"
+import { loadStripe, StripeElementsOptions } from "@stripe/stripe-js"
+import convertToSubcurrency from "@lib/convertToSubcurrency"
+import CheckoutPage from "./checkout-page"
+import { useSelector } from "react-redux"
+import { getCart, getTotalCartPrices } from "@components/cart/cartSlice"
+import { formatCurrency } from "@lib/client-helpers"
+import { Button } from "@components/ui/button"
+import Link from "next/link"
+import { Store } from "lucide-react"
+import { useSearchParams } from "next/navigation"
+import useInitializeCart from "@hooks/use-initailize-cart"
+import Spinner from "@components/Spinner"
 
-const STRIPE_PUBLIC_KEY = process.env.NEXT_PUBLIC_STRIPE_KEY!;
+const STRIPE_PUBLIC_KEY = process.env.NEXT_PUBLIC_STRIPE_KEY!
 
-if (STRIPE_PUBLIC_KEY === undefined) throw new Error("something went wrong.");
-const stripePromise = loadStripe(STRIPE_PUBLIC_KEY);
+if (STRIPE_PUBLIC_KEY === undefined) throw new Error("something went wrong.")
+const stripePromise = loadStripe(STRIPE_PUBLIC_KEY)
 // This helper gets the hex/hsl value from your Tailwind CSS variables
 const getVariable = (name: string) => {
-  if (typeof window === "undefined") return "";
+  if (typeof window === "undefined") return ""
   return getComputedStyle(document.documentElement)
     .getPropertyValue(name)
-    .trim();
-};
+    .trim()
+}
 
 const Stripe = () => {
-  const [isLoadig, setIsLoading] = useState(false);
+  const [isLoadig, setIsLoading] = useState(false)
   const [theme, setTheme] = useState({
     input: "#e2e8f0",
     ring: "#94a3b8",
     background: "#ffffff",
     foreground: "#0f172a",
-  });
+  })
 
   useEffect(() => {
     // We grab the actual values once the component mounts
@@ -41,8 +41,8 @@ const Stripe = () => {
       ring: getVariable("--ring") || "#94a3b8",
       background: getVariable("--background") || "#ffffff",
       foreground: getVariable("--foreground") || "#0f172a",
-    });
-  }, []);
+    })
+  }, [])
   const stripeAppearance = {
     variables: {
       fontFamily: "ui-sans-serif, system-ui, sans-serif",
@@ -79,31 +79,31 @@ const Stripe = () => {
         paddingBottom: "5px",
       },
     },
-  };
-  const amount = useSelector(getTotalCartPrices);
-  useInitializeCart();
-  const cart = useSelector(getCart);
-  const searchParams = useSearchParams();
-  const [clientSecret, setClientSecret] = React.useState("");
-  const orderId = searchParams.get("orderId"); // Get the ID from URL
+  }
+  const amount = useSelector(getTotalCartPrices)
+  useInitializeCart()
+  const cart = useSelector(getCart)
+  const searchParams = useSearchParams()
+  const [clientSecret, setClientSecret] = React.useState("")
+  const orderId = searchParams.get("orderId") // Get the ID from URL
 
   useEffect(() => {
-    if (amount <= 0 || !orderId) return; // Don't fetch for empty carts
+    if (amount <= 0 || !orderId) return // Don't fetch for empty carts
 
     const fetchSecret = async () => {
-      setIsLoading(true);
+      setIsLoading(true)
       const res = await fetch("/api/create-payment-intent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ amount: convertToSubcurrency(amount), orderId }),
-      });
-      const data = await res.json();
-      setClientSecret(data.clientSecret);
-      setIsLoading(false);
-    };
+      })
+      const data = await res.json()
+      setClientSecret(data.clientSecret)
+      setIsLoading(false)
+    }
 
-    fetchSecret();
-  }, [amount, orderId]);
+    fetchSecret()
+  }, [amount, orderId])
   // The options object requires the clientSecret
   const options: StripeElementsOptions = {
     clientSecret,
@@ -114,36 +114,36 @@ const Stripe = () => {
     //     colorPrimary: "#0570de",
     //   },
     // },
-  };
+  }
   if (!amount && !isLoadig)
     return (
-      <div className=" p-5 border w-fit  flex-col mx-auto rounded-md bg-secondary dark:bg-accent mt-20 sm:mt-32 flex items-center gap-3 justify-center text-center">
-        <p className=" text-xl font-semibold text-muted-foreground">
+      <div className="mx-auto mt-20 flex w-fit flex-col items-center justify-center gap-3 rounded-md border bg-secondary p-5 text-center sm:mt-32 dark:bg-accent">
+        <p className="text-xl font-semibold text-muted-foreground">
           Your cart is empty
         </p>{" "}
         <Button asChild size="sm" variant="orange">
           <Link
             href="/products"
             prefetch={false}
-            className=" flex items-center gap-2"
+            className="flex items-center gap-2"
           >
             View some products <Store size={18} />
           </Link>
         </Button>
       </div>
-    );
-  if (isLoadig) return <Spinner className=" static h-fit  mt-10" size={30} />;
+    )
+  if (isLoadig) return <Spinner className="static mt-10 h-fit" size={30} />
 
   return (
     //bg-gradient-to-bl from-orange-400 to-red-400
     <section
-      className={`max-w-6xl mx-auto t text-center  rounded-sm mt-10  p-3 sm:p-10 `}
+      className={`t mx-auto mt-10 max-w-6xl rounded-sm p-3 text-center sm:p-10`}
     >
-      <div className=" mb-10  ">
-        <h1 className=" text-3xl sm:text-4xl font-extrabold mb-2 ">
+      <div className="mb-10">
+        <h1 className="mb-2 text-3xl font-extrabold sm:text-4xl">
           Auto-Zone has requested
         </h1>
-        <span className=" font-bold">{formatCurrency(amount)}</span>
+        <span className="font-bold">{formatCurrency(amount)}</span>
       </div>
 
       {clientSecret && (
@@ -167,7 +167,7 @@ const Stripe = () => {
         </Elements>
       )}
     </section>
-  );
-};
+  )
+}
 
-export default Stripe;
+export default Stripe

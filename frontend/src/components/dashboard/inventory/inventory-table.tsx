@@ -1,4 +1,4 @@
-import React, { SetStateAction, useCallback, useEffect, useState } from "react";
+import React, { SetStateAction, useCallback, useEffect, useState } from "react"
 import {
   Table,
   TableBody,
@@ -7,25 +7,25 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "@/components/ui/table"
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/components/ui/accordion";
+} from "@/components/ui/accordion"
 import {
   ClientWithPhoneNumbers,
   PhoneNumber,
   ProductBoughtData,
-} from "@lib/types";
-import { Button } from "@components/ui/button";
+} from "@lib/types"
+import { Button } from "@components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@/components/ui/dropdown-menu"
 import {
   Dialog,
   DialogClose,
@@ -35,7 +35,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from "@/components/ui/dialog"
 
 import {
   CircleUser,
@@ -46,69 +46,65 @@ import {
   Pencil,
   ReceiptText,
   UserRoundMinus,
-} from "lucide-react";
-import { useToast } from "@hooks/use-toast";
+} from "lucide-react"
+import { useToast } from "@hooks/use-toast"
 import SuccessToastDescription, {
   ErorrToastDescription,
-} from "@components/toast-items";
-import Spinner from "@components/Spinner";
+} from "@components/toast-items"
+import Spinner from "@components/Spinner"
 
-import { deleteClientByIdAction } from "@lib/actions/clientActions";
+import { deleteClientByIdAction } from "@lib/actions/clientActions"
 import {
   useParams,
   usePathname,
   useRouter,
   useSearchParams,
-} from "next/navigation";
+} from "next/navigation"
 // import useCarCountPerClient from "@lib/queries/useCarCountPerClient";
-import Link from "next/link";
+import Link from "next/link"
 import {
   deleteRestockingBillAction,
   editRestockingBillAction,
-} from "@lib/actions/restockingBillActions";
-import { Input } from "@components/ui/input";
-import { Switch } from "@components/ui/switch";
-import { Label } from "@components/ui/label";
-import { Checkbox } from "@components/ui/checkbox";
-import { deleteProductsBoughtByIdAction } from "@lib/actions/productBoughtActions";
-import { format, isEqual } from "date-fns";
-import { Calendar as CalendarIcon } from "lucide-react";
+} from "@lib/actions/restockingBillActions"
+import { Input } from "@components/ui/input"
+import { Switch } from "@components/ui/switch"
+import { Label } from "@components/ui/label"
+import { Checkbox } from "@components/ui/checkbox"
+import { deleteProductsBoughtByIdAction } from "@lib/actions/productBoughtActions"
+import { format, isEqual } from "date-fns"
+import { Calendar as CalendarIcon } from "lucide-react"
 
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils"
 
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@components/ui/popover";
-import CurrencyInput, { formatValue } from "react-currency-input-field";
-import TagCarousel from "@components/tag-carousel";
+import { Calendar } from "@/components/ui/calendar"
+import { Popover, PopoverContent, PopoverTrigger } from "@components/ui/popover"
+import CurrencyInput, { formatValue } from "react-currency-input-field"
+import TagCarousel from "@components/tag-carousel"
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@components/ui/tooltip";
+} from "@components/ui/tooltip"
 
 const formatCurrency = (value: number) =>
   new Intl.NumberFormat("en", { style: "currency", currency: "egp" }).format(
     value
-  );
+  )
 
 const InventoryTable = ({
   productBought,
   currPage,
 }: {
-  currPage: string;
-  productBought: ProductBoughtData[];
+  currPage: string
+  productBought: ProductBoughtData[]
 }) => {
   if (!productBought)
-    return <p>Something went wrong while getting the client&apos;s data</p>;
-  const currPageSize = productBought.length;
+    return <p>Something went wrong while getting the client&apos;s data</p>
+  const currPageSize = productBought.length
 
   return (
-    <Table className=" mt-10">
+    <Table className="mt-10">
       <TableCaption>
         {productBought.length
           ? "A list of all your inventory receipts."
@@ -135,40 +131,40 @@ const InventoryTable = ({
           : null}
       </TableBody>
     </Table>
-  );
-};
+  )
+}
 
 function Row({
   proBought,
   currPage,
   currPageSize,
 }: {
-  currPage: string;
-  proBought: ProductBoughtData;
-  currPageSize: number;
+  currPage: string
+  proBought: ProductBoughtData
+  currPageSize: number
 }) {
-  const [open, setOpen] = useState(false);
-  const [deleteOpen, setDeleteOpen] = useState<number | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [open, setOpen] = useState(false)
+  const [deleteOpen, setDeleteOpen] = useState<number | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
 
   function handleClose() {
-    setOpen(false);
+    setOpen(false)
   }
   return (
     <>
       <TableRow
         onClick={() => setOpen(true)}
-        className={`${isLoading && "opacity-60  pointer-events-none"}`}
+        className={`${isLoading && "pointer-events-none opacity-60"}`}
       >
         <TableCell className="font-medium">{proBought.id}</TableCell>
         <TableCell>{proBought.shopName}</TableCell>
-        <TableCell className="text-right ">
+        <TableCell className="text-right">
           {format(proBought.created_at, "PPP")}
         </TableCell>
 
         <TableCell>
           {" "}
-          <div className=" flex items-center gap-2 justify-end">
+          <div className="flex items-center justify-end gap-2">
             {/* <ShowCars client={client} /> */}
 
             {/* <Button
@@ -206,7 +202,7 @@ function Row({
         setDeleteOpen={setDeleteOpen}
       />
     </>
-  );
+  )
 }
 
 function ProductsDialog({
@@ -216,27 +212,27 @@ function ProductsDialog({
   setDeleteOpen,
   handleClose,
 }: {
-  open: boolean;
-  setDeleteOpen: React.Dispatch<SetStateAction<number | null>>;
-  setOpen: React.Dispatch<SetStateAction<boolean>>;
-  handleClose: () => void;
-  proBought: ProductBoughtData;
+  open: boolean
+  setDeleteOpen: React.Dispatch<SetStateAction<number | null>>
+  setOpen: React.Dispatch<SetStateAction<boolean>>
+  handleClose: () => void
+  proBought: ProductBoughtData
 }) {
-  const [priceValue, setPriceValue] = useState("");
-  const [discountValue, setDiscountValue] = useState("");
-  const [countValue, setCountValue] = useState("");
+  const [priceValue, setPriceValue] = useState("")
+  const [discountValue, setDiscountValue] = useState("")
+  const [countValue, setCountValue] = useState("")
   const [totalPriceAfterDiscountValue, setTotalPriceAfterDiscount] =
-    useState("");
-  const [nameValue, setNameValue] = useState("");
-  const [hasReturnedValue, setHasReturnedValue] = useState<boolean>(false);
-  const [checked, setChecked] = useState(false);
-  const searchParam = useSearchParams();
-  const router = useRouter();
-  const pathname = usePathname();
+    useState("")
+  const [nameValue, setNameValue] = useState("")
+  const [hasReturnedValue, setHasReturnedValue] = useState<boolean>(false)
+  const [checked, setChecked] = useState(false)
+  const searchParam = useSearchParams()
+  const router = useRouter()
+  const pathname = usePathname()
 
-  const name = new RegExp(nameValue, "i"); // 'i' for case-insensitive
-  const hasReturned = new RegExp(String(hasReturnedValue), "i");
-  let productsArr = proBought.productsBought;
+  const name = new RegExp(nameValue, "i") // 'i' for case-insensitive
+  const hasReturned = new RegExp(String(hasReturnedValue), "i")
+  let productsArr = proBought.productsBought
 
   productsArr = productsArr.filter((product) => {
     // const price = new RegExp(priceValue, "i");
@@ -254,64 +250,63 @@ function ProductsDialog({
     //   totalPriceAfterDiscount.test(String(product.totalPriceAfterDiscount)) &&
     //   name.test(product.productName);
 
-    let filterValue = name.test(product.product.name);
+    let filterValue = name.test(product.product.name)
     if (checked)
-      filterValue = filterValue && hasReturned.test(String(product.isReturned));
+      filterValue = filterValue && hasReturned.test(String(product.isReturned))
 
     if (Number(priceValue))
-      filterValue = filterValue && product.pricePerUnit === Number(priceValue);
+      filterValue = filterValue && product.pricePerUnit === Number(priceValue)
 
     if (Number(discountValue))
-      filterValue = filterValue && product.discount === Number(discountValue);
+      filterValue = filterValue && product.discount === Number(discountValue)
 
     if (Number(countValue))
-      filterValue = filterValue && product.count === Number(countValue);
+      filterValue = filterValue && product.count === Number(countValue)
 
     if (Number(totalPriceAfterDiscountValue))
       filterValue =
         filterValue &&
-        product.totalPriceAfterDiscount ===
-          Number(totalPriceAfterDiscountValue);
+        product.totalPriceAfterDiscount === Number(totalPriceAfterDiscountValue)
 
-    return filterValue;
-  });
+    return filterValue
+  })
 
   function handleReset() {
-    setPriceValue("");
-    setDiscountValue("");
-    setNameValue("");
-    setCountValue("");
-    setTotalPriceAfterDiscount("");
-    setChecked(false);
-    setHasReturnedValue(false);
+    setPriceValue("")
+    setDiscountValue("")
+    setNameValue("")
+    setCountValue("")
+    setTotalPriceAfterDiscount("")
+    setChecked(false)
+    setHasReturnedValue(false)
   }
 
   function handleOpenEdit(filter: string) {
-    const params = new URLSearchParams(searchParam);
-    params.set("edit", filter);
-    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    const params = new URLSearchParams(searchParam)
+    params.set("edit", filter)
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false })
   }
 
   const totals = productsArr.reduce(
     (acc, item) => {
-      acc.totalDiscount += item.discount;
-      acc.totalPrice += item.pricePerUnit * item.count;
-      acc.units += item.count;
+      acc.totalDiscount += item.discount
+      acc.totalPrice += item.pricePerUnit * item.count
+      acc.units += item.count
 
-      return acc;
+      return acc
     },
     { totalDiscount: 0, totalPrice: 0, units: 0 }
-  );
+  )
 
   useEffect(() => {
-    handleReset();
-  }, [open]);
+    handleReset()
+  }, [open])
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className=" border-none p-4  sm:p-6  !pb-0  flex flex-col  overflow-y-auto    max-h-[81vh]     max-w-[900px]">
-        <DialogHeader className=" hidden  invisible">
+      <DialogContent className="flex max-h-[81vh] max-w-[900px] flex-col overflow-y-auto border-none p-4 !pb-0 sm:p-6">
+        <DialogHeader className="invisible hidden">
           <DialogTitle>{`'s phome numbers`}</DialogTitle>
-          <DialogDescription className=" hidden">
+          <DialogDescription className="hidden">
             This action cannot be undone. This will permanently delete your
             account and remove your data from our servers.
           </DialogDescription>
@@ -320,16 +315,16 @@ function ProductsDialog({
         {/* <main className="  gap-6  flex flex-col max-h-[90%]  h-full relative   "> */}
 
         <Accordion type="single" collapsible>
-          <AccordionItem value="item-1" className=" border-none">
-            <div className=" relative w-[98%] mx-auto">
-              <AccordionTrigger className=" flex    rounded-full bg-secondary/50 dark:bg-card/20   gap-1 px-3  py-2 text-[.7rem] mb-1">
+          <AccordionItem value="item-1" className="border-none">
+            <div className="relative mx-auto w-[98%]">
+              <AccordionTrigger className="mb-1 flex gap-1 rounded-full bg-secondary/50 px-3 py-2 text-[.7rem] dark:bg-card/20">
                 Filters
               </AccordionTrigger>
             </div>
-            <AccordionContent className=" pb-0">
-              <div className=" flex flex-wrap gap-2  xs:gap-3 bg-secondary/50  dark:bg-card/20 rounded-md  justify-center   p-3  text-sm">
-                <div className=" space-y-2  w-full xxs:w-[48%] sm:w-[31%]  md:w-[32%]   mb-auto">
-                  <label className=" text-xs " htmlFor="price">
+            <AccordionContent className="pb-0">
+              <div className="flex flex-wrap justify-center gap-2 rounded-md bg-secondary/50 p-3 text-sm xs:gap-3 dark:bg-card/20">
+                <div className="mb-auto w-full space-y-2 xxs:w-[48%] sm:w-[31%] md:w-[32%]">
+                  <label className="text-xs" htmlFor="price">
                     Price per unit
                   </label>
                   <CurrencyInput
@@ -343,13 +338,13 @@ function ProductsDialog({
                     groupSeparator="," // Use comma for thousands
                     value={priceValue}
                     onValueChange={(formattedValue, name, value) => {
-                      setPriceValue(formattedValue || "");
+                      setPriceValue(formattedValue || "")
                     }}
-                    className="input-field "
+                    className="input-field"
                   />{" "}
                 </div>
-                <div className=" space-y-2  w-full xxs:w-[48%] sm:w-[31%]  md:w-[32%]  mb-auto">
-                  <label className=" text-xs " htmlFor="discount">
+                <div className="mb-auto w-full space-y-2 xxs:w-[48%] sm:w-[31%] md:w-[32%]">
+                  <label className="text-xs" htmlFor="discount">
                     Discount
                   </label>
                   <CurrencyInput
@@ -362,13 +357,13 @@ function ProductsDialog({
                     groupSeparator="," // Use comma for thousands
                     value={discountValue}
                     onValueChange={(formattedValue, name, value) => {
-                      setDiscountValue(formattedValue || "");
+                      setDiscountValue(formattedValue || "")
                     }}
-                    className="input-field "
+                    className="input-field"
                   />
                 </div>
-                <div className=" space-y-2  w-full xxs:w-[48%] sm:w-[31%]  md:w-[32%]  mb-auto">
-                  <label className=" text-xs " htmlFor="count">
+                <div className="mb-auto w-full space-y-2 xxs:w-[48%] sm:w-[31%] md:w-[32%]">
+                  <label className="text-xs" htmlFor="count">
                     Count
                   </label>
                   <CurrencyInput
@@ -381,13 +376,13 @@ function ProductsDialog({
                     groupSeparator="," // Use comma for thousands
                     value={countValue}
                     onValueChange={(formattedValue, name, value) => {
-                      setCountValue(formattedValue || "");
+                      setCountValue(formattedValue || "")
                     }}
-                    className="input-field  "
+                    className="input-field"
                   />
                 </div>
-                <div className=" space-y-2  w-full xxs:w-[48%] sm:w-[31%]  md:w-[32%]  mb-auto">
-                  <label className=" text-xs " htmlFor="total-price-after-dis">
+                <div className="mb-auto w-full space-y-2 xxs:w-[48%] sm:w-[31%] md:w-[32%]">
+                  <label className="text-xs" htmlFor="total-price-after-dis">
                     Total price after discount
                   </label>
                   <CurrencyInput
@@ -400,13 +395,13 @@ function ProductsDialog({
                     groupSeparator=","
                     value={totalPriceAfterDiscountValue}
                     onValueChange={(formattedValue, name, value) => {
-                      setTotalPriceAfterDiscount(formattedValue || "");
+                      setTotalPriceAfterDiscount(formattedValue || "")
                     }}
-                    className="input-field "
+                    className="input-field"
                   />
                 </div>
-                <div className=" space-y-2   w-full xxs:w-[48%] sm:w-[31%]  md:w-[32%]  mb-auto">
-                  <label className=" text-xs " htmlFor="name">
+                <div className="mb-auto w-full space-y-2 xxs:w-[48%] sm:w-[31%] md:w-[32%]">
+                  <label className="text-xs" htmlFor="name">
                     Name
                   </label>
                   <Input
@@ -417,7 +412,7 @@ function ProductsDialog({
                   />
                 </div>
 
-                <div className="flex items-center  justify-center  space-x-2   w-full xxs:w-[48%] sm:w-[31%]  md:w-[32%] ">
+                <div className="flex w-full items-center justify-center space-x-2 xxs:w-[48%] sm:w-[31%] md:w-[32%]">
                   <Switch
                     id="airplane-mode"
                     checked={hasReturnedValue}
@@ -426,7 +421,7 @@ function ProductsDialog({
                     onCheckedChange={(chcked) => setHasReturnedValue(chcked)}
                     disabled={!checked}
                   />
-                  <Label className=" text-xs " htmlFor="airplane-mode">
+                  <Label className="text-xs" htmlFor="airplane-mode">
                     Has it returned
                   </Label>
                   <Checkbox
@@ -439,12 +434,12 @@ function ProductsDialog({
           </AccordionItem>
         </Accordion>
 
-        <div className=" space-y-4    sm:flex-1  sm:px-2   sm:overflow-y-auto">
-          <div className=" flex items-center justify-between">
-            <h2 className=" font-semibold text-xl  whitespace-nowrap">
+        <div className="space-y-4 sm:flex-1 sm:overflow-y-auto sm:px-2">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-semibold whitespace-nowrap">
               {proBought.productsBought.length} Products bought.
             </h2>
-            <div className=" text-xs   justify-end flex items-center gap-y-1 gap-x-3 flex-wrap text-muted-foreground  ">
+            <div className="flex flex-wrap items-center justify-end gap-x-3 gap-y-1 text-xs text-muted-foreground">
               <div>
                 Shop: <span>{proBought.shopName}</span>
               </div>
@@ -458,19 +453,19 @@ function ProductsDialog({
               return (
                 <div
                   key={i}
-                  className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground px-4 py-2"
+                  className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium whitespace-nowrap shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50"
                 >
                   <Link
                     href={`/products/${product.productId}`}
-                    className="flex text-sm  h-fit flex-wrap  font-semibold !text-green-400  !justify-start  items-center  max-w-full    gap-x-6 gap-y-3"
+                    className="flex h-fit max-w-full flex-wrap items-center !justify-start gap-x-6 gap-y-3 text-sm font-semibold !text-green-400"
                   >
                     <div className=" ">
                       Product name:{" "}
-                      <span className=" text-xs text-muted-foreground  break-all whitespace-normal">{` ${product.product?.name}`}</span>{" "}
+                      <span className="text-xs break-all whitespace-normal text-muted-foreground">{` ${product.product?.name}`}</span>{" "}
                     </div>
                     <div className=" ">
                       Price:{" "}
-                      <span className=" text-xs text-muted-foreground">{` ${formatCurrency(
+                      <span className="text-xs text-muted-foreground">{` ${formatCurrency(
                         product.pricePerUnit
                       )}`}</span>{" "}
                     </div>
@@ -493,49 +488,49 @@ function ProductsDialog({
                     </div>
                     <div>
                       Total price after discount:{" "}
-                      <span className="text-xs text-muted-foreground   break-all whitespace-normal">{` ${formatCurrency(
+                      <span className="text-xs break-all whitespace-normal text-muted-foreground">{` ${formatCurrency(
                         product.totalPriceAfterDiscount
                       )}`}</span>
                     </div>
-                    <div className=" break-all  whitespace-normal">{`Note: ${product.note}`}</div>
+                    <div className="break-all whitespace-normal">{`Note: ${product.note}`}</div>
 
-                    <div className=" flex items-center gap-2 ml-auto">
+                    <div className="ml-auto flex items-center gap-2">
                       <Button
                         variant="outline"
                         onClick={(e) => {
-                          e.preventDefault();
-                          handleOpenEdit(String(product.id));
-                          setOpen(false);
+                          e.preventDefault()
+                          handleOpenEdit(String(product.id))
+                          setOpen(false)
                         }}
-                        className=" p-0 w-8 h-8"
+                        className="h-8 w-8 p-0"
                       >
-                        <Pencil className=" h-4 w-4" />
+                        <Pencil className="h-4 w-4" />
                       </Button>
                       <Button
                         onClick={(e) => {
-                          e.preventDefault();
-                          setDeleteOpen(product.id);
-                          setOpen(false);
+                          e.preventDefault()
+                          setDeleteOpen(product.id)
+                          setOpen(false)
                         }}
                         variant="destructive"
                         size="sm"
-                        className=" p-0 w-8 h-8"
+                        className="h-8 w-8 p-0"
                       >
-                        <PackageMinus className=" h-4 w-4" />
+                        <PackageMinus className="h-4 w-4" />
                       </Button>
                     </div>
                   </Link>
                 </div>
-              );
+              )
             })
           ) : (
-            <p className=" text-center  py-3">No Products.</p>
+            <p className="py-3 text-center">No Products.</p>
           )}
         </div>
         {/* </main> */}
-        <div className=" sticky pb-6 pt-4 sm:pt-0 bottom-0 left-0 bg-background  space-y-3">
+        <div className="sticky bottom-0 left-0 space-y-3 bg-background pt-4 pb-6 sm:pt-0">
           <DialogClose asChild>
-            <Button size="sm" className=" w-full" variant="secondary">
+            <Button size="sm" className="w-full" variant="secondary">
               Close
             </Button>
           </DialogClose>
@@ -558,31 +553,31 @@ function ProductsDialog({
         </div>
       </DialogContent>
     </Dialog>
-  );
+  )
 }
 
 interface SummaryProps {
-  units: number;
-  totalEntries: number;
-  totalPrice: number;
-  totalDiscount: number;
+  units: number
+  totalEntries: number
+  totalPrice: number
+  totalDiscount: number
 }
 
 function Summary({
   summary: { totalDiscount, totalPrice, totalEntries, units },
 }: {
-  summary: SummaryProps;
+  summary: SummaryProps
 }) {
   return (
     <TagCarousel>
       <TooltipProvider delayDuration={500}>
         <Tooltip>
-          <TooltipTrigger className=" hover:cursor-default">
+          <TooltipTrigger className="hover:cursor-default">
             {" "}
-            <div className=" relative h-fit w-fit text-xs">
+            <div className="relative h-fit w-fit text-xs">
               <div className="embla__slide">
                 {" "}
-                <span className=" h-5 w-5 bg-chart-5 rounded-full flex items-center justify-center">
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-chart-5">
                   {totalEntries}
                 </span>
               </div>
@@ -596,13 +591,13 @@ function Summary({
 
       <TooltipProvider delayDuration={500}>
         <Tooltip>
-          <TooltipTrigger className=" hover:cursor-default">
+          <TooltipTrigger className="hover:cursor-default">
             {" "}
-            <div className=" relative">
+            <div className="relative">
               <div className="embla__slide">
                 {" "}
-                <div className="py-[.21rem] px-2 bg-chart-1  break-keep   hover:opacity-90 transition-opacity text-[.7rem] flex items-center gap-1 justify-center rounded-full">
-                  <span className=" inline-flex items-center   px-[0.3rem] py-0.1   shrink-0  bg-chart-5 rounded-full justify-center">
+                <div className="flex items-center justify-center gap-1 rounded-full bg-chart-1 px-2 py-[.21rem] text-[.7rem] break-keep transition-opacity hover:opacity-90">
+                  <span className="py-0.1 inline-flex shrink-0 items-center justify-center rounded-full bg-chart-5 px-[0.3rem]">
                     {units}
                   </span>
                   Units
@@ -616,36 +611,36 @@ function Summary({
         </Tooltip>
       </TooltipProvider>
 
-      <div className=" relative">
+      <div className="relative">
         <div className="embla__slide">
           {" "}
-          <div className=" py-1 px-2 bg-chart-1  text-nowrap break-keep   hover:opacity-90 transition-opacity text-[.7rem] flex items-center gap-1 justify-center rounded-full ">
+          <div className="flex items-center justify-center gap-1 rounded-full bg-chart-1 px-2 py-1 text-[.7rem] text-nowrap break-keep transition-opacity hover:opacity-90">
             Total Price:
             <span>{formatCurrency(totalPrice)}</span>
           </div>
         </div>
       </div>
 
-      <div className=" relative">
+      <div className="relative">
         <div className="embla__slide">
           {" "}
-          <div className=" py-1 px-2 bg-chart-4  text-nowrap break-keep  hover:opacity-90 transition-opacity rounded-full text-[.7rem] gap-1 flex items-center justify-center ">
+          <div className="flex items-center justify-center gap-1 rounded-full bg-chart-4 px-2 py-1 text-[.7rem] text-nowrap break-keep transition-opacity hover:opacity-90">
             Total discount: <span>{formatCurrency(totalDiscount)}</span>
           </div>
         </div>
       </div>
 
-      <div className=" relative">
+      <div className="relative">
         <div className="embla__slide">
           {" "}
-          <div className=" py-1 px-2 bg-chart-5 rounded-full text-nowrap  hover:opacity-90  transition-opacity  text-[.7rem] gap-1 flex items-center justify-center ">
+          <div className="flex items-center justify-center gap-1 rounded-full bg-chart-5 px-2 py-1 text-[.7rem] text-nowrap transition-opacity hover:opacity-90">
             Total after discount:{" "}
             <span>{formatCurrency(totalPrice - totalDiscount)}</span>
           </div>
         </div>
       </div>
     </TagCarousel>
-  );
+  )
 }
 
 function TableActions({
@@ -653,69 +648,69 @@ function TableActions({
   currPageSize,
   currPage,
 }: {
-  currPage: string;
-  proBought: ProductBoughtData;
-  currPageSize: number;
+  currPage: string
+  proBought: ProductBoughtData
+  currPageSize: number
 }) {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [open, setOpen] = useState<"delete" | "edit" | "">("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [open, setOpen] = useState<"delete" | "edit" | "">("")
+  const [isLoading, setIsLoading] = useState(false)
 
-  const searchParam = useSearchParams();
-  const pathname = usePathname();
-  const router = useRouter();
+  const searchParam = useSearchParams()
+  const pathname = usePathname()
+  const router = useRouter()
 
   function handleClose() {
-    setOpen("");
+    setOpen("")
   }
 
   if (isLoading)
     return (
       <Spinner
-        className="  w-4 h-4 flex items-center mr-1 justify-center "
+        className="mr-1 flex h-4 w-4 items-center justify-center"
         size={15}
       />
-    );
+    )
 
   return (
     <div onClick={(e) => e.stopPropagation()}>
       <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="icon" className=" p-0 h-6 w-6">
-            <Ellipsis className=" w-4 h-4" />
+          <Button variant="outline" size="icon" className="h-6 w-6 p-0">
+            <Ellipsis className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className=" min-w-[200px] mr-5 ">
+        <DropdownMenuContent className="mr-5 min-w-[200px]">
           {/* <DropdownMenuLabel>My Account</DropdownMenuLabel> */}
           {/* <DropdownMenuSeparator /> */}
           <DropdownMenuItem
-            className=" gap-2"
+            className="gap-2"
             onClick={() => {
-              setOpen("edit");
+              setOpen("edit")
             }}
           >
-            <ReceiptText className=" w-4 h-4" /> Edit receipt
+            <ReceiptText className="h-4 w-4" /> Edit receipt
           </DropdownMenuItem>
           <DropdownMenuItem
-            className=" gap-2"
+            className="gap-2"
             onClick={() => {
-              const params = new URLSearchParams(searchParam);
-              params.set("reStockingBillId", proBought.id.toString());
+              const params = new URLSearchParams(searchParam)
+              params.set("reStockingBillId", proBought.id.toString())
               router.replace(`${pathname}?${params.toString()}`, {
                 scroll: false,
-              });
+              })
             }}
           >
-            <PackagePlus className=" w-4 h-4" /> Add more bought products
+            <PackagePlus className="h-4 w-4" /> Add more bought products
           </DropdownMenuItem>
           <DropdownMenuItem
             disabled={proBought.productsBought.length > 0}
-            className=" gap-2"
+            className="gap-2"
             onClick={() => {
-              setOpen("delete");
+              setOpen("delete")
             }}
           >
-            <UserRoundMinus className=" w-4 h-4" /> Delete
+            <UserRoundMinus className="h-4 w-4" /> Delete
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -743,7 +738,7 @@ function TableActions({
         handleClose={handleClose}
       />
     </div>
-  );
+  )
 }
 
 function EditReceipt({
@@ -753,52 +748,52 @@ function EditReceipt({
   setIsDeleting,
   restockingBill,
 }: {
-  open: boolean;
-  isDeleting: boolean;
-  setIsDeleting: React.Dispatch<SetStateAction<boolean>>;
-  handleClose: () => void;
-  restockingBill: ProductBoughtData;
+  open: boolean
+  isDeleting: boolean
+  setIsDeleting: React.Dispatch<SetStateAction<boolean>>
+  handleClose: () => void
+  restockingBill: ProductBoughtData
 }) {
-  const { toast } = useToast();
+  const { toast } = useToast()
 
-  const billDate = new Date(restockingBill.created_at);
-  const [shopName, setShopName] = useState(restockingBill.shopName);
-  const [dateOfOrder, setSetDateOfOrder] = useState<Date | undefined>(billDate);
+  const billDate = new Date(restockingBill.created_at)
+  const [shopName, setShopName] = useState(restockingBill.shopName)
+  const [dateOfOrder, setSetDateOfOrder] = useState<Date | undefined>(billDate)
   const [errors, setErrors] = useState({
     shopNameError: "",
     dateOfOrderError: "",
-  });
+  })
   const stripTime = (date: Date) => {
-    return new Date(date.getFullYear(), date.getMonth(), date.getDate());
-  };
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate())
+  }
 
   // Check if the user changed anything about the original data.
   const hasNotChange =
     isEqual(stripTime(billDate), stripTime(dateOfOrder || new Date())) &&
-    restockingBill.shopName === shopName;
+    restockingBill.shopName === shopName
 
   // Just to note, here we are not deleting anything but we are still using the isdeleting as an isLoading state.
   const disabled =
     hasNotChange ||
     errors.dateOfOrderError.trim() !== "" ||
     errors.shopNameError.trim() !== "" ||
-    isDeleting;
+    isDeleting
 
   const handleEdit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+    e.preventDefault()
     try {
-      setIsDeleting(true);
+      setIsDeleting(true)
       const restockingToEdit: { shopName: string; created_at?: Date } = {
         shopName,
-      };
-      if (dateOfOrder) restockingToEdit.created_at = dateOfOrder;
+      }
+      if (dateOfOrder) restockingToEdit.created_at = dateOfOrder
       await editRestockingBillAction({
         restockingToEdit,
         id: restockingBill.id,
-      });
+      })
 
-      setIsDeleting(false);
-      handleClose();
+      setIsDeleting(false)
+      handleClose()
       toast({
         className: "bg-primary  text-primary-foreground",
         title: `Data updated!`,
@@ -807,71 +802,71 @@ function EditReceipt({
             message={`A receipt related to the shop '${restockingBill.shopName}' has been updated.`}
           />
         ),
-      });
+      })
     } catch (error: any) {
-      setIsDeleting(false);
+      setIsDeleting(false)
       toast({
         variant: "destructive",
         title: "Faild to edit inventory receipt data.",
         description: <ErorrToastDescription error={error.message} />,
-      });
+      })
     }
-  };
+  }
 
   useEffect(() => {
     if (!dateOfOrder) {
-      setErrors((err) => ({ ...err, dateOfOrderError: "Date is required" }));
+      setErrors((err) => ({ ...err, dateOfOrderError: "Date is required" }))
     } else {
-      setErrors((err) => ({ ...err, dateOfOrderError: "" }));
+      setErrors((err) => ({ ...err, dateOfOrderError: "" }))
     }
-  }, [dateOfOrder]);
+  }, [dateOfOrder])
 
   useEffect(() => {
-    const body = document.querySelector("body");
+    const body = document.querySelector("body")
     // Reset form's data every time we open or close the dialog.
-    setSetDateOfOrder(new Date(restockingBill.created_at));
-    setShopName(restockingBill.shopName);
+    setSetDateOfOrder(new Date(restockingBill.created_at))
+    setShopName(restockingBill.shopName)
     if (body) {
-      body.style.pointerEvents = "auto";
+      body.style.pointerEvents = "auto"
     }
     return () => {
-      if (body) body.style.pointerEvents = "auto";
-    };
-  }, [open]);
+      if (body) body.style.pointerEvents = "auto"
+    }
+  }, [open])
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[425px] border-none">
+      <DialogContent className="border-none sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Edit receipt.</DialogTitle>
           <DialogDescription>Edit receipt&apos;s data.</DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleEdit} className="  space-y-5 ">
-          <div className="   space-y-2">
+        <form onSubmit={handleEdit} className="space-y-5">
+          <div className="space-y-2">
             <Label className={`${errors.shopNameError && "text-destructive"}`}>
               Shop name
             </Label>
             <Input
               value={shopName}
               onChange={(e) => {
-                const value = e.target.value;
-                setShopName(value);
+                const value = e.target.value
+                setShopName(value)
                 if (value.trim().length < 3) {
                   setErrors((err) => ({
                     ...err,
                     shopNameError: "Shop name has to be longer.",
-                  }));
+                  }))
                 } else {
-                  setErrors((err) => ({ ...err, shopNameError: "" }));
+                  setErrors((err) => ({ ...err, shopNameError: "" }))
                 }
               }}
             />
             {errors.shopNameError && (
-              <p className=" text-destructive">{errors.shopNameError}</p>
+              <p className="text-destructive">{errors.shopNameError}</p>
             )}
           </div>
 
-          <div className="   space-y-2">
+          <div className="space-y-2">
             <Label
               className={`${errors.dateOfOrderError && "text-destructive"}`}
             >
@@ -883,7 +878,7 @@ function EditReceipt({
                   type="button"
                   variant={"outline"}
                   className={cn(
-                    " w-full justify-start text-left gap-4 items-center font-normal",
+                    "w-full items-center justify-start gap-4 text-left font-normal",
                     !dateOfOrder && "text-muted-foreground"
                   )}
                 >
@@ -905,24 +900,24 @@ function EditReceipt({
               </PopoverContent>
             </Popover>
             {errors.dateOfOrderError && (
-              <p className=" text-destructive">{errors.dateOfOrderError}</p>
+              <p className="text-destructive">{errors.dateOfOrderError}</p>
             )}
           </div>
 
-          <div className="  flex  flex-col-reverse    gap-2 ">
+          <div className="flex flex-col-reverse gap-2">
             <DialogClose asChild>
               <Button size="sm" variant="secondary" type="button">
                 Cancel
               </Button>
             </DialogClose>
             <Button disabled={disabled} size="sm" type="submit">
-              {isDeleting ? <Spinner className=" h-full" /> : "Confrim"}
+              {isDeleting ? <Spinner className="h-full" /> : "Confrim"}
             </Button>
           </div>
         </form>
       </DialogContent>
     </Dialog>
-  );
+  )
 }
 
 function DeleteRestockingDialog({
@@ -934,50 +929,50 @@ function DeleteRestockingDialog({
   setIsDeleting,
   restockingBill,
 }: {
-  currPage: string;
-  open: boolean;
-  isDeleting: boolean;
-  setIsDeleting: React.Dispatch<SetStateAction<boolean>>;
-  handleClose: () => void;
-  restockingBill: ProductBoughtData;
-  pageSize: number;
+  currPage: string
+  open: boolean
+  isDeleting: boolean
+  setIsDeleting: React.Dispatch<SetStateAction<boolean>>
+  handleClose: () => void
+  restockingBill: ProductBoughtData
+  pageSize: number
 }) {
-  const { toast } = useToast();
-  const searchParam = useSearchParams();
-  const router = useRouter();
-  const pathname = usePathname();
+  const { toast } = useToast()
+  const searchParam = useSearchParams()
+  const router = useRouter()
+  const pathname = usePathname()
 
   function checkIfLastItem() {
-    const params = new URLSearchParams(searchParam);
+    const params = new URLSearchParams(searchParam)
     if (pageSize === 1) {
       if (Number(currPage) === 1 && pageSize === 1) {
-        params.delete("dateOfOrderTo");
-        params.delete("dateOfOrderFrom");
-        params.delete("minTotalPrice");
-        params.delete("maxTotalPrice");
-        params.delete("shopName");
+        params.delete("dateOfOrderTo")
+        params.delete("dateOfOrderFrom")
+        params.delete("minTotalPrice")
+        params.delete("maxTotalPrice")
+        params.delete("shopName")
       }
       if (Number(currPage) > 1) {
-        params.set("page", String(Number(currPage) - 1));
+        params.set("page", String(Number(currPage) - 1))
       }
-      router.push(`${pathname}?${params.toString()}`);
+      router.push(`${pathname}?${params.toString()}`)
     }
   }
 
   useEffect(() => {
-    const body = document.querySelector("body");
+    const body = document.querySelector("body")
 
     if (body) {
-      body.style.pointerEvents = "auto";
+      body.style.pointerEvents = "auto"
     }
     return () => {
-      if (body) body.style.pointerEvents = "auto";
-    };
-  }, [open]);
+      if (body) body.style.pointerEvents = "auto"
+    }
+  }, [open])
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[425px] border-none">
+      <DialogContent className="border-none sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Delete receipt.</DialogTitle>
           <DialogDescription>
@@ -985,7 +980,7 @@ function DeleteRestockingDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <DialogFooter className="   gap-2 sm:gap-0">
+        <DialogFooter className="gap-2 sm:gap-0">
           <DialogClose asChild>
             <Button size="sm" variant="secondary">
               Cancel
@@ -996,12 +991,12 @@ function DeleteRestockingDialog({
             variant="destructive"
             size="sm"
             onClick={async () => {
-              setIsDeleting(true);
+              setIsDeleting(true)
               try {
-                await deleteRestockingBillAction(String(restockingBill.id));
-                checkIfLastItem();
-                setIsDeleting(false);
-                handleClose();
+                await deleteRestockingBillAction(String(restockingBill.id))
+                checkIfLastItem()
+                setIsDeleting(false)
+                handleClose()
                 toast({
                   className: "bg-primary  text-primary-foreground",
                   title: `Data deleted!.`,
@@ -1010,22 +1005,22 @@ function DeleteRestockingDialog({
                       message={`A receipt related to the shop '${restockingBill.shopName}' has been deleted.`}
                     />
                   ),
-                });
+                })
               } catch (error: any) {
                 toast({
                   variant: "destructive",
                   title: "Faild to delete inventory receipt data.",
                   description: <ErorrToastDescription error={error.message} />,
-                });
+                })
               }
             }}
           >
-            {isDeleting ? <Spinner className=" h-full" /> : "Confrim"}
+            {isDeleting ? <Spinner className="h-full" /> : "Confrim"}
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  );
+  )
 }
 
 function DeleteDialog({
@@ -1040,44 +1035,44 @@ function DeleteDialog({
   setIsDeleting,
   proBought,
 }: {
-  currPage: string;
-  open: boolean;
-  isDeleting: boolean;
-  setOpen: React.Dispatch<SetStateAction<number | null>>;
-  productBoughtId: number | null;
-  setMainDialong: React.Dispatch<SetStateAction<boolean>>;
-  setIsDeleting: React.Dispatch<SetStateAction<boolean>>;
-  handleClose: () => void;
-  proBought: ProductBoughtData;
-  pageSize: number;
+  currPage: string
+  open: boolean
+  isDeleting: boolean
+  setOpen: React.Dispatch<SetStateAction<number | null>>
+  productBoughtId: number | null
+  setMainDialong: React.Dispatch<SetStateAction<boolean>>
+  setIsDeleting: React.Dispatch<SetStateAction<boolean>>
+  handleClose: () => void
+  proBought: ProductBoughtData
+  pageSize: number
 }) {
-  const { toast } = useToast();
+  const { toast } = useToast()
 
   const proToDelete = productBoughtId
     ? proBought.productsBought.find((pro) => pro.id === productBoughtId)
-    : null;
+    : null
 
   useEffect(() => {
-    const body = document.querySelector("body");
+    const body = document.querySelector("body")
 
     if (body) {
-      body.style.pointerEvents = "auto";
+      body.style.pointerEvents = "auto"
     }
     return () => {
-      if (body) body.style.pointerEvents = "auto";
-    };
-  }, [open]);
+      if (body) body.style.pointerEvents = "auto"
+    }
+  }, [open])
 
   return (
     <Dialog
       open={open}
       onOpenChange={() => {
-        handleClose();
-        setOpen(null);
-        setMainDialong(true);
+        handleClose()
+        setOpen(null)
+        setMainDialong(true)
       }}
     >
-      <DialogContent className="sm:max-w-[425px] border-none">
+      <DialogContent className="border-none sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Delete inventory bought.</DialogTitle>
           <DialogDescription>
@@ -1085,7 +1080,7 @@ function DeleteDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <DialogFooter className="   gap-2 sm:gap-0">
+        <DialogFooter className="gap-2 sm:gap-0">
           <DialogClose asChild>
             <Button size="sm" variant="secondary">
               Cancel
@@ -1097,21 +1092,21 @@ function DeleteDialog({
             size="sm"
             onClick={async () => {
               try {
-                if (!proToDelete) throw new Error(`Something went wrong.`);
-                setIsDeleting(true);
-                const newStock = proToDelete.product.stock - proToDelete.count;
+                if (!proToDelete) throw new Error(`Something went wrong.`)
+                setIsDeleting(true)
+                const newStock = proToDelete.product.stock - proToDelete.count
                 const total =
-                  proBought.totalPrice - proToDelete.totalPriceAfterDiscount;
+                  proBought.totalPrice - proToDelete.totalPriceAfterDiscount
                 await deleteProductsBoughtByIdAction(
                   proToDelete.id,
                   total,
                   proBought.id,
                   { id: proToDelete.productId, stock: newStock }
-                );
+                )
                 // checkIfLastItem();
-                setIsDeleting(false);
-                setOpen(null);
-                setMainDialong(true);
+                setIsDeleting(false)
+                setOpen(null)
+                setMainDialong(true)
                 // handleClose();
                 toast({
                   className: "bg-primary  text-primary-foreground",
@@ -1121,23 +1116,23 @@ function DeleteDialog({
                       message={`A receipt related to the  '${proBought.shopName}' has been deleted.`}
                     />
                   ),
-                });
+                })
               } catch (error: any) {
                 toast({
                   variant: "destructive",
                   title: "Faild to delete inventory receipt data.",
                   description: <ErorrToastDescription error={error.message} />,
-                });
+                })
               }
-              setIsDeleting(false);
+              setIsDeleting(false)
             }}
           >
-            {isDeleting ? <Spinner className=" h-full" /> : "Confrim"}
+            {isDeleting ? <Spinner className="h-full" /> : "Confrim"}
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  );
+  )
 }
 
-export default InventoryTable;
+export default InventoryTable

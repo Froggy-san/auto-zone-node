@@ -1,23 +1,22 @@
-
-import { CommandInput } from "@components/search-command/CommandInput";
-import { CommandItem } from "@components/search-command/CommandItem";
-import { CommandList } from "@components/search-command/CommandList";
-import { CommandPalette } from "@components/search-command/CommandPalette";
-import React from "react";
+import { CommandInput } from "@components/search-command/CommandInput"
+import { CommandItem } from "@components/search-command/CommandItem"
+import { CommandList } from "@components/search-command/CommandList"
+import { CommandPalette } from "@components/search-command/CommandPalette"
+import React from "react"
 
 const TestingSearch = () => {
   const handleSelect = (itemValue: string) => {
-    console.log(`Item selected: ${itemValue}`);
+    console.log(`Item selected: ${itemValue}`)
     // You could navigate, open a modal, etc.
-    alert(`You selected: ${itemValue}`);
-  };
+    alert(`You selected: ${itemValue}`)
+  }
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">My Custom Command Palette</h1>
+      <h1 className="mb-4 text-2xl font-bold">My Custom Command Palette</h1>
       <CommandPalette>
         <CommandInput />
-        <CommandList className=" bg-background">
+        <CommandList className="bg-background">
           {/* Group 1 */}
           <div className="cmdk-group">
             <div className="cmdk-group-heading">Fruits</div>
@@ -68,7 +67,7 @@ const TestingSearch = () => {
         navigate and Enter to select.
       </p>
     </div>
-  );
-};
+  )
+}
 
-export default TestingSearch;
+export default TestingSearch

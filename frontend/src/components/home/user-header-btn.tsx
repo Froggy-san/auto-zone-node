@@ -1,22 +1,22 @@
-import React from "react";
-import { Button } from "../ui/button";
+import React from "react"
+import { Button } from "../ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuShortcut,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Key, LogOut, Settings2, User } from "lucide-react";
-import Link from "next/link";
-import { logoutUser } from "@/lib/actions/authActions";
-import { User as UserType } from "@/lib/types";
+} from "@/components/ui/dropdown-menu"
+import { Key, LogOut, Settings2, User } from "lucide-react"
+import Link from "next/link"
+import { logoutUser } from "@/lib/actions/authActions"
+import { User as UserType } from "@/lib/types"
 
 const UserHeaderBtn = ({ user }: { user: UserType | null }) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="icon" className=" rounded-full">
+        <Button variant="outline" size="icon" className="rounded-full">
           <User size={20} />
         </Button>
       </DropdownMenuTrigger>
@@ -24,7 +24,7 @@ const UserHeaderBtn = ({ user }: { user: UserType | null }) => {
         {user ? (
           <DropdownMenuItem
             onClick={async () => {
-              await logoutUser();
+              await logoutUser()
             }}
           >
             Logout
@@ -53,7 +53,7 @@ const UserHeaderBtn = ({ user }: { user: UserType | null }) => {
         </Link>
       </DropdownMenuContent>
     </DropdownMenu>
-  );
-};
+  )
+}
 
-export default UserHeaderBtn;
+export default UserHeaderBtn

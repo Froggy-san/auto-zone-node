@@ -9,23 +9,23 @@ import React, {
   useEffect,
   useRef,
   useState,
-} from "react";
+} from "react"
 
-import { IoClose } from "react-icons/io5";
+import { IoClose } from "react-icons/io5"
 
-import { BsSendFill } from "react-icons/bs";
-import { Card } from "@mui/material";
-import { Badge } from "./ui/badge";
-import { Button, ButtonProps } from "./ui/button";
+import { BsSendFill } from "react-icons/bs"
+import { Card } from "@mui/material"
+import { Badge } from "./ui/badge"
+import { Button, ButtonProps } from "./ui/button"
 
 interface TagsInputContextValues {
-  onChange: React.Dispatch<SetStateAction<string[]>>;
-  Tags: string[];
-  handleAddTag: (value: string) => void;
-  handleEditTag: (newString: string, index: number) => void;
-  value: string;
-  setValue: React.Dispatch<SetStateAction<string>>;
-  isEditable?: boolean;
+  onChange: React.Dispatch<SetStateAction<string[]>>
+  Tags: string[]
+  handleAddTag: (value: string) => void
+  handleEditTag: (newString: string, index: number) => void
+  value: string
+  setValue: React.Dispatch<SetStateAction<string>>
+  isEditable?: boolean
 }
 
 const TagsInputContext = createContext<TagsInputContextValues>({
@@ -36,14 +36,14 @@ const TagsInputContext = createContext<TagsInputContextValues>({
   value: "",
   setValue: () => {},
   isEditable: true,
-});
+})
 interface TagsInputProps {
-  onChange: React.Dispatch<SetStateAction<string[]>>;
-  Tags: string[];
-  className?: string;
-  style?: CSSProperties;
-  children?: ReactNode;
-  isEditable?: boolean;
+  onChange: React.Dispatch<SetStateAction<string[]>>
+  Tags: string[]
+  className?: string
+  style?: CSSProperties
+  children?: ReactNode
+  isEditable?: boolean
 }
 const TagsInput = function ({
   children,
@@ -51,17 +51,17 @@ const TagsInput = function ({
   onChange,
   isEditable = true,
 }: TagsInputProps) {
-  const [value, setValue] = useState("");
+  const [value, setValue] = useState("")
   function handleAddTag(value: string) {
-    const trimmedValue = value.trim();
+    const trimmedValue = value.trim()
     if (trimmedValue) {
-      onChange([...Tags, trimmedValue]);
-      setValue("");
+      onChange([...Tags, trimmedValue])
+      setValue("")
     }
   }
 
   function handleEditTag(newString: string, index: number) {
-    onChange(Tags.map((item, i) => (i === index ? newString : item)));
+    onChange(Tags.map((item, i) => (i === index ? newString : item)))
   }
   return (
     <TagsInputContext.Provider
@@ -77,8 +77,8 @@ const TagsInput = function ({
     >
       {children}
     </TagsInputContext.Provider>
-  );
-};
+  )
+}
 
 const TagsContainer = forwardRef(function (
   {
@@ -87,19 +87,19 @@ const TagsContainer = forwardRef(function (
     style,
     tagsStyles,
   }: {
-    className?: string;
-    style?: CSSProperties;
-    tagsStyles?: string;
-    children?: ReactElement;
+    className?: string
+    style?: CSSProperties
+    tagsStyles?: string
+    children?: ReactElement
   },
   ref?: React.Ref<HTMLDivElement>
 ) {
-  const { onChange, Tags } = useContext(TagsInputContext);
+  const { onChange, Tags } = useContext(TagsInputContext)
   function handleRemovingTag(index: number) {
     // Create a shallow copy of the Tags array
-    const updatedTags = [...Tags];
-    updatedTags.splice(index, 1); // Remove the tag at the specified index
-    onChange(updatedTags); // Update the state with the modified array
+    const updatedTags = [...Tags]
+    updatedTags.splice(index, 1) // Remove the tag at the specified index
+    onChange(updatedTags) // Update the state with the modified array
   }
   return (
     <Card
@@ -122,8 +122,8 @@ const TagsContainer = forwardRef(function (
         : null}
       {children}
     </Card>
-  );
-});
+  )
+})
 
 function TagItem({
   itemIndex,
@@ -131,25 +131,25 @@ function TagItem({
   removeFunction,
   className,
 }: {
-  itemIndex?: number;
-  className?: string;
-  tag: string;
-  removeFunction: () => void;
+  itemIndex?: number
+  className?: string
+  tag: string
+  removeFunction: () => void
 }) {
-  const { handleEditTag, isEditable } = useContext(TagsInputContext);
-  const [value, setValue] = useState(tag);
-  const [isEditing, setIsEditing] = useState(false);
-  const [width, setWidth] = useState(0);
-  const spanRef = useRef<HTMLSpanElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const { handleEditTag, isEditable } = useContext(TagsInputContext)
+  const [value, setValue] = useState(tag)
+  const [isEditing, setIsEditing] = useState(false)
+  const [width, setWidth] = useState(0)
+  const spanRef = useRef<HTMLSpanElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (spanRef.current) {
-      const contentWidth = spanRef.current.offsetWidth + 20;
+      const contentWidth = spanRef.current.offsetWidth + 20
 
-      setWidth(contentWidth);
+      setWidth(contentWidth)
     }
-  }, [value, setWidth, spanRef]);
+  }, [value, setWidth, spanRef])
 
   return (
     <div
@@ -166,9 +166,9 @@ function TagItem({
           value={value}
           onChange={(e) => setValue(e.target.value)}
           onBlur={() => {
-            setIsEditing(false);
+            setIsEditing(false)
             if (value.trim() !== tag.trim() && itemIndex !== undefined)
-              handleEditTag(value, itemIndex);
+              handleEditTag(value, itemIndex)
           }}
           autoFocus
           className="h-[90%] max-w-full rounded-sm border bg-primary px-2 text-sm font-semibold text-primary-foreground"
@@ -186,7 +186,7 @@ function TagItem({
         <IoClose onClick={removeFunction} size={15} />
       </button>
     </div>
-  );
+  )
 }
 
 const TagsInputField = forwardRef(function (
@@ -197,27 +197,27 @@ const TagsInputField = forwardRef(function (
     type,
     ariaLabel,
   }: {
-    className?: string;
-    placeholder?: string;
-    type?: string;
-    ariaLabel?: string;
-    style?: CSSProperties;
+    className?: string
+    placeholder?: string
+    type?: string
+    ariaLabel?: string
+    style?: CSSProperties
   },
   ref?: React.Ref<HTMLDivElement>
 ) {
   const { value, setValue, handleAddTag, onChange, Tags } =
-    useContext(TagsInputContext);
+    useContext(TagsInputContext)
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === "Enter") {
-      e.preventDefault(); // Prevent form submission
-      handleAddTag(value);
+      e.preventDefault() // Prevent form submission
+      handleAddTag(value)
     }
     if (e.code === "Backspace" && !value) {
-      e.preventDefault();
-      const updatedTags = [...Tags];
-      updatedTags.pop(); // Remove the last tag
-      onChange(updatedTags); // Update the state with the modified array
+      e.preventDefault()
+      const updatedTags = [...Tags]
+      updatedTags.pop() // Remove the last tag
+      onChange(updatedTags) // Update the state with the modified array
     }
   }
 
@@ -239,20 +239,20 @@ const TagsInputField = forwardRef(function (
         }`}
       />
       {value && (
-        <Badge className="show-tag pointer-events-none absolute right-[0.3rem] top-[0.3rem] hidden h-6 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-foreground opacity-100 sm:flex">
+        <Badge className="show-tag pointer-events-none absolute top-[0.3rem] right-[0.3rem] hidden h-6 items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-foreground opacity-100 select-none sm:flex">
           Enter
         </Badge>
       )}
     </div>
-  );
-});
+  )
+})
 
 const SendBtn = forwardRef(function (
   { className, style, variant, children, size, asChild }: ButtonProps,
   ref?: React.Ref<HTMLButtonElement>
 ) {
-  const { value, handleAddTag } = useContext(TagsInputContext);
-  const isValue = value.trim().length; // checking if the user inputed any value in the input field
+  const { value, handleAddTag } = useContext(TagsInputContext)
+  const isValue = value.trim().length // checking if the user inputed any value in the input field
 
   return (
     <Button
@@ -268,21 +268,21 @@ const SendBtn = forwardRef(function (
     >
       {children || <BsSendFill />}
     </Button>
-  );
-});
+  )
+})
 
 export function useTagsInput() {
-  const context = useContext(TagsInputContext);
+  const context = useContext(TagsInputContext)
   if (!context)
-    throw new Error(`You have used the TagsContext outside the providor`);
-  return context;
+    throw new Error(`You have used the TagsContext outside the providor`)
+  return context
 }
 
-TagsInput.TagsContainer = TagsContainer;
-TagsInput.TagsInputField = TagsInputField;
-TagsInput.SendBtn = SendBtn;
+TagsInput.TagsContainer = TagsContainer
+TagsInput.TagsInputField = TagsInputField
+TagsInput.SendBtn = SendBtn
 
 TagsContainer.displayName = "TagsContainer"
 TagsInputField.displayName = "TagsInputField"
 SendBtn.displayName = "SendBtn"
-export default TagsInput;
+export default TagsInput

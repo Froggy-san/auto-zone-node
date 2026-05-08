@@ -1,13 +1,12 @@
-
-import React, { useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import React, { useState } from "react"
+import { Card, CardContent } from "@/components/ui/card"
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-} from "@/components/ui/carousel";
+} from "@/components/ui/carousel"
 import {
   Dialog,
   DialogClose,
@@ -17,71 +16,62 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { CarItem, PhoneNumber } from "@lib/types";
-import { ImageOff } from "lucide-react";
-import ProductImages from "@components/products/product-images";
-import NoteDialog from "@components/garage/note-dialog";
-import Link from "next/link";
-import { Button } from "@components/ui/button";
+} from "@/components/ui/dialog"
 
-type ClientDetails = {
-  id: number;
-  email: string;
-  name: string;
-  phones: PhoneNumber[];
-};
-interface Props {
-  cars: CarItem[];
-  clientDetails: ClientDetails;
-  isAdmin: boolean;
-}
+import { ImageOff } from "lucide-react"
+import ProductImages from "@/components/products/product-images"
+import NoteDialog from "@/components/garage/note-dialog"
 
-const CarCarousel = ({ cars, clientDetails, isAdmin }: Props) => {
-  const [carId, setCarId] = useState<number | null>(null);
+import { Button } from "@/components/ui/button"
+import type { Car, User } from "@/types"
+import { Link } from "react-router"
 
-  const showenCar = carId ? cars.find((car) => car.id === carId) : undefined;
+const CarCarousel = ({ user }: { user: User }) => {
+  const [carId, setCarId] = useState<string | null>(null)
+  const isAdmin = user.role === "admin"
+  const cars = user.cars || []
+  const showenCar = carId ? cars.find((car) => car.id === carId) : undefined
 
   return (
-    <div className="mt-10  w-full max-w-[1500px] mx-auto  p-5 shadow-lg space-y-3  rounded-3xl bg-card/30  ">
-      <h2 className="text-xl font-semibold ">YOUR CARS</h2>
+    <div className="mx-auto mt-10 w-full max-w-[1500px] space-y-3 rounded-3xl bg-card/30 p-5 shadow-lg">
+      <h2 className="text-xl font-semibold">YOUR CARS</h2>
       <Carousel
         opts={{
           align: "start",
         }}
         orientation="vertical"
-        className=" flex  items-center justify-between  w-full gap-3"
+        className="flex w-full items-center justify-between gap-3"
       >
-        <div className=" flex-1 ">
-          <CarouselContent className="   -mt-1   h-[250px] lg:h-[350px] py-1 gap-2  relative   ">
+        <div className="flex-1">
+          <CarouselContent className="relative -mt-1 h-[250px] gap-2 py-1 lg:h-[350px]">
             {cars.map((car, index) => {
-              const image = car.carImages[0]?.imagePath;
+              const image = car.carImages[0]?.imagePath
               return (
                 <CarouselItem
                   key={index}
-                  className=" h-full  p-0  rounded-lg   overflow-hidden  "
+                  className="h-full overflow-hidden rounded-lg p-0"
                   onClick={() => setCarId(car.id)}
                 >
                   {image ? (
                     <img
                       src={image}
                       alt={`image:${car.plateNumber}`}
-                      className="object-cover w-full h-full max-h-full hover:opacity-85  hover:cursor-pointer transition-all "
+                      className="h-full max-h-full w-full object-cover transition-all hover:cursor-pointer hover:opacity-85"
                     />
                   ) : (
-                    <div className="flex items-center justify-center h-full">
-                      <ImageOff className="w-6 h-6" />
+                    <div className="flex h-full items-center justify-center">
+                      <ImageOff className="h-6 w-6" />
                     </div>
                   )}
                 </CarouselItem>
-              );
+              )
             })}
           </CarouselContent>
         </div>
 
-        <div className=" flex flex-col  items-center   !h-full gap-5 ">
-          <CarouselPrevious className="  static  left-[unset]   translate-x-0  " />
-          <CarouselNext className=" static left-[unset]    translate-x-0" />
+        <div className="flex !h-full flex-col items-center gap-5">
+          <CarouselPrevious className="static left-[unset] translate-x-0" />
+          <CarouselNext className="static left-[unset] translate-x-0" />
         </div>
       </Carousel>
 
@@ -90,28 +80,28 @@ const CarCarousel = ({ cars, clientDetails, isAdmin }: Props) => {
         viewedCar={showenCar}
         setCarId={setCarId}
         isAdmin={isAdmin}
-        client={clientDetails}
+        client={user}
       />
     </div>
-  );
-};
+  )
+}
 
 interface CarDia {
-  viewedCar: CarItem | undefined;
-  setCarId: React.Dispatch<React.SetStateAction<number | null>>;
-  isAdmin: boolean;
-  client: ClientDetails;
+  viewedCar: Car | undefined
+  setCarId: React.Dispatch<React.SetStateAction<string | null>>
+  isAdmin: boolean
+  client: User
 }
 
 function CarDialog({ viewedCar, setCarId, isAdmin, client }: CarDia) {
-  const [noteOpen, setNoteOpen] = useState(false);
+  const [noteOpen, setNoteOpen] = useState(false)
 
-  const open = viewedCar ? true : false;
-  const carImages = viewedCar?.carImages.map((image) => image.imagePath);
+  const open = viewedCar ? true : false
+  const carImages = viewedCar?.carImages.map((image) => image.imagePath)
   return (
     <Dialog open={open} onOpenChange={() => setCarId(null)}>
-      <DialogContent className=" p-0 ">
-        <DialogHeader className=" hidden">
+      <DialogContent className="p-0">
+        <DialogHeader className="hidden">
           <DialogTitle>Are you absolutely sure?</DialogTitle>
           <DialogDescription>
             This action cannot be undone. This will permanently delete your
@@ -121,41 +111,40 @@ function CarDialog({ viewedCar, setCarId, isAdmin, client }: CarDia) {
         {carImages?.length ? (
           <ProductImages
             imageUrls={carImages}
-            className=" h-[250px] sm:rounded-t-lg overflow-hidden"
+            className="h-[250px] overflow-hidden sm:rounded-t-lg"
           />
         ) : (
-          <div className=" h-[200px] flex items-center justify-center  bg-foreground/10 rounded-t-lg">
-            <ImageOff className=" w-20 h-20" />
+          <div className="flex h-[200px] items-center justify-center rounded-t-lg bg-foreground/10">
+            <ImageOff className="h-20 w-20" />
           </div>
         )}
 
-        <div className=" p-3 relative">
+        <div className="relative p-3">
           {isAdmin && (
             <NoteDialog
               title="Car note"
               content={viewedCar?.notes}
               open={noteOpen}
               onOpenChange={setNoteOpen}
-              className=" absolute right-4 top-3"
+              className="absolute top-3 right-4"
             />
           )}
           {isAdmin ? (
             <Link
-              prefetch={false}
-              href={`/garage/${client.id}?viewedCar=${viewedCar?.id}`}
-              className="  space-y-1 text-sm text-muted-foreground "
+              to={`/garage/${client.id}?viewedCar=${viewedCar?.id}`}
+              className="space-y-1 text-sm text-muted-foreground"
             >
-              <div className=" line-clamp-1 ">Client: {client.name}</div>
+              <div className="line-clamp-1">Client: {client.username}</div>
 
-              <div className=" line-clamp-2 ">
+              <div className="line-clamp-2">
                 Plate number: {viewedCar?.plateNumber}
               </div>
 
-              <div className=" line-clamp-2 ">
+              <div className="line-clamp-2">
                 Chassis number: {viewedCar?.chassisNumber}
               </div>
 
-              <div className=" line-clamp-2 ">
+              <div className="line-clamp-2">
                 Motor number: {viewedCar?.motorNumber}
               </div>
 
@@ -171,27 +160,27 @@ function CarDialog({ viewedCar, setCarId, isAdmin, client }: CarDia) {
 Generation: {carInfo.carModel.name}
 </div> */}
 
-              <div className=" line-clamp-2  flex items-center gap-3">
+              <div className="line-clamp-2 flex items-center gap-3">
                 color:{" "}
                 <div
-                  className=" w-6 h-6 rounded-full border"
+                  className="h-6 w-6 rounded-full border"
                   style={{ background: `${viewedCar?.color}` }}
                 />
               </div>
             </Link>
           ) : (
-            <div className="  space-y-1 text-sm text-muted-foreground ">
-              <div className=" line-clamp-1 ">Client: {client.name}</div>
+            <div className="space-y-1 text-sm text-muted-foreground">
+              <div className="line-clamp-1">Client: {client.username}</div>
 
-              <div className=" line-clamp-2 ">
+              <div className="line-clamp-2">
                 Plate number: {viewedCar?.plateNumber}
               </div>
 
-              <div className=" line-clamp-2 ">
+              <div className="line-clamp-2">
                 Chassis number: {viewedCar?.chassisNumber}
               </div>
 
-              <div className=" line-clamp-2 ">
+              <div className="line-clamp-2">
                 Motor number: {viewedCar?.motorNumber}
               </div>
 
@@ -207,10 +196,10 @@ Generation: {carInfo.carModel.name}
 Generation: {carInfo.carModel.name}
 </div> */}
 
-              <div className=" line-clamp-2  flex items-center gap-3">
+              <div className="line-clamp-2 flex items-center gap-3">
                 color:{" "}
                 <div
-                  className=" w-6 h-6 rounded-full border"
+                  className="h-6 w-6 rounded-full border"
                   style={{ background: `${viewedCar?.color}` }}
                 />
               </div>
@@ -220,7 +209,7 @@ Generation: {carInfo.carModel.name}
             <Button
               autoFocus
               size="sm"
-              className=" w-full mt-4"
+              className="mt-4 w-full"
               variant="secondary"
             >
               Close
@@ -229,10 +218,10 @@ Generation: {carInfo.carModel.name}
         </div>
       </DialogContent>
     </Dialog>
-  );
+  )
 }
 
-export default CarCarousel;
+export default CarCarousel
 
 // DON'T DELETE
 // THE PEEK-ABOO EFFECT.

@@ -1,32 +1,32 @@
-import { Client, User } from "@lib/types";
-import { createClient } from "@utils/supabase/client";
+import { Client, User } from "@lib/types"
+import { createClient } from "@utils/supabase/client"
 
 export async function getCurrUser(): Promise<{
-  user: User | null;
-  client: Client | null;
+  user: User | null
+  client: Client | null
 }> {
-  const supabase = createClient();
+  const supabase = createClient()
 
   const {
     data: { user },
-  } = await supabase.auth.getUser();
+  } = await supabase.auth.getUser()
 
-  let clientById = null;
+  let clientById = null
 
   if (user) {
     const { data, error } = await supabase
       .from("clients")
       .select("*")
       .eq("user_id", user?.id)
-      .single();
+      .single()
     if (error) {
       console.log(
-        `Something went wrong while grabbing the client's detais: ${error.message}`,
-      );
+        `Something went wrong while grabbing the client's detais: ${error.message}`
+      )
     }
 
-    clientById = data;
+    clientById = data
   }
 
-  return { user, client: clientById };
+  return { user, client: clientById }
 }

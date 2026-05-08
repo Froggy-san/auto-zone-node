@@ -1,4 +1,4 @@
-import React, { SetStateAction, useEffect, useMemo, useState } from "react";
+import React, { SetStateAction, useEffect, useMemo, useState } from "react"
 import {
   Table,
   TableBody,
@@ -8,7 +8,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "@/components/ui/table"
 import {
   CarItem,
   Category,
@@ -16,8 +16,8 @@ import {
   ClientWithPhoneNumbers,
   Service,
   ServiceStatus,
-} from "@lib/types";
-import { Button } from "@components/ui/button";
+} from "@lib/types"
+import { Button } from "@components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,7 +29,7 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@/components/ui/dropdown-menu"
 import {
   Dialog,
   DialogClose,
@@ -39,7 +39,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from "@/components/ui/dialog"
 
 import {
   ArrowDownToLine,
@@ -57,72 +57,72 @@ import {
   Replace,
   Trash2,
   UserRoundMinus,
-} from "lucide-react";
-import { useToast } from "@hooks/use-toast";
+} from "lucide-react"
+import { useToast } from "@hooks/use-toast"
 import SuccessToastDescription, {
   ErorrToastDescription,
-} from "@components/toast-items";
-import Spinner from "@components/Spinner";
-import { FaArrowUpWideShort } from "react-icons/fa6";
+} from "@components/toast-items"
+import Spinner from "@components/Spinner"
+import { FaArrowUpWideShort } from "react-icons/fa6"
 
-import { deleteClientByIdAction } from "@lib/actions/clientActions";
+import { deleteClientByIdAction } from "@lib/actions/clientActions"
 import {
   useParams,
   usePathname,
   useRouter,
   useSearchParams,
-} from "next/navigation";
+} from "next/navigation"
 
 // import StatusBadge from "../status-badge";
 const StatusBadge = dynamic(() => import("../status-badge"), {
-  loading: () => <Spinner className="  w-fit h-fit" size={12} />,
+  loading: () => <Spinner className="h-fit w-fit" size={12} />,
   ssr: false,
-});
-import ServiceFeesDialog from "./service-Fee-dialog";
-import ProductSoldDialog from "./products-sold-dialog";
-import CarDialog from "./car-dialog";
-import ClientDialog from "./client-dialog";
+})
+import ServiceFeesDialog from "./service-Fee-dialog"
+import ProductSoldDialog from "./products-sold-dialog"
+import CarDialog from "./car-dialog"
+import ClientDialog from "./client-dialog"
 import {
   deleteServiceAction,
   editServiceAction,
-} from "@lib/actions/serviceActions";
-import EditServiceForm from "./edit-service-form";
-import { formatCurrency } from "@lib/client-helpers";
-import NoteDialog from "@components/garage/note-dialog";
-import dynamic from "next/dynamic";
+} from "@lib/actions/serviceActions"
+import EditServiceForm from "./edit-service-form"
+import { formatCurrency } from "@lib/client-helpers"
+import NoteDialog from "@components/garage/note-dialog"
+import dynamic from "next/dynamic"
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@components/ui/tooltip";
-import StatsRow from "./stats-row";
-import SearchDialog from "./search-dialog";
-import { AnimatePresence, motion } from "framer-motion";
-import downloadAsPdf from "@lib/services/download-pdf";
-import ServiceSelectControls from "./service-select-controls";
-import { useQueryClient } from "@tanstack/react-query";
-import { Priority } from "@components/priority-select";
-import { Checkbox } from "@components/ui/checkbox";
-import { Label } from "@components/ui/label";
+} from "@components/ui/tooltip"
+import StatsRow from "./stats-row"
+import SearchDialog from "./search-dialog"
+import { AnimatePresence, motion } from "framer-motion"
+import downloadAsPdf from "@lib/services/download-pdf"
+import ServiceSelectControls from "./service-select-controls"
+import { useQueryClient } from "@tanstack/react-query"
+import { Priority } from "@components/priority-select"
+import { Checkbox } from "@components/ui/checkbox"
+import { Label } from "@components/ui/label"
 interface Props {
-  isClientPage?: boolean;
-  isAdmin: boolean;
-  categories: CategoryProps[];
-  cars: CarItem[];
-  clients: ClientWithPhoneNumbers[];
-  status: ServiceStatus[];
-  currPage: string;
-  services: Service[];
-  className?: string;
-  dateFrom: string;
-  dateTo: string;
-  clientId: string;
-  carId: string;
-  serviceStatusId: string;
-  minPrice: string;
-  maxPrice: string;
-  pageNumber: string;
+  isClientPage?: boolean
+  isAdmin: boolean
+  categories: CategoryProps[]
+  cars: CarItem[]
+  clients: ClientWithPhoneNumbers[]
+  status: ServiceStatus[]
+  currPage: string
+  services: Service[]
+  className?: string
+  dateFrom: string
+  dateTo: string
+  clientId: string
+  carId: string
+  serviceStatusId: string
+  minPrice: string
+  maxPrice: string
+  pageNumber: string
 }
 
 const ServiceTable = ({
@@ -144,39 +144,39 @@ const ServiceTable = ({
   pageNumber,
   className,
 }: Props) => {
-  const [loadingIds, setLoadingIds] = useState<number[]>([]);
-  const [selected, setSelected] = useState<number[]>([]);
+  const [loadingIds, setLoadingIds] = useState<number[]>([])
+  const [selected, setSelected] = useState<number[]>([])
   if (!services)
-    return <p>Something went wrong while getting the services&apos;s data</p>;
-  const currPageSize = services.length;
+    return <p>Something went wrong while getting the services&apos;s data</p>
+  const currPageSize = services.length
 
   const nonCanceledService = services.filter(
-    (serv) => serv.serviceStatuses.name != "Canceled",
-  );
+    (serv) => serv.serviceStatuses.name != "Canceled"
+  )
 
   const fees = nonCanceledService
     .flatMap((service) => service.servicesFee)
-    .filter((fee) => !fee.isReturned);
+    .filter((fee) => !fee.isReturned)
   const soldProducts = nonCanceledService
     .flatMap((service) => service.productsToSell)
-    .filter((pro) => !pro.isReturned);
+    .filter((pro) => !pro.isReturned)
 
   const totalFees = fees.reduce((acc, item) => {
-    acc += item.totalPriceAfterDiscount;
+    acc += item.totalPriceAfterDiscount
 
-    return acc;
-  }, 0);
+    return acc
+  }, 0)
 
   const totalSoldProducts = soldProducts.reduce((acc, item) => {
-    acc += item.totalPriceAfterDiscount;
+    acc += item.totalPriceAfterDiscount
 
-    return acc;
-  }, 0);
+    return acc
+  }, 0)
 
-  const totals = totalFees + totalSoldProducts;
+  const totals = totalFees + totalSoldProducts
   return (
     <>
-      <div className=" flex    break-keep flex-col-reverse sm:flex-row gap-x-2 gap-y-5 items-center ">
+      <div className="flex flex-col-reverse items-center gap-x-2 gap-y-5 break-keep sm:flex-row">
         <ServiceSelectControls
           isAdmin={isAdmin}
           selected={selected}
@@ -201,8 +201,8 @@ const ServiceTable = ({
           currPage={pageNumber}
         />
       </div>
-      <div className="mt-10 p-3 border rounded-3xl shadow-lg ">
-        <Table className=" min-w-[800px]">
+      <div className="mt-10 rounded-3xl border p-3 shadow-lg">
+        <Table className="min-w-[800px]">
           <TableCaption>
             {services.length
               ? "A list of all service receipts."
@@ -211,15 +211,13 @@ const ServiceTable = ({
 
           <TableHeader>
             <TableRow>
-              <TableHead className=" min-w-[20px]">ID</TableHead>
+              <TableHead className="min-w-[20px]">ID</TableHead>
               <TableHead>DATE</TableHead>
               <TableHead>CLIENT</TableHead>
               <TableHead>CAR</TableHead>
               <TableHead>STATUS</TableHead>
               <TableHead>FEES</TableHead>
-              <TableHead className=" whitespace-nowrap">
-                SOLD PRODUCTS
-              </TableHead>
+              <TableHead className="whitespace-nowrap">SOLD PRODUCTS</TableHead>
               <TableHead className="">PRIORITY</TableHead>
               <TableHead className="text-right">TOTAL PRICE</TableHead>
             </TableRow>
@@ -249,17 +247,17 @@ const ServiceTable = ({
             <TableRow>
               <TableCell colSpan={5}>Page-Total:</TableCell>
 
-              <TableCell className="   min-w-[100px] max-w-[120px] ">
+              <TableCell className="max-w-[120px] min-w-[100px]">
                 {formatCurrency(totalFees)}
               </TableCell>
 
-              <TableCell className="   min-w-[100px] max-w-[120px] ">
+              <TableCell className="max-w-[120px] min-w-[100px]">
                 {formatCurrency(totalSoldProducts)}
               </TableCell>
 
               <TableCell
                 colSpan={3}
-                className=" text-right   min-w-[100px] max-w-[120px] "
+                className="max-w-[120px] min-w-[100px] text-right"
               >
                 {formatCurrency(totals)}
               </TableCell>
@@ -277,8 +275,8 @@ const ServiceTable = ({
         </Table>
       </div>
     </>
-  );
-};
+  )
+}
 
 function Row({
   selected,
@@ -294,50 +292,50 @@ function Row({
   currPageSize,
   isLoading: loading,
 }: {
-  isLoading: boolean;
-  selected: number[];
-  setSelected: React.Dispatch<React.SetStateAction<number[]>>;
-  isClientPage?: boolean;
-  isAdmin: boolean;
-  categories: CategoryProps[];
-  clients: ClientWithPhoneNumbers[];
-  cars: CarItem[];
-  status: ServiceStatus[];
-  currPage: string;
-  service: Service;
-  currPageSize: number;
+  isLoading: boolean
+  selected: number[]
+  setSelected: React.Dispatch<React.SetStateAction<number[]>>
+  isClientPage?: boolean
+  isAdmin: boolean
+  categories: CategoryProps[]
+  clients: ClientWithPhoneNumbers[]
+  cars: CarItem[]
+  status: ServiceStatus[]
+  currPage: string
+  service: Service
+  currPageSize: number
 }) {
   const total = useMemo(() => {
     const totalFees = service.servicesFee
       .filter((fee) => !fee.isReturned)
       .reduce((sum, curr) => {
-        sum += curr.totalPriceAfterDiscount;
-        return sum;
-      }, 0);
+        sum += curr.totalPriceAfterDiscount
+        return sum
+      }, 0)
     const totalSold = service.productsToSell
       .filter((pro) => !pro.isReturned)
       .reduce((sum, curr) => {
-        sum += curr.totalPriceAfterDiscount;
-        return sum;
-      }, 0);
-    const total = totalSold + totalFees;
-    return total;
-  }, [service]);
-  const item = selected.some((item) => item === service.id);
+        sum += curr.totalPriceAfterDiscount
+        return sum
+      }, 0)
+    const total = totalSold + totalFees
+    return total
+  }, [service])
+  const item = selected.some((item) => item === service.id)
   return (
     <>
       <TableRow
         onClick={() => {
           setSelected((selected) => {
-            if (item) return selected.filter((item) => item !== service.id);
-            return [...selected, service.id];
-          });
+            if (item) return selected.filter((item) => item !== service.id)
+            return [...selected, service.id]
+          })
         }}
         className={` ${item && "bg-accent/60 hover:bg-accent/40"}`}
       >
         <TableCell className="font-medium"> {service.id}</TableCell>
 
-        <TableCell className=" whitespace-nowrap">
+        <TableCell className="whitespace-nowrap">
           {service.created_at}
         </TableCell>
 
@@ -362,19 +360,19 @@ function Row({
           />
         </TableCell>
 
-        <TableCell className=" min-w-[100px]">
+        <TableCell className="min-w-[100px]">
           <ProductSoldDialog
             isAdmin={isAdmin}
             service={service}
             total={total}
           />
         </TableCell>
-        <TableCell className=" relative">
+        <TableCell className="relative">
           <Priority priority={service.priority} />
         </TableCell>
-        <TableCell className=" font-bold text-right ">
-          <div className=" flex   items-center justify-end gap-3">
-            <span className={` ${total === 0 && " text-muted-foreground"}`}>
+        <TableCell className="text-right font-bold">
+          <div className="flex items-center justify-end gap-3">
+            <span className={` ${total === 0 && "text-muted-foreground"}`}>
               {" "}
               {formatCurrency(total)}{" "}
             </span>
@@ -420,7 +418,7 @@ function Row({
         setDeleteOpen={setDeleteOpen}
       /> */}
     </>
-  );
+  )
 }
 
 function TableActions({
@@ -434,40 +432,40 @@ function TableActions({
   cars,
   clients,
 }: {
-  loading: boolean;
-  isClientPage?: boolean;
-  isAdmin?: boolean;
-  cars: CarItem[];
-  clients: ClientWithPhoneNumbers[];
-  status: ServiceStatus[];
-  currPage: string;
-  service: Service;
-  currPageSize: number;
+  loading: boolean
+  isClientPage?: boolean
+  isAdmin?: boolean
+  cars: CarItem[]
+  clients: ClientWithPhoneNumbers[]
+  status: ServiceStatus[]
+  currPage: string
+  service: Service
+  currPageSize: number
 }) {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [open, setOpen] = useState<"delete" | "edit" | "note" | "">("");
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [open, setOpen] = useState<"delete" | "edit" | "note" | "">("")
 
   // const [open, setOpen] = useState(false);
   // const [chosenStatus, setChosenStatus] = useState<number>(service.status.id);
-  const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
-  const searchParam = useSearchParams();
-  const pathname = usePathname();
-  const router = useRouter();
-  const params = new URLSearchParams(searchParam);
-  const currLoading = isLoading || loading;
+  const [isLoading, setIsLoading] = useState(false)
+  const { toast } = useToast()
+  const searchParam = useSearchParams()
+  const pathname = usePathname()
+  const router = useRouter()
+  const params = new URLSearchParams(searchParam)
+  const currLoading = isLoading || loading
 
   const handleChangePriority = async (
-    priority: "Low" | "Medium" | "High" | string,
+    priority: "Low" | "Medium" | "High" | string
   ) => {
-    setIsLoading(true);
+    setIsLoading(true)
     try {
       await editServiceAction({
         priority,
         id: service.id,
-      });
+      })
 
-      setIsLoading(false);
+      setIsLoading(false)
       // handleClose();
       toast({
         className: "bg-primary  text-primary-foreground",
@@ -477,26 +475,26 @@ function TableActions({
             message={`Service priority has been uptated.'`}
           />
         ),
-      });
+      })
     } catch (error: any) {
-      setIsLoading(false);
+      setIsLoading(false)
       toast({
         variant: "destructive",
         title: "Faild to update the service priority.",
         description: <ErorrToastDescription error={error.message} />,
-      });
+      })
     }
-  };
+  }
 
   const handleChangeStatus = async (id: number) => {
-    setIsLoading(true);
+    setIsLoading(true)
     try {
       await editServiceAction({
         serviceStatusId: id,
         id: service.id,
-      });
+      })
 
-      setIsLoading(false);
+      setIsLoading(false)
       // handleClose();
       toast({
         className: "bg-primary  text-primary-foreground",
@@ -506,21 +504,21 @@ function TableActions({
             message={`Service status has been uptated.'`}
           />
         ),
-      });
+      })
     } catch (error: any) {
-      setIsLoading(false);
+      setIsLoading(false)
       toast({
         variant: "destructive",
         title: "Faild to update the service status.",
         description: <ErorrToastDescription error={error.message} />,
-      });
+      })
     }
-  };
+  }
 
   const handlePdf = async () => {
-    setIsLoading(true);
+    setIsLoading(true)
     try {
-      await downloadAsPdf([service.id]);
+      await downloadAsPdf([service.id])
       toast({
         className: "bg-primary  text-primary-foreground",
         title: `Done.`,
@@ -529,19 +527,19 @@ function TableActions({
             message={`Receipt data is ready to be downloaded as a PDF.`}
           />
         ),
-      });
+      })
     } catch (error: any) {
-      console.error(error);
+      console.error(error)
 
       toast({
         variant: "destructive",
         title: "Failed to download.",
         description: <ErorrToastDescription error={error.message} />,
-      });
+      })
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   // const handlePdf = async () => {
   //   setIsLoading(true);
@@ -593,68 +591,64 @@ function TableActions({
   if (currLoading)
     return (
       <Spinner
-        className="  w-4 h-4 flex items-center mx-1 justify-center  "
+        className="mx-1 flex h-4 w-4 items-center justify-center"
         size={15}
       />
-    );
+    )
 
   return (
-    <div onClick={(e) => e.stopPropagation()} className=" w-fit ">
+    <div onClick={(e) => e.stopPropagation()} className="w-fit">
       {isAdmin ? (
         <>
           <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
             <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                size="icon"
-                className="     p-0 h-6 w-6"
-              >
-                <Ellipsis className=" w-4 h-4" />
+              <Button variant="outline" size="icon" className="h-6 w-6 p-0">
+                <Ellipsis className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className=" min-w-[200px] mr-5 ">
+            <DropdownMenuContent className="mr-5 min-w-[200px]">
               {/* <DropdownMenuLabel>My Account</DropdownMenuLabel> */}
               {/* <DropdownMenuSeparator /> */}
               <DropdownMenuItem
-                className=" gap-2"
+                className="gap-2"
                 onClick={() => {
-                  setOpen("edit");
+                  setOpen("edit")
                 }}
               >
-                <ReceiptText className=" w-4 h-4" /> Edit service receipt
+                <ReceiptText className="h-4 w-4" /> Edit service receipt
               </DropdownMenuItem>
 
               <DropdownMenuItem
                 disabled={!service.note}
-                className=" gap-2"
+                className="gap-2"
                 onClick={() => {
-                  setOpen("note");
+                  setOpen("note")
                 }}
               >
-                <NotepadTextDashed className=" w-4 h-4" /> View receipt note
+                <NotepadTextDashed className="h-4 w-4" /> View receipt note
               </DropdownMenuItem>
               <DropdownMenuItem
-                className=" gap-2"
+                className="gap-2"
                 onClick={() => {
-                  params.set("addFeeId", service.id.toString());
+                  params.set("addFeeId", service.id.toString())
                   router.push(`${pathname}?${params.toString()}`, {
                     scroll: false,
-                  });
+                  })
                 }}
               >
-                <HandPlatter className=" w-4 h-4" /> Add more service fees{" "}
+                <HandPlatter className="h-4 w-4" /> Add more service fees{" "}
               </DropdownMenuItem>
               <DropdownMenuItem
-                className=" gap-2"
+                className="gap-2"
                 onClick={() => {
-                  const params = new URLSearchParams(searchParam);
-                  params.set("addSoldId", service.id.toString());
+                  const params = new URLSearchParams(searchParam)
+                  params.set("addSoldId", service.id.toString())
                   router.push(`${pathname}?${params.toString()}`, {
                     scroll: false,
-                  });
+                  })
                 }}
               >
-                <PackagePlus className=" w-4 h-4" /> Add more sold products
+                <PackagePlus className="h-4 w-4" /> Add more sold products
               </DropdownMenuItem>
               <DropdownMenuSub
               // disabled={isLoading}
@@ -663,54 +657,54 @@ function TableActions({
               //   setOpen("delete");
               // }}
               >
-                <DropdownMenuSubTrigger className=" gap-2">
+                <DropdownMenuSubTrigger className="gap-2">
                   {" "}
                   <FaArrowUpWideShort /> Change priority
                 </DropdownMenuSubTrigger>
 
                 <DropdownMenuPortal>
-                  <DropdownMenuSubContent className=" max-h-[170px] overflow-y-auto">
+                  <DropdownMenuSubContent className="max-h-[170px] overflow-y-auto">
                     <DropdownMenuItem
                       key="high"
-                      className=" gap-2 justify-between"
+                      className="justify-between gap-2"
                       onClick={async () => {
                         if (service.priority?.toLocaleLowerCase() === "high")
-                          return;
-                        await handleChangePriority("High");
+                          return
+                        await handleChangePriority("High")
                       }}
                     >
                       <Priority priority="high" />
                       {service.priority?.toLocaleLowerCase() == "high" && (
-                        <Check className=" w-3 h-3" />
+                        <Check className="h-3 w-3" />
                       )}
                     </DropdownMenuItem>
 
                     <DropdownMenuItem
                       key="medium"
-                      className=" gap-2 justify-between"
+                      className="justify-between gap-2"
                       onClick={async () => {
                         if (service.priority?.toLocaleLowerCase() === "medium")
-                          return;
-                        await handleChangePriority("Medium");
+                          return
+                        await handleChangePriority("Medium")
                       }}
                     >
                       <Priority priority="medium" />
                       {service.priority?.toLocaleLowerCase() == "medium" && (
-                        <Check className=" w-3 h-3" />
+                        <Check className="h-3 w-3" />
                       )}
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       key="low"
-                      className=" gap-2 justify-between"
+                      className="justify-between gap-2"
                       onClick={async () => {
                         if (service.priority?.toLocaleLowerCase() === "low")
-                          return;
-                        await handleChangePriority("Low");
+                          return
+                        await handleChangePriority("Low")
                       }}
                     >
                       <Priority priority="low" />
                       {(service.priority?.toLocaleLowerCase() == "low" ||
-                        !service.priority) && <Check className=" w-3 h-3" />}
+                        !service.priority) && <Check className="h-3 w-3" />}
                     </DropdownMenuItem>
 
                     {/* <DropdownMenuItem
@@ -734,30 +728,30 @@ function TableActions({
               //   setOpen("delete");
               // }}
               >
-                <DropdownMenuSubTrigger className=" gap-2">
+                <DropdownMenuSubTrigger className="gap-2">
                   {" "}
-                  <Replace className=" w-4 h-4" /> Change status
+                  <Replace className="h-4 w-4" /> Change status
                 </DropdownMenuSubTrigger>
 
                 <DropdownMenuPortal>
-                  <DropdownMenuSubContent className=" max-h-[170px] overflow-y-auto">
+                  <DropdownMenuSubContent className="max-h-[170px] overflow-y-auto">
                     {status.map((status, i) => (
                       <DropdownMenuItem
                         key={i}
-                        className=" gap-2 justify-between"
+                        className="justify-between gap-2"
                         onClick={async () => {
                           // setChosenStatus(status.id)
-                          if (status.id === service.serviceStatuses.id) return;
-                          await handleChangeStatus(status.id);
+                          if (status.id === service.serviceStatuses.id) return
+                          await handleChangeStatus(status.id)
                         }}
                       >
                         <StatusBadge
                           disableToolTip
                           status={status}
-                          className=" py-[.1rem]"
+                          className="py-[.1rem]"
                         />
                         {service.serviceStatuses.id === status.id && (
-                          <Check className=" w-3 h-3" />
+                          <Check className="h-3 w-3" />
                         )}
                       </DropdownMenuItem>
                     ))}
@@ -766,21 +760,21 @@ function TableActions({
               </DropdownMenuSub>
               {/* <DropdownMenuSeparator /> */}
               <DropdownMenuItem
-                className=" gap-2  "
+                className="gap-2"
                 onClick={async () => {
-                  await handlePdf();
+                  await handlePdf()
                 }}
               >
-                <ArrowDownToLine className=" w-4 h-4" />
+                <ArrowDownToLine className="h-4 w-4" />
                 Download as PDF
               </DropdownMenuItem>
               <DropdownMenuItem
-                className=" gap-2  !text-red-900  dark:!text-red-300 hover:!bg-destructive/70"
+                className="gap-2 !text-red-900 hover:!bg-destructive/70 dark:!text-red-300"
                 onClick={() => {
-                  setOpen("delete");
+                  setOpen("delete")
                 }}
               >
-                <Trash2 className=" w-4 h-4" />
+                <Trash2 className="h-4 w-4" />
                 Delete service receipt
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -834,10 +828,10 @@ function TableActions({
               <Button
                 variant="outline"
                 size="icon"
-                className="     p-1 h-6 w-6"
+                className="h-6 w-6 p-1"
                 onClick={async () => await handlePdf()}
               >
-                <Download className=" w-4 h-4" />
+                <Download className="h-4 w-4" />
               </Button>
             </TooltipTrigger>
             <TooltipContent>Download as pdf</TooltipContent>
@@ -845,7 +839,7 @@ function TableActions({
         </TooltipProvider>
       )}
     </div>
-  );
+  )
 }
 
 function DeleteService({
@@ -857,61 +851,61 @@ function DeleteService({
   setIsDeleting,
   service,
 }: {
-  currPage: string;
-  open: boolean;
-  isDeleting: boolean;
-  setIsDeleting: React.Dispatch<SetStateAction<boolean>>;
-  handleClose: () => void;
-  service: Service;
-  pageSize: number;
+  currPage: string
+  open: boolean
+  isDeleting: boolean
+  setIsDeleting: React.Dispatch<SetStateAction<boolean>>
+  handleClose: () => void
+  service: Service
+  pageSize: number
 }) {
-  const [checked, setChecked] = useState(true);
-  const { toast } = useToast();
-  const searchParam = useSearchParams();
-  const router = useRouter();
-  const pathname = usePathname();
-  const queryClient = useQueryClient();
+  const [checked, setChecked] = useState(true)
+  const { toast } = useToast()
+  const searchParam = useSearchParams()
+  const router = useRouter()
+  const pathname = usePathname()
+  const queryClient = useQueryClient()
 
   function checkIfLastItem() {
-    const params = new URLSearchParams(searchParam);
+    const params = new URLSearchParams(searchParam)
     if (pageSize === 1) {
       if (Number(currPage) === 1 && pageSize === 1) {
-        params.delete("dateFrom");
-        params.delete("dateTo");
-        params.delete("clientId");
-        params.delete("carId");
-        params.delete("serviceStatusId");
-        params.delete("minPrice");
-        params.delete("maxPrice");
+        params.delete("dateFrom")
+        params.delete("dateTo")
+        params.delete("clientId")
+        params.delete("carId")
+        params.delete("serviceStatusId")
+        params.delete("minPrice")
+        params.delete("maxPrice")
       }
       if (Number(currPage) > 1) {
-        params.set("page", String(Number(currPage) - 1));
+        params.set("page", String(Number(currPage) - 1))
       }
-      router.push(`${pathname}?${params.toString()}`, { scroll: false });
+      router.push(`${pathname}?${params.toString()}`, { scroll: false })
     }
   }
 
   useEffect(() => {
-    const body = document.querySelector("body");
+    const body = document.querySelector("body")
 
     if (body) {
-      body.style.pointerEvents = "auto";
+      body.style.pointerEvents = "auto"
     }
     return () => {
-      if (body) body.style.pointerEvents = "auto";
-    };
-  }, [open]);
+      if (body) body.style.pointerEvents = "auto"
+    }
+  }, [open])
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[425px] border-none">
+      <DialogContent className="border-none sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Delete service receipt.</DialogTitle>
           <DialogDescription>
             {`You are about to delete a receipt dated '${service.created_at}', issued to the client '${service.clients.name}', along with all its associated data.`}
           </DialogDescription>
         </DialogHeader>
-        <div className=" flex items-center gap-2">
+        <div className="flex items-center gap-2">
           {" "}
           <Checkbox
             checked={checked}
@@ -923,7 +917,7 @@ function DeleteService({
             Restock all the products deleted within the service
           </Label>
         </div>
-        <DialogFooter className="   gap-2 sm:gap-0">
+        <DialogFooter className="gap-2 sm:gap-0">
           <Button onClick={handleClose} size="sm" variant="secondary">
             Cancel
           </Button>
@@ -933,11 +927,11 @@ function DeleteService({
             variant="destructive"
             size="sm"
             onClick={async () => {
-              setIsDeleting(true);
+              setIsDeleting(true)
               try {
                 const productsIds = Array.from(
-                  new Set(service.productsToSell.map((p) => p.productId)),
-                );
+                  new Set(service.productsToSell.map((p) => p.productId))
+                )
 
                 const productsToRestock = checked
                   ? productsIds.map((id) =>
@@ -945,23 +939,23 @@ function DeleteService({
                         .filter((product) => product.productId === id)
                         .reduce(
                           (acc, currPro) => {
-                            acc.quantity += currPro.count;
-                            return acc;
+                            acc.quantity += currPro.count
+                            return acc
                           },
-                          { id, quantity: 0 },
-                        ),
+                          { id, quantity: 0 }
+                        )
                     )
-                  : undefined;
+                  : undefined
 
                 const { error } = await deleteServiceAction(
                   service.id.toString(),
-                  productsToRestock,
-                );
-                if (error) throw new Error(error);
-                checkIfLastItem();
-                setIsDeleting(false);
-                handleClose();
-                queryClient.removeQueries({ queryKey: ["servicesStats"] });
+                  productsToRestock
+                )
+                if (error) throw new Error(error)
+                checkIfLastItem()
+                setIsDeleting(false)
+                handleClose()
+                queryClient.removeQueries({ queryKey: ["servicesStats"] })
                 toast({
                   className: "bg-primary  text-primary-foreground",
                   title: `Data deleted!.`,
@@ -970,23 +964,23 @@ function DeleteService({
                       message={`Service data has been deleted.`}
                     />
                   ),
-                });
+                })
               } catch (error: any) {
-                setIsDeleting(false);
+                setIsDeleting(false)
                 toast({
                   variant: "destructive",
                   title: "Faild to delete Service data",
                   description: <ErorrToastDescription error={error.message} />,
-                });
+                })
               }
             }}
           >
-            {isDeleting ? <Spinner className=" h-full" /> : "Confrim"}
+            {isDeleting ? <Spinner className="h-full" /> : "Confrim"}
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  );
+  )
 }
 
 function DeleteDialog({
@@ -1001,44 +995,44 @@ function DeleteDialog({
   setIsDeleting,
   service,
 }: {
-  currPage: string;
-  open: boolean;
-  isDeleting: boolean;
-  setOpen: React.Dispatch<SetStateAction<number | null>>;
-  productBoughtId: number | null;
-  setMainDialong: React.Dispatch<SetStateAction<boolean>>;
-  setIsDeleting: React.Dispatch<SetStateAction<boolean>>;
-  handleClose: () => void;
-  service: Service;
-  pageSize: number;
+  currPage: string
+  open: boolean
+  isDeleting: boolean
+  setOpen: React.Dispatch<SetStateAction<number | null>>
+  productBoughtId: number | null
+  setMainDialong: React.Dispatch<SetStateAction<boolean>>
+  setIsDeleting: React.Dispatch<SetStateAction<boolean>>
+  handleClose: () => void
+  service: Service
+  pageSize: number
 }) {
-  const { toast } = useToast();
+  const { toast } = useToast()
 
   //   const proTodelete = productBoughtId
   //     ? proBought.productsBought.find((pro) => pro.id === productBoughtId)
   //     : null;
 
   useEffect(() => {
-    const body = document.querySelector("body");
+    const body = document.querySelector("body")
 
     if (body) {
-      body.style.pointerEvents = "auto";
+      body.style.pointerEvents = "auto"
     }
     return () => {
-      if (body) body.style.pointerEvents = "auto";
-    };
-  }, [open]);
+      if (body) body.style.pointerEvents = "auto"
+    }
+  }, [open])
 
   return (
     <Dialog
       open={open}
       onOpenChange={() => {
-        handleClose();
-        setOpen(null);
-        setMainDialong(true);
+        handleClose()
+        setOpen(null)
+        setMainDialong(true)
       }}
     >
-      <DialogContent className="sm:max-w-[425px] border-none">
+      <DialogContent className="border-none sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Delete service.</DialogTitle>
           <DialogDescription>
@@ -1046,7 +1040,7 @@ function DeleteDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <DialogFooter className="   gap-2 sm:gap-0">
+        <DialogFooter className="gap-2 sm:gap-0">
           <DialogClose>
             Cancel
             {/* <Button size="sm" variant="secondary">
@@ -1059,13 +1053,13 @@ function DeleteDialog({
             size="sm"
             onClick={async () => {
               try {
-                setIsDeleting(true);
+                setIsDeleting(true)
                 // if (proTodelete)
-                await deleteServiceAction(service.id.toString());
+                await deleteServiceAction(service.id.toString())
                 // checkIfLastItem();
-                setIsDeleting(false);
-                setOpen(null);
-                setMainDialong(true);
+                setIsDeleting(false)
+                setOpen(null)
+                setMainDialong(true)
                 // handleClose();
                 toast({
                   className: "bg-primary  text-primary-foreground",
@@ -1075,23 +1069,23 @@ function DeleteDialog({
                       message={`Service data has been deleted`}
                     />
                   ),
-                });
+                })
               } catch (error: any) {
                 toast({
                   variant: "destructive",
                   title: "Faild to delete client's data",
                   description: <ErorrToastDescription error={error.message} />,
-                });
+                })
               }
-              setIsDeleting(false);
+              setIsDeleting(false)
             }}
           >
-            {isDeleting ? <Spinner className=" h-full" /> : "Confrim"}
+            {isDeleting ? <Spinner className="h-full" /> : "Confrim"}
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  );
+  )
 }
 
-export default ServiceTable;
+export default ServiceTable

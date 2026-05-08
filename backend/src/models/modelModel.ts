@@ -42,4 +42,9 @@ carModelSchema.virtual("generations", {
   foreignField: "carModel",
 });
 
+// carModelSchema.virtual("carMaker", {
+//   ref: "carMakers",
+//   localField: "carMaker",
+//   foreignField: "_id",
+// });
 export const Model = model<ICarModel>("carModels", carModelSchema);

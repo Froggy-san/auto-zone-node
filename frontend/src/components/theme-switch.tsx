@@ -8,7 +8,7 @@ import { useTheme } from "./theme-provider"
 // import sound from "@public/sound/mixkit-on-or-off-light-switch-tap-2585.wav";
 export function ModeToggle() {
   const { theme, setTheme } = useTheme()
-  console.log(theme, "THEME ")
+
   const audioRef = React.useRef<HTMLAudioElement>(null)
 
   const playSound = () => {

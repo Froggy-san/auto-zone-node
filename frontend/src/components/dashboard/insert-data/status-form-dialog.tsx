@@ -1,4 +1,4 @@
-import React, { SetStateAction } from "react";
+import React, { SetStateAction } from "react"
 import {
   Dialog,
   DialogContent,
@@ -6,19 +6,19 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import ServiceStatusForm from "./service-status-form";
-import { ServiceStatus } from "@lib/types";
+} from "@/components/ui/dialog"
+import ServiceStatusForm from "./service-status-form"
+import { ServiceStatus } from "@lib/types"
 
 interface Props {
-  open: boolean;
-  setOpen: React.Dispatch<SetStateAction<boolean>>;
-  statusToEdit?: ServiceStatus;
+  open: boolean
+  setOpen: React.Dispatch<SetStateAction<boolean>>
+  statusToEdit?: ServiceStatus
 }
 const StatusFormDialog = ({ open, setOpen, statusToEdit }: Props) => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className=" max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Service status</DialogTitle>
           <DialogDescription>
@@ -33,7 +33,7 @@ const StatusFormDialog = ({ open, setOpen, statusToEdit }: Props) => {
         />
       </DialogContent>
     </Dialog>
-  );
-};
+  )
+}
 
-export default StatusFormDialog;
+export default StatusFormDialog

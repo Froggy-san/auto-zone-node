@@ -1,20 +1,20 @@
-import { PaymentStatusSchema } from "@lib/types";
-import { cn } from "@lib/utils";
-import { BsExclamationDiamond } from "react-icons/bs";
+import { PaymentStatusSchema } from "@lib/types"
+import { cn } from "@lib/utils"
+import { BsExclamationDiamond } from "react-icons/bs"
 import {
   TbCreditCardOff,
   TbCreditCardPay,
   TbCreditCardRefund,
-} from "react-icons/tb";
-import { z } from "zod";
+} from "react-icons/tb"
+import { z } from "zod"
 
 const paymentStatusConfig: Record<
   z.infer<typeof PaymentStatusSchema>,
   {
-    label: string;
-    icon?: React.ElementType;
-    bgClass: string;
-    textClass: string;
+    label: string
+    icon?: React.ElementType
+    bgClass: string
+    textClass: string
   }
 > = {
   paid: {
@@ -136,30 +136,30 @@ const paymentStatusConfig: Record<
   //   bgClass: "bg-action-message/15",
   //   textClass: "text-action-message",
   // },
-};
+}
 
 function PaymentStatus({
   status,
   className,
 }: {
-  status: z.infer<typeof PaymentStatusSchema>;
-  className?: string;
+  status: z.infer<typeof PaymentStatusSchema>
+  className?: string
 }) {
-  const config = paymentStatusConfig[status] || paymentStatusConfig.unpaid;
-  const Icon = config?.icon;
+  const config = paymentStatusConfig[status] || paymentStatusConfig.unpaid
+  const Icon = config?.icon
 
   return (
     <span
       className={cn(
-        " inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium gap-1.5",
+        "inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium",
         config.bgClass,
         config.textClass,
-        className,
+        className
       )}
     >
-      {Icon && <Icon className="w-4 h-4" />}
+      {Icon && <Icon className="h-4 w-4" />}
       {config.label}
     </span>
-  );
+  )
 }
-export default PaymentStatus;
+export default PaymentStatus

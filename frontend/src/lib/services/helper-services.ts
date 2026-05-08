@@ -1,15 +1,14 @@
-import { type FileWithPreview } from "@/lib/types";
-
+import { type FileWithPreview } from "@/lib/types"
 
 type ImgData = {
-  path: string;
-  name: string;
-  isMain: boolean;
-  file: FileWithPreview | File;
-};
+  path: string
+  name: string
+  isMain: boolean
+  file: FileWithPreview | File
+}
 interface UploadImageToBucket {
-  bucketName: string;
-  images: ImgData[];
+  bucketName: string
+  images: ImgData[]
 }
 
 // export async function uploadImageToBucket({
@@ -53,11 +52,11 @@ interface UploadImageToBucket {
 // }
 
 interface UploadsingleImageToBucket {
-  bucketName: string;
+  bucketName: string
   image: {
-    name: string;
-    file: File | FileWithPreview;
-  };
+    name: string
+    file: File | FileWithPreview
+  }
 }
 // export async function uploadSingleImgToBucket({
 //   bucketName,
@@ -115,7 +114,7 @@ interface UploadsingleImageToBucket {
 // }
 
 function geoError(error: GeolocationPositionError) {
-  console.log(`Failed to get user's position: ${error.message}`);
+  console.log(`Failed to get user's position: ${error.message}`)
 }
 
 export function getUserLocation() {
@@ -126,12 +125,12 @@ export function getUserLocation() {
       )
         .then((res) => res.json())
         .then((data) => {
-          console.log(data, "DD");
+          console.log(data, "DD")
 
           // const country = data.features[0].properties.country;
           // console.log(country, "SSSSSSSSSSSSSSSSSSSSSSSSSSSSS"); // e.g., "Germany"
-        });
-    }, geoError);
+        })
+    }, geoError)
   } else {
   }
 }

@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Button } from "@/components/ui/button";
+import React, { useState } from "react"
+import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -8,38 +8,38 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import Spinner from "@components/Spinner";
-import { useToast } from "@hooks/use-toast";
-import { deleteCarAction } from "@lib/actions/carsAction";
+} from "@/components/ui/dialog"
+import Spinner from "@components/Spinner"
+import { useToast } from "@hooks/use-toast"
+import { deleteCarAction } from "@lib/actions/carsAction"
 import SuccessToastDescription, {
   ErorrToastDescription,
-} from "@components/toast-items";
-import { useRouter } from "next/navigation";
-import { cn } from "@lib/utils";
+} from "@components/toast-items"
+import { useRouter } from "next/navigation"
+import { cn } from "@lib/utils"
 const DeleteCar = ({
   carId,
   clientId,
   imagePaths,
   className,
 }: {
-  carId: number;
-  clientId: number;
-  imagePaths: string[];
-  className?: string;
+  carId: number
+  clientId: number
+  imagePaths: string[]
+  className?: string
 }) => {
   return (
     <div
       className={cn(
-        "flex  flex-col w-full  gap-y-2 xs:flex-row xs:items-center justify-between rounded-lg border p-3 shadow-sm gap-x-7",
+        "flex w-full flex-col justify-between gap-x-7 gap-y-2 rounded-lg border p-3 shadow-sm xs:flex-row xs:items-center",
         className
       )}
     >
-      <div className="space-y-0.5   ">
-        <label className=" font-semibold">Products</label>
-        <p className=" text-muted-foreground text-sm">Delete car.</p>
+      <div className="space-y-0.5">
+        <label className="font-semibold">Products</label>
+        <p className="text-sm text-muted-foreground">Delete car.</p>
       </div>
-      <div className=" sm:pr-2">
+      <div className="sm:pr-2">
         <DeleteDialog
           carId={carId}
           clientId={clientId}
@@ -47,54 +47,54 @@ const DeleteCar = ({
         />
       </div>
     </div>
-  );
-};
+  )
+}
 
 function DeleteDialog({
   carId,
   clientId,
   imagePaths,
 }: {
-  carId: number;
-  clientId: number;
-  imagePaths: string[];
+  carId: number
+  clientId: number
+  imagePaths: string[]
 }) {
-  const [open, setOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
-  const router = useRouter();
+  const [open, setOpen] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const { toast } = useToast()
+  const router = useRouter()
   async function handleDelete() {
     try {
-      if (!carId) return;
-      setIsLoading(true);
-      await deleteCarAction(clientId, carId, imagePaths);
-      router.back();
+      if (!carId) return
+      setIsLoading(true)
+      await deleteCarAction(clientId, carId, imagePaths)
+      router.back()
       //   checkIfLastItem();
       //   queryClient.invalidateQueries({ queryKey: ["carCount"] });
-      setOpen(false);
+      setOpen(false)
 
       toast({
         className: "bg-primary  text-primary-foreground",
         variant: "default",
         title: "Data deleted!.",
         description: <SuccessToastDescription message="Car has been deleted" />,
-      });
+      })
     } catch (error: any) {
       toast({
         variant: "destructive",
         title: "Something went wrong.",
         description: <ErorrToastDescription error={error.message} />,
-      });
+      })
     }
   }
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" variant="destructive" className="  w-full">
-          {isLoading ? <Spinner className=" h-full" size={12} /> : "Delete"}
+        <Button size="sm" variant="destructive" className="w-full">
+          {isLoading ? <Spinner className="h-full" size={12} /> : "Delete"}
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px] border-none">
+      <DialogContent className="border-none sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Are you sure?</DialogTitle>
           <DialogDescription>
@@ -103,7 +103,7 @@ function DeleteDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <DialogFooter className=" gap-y-2">
+        <DialogFooter className="gap-y-2">
           <Button
             onClick={() => setOpen(false)}
             type="reset"
@@ -125,7 +125,7 @@ function DeleteDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  );
+  )
 }
 
-export default DeleteCar;
+export default DeleteCar

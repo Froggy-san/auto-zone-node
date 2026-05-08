@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useFieldArray, useForm, useWatch } from "react-hook-form";
-import { Button } from "@/components/ui/button";
+import React, { useEffect, useState } from "react"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useFieldArray, useForm, useWatch } from "react-hook-form"
+import { Button } from "@/components/ui/button"
 import {
   Form,
   FormControl,
@@ -10,8 +10,8 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+} from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
 import {
   ClientWithPhoneNumbers,
   CreateProductBought,
@@ -19,41 +19,41 @@ import {
   ProductBought,
   ProductWithCategory,
   RestockingBill,
-} from "@lib/types";
-import { motion } from "framer-motion";
+} from "@lib/types"
+import { motion } from "framer-motion"
 
-import Spinner from "@components/Spinner";
-import { useToast } from "@hooks/use-toast";
+import Spinner from "@components/Spinner"
+import { useToast } from "@hooks/use-toast"
 import SuccessToastDescription, {
   ErorrToastDescription,
-} from "@components/toast-items";
+} from "@components/toast-items"
 
-import useObjectCompare from "@hooks/use-compare-objs";
-import { Cross2Icon } from "@radix-ui/react-icons";
-import { RotateCcw } from "lucide-react";
+import useObjectCompare from "@hooks/use-compare-objs"
+import { Cross2Icon } from "@radix-ui/react-icons"
+import { RotateCcw } from "lucide-react"
 import {
   createProductBoughtBulkAction,
   editProductBoughtAction,
-} from "@lib/actions/productBoughtActions";
-import { ProductsComboBox } from "@components/proudcts-combo-box";
-import { RestockingComboBox } from "@components/restocking-combo-box";
-import { Textarea } from "@components/ui/textarea";
-import DialogComponent from "@components/dialog-component";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Switch } from "@components/ui/switch";
-import FormInventoryItem from "./form-inventory-item";
+} from "@lib/actions/productBoughtActions"
+import { ProductsComboBox } from "@components/proudcts-combo-box"
+import { RestockingComboBox } from "@components/restocking-combo-box"
+import { Textarea } from "@components/ui/textarea"
+import DialogComponent from "@components/dialog-component"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
+import { Switch } from "@components/ui/switch"
+import FormInventoryItem from "./form-inventory-item"
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@components/ui/accordion";
-import CurrencyInput from "react-currency-input-field";
+} from "@components/ui/accordion"
+import CurrencyInput from "react-currency-input-field"
 
 export const formatCurrency = (value: number) =>
   new Intl.NumberFormat("en", { style: "currency", currency: "egp" }).format(
     value
-  );
+  )
 
 const InventoryForm = ({
   reStockingBillId,
@@ -63,25 +63,25 @@ const InventoryForm = ({
   handleClose: handleCloseExternal,
   proBoughtToEdit,
 }: {
-  reStockingBillId?: string;
-  proBoughtToEdit?: ProductBought;
-  products: ProductWithCategory[];
-  restockings: RestockingBill[];
-  open?: boolean;
-  handleClose?: () => void;
-  client?: ClientWithPhoneNumbers;
+  reStockingBillId?: string
+  proBoughtToEdit?: ProductBought
+  products: ProductWithCategory[]
+  restockings: RestockingBill[]
+  open?: boolean
+  handleClose?: () => void
+  client?: ClientWithPhoneNumbers
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false)
   const [isReturned, setIsReturned] = useState<boolean>(
     proBoughtToEdit?.isReturned ? proBoughtToEdit.isReturned : false
-  );
+  )
 
-  const { toast } = useToast();
-  const searchParam = useSearchParams();
-  const router = useRouter();
-  const pathname = usePathname();
+  const { toast } = useToast()
+  const searchParam = useSearchParams()
+  const router = useRouter()
+  const pathname = usePathname()
 
-  const isItOpen = open ? true : isOpen;
+  const isItOpen = open ? true : isOpen
 
   const editProBught = {
     pricePerUnit: proBoughtToEdit?.pricePerUnit,
@@ -90,103 +90,103 @@ const InventoryForm = ({
     note: proBoughtToEdit?.note,
     productId: proBoughtToEdit?.productId,
     productsRestockingBillId: "",
-  };
+  }
 
   const defaultValues = {
     productBought: proBoughtToEdit ? [editProBught] : [],
     shopName: proBoughtToEdit || reStockingBillId ? "just a random string" : "",
-  };
+  }
 
   const form = useForm<CreateProductBought>({
     mode: "onChange",
     resolver: zodResolver(CreateProductBoughtSchema),
     defaultValues,
-  });
+  })
 
-  const initialIsReturned = proBoughtToEdit?.isReturned;
-  const isEqual = useObjectCompare(form.getValues(), defaultValues);
+  const initialIsReturned = proBoughtToEdit?.isReturned
+  const isEqual = useObjectCompare(form.getValues(), defaultValues)
 
-  const disabled = initialIsReturned === isReturned && isEqual;
+  const disabled = initialIsReturned === isReturned && isEqual
 
   const productBoughtArr = useWatch({
     control: form.control,
     name: "productBought",
-  });
+  })
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: "productBought",
-  });
+  })
 
   function handleClose() {
     if (open) {
-      const params = new URLSearchParams(searchParam);
-      params.delete("edit");
-      params.delete("reStockingBillId");
-      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+      const params = new URLSearchParams(searchParam)
+      params.delete("edit")
+      params.delete("reStockingBillId")
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false })
     } else {
-      handleCloseExternal?.();
-      setIsOpen(false);
+      handleCloseExternal?.()
+      setIsOpen(false)
     }
-    if (isLoading) return;
-    form.reset(defaultValues);
+    if (isLoading) return
+    form.reset(defaultValues)
   }
-  const isLoading = form.formState.isSubmitting;
+  const isLoading = form.formState.isSubmitting
 
   useEffect(() => {
-    const body = document.querySelector("body");
-    form.reset(defaultValues);
+    const body = document.querySelector("body")
+    form.reset(defaultValues)
     if (body) {
-      body.style.pointerEvents = "auto";
+      body.style.pointerEvents = "auto"
     }
     return () => {
-      if (body) body.style.pointerEvents = "auto";
-    };
-  }, [isItOpen]);
+      if (body) body.style.pointerEvents = "auto"
+    }
+  }, [isItOpen])
 
   useEffect(() => {
     productBoughtArr.forEach((item, index) => {
-      const totalAmount = item.pricePerUnit * item.count - item.discount;
+      const totalAmount = item.pricePerUnit * item.count - item.discount
       if (totalAmount > 0) {
-        form.clearErrors(`productBought.${index}.discount`);
+        form.clearErrors(`productBought.${index}.discount`)
       }
-    });
-  }, [productBoughtArr, form]);
+    })
+  }, [productBoughtArr, form])
 
   const total = productBoughtArr.reduce(
     (acc, item) => {
-      acc.totalDiscount += item.discount * item.count;
-      acc.totalPrice += item.pricePerUnit;
-      acc.totalCount += item.count;
+      acc.totalDiscount += item.discount * item.count
+      acc.totalPrice += item.pricePerUnit
+      acc.totalCount += item.count
 
-      return acc;
+      return acc
     },
     { totalDiscount: 0, totalPrice: 0, totalCount: 0 }
-  );
+  )
 
   async function onSubmit({ productBought, shopName }: CreateProductBought) {
     try {
-      const pro = productBought[0];
+      const pro = productBought[0]
 
       if (proBoughtToEdit) {
         const originalTotal =
-          proBoughtToEdit.productsRestockingBills?.totalPrice || 0;
+          proBoughtToEdit.productsRestockingBills?.totalPrice || 0
 
         const newTotal =
           originalTotal -
           proBoughtToEdit.totalPriceAfterDiscount +
           total.totalPrice -
-          total.totalDiscount;
+          total.totalDiscount
 
         const productStocks =
-          products.find((product) => product.id === pro.productId)?.stock || 0;
-        const newStockNum = productStocks - proBoughtToEdit.count + pro.count;
+          products.find((product) => product.id === pro.productId)?.stock || 0
+        const newStockNum = productStocks - proBoughtToEdit.count + pro.count
         console.log(
           productStocks,
           pro.count,
           proBoughtToEdit.count,
           newStockNum
-        );
+        )
         const { error } = await editProductBoughtAction(
           {
             pricePerUnit: pro.pricePerUnit,
@@ -200,20 +200,19 @@ const InventoryForm = ({
             isReturned,
           },
           newTotal
-        );
-        if (error) throw new Error(error);
+        )
+        if (error) throw new Error(error)
       } else {
-        const totalPrice = total.totalPrice - total.totalDiscount;
+        const totalPrice = total.totalPrice - total.totalDiscount
 
         // When ever the shop buys new inventory we want the product stock to increase.
         const stocksToUpdate = productBought.map((pro) => {
           const productStockNum =
-            products.find((product) => product.id === pro.productId)?.stock ||
-            0;
-          const newStockNum = productStockNum + pro.count;
-          console.log(productStockNum, newStockNum);
-          return { id: pro.productId, stock: newStockNum };
-        });
+            products.find((product) => product.id === pro.productId)?.stock || 0
+          const newStockNum = productStockNum + pro.count
+          console.log(productStockNum, newStockNum)
+          return { id: pro.productId, stock: newStockNum }
+        })
 
         const { error } = await createProductBoughtBulkAction({
           shopName,
@@ -221,11 +220,11 @@ const InventoryForm = ({
           stocksToUpdate,
           reStockingBillId: reStockingBillId ? Number(reStockingBillId) : null,
           totalPrice,
-        });
-        if (error) throw new Error(error);
+        })
+        if (error) throw new Error(error)
       }
 
-      handleClose();
+      handleClose()
 
       toast({
         className: "bg-primary  text-primary-foreground",
@@ -239,7 +238,7 @@ const InventoryForm = ({
             }
           />
         ),
-      });
+      })
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -247,39 +246,36 @@ const InventoryForm = ({
           ? "Faild to update inventory's data"
           : "Faild to create a new inventory.",
         description: <ErorrToastDescription error={error.message} />,
-      });
+      })
     }
   }
   return (
     <DialogComponent open={isItOpen} onOpenChange={handleClose}>
-      <Button onClick={() => setIsOpen(true)} size="sm" className=" w-full">
+      <Button onClick={() => setIsOpen(true)} size="sm" className="w-full">
         Create client
       </Button>
 
-      <DialogComponent.Content className=" max-h-[70vh]  sm:max-h-[76vh]  overflow-y-auto max-w-[1000px] sm:p-14">
+      <DialogComponent.Content className="max-h-[70vh] max-w-[1000px] overflow-y-auto sm:max-h-[76vh] sm:p-14">
         <DialogComponent.Header>
           <DialogComponent.Title>
             {reStockingBillId
               ? "Add more inventory"
               : proBoughtToEdit
-              ? "Edit inventory"
-              : "Add inventory"}
+                ? "Edit inventory"
+                : "Add inventory"}
           </DialogComponent.Title>
           <DialogComponent.Description>
             {reStockingBillId
               ? "Add more inventory to the same recipt."
               : proBoughtToEdit
-              ? `Edit inventory data. `
-              : "Make a recipt for all the inventory bought."}
+                ? `Edit inventory data. `
+                : "Make a recipt for all the inventory bought."}
           </DialogComponent.Description>
         </DialogComponent.Header>
         {proBoughtToEdit ? (
           <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(onSubmit)}
-              className="space-y-8   "
-            >
-              <div className=" space-y-4">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+              <div className="space-y-4">
                 {fields.map((field, i) => (
                   <motion.div
                     initial={{
@@ -297,15 +293,15 @@ const InventoryForm = ({
                       transition: { duration: 0.1, type: "spring" },
                     }}
                     key={field.id}
-                    className=" space-y-4  "
+                    className="space-y-4"
                   >
-                    <div className=" flex  flex-col gap-2 sm:flex-row">
+                    <div className="flex flex-col gap-2 sm:flex-row">
                       <FormField
                         disabled={isLoading}
                         control={form.control}
                         name={`productBought.${i}.productId`}
                         render={({ field }) => (
-                          <FormItem className=" flex-1">
+                          <FormItem className="flex-1">
                             <FormLabel>Product</FormLabel>
                             <FormControl>
                               <ProductsComboBox
@@ -327,7 +323,7 @@ const InventoryForm = ({
                         control={form.control}
                         name="shopName"
                         render={({ field }) => (
-                          <FormItem className=" flex-1">
+                          <FormItem className="flex-1">
                             <FormLabel>Shop</FormLabel>
                             <FormControl>
                               {/* <Input
@@ -348,13 +344,13 @@ const InventoryForm = ({
                         )}
                       />
                     </div>
-                    <div className=" flex  flex-col gap-2  sm:flex-row  ">
+                    <div className="flex flex-col gap-2 sm:flex-row">
                       <FormField
                         disabled={isLoading}
                         control={form.control}
                         name={`productBought.${i}.pricePerUnit`}
                         render={({ field }) => (
-                          <FormItem className="  w-full mb-auto ">
+                          <FormItem className="mb-auto w-full">
                             <FormLabel htmlFor="price-per-unit">
                               Price per unit
                             </FormLabel>
@@ -375,9 +371,9 @@ const InventoryForm = ({
                                 ) => {
                                   // setFormattedListing(formattedValue || "");
 
-                                  field.onChange(Number(value?.value) || 0);
+                                  field.onChange(Number(value?.value) || 0)
                                 }}
-                                className="input-field "
+                                className="input-field"
                               />
                             </FormControl>
                             <FormDescription>
@@ -392,7 +388,7 @@ const InventoryForm = ({
                         control={form.control}
                         name={`productBought.${i}.discount`}
                         render={({ field }) => (
-                          <FormItem className="  w-full mb-auto">
+                          <FormItem className="mb-auto w-full">
                             <FormLabel htmlFor="total-discount">
                               Total Discount
                             </FormLabel>
@@ -411,9 +407,9 @@ const InventoryForm = ({
                                   name,
                                   value
                                 ) => {
-                                  field.onChange(Number(value?.value) || 0);
+                                  field.onChange(Number(value?.value) || 0)
                                 }}
-                                className="input-field "
+                                className="input-field"
                               />
                             </FormControl>
                             <FormDescription>
@@ -428,7 +424,7 @@ const InventoryForm = ({
                         control={form.control}
                         name={`productBought.${i}.count`}
                         render={({ field }) => (
-                          <FormItem className=" w-full  mb-auto">
+                          <FormItem className="mb-auto w-full">
                             <FormLabel htmlFor="count">Count</FormLabel>
                             <FormControl>
                               <CurrencyInput
@@ -445,9 +441,9 @@ const InventoryForm = ({
                                   name,
                                   value
                                 ) => {
-                                  field.onChange(Number(value?.value) || 0);
+                                  field.onChange(Number(value?.value) || 0)
                                 }}
-                                className="input-field  "
+                                className="input-field"
                               />
                             </FormControl>
                             <FormDescription>
@@ -464,7 +460,7 @@ const InventoryForm = ({
                       control={form.control}
                       name={`productBought.${i}.note`}
                       render={({ field }) => (
-                        <FormItem className=" flex-1">
+                        <FormItem className="flex-1">
                           <FormLabel>Notes</FormLabel>
                           <FormControl>
                             <Textarea placeholder="note..." {...field} />
@@ -493,7 +489,7 @@ const InventoryForm = ({
                     </div>
                     <div>
                       Total amount spent:
-                      <span className=" ml-3">
+                      <span className="ml-3">
                         {formatCurrency(
                           (productBoughtArr[i]?.pricePerUnit -
                             productBoughtArr[i]?.discount) *
@@ -505,14 +501,14 @@ const InventoryForm = ({
                 ))}
               </div>
 
-              <div className=" relative flex flex-col-reverse sm:flex-row items-center justify-end  gap-3">
+              <div className="relative flex flex-col-reverse items-center justify-end gap-3 sm:flex-row">
                 <Button
                   onClick={() => form.reset()}
                   type="button"
-                  className=" p-0 h-6 w-6 hidden sm:flex  absolute left-5 bottom-0"
+                  className="absolute bottom-0 left-5 hidden h-6 w-6 p-0 sm:flex"
                   variant="outline"
                 >
-                  <RotateCcw className=" w-4 h-4" />
+                  <RotateCcw className="h-4 w-4" />
                 </Button>
                 <Button
                   onClick={handleClose}
@@ -520,7 +516,7 @@ const InventoryForm = ({
                   type="reset"
                   variant="secondary"
                   size="sm"
-                  className=" w-full sm:w-[unset]"
+                  className="w-full sm:w-[unset]"
                 >
                   Cancel
                 </Button>
@@ -528,28 +524,25 @@ const InventoryForm = ({
                   type="submit"
                   size="sm"
                   disabled={isLoading || disabled}
-                  className=" w-full sm:w-[unset]"
+                  className="w-full sm:w-[unset]"
                 >
-                  {isLoading ? <Spinner className=" h-full" /> : "Update"}
+                  {isLoading ? <Spinner className="h-full" /> : "Update"}
                 </Button>
               </div>
             </form>
           </Form>
         ) : (
           <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(onSubmit)}
-              className="space-y-8  "
-            >
-              <div className=" space-y-4">
-                <div className=" border  flex  items-center px-4 py-2 rounded-lg justify-between">
-                  <span className=" text-muted-foreground text-sm">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between rounded-lg border px-4 py-2">
+                  <span className="text-sm text-muted-foreground">
                     Add new inventory
                   </span>
                   <Button
                     size="sm"
                     type="button"
-                    className=" text-xs"
+                    className="text-xs"
                     onClick={() =>
                       append({
                         pricePerUnit: 0,
@@ -586,27 +579,27 @@ const InventoryForm = ({
                   <Accordion
                     type="single"
                     collapsible
-                    className=" max-w-[450px] mx-auto "
+                    className="mx-auto max-w-[450px]"
                     defaultValue="item-4"
                   >
                     <AccordionItem value="item-4">
-                      <AccordionTrigger className=" text-muted-foreground font-semibold">
+                      <AccordionTrigger className="font-semibold text-muted-foreground">
                         Summary
                       </AccordionTrigger>
                       <AccordionContent>
-                        <div className="max-w-[500px] mx-auto">
-                          <div className=" py-2   border-t space-y-2 text-xs text-muted-foreground">
-                            <div className=" flex  flex-col xs:flex-row  gap-5 xs:items-center  justify-between">
-                              <div className=" space-y-2  ">
+                        <div className="mx-auto max-w-[500px]">
+                          <div className="space-y-2 border-t py-2 text-xs text-muted-foreground">
+                            <div className="flex flex-col justify-between gap-5 xs:flex-row xs:items-center">
+                              <div className="space-y-2">
                                 <div>
                                   Total Entries:{" "}
-                                  <span className=" relative after:content-['entry'] after:absolute after:-right-8 after:-top-1 text-orange-400 dark:after:text-dashboard-orange ">
+                                  <span className="dark:after:text-dashboard-orange relative text-orange-400 after:absolute after:-top-1 after:-right-8 after:content-['entry']">
                                     {productBoughtArr.length}
                                   </span>
                                 </div>
                                 <div>
                                   Total Units:{" "}
-                                  <span className=" relative after:content-['units'] after:absolute after:-right-8 after:-top-1 after:text-indigo-800 dark:after:text-dashboard-indigo ">
+                                  <span className="dark:after:text-dashboard-indigo relative after:absolute after:-top-1 after:-right-8 after:text-indigo-800 after:content-['units']">
                                     {total.totalCount}
                                   </span>
                                 </div>
@@ -619,9 +612,9 @@ const InventoryForm = ({
                                   Total Discount:{" "}
                                   {formatCurrency(total.totalDiscount)}
                                 </div>
-                                <div className="  py-2 border-y w-fit text-xs">
+                                <div className="w-fit border-y py-2 text-xs">
                                   Total Price After Discount:{" "}
-                                  <span className="text-indigo-800 dark:text-dashboard-indigo">
+                                  <span className="dark:text-dashboard-indigo text-indigo-800">
                                     {" "}
                                     {formatCurrency(
                                       total.totalPrice - total.totalDiscount
@@ -639,7 +632,7 @@ const InventoryForm = ({
                   <Button
                     size="sm"
                     type="button"
-                    className=" text-xs w-full"
+                    className="w-full text-xs"
                     onClick={() =>
                       append({
                         pricePerUnit: 0,
@@ -656,14 +649,14 @@ const InventoryForm = ({
                 </>
               ) : null}
 
-              <div className=" relative flex flex-col-reverse sm:flex-row items-center justify-end  gap-3">
+              <div className="relative flex flex-col-reverse items-center justify-end gap-3 sm:flex-row">
                 <Button
                   onClick={() => form.reset()}
                   type="button"
-                  className=" p-0 h-6 w-6 hidden sm:flex  absolute left-5 bottom-0"
+                  className="absolute bottom-0 left-5 hidden h-6 w-6 p-0 sm:flex"
                   variant="outline"
                 >
-                  <RotateCcw className=" w-4 h-4" />
+                  <RotateCcw className="h-4 w-4" />
                 </Button>
                 <Button
                   onClick={handleClose}
@@ -671,7 +664,7 @@ const InventoryForm = ({
                   type="reset"
                   variant="secondary"
                   size="sm"
-                  className=" w-full sm:w-[unset]"
+                  className="w-full sm:w-[unset]"
                 >
                   Cancel
                 </Button>
@@ -679,10 +672,10 @@ const InventoryForm = ({
                   type="submit"
                   size="sm"
                   disabled={isLoading || isEqual}
-                  className=" w-full sm:w-[unset]"
+                  className="w-full sm:w-[unset]"
                 >
                   {isLoading ? (
-                    <Spinner className=" h-full" />
+                    <Spinner className="h-full" />
                   ) : reStockingBillId ? (
                     "Add"
                   ) : (
@@ -695,10 +688,10 @@ const InventoryForm = ({
         )}
       </DialogComponent.Content>
     </DialogComponent>
-  );
-};
+  )
+}
 
-export default InventoryForm;
+export default InventoryForm
 // <React.Fragment key={field.id}>
 //   <h2>{i + 1}.</h2>
 //   <motion.div

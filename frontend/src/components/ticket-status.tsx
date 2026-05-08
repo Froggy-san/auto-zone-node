@@ -1,8 +1,8 @@
-import CloseButton from "@components/close-button";
-import { Badge } from "@components/ui/badge";
-import { TicketStatus as TicketStatusType } from "@lib/types";
-import { cn } from "@lib/utils";
-import React, { useState } from "react";
+import CloseButton from "@components/close-button"
+import { Badge } from "@components/ui/badge"
+import { TicketStatus as TicketStatusType } from "@lib/types"
+import { cn } from "@lib/utils"
+import React, { useState } from "react"
 
 import {
   Dialog,
@@ -12,54 +12,54 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from "@/components/ui/dialog"
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { Button } from "./ui/button";
-import { useToast } from "@hooks/use-toast";
-import SuccessToastDescription, { ErorrToastDescription } from "./toast-items";
-import { deleteTicketStatusAction } from "@lib/actions/ticket-status-actions";
-import Spinner from "./Spinner";
-import StatusForm from "./dashboard/tickets/status-form";
+} from "@/components/ui/tooltip"
+import { Button } from "./ui/button"
+import { useToast } from "@hooks/use-toast"
+import SuccessToastDescription, { ErorrToastDescription } from "./toast-items"
+import { deleteTicketStatusAction } from "@lib/actions/ticket-status-actions"
+import Spinner from "./Spinner"
+import StatusForm from "./dashboard/tickets/status-form"
 const TicketStatus = ({
   ticketStatus,
   className,
   admin,
 }: {
-  ticketStatus: TicketStatusType;
-  className?: string;
-  admin?: boolean;
+  ticketStatus: TicketStatusType
+  className?: string
+  admin?: boolean
 }) => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [open, setOpen] = useState(false);
-  const [editOpen, setEditOpen] = useState(false);
-  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false)
+  const [open, setOpen] = useState(false)
+  const [editOpen, setEditOpen] = useState(false)
+  const { toast } = useToast()
 
   async function handleDelete() {
     try {
-      setIsLoading(true);
+      setIsLoading(true)
 
-      const { error } = await deleteTicketStatusAction(ticketStatus.id);
-      if (error) throw new Error(error);
+      const { error } = await deleteTicketStatusAction(ticketStatus.id)
+      if (error) throw new Error(error)
       toast({
         className: "bg-primary  text-primary-foreground",
         title: "Done.",
         description: (
           <SuccessToastDescription message="Ticket status has been deleted." />
         ),
-      });
+      })
     } catch (error: any) {
       toast({
         variant: "destructive",
         title: "Uh oh! Something went wrong.",
         description: <ErorrToastDescription error={error.message} />,
-      });
+      })
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
   }
 
@@ -71,17 +71,17 @@ const TicketStatus = ({
             <div
               onClick={() => setEditOpen(true)}
               className={cn(
-                "   text-xs select-none w-fit font-semibold flex items-center justify-center gap-1  px-2.5 py-[0.15rem]  whitespace-nowrap text-center rounded-[10px] bg-primary text-primary-foreground  transition-all",
+                "flex w-fit items-center justify-center gap-1 rounded-[10px] bg-primary px-2.5 py-[0.15rem] text-center text-xs font-semibold whitespace-nowrap text-primary-foreground transition-all select-none",
 
                 {
                   "bg-dashboard-blue text-dashboard-text-blue":
                     ticketStatus.name.toLowerCase() === "in progress",
-                  "  bg-dashboard-orange text-dashboard-text-orange ":
+                  "bg-dashboard-orange text-dashboard-text-orange":
                     ticketStatus.name.toLowerCase() ===
                     "awaiting client's response",
-                  " text-red-800  dark:text-red-200  bg-destructive/70":
+                  "bg-destructive/70 text-red-800 dark:text-red-200":
                     ticketStatus.name.toLowerCase() === "closed",
-                  " bg-dashboard-green text-dashboard-text-green":
+                  "bg-dashboard-green text-dashboard-text-green":
                     ticketStatus.name.toLowerCase() === "solved",
                 },
                 className
@@ -91,13 +91,13 @@ const TicketStatus = ({
 
               {admin &&
                 (isLoading ? (
-                  <Spinner className=" h-4 w-4" />
+                  <Spinner className="h-4 w-4" />
                 ) : (
                   <CloseButton
-                    className=" static"
+                    className="static"
                     onClick={(e) => {
-                      e.stopPropagation();
-                      setOpen(true);
+                      e.stopPropagation()
+                      setOpen(true)
                     }}
                   />
                 ))}
@@ -113,7 +113,7 @@ const TicketStatus = ({
                           delete the status badge from the database.
                         </DialogDescription>
                       </DialogHeader>
-                      <DialogFooter className=" gap-y-2">
+                      <DialogFooter className="gap-y-2">
                         <DialogClose>
                           <Button variant="secondary" size="sm">
                             Close
@@ -146,21 +146,21 @@ const TicketStatus = ({
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
-    );
+    )
   return (
     <div
       onClick={() => setEditOpen(true)}
       className={cn(
-        "   text-xs select-none w-fit font-semibold flex items-center justify-center gap-1  px-2.5 py-[0.15rem]  whitespace-nowrap text-center rounded-[10px] bg-primary text-primary-foreground  transition-all",
+        "flex w-fit items-center justify-center gap-1 rounded-[10px] bg-primary px-2.5 py-[0.15rem] text-center text-xs font-semibold whitespace-nowrap text-primary-foreground transition-all select-none",
 
         {
           "bg-dashboard-blue text-dashboard-text-blue":
             ticketStatus.name.toLowerCase() === "in progress",
-          "  bg-dashboard-orange text-dashboard-text-orange ":
+          "bg-dashboard-orange text-dashboard-text-orange":
             ticketStatus.name.toLowerCase() === "awaiting client's response",
-          " text-red-800  dark:text-red-200  bg-destructive/70":
+          "bg-destructive/70 text-red-800 dark:text-red-200":
             ticketStatus.name.toLowerCase() === "closed",
-          " bg-dashboard-green text-dashboard-text-green":
+          "bg-dashboard-green text-dashboard-text-green":
             ticketStatus.name.toLowerCase() === "solved",
         },
         className
@@ -170,13 +170,13 @@ const TicketStatus = ({
 
       {admin &&
         (isLoading ? (
-          <Spinner className=" h-4 w-4" />
+          <Spinner className="h-4 w-4" />
         ) : (
           <CloseButton
-            className=" static"
+            className="static"
             onClick={(e) => {
-              e.stopPropagation();
-              setOpen(true);
+              e.stopPropagation()
+              setOpen(true)
             }}
           />
         ))}
@@ -192,7 +192,7 @@ const TicketStatus = ({
                   status badge from the database.
                 </DialogDescription>
               </DialogHeader>
-              <DialogFooter className=" gap-y-2">
+              <DialogFooter className="gap-y-2">
                 <DialogClose>
                   <Button variant="secondary" size="sm">
                     Close
@@ -214,7 +214,7 @@ const TicketStatus = ({
         </div>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default TicketStatus;
+export default TicketStatus

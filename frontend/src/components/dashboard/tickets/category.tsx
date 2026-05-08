@@ -1,8 +1,8 @@
-import CloseButton from "@components/close-button";
-import Spinner from "@components/Spinner";
-import { TicketCategory } from "@lib/types";
-import { cn } from "@lib/utils";
-import React from "react";
+import CloseButton from "@components/close-button"
+import Spinner from "@components/Spinner"
+import { TicketCategory } from "@lib/types"
+import { cn } from "@lib/utils"
+import React from "react"
 
 const Category = ({
   category,
@@ -11,32 +11,32 @@ const Category = ({
   isLoading,
   className,
 }: {
-  category: TicketCategory;
-  setEdit: React.Dispatch<React.SetStateAction<number | null>>;
-  setDeleteId: React.Dispatch<React.SetStateAction<number | null>>;
+  category: TicketCategory
+  setEdit: React.Dispatch<React.SetStateAction<number | null>>
+  setDeleteId: React.Dispatch<React.SetStateAction<number | null>>
 
-  isLoading: boolean;
-  className?: string;
+  isLoading: boolean
+  className?: string
 }) => {
   return (
     <li
       onClick={() => setEdit(category.id)}
-      className={cn(" relative ", className)}
+      className={cn("relative", className)}
     >
       <span>{category.name}</span>
       {isLoading ? (
-        <Spinner className=" h-4 w-4" />
+        <Spinner className="h-4 w-4" />
       ) : (
         <CloseButton
-          className=" top-[unset] left-[unset] static ml-auto"
+          className="static top-[unset] left-[unset] ml-auto"
           onClick={(e) => {
-            e.stopPropagation();
-            setDeleteId(category.id);
+            e.stopPropagation()
+            setDeleteId(category.id)
           }}
         />
       )}
     </li>
-  );
-};
+  )
+}
 
-export default Category;
+export default Category

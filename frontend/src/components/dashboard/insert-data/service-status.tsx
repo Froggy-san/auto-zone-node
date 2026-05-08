@@ -1,36 +1,36 @@
-import ErrorMessage from "@components/error-message";
-import { getServiceStatusAction } from "@lib/actions/serviceStatusAction";
-import React from "react";
+import ErrorMessage from "@components/error-message"
+import { getServiceStatusAction } from "@lib/actions/serviceStatusAction"
+import React from "react"
 // import StatusBadge from "../status-badge";
-import dynamic from "next/dynamic";
-import Spinner from "@components/Spinner";
+import dynamic from "next/dynamic"
+import Spinner from "@components/Spinner"
 
 const StatusBadge = dynamic(() => import("../status-badge"), {
-  loading: () => <Spinner className="  w-fit h-fit" size={12} />,
+  loading: () => <Spinner className="h-fit w-fit" size={12} />,
   ssr: false,
-});
+})
 const ServiceStatus = () => {
-  const { data, error } = await getServiceStatusAction();
+  const { data, error } = await getServiceStatusAction()
 
   if (error || !data)
     return (
       <ErrorMessage>
         {error || "Something went wrong while getting the service statuses"}
       </ErrorMessage>
-    );
+    )
 
   return (
-    <ul className=" flex flex-row gap-2  flex-wrap ">
+    <ul className="flex flex-row flex-wrap gap-2">
       {data.map((status) => (
         <StatusBadge
           controls
           key={status.id}
           status={status}
-          className="  hover:opacity-90 transition-opacity "
+          className="transition-opacity hover:opacity-90"
         />
       ))}
     </ul>
-  );
-};
+  )
+}
 
-export default ServiceStatus;
+export default ServiceStatus

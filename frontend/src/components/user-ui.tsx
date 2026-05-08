@@ -20,7 +20,7 @@ import Spinner from "./Spinner"
 import { motion } from "framer-motion"
 // import { useToast } from "@hooks/use-toast";
 import { ErorrToastDescription } from "./toast-items"
-// import { logoutUser } from "@lib/actions/authActions";
+
 import { AppWindow, LogOut, PersonStanding, ShoppingCart } from "lucide-react"
 // import Link from "next/link";
 import { cn } from "@/lib/utils"
@@ -29,6 +29,12 @@ import { useQueryClient } from "@tanstack/react-query"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { getInitials } from "@/lib/client-helpers"
 import { TbMessageReport } from "react-icons/tb"
+import useCurrentUser from "@/features/users/useCurrentUser"
+import { Link, useLocation, useParams } from "react-router"
+import { BASE_URL } from "@/lib/constants"
+import { logout } from "@/services/authApi"
+import { toast } from "sonner"
+import useLogout from "@/features/auth/useLogout"
 interface Props {
   collapse?: boolean
   lock?: boolean
@@ -51,25 +57,26 @@ const UserUi = ({
 }: Props) => {
   // const [open,setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
-  const { isLoading, user, client } = useCurrUser()
-  const { toast } = useToast()
-  const pathname = usePathname()
+  const { user, isLoading, error } = useCurrentUser()
+
+  const pathname = useLocation().pathname
   const params = useParams()
   const queryClient = useQueryClient()
-
+  const { logout, isPending } = useLogout()
   if (isLoading) return <Spinner className="mb-2 h-fit" />
   if (!user)
     return (
       <Button size="sm" asChild>
-        <Link href="/login">Login</Link>
+        <Link to="/login">Login</Link>
       </Button>
     ) // Change this line later.
   const userId = params.userId
-  const userData = user
-  const image = client?.picture || userData?.user_metadata.avatar_url
-  const name = client?.name || userData?.user_metadata.full_name
-  const sameUser = userId === userData.id
+
+  const image = user?.picture ? `${BASE_URL}/${user.picture}` : undefined
+  const name = user.username
+  const sameUser = userId === user._id
   const isSettings = pathname.endsWith("settings") && sameUser
+
   const isActivities =
     pathname.split("/").length <= 3 && pathname.endsWith("") && sameUser
 
@@ -80,18 +87,13 @@ const UserUi = ({
       return !isOpen
     })
   }
-  async function handleLogout() {
-    setLoading(true)
-    const error = await logoutUser()
-    queryClient.invalidateQueries({ queryKey: ["user"] })
-    setLoading(false)
-    if (error)
-      toast({
-        variant: "destructive",
-        title: "Something went wrong.",
-        description: <ErorrToastDescription error={error} />,
-      })
-  }
+  // async function handleLogout() {
+  //   setLoading(true)
+  //   await logout()
+  //   queryClient.invalidateQueries({ queryKey: ["user"] })
+  //   setLoading(false)
+  //   if (error) toast.success("Loggedout")
+  // }
   return (
     <DropdownMenu open={open} onOpenChange={handleOpenMenu}>
       <DropdownMenuTrigger asChild>
@@ -105,6 +107,7 @@ const UserUi = ({
           >
             <Avatar className="h-8 w-8">
               <AvatarImage src={image} />
+
               <AvatarFallback>{getInitials(name)}</AvatarFallback>
             </Avatar>
             {!collapse && (
@@ -118,12 +121,11 @@ const UserUi = ({
             )}
           </Button>
         ) : (
-          <div className="flex items-center justify-center">
-            <img
-              className="h-8 w-8 rounded-full object-cover object-top opacity-90 transition-all hover:cursor-pointer hover:contrast-75"
-              src={image}
-            />
-          </div>
+          <Avatar className="h-8 w-8">
+            <AvatarImage src={image} />
+
+            <AvatarFallback>{getInitials(name)}</AvatarFallback>
+          </Avatar>
         )}
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align={showName ? "start" : "end"}>
@@ -131,7 +133,7 @@ const UserUi = ({
         <DropdownMenuGroup>
           <DropdownMenuItem disabled={loading || isActivities} asChild>
             <Link
-              href={`/user/${userData.id}`}
+              to={`/user/${user._id}`}
               className="flex w-full items-center justify-between"
             >
               Activities
@@ -143,7 +145,7 @@ const UserUi = ({
 
           <DropdownMenuItem disabled={loading || isSettings} asChild>
             <Link
-              href={`/user/${userData.id}/settings`}
+              to={`/user/${user._id}/settings`}
               className="flex w-full items-center justify-between"
             >
               Personal details
@@ -154,7 +156,7 @@ const UserUi = ({
           </DropdownMenuItem>
           <DropdownMenuItem disabled={loading || isSettings} asChild>
             <Link
-              href={`/user/${userData.id}/complaints`}
+              to={`/user/${user._id}/complaints`}
               className="flex w-full items-center justify-between"
             >
               Complanints
@@ -165,7 +167,7 @@ const UserUi = ({
           </DropdownMenuItem>
           <DropdownMenuItem disabled={loading || isSettings} asChild>
             <Link
-              href={`/cart`}
+              to={`/cart`}
               className="flex w-full items-center justify-between"
             >
               Your Cart
@@ -177,7 +179,7 @@ const UserUi = ({
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
 
-        <DropdownMenuItem disabled={loading} onClick={handleLogout}>
+        <DropdownMenuItem disabled={loading} onClick={() => logout()}>
           Log out
           <DropdownMenuShortcut>
             <LogOut className="h-4 w-4" />

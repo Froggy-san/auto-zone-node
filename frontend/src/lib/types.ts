@@ -3,7 +3,6 @@ import { z } from "zod"
 import { MIN_PASS_LENGTH } from "./constants"
 
 export function validateEgyptianPhoneNumber(phoneNumber: string) {
-
   // define the regex
   const regex = /^01[0125][0-9]{8}$/
   // test the string against the regex
@@ -17,8 +16,8 @@ export function validateEgyptianPhoneNumber(phoneNumber: string) {
 }
 
 export const LoginFormSchema = z.object({
-  username: z
-    .string()
+  email: z
+    .email()
     .describe("Username")
     .min(3, { message: "Invaild user name" }),
   password: z
@@ -29,14 +28,11 @@ export const LoginFormSchema = z.object({
 
 export const SignUpFormSchema = z
   .object({
-    email: z
-      .string()
-      .describe("Email")
-      .min(6, { message: "Invaild user name" }),
+    email: z.string().describe("Email").min(6, { message: "Invaild email" }),
     username: z
       .string()
       .describe("Username")
-      .min(6, { message: "Invaild user name" }),
+      .min(6, { message: "Invaild username" }),
     password: z
       .string()
       .describe("Password")
@@ -76,7 +72,7 @@ const RowSchema = z.object({
 })
 
 export const AdditionalDetailsSchema = z.object({
-  _id:z.string().optional(),
+  _id: z.string().optional(),
   title: z.string().min(3, "Title is too short."),
   table: z.array(RowSchema),
   description: z.string(),
@@ -276,13 +272,16 @@ export const CreateCarSchema = z.object({
   motorNumber: z.string(),
   notes: z.string(),
   odometer: z.string(),
-  clientId: z.number().min(1, { message: "Every car must have an owner" }),
-  carGenerationId: z
-    .number()
+  user: z.string().min(1, { message: "Every car must have an owner" }),
+  carGeneration: z
+    .string()
     .min(1, { message: "Every car must have car generation" }),
-  images: z.array(z.custom<FileWithPreview>()).max(9, {
-    message: "You can only upload up to 9 images at a time.",
+  images: z.array(z.custom<FileWithPreview>()).max(30, {
+    message: "You can only upload up to 30 images at a time.",
   }),
+  mainImageName: z.string(),
+  // carMakerId: z.string().optional(),
+  // carModelId: z.string().optional(),
 })
 
 export const ProductBoughtSchema = z

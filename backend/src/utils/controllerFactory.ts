@@ -53,7 +53,11 @@ export const createOne = (Model: Model<any>) =>
     });
   });
 
-export const getOne = (Model: Model<any>, populateOptions?: any) =>
+export const getOne = (
+  Model: Model<any>,
+  populateOptions?: any,
+  shouldFetchNextPrev: boolean = false,
+) =>
   catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     let query = Model.findById(req.params.id);
 
@@ -81,14 +85,18 @@ export const getOne = (Model: Model<any>, populateOptions?: any) =>
       }
     });
 
-    const nextDoc = await Model.findOne({ ...filterObj, _id: { $gt: doc._id } })
-      .sort({ _id: 1 })
-      .select("_id");
+    let nextDoc = null;
+    let prevDoc = null;
 
-    const prevDoc = await Model.findOne({ ...filterObj, _id: { $lt: doc._id } })
-      .sort({ _id: -1 })
-      .select("_id");
+    if (shouldFetchNextPrev) {
+      nextDoc = await Model.findOne({ ...filterObj, _id: { $gt: doc._id } })
+        .sort({ _id: 1 })
+        .select("_id");
 
+      prevDoc = await Model.findOne({ ...filterObj, _id: { $lt: doc._id } })
+        .sort({ _id: -1 })
+        .select("_id");
+    }
     res.status(200).json({
       status: "success",
       data: {

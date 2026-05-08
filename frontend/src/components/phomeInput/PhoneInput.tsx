@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/button"
 import {
   Command,
   CommandEmpty,
@@ -6,15 +6,15 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "@/components/ui/command";
-import { Input } from "@/components/ui/input";
+} from "@/components/ui/command"
+import { Input } from "@/components/ui/input"
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { cn } from "@/lib/utils";
+} from "@/components/ui/popover"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { cn } from "@/lib/utils"
 import parsePhoneNumberFromString, {
   AsYouType,
   type CarrierCode,
@@ -23,37 +23,37 @@ import parsePhoneNumberFromString, {
   type NationalNumber,
   type CountryCode,
   type NumberType,
-} from "libphonenumber-js";
-import { Check, ChevronsUpDown } from "lucide-react";
-import * as React from "react";
-import { countries } from "./countries";
-import { useStateHistory } from "./use-state-history";
+} from "libphonenumber-js"
+import { Check, ChevronsUpDown } from "lucide-react"
+import * as React from "react"
+import { countries } from "./countries"
+import { useStateHistory } from "./use-state-history"
 
-export type Country = (typeof countries)[number];
+export type Country = (typeof countries)[number]
 
 export type PhoneData = {
-  phoneNumber?: E164Number;
-  countryCode?: CountryCode;
-  countryCallingCode?: CountryCallingCode;
-  carrierCode?: CarrierCode;
-  nationalNumber?: NationalNumber;
-  internationalNumber?: string;
-  possibleCountries?: string;
-  isValid?: boolean;
-  isPossible?: boolean;
-  uri?: string;
-  type?: NumberType;
-};
+  phoneNumber?: E164Number
+  countryCode?: CountryCode
+  countryCallingCode?: CountryCallingCode
+  carrierCode?: CarrierCode
+  nationalNumber?: NationalNumber
+  internationalNumber?: string
+  possibleCountries?: string
+  isValid?: boolean
+  isPossible?: boolean
+  uri?: string
+  type?: NumberType
+}
 
 interface PhoneInputProps extends React.ComponentPropsWithoutRef<"input"> {
-  value?: string;
-  defaultCountry?: CountryCode;
+  value?: string
+  defaultCountry?: CountryCode
 }
 
 export function getPhoneData(phone: string): PhoneData {
-  const asYouType = new AsYouType();
-  asYouType.input(phone);
-  const number = asYouType.getNumber();
+  const asYouType = new AsYouType()
+  asYouType.input(phone)
+  const number = asYouType.getNumber()
   return {
     phoneNumber: number?.number,
     countryCode: number?.country,
@@ -66,7 +66,7 @@ export function getPhoneData(phone: string): PhoneData {
     isPossible: number?.isPossible(),
     uri: number?.getURI(),
     type: number?.getType(),
-  };
+  }
 }
 
 export function PhoneInput({
@@ -77,77 +77,77 @@ export function PhoneInput({
   required = true,
   ...rest
 }: PhoneInputProps) {
-  const asYouType = new AsYouType();
+  const asYouType = new AsYouType()
 
-  const inputRef = React.useRef<HTMLInputElement>(null);
+  const inputRef = React.useRef<HTMLInputElement>(null)
 
-  const [value, handlers, history] = useStateHistory(valueProp);
+  const [value, handlers, history] = useStateHistory(valueProp)
 
   if (value && value.length > 0) {
     defaultCountry =
       parsePhoneNumberFromString(value)?.getPossibleCountries()[0] ||
-      defaultCountry;
+      defaultCountry
   }
 
-  const [openCommand, setOpenCommand] = React.useState(false);
+  const [openCommand, setOpenCommand] = React.useState(false)
   const [countryCode, setCountryCode] =
-    React.useState<CountryCode>(defaultCountry);
+    React.useState<CountryCode>(defaultCountry)
   const selectedCountry = countries.find(
     (country) => country.iso2 === countryCode
-  );
+  )
 
   const initializeDefaultValue = () => {
     if (value) {
-      return value;
+      return value
     }
 
-    return `+${selectedCountry?.phone_code}`;
-  };
+    return `+${selectedCountry?.phone_code}`
+  }
 
   const handleOnInput = (event: React.FormEvent<HTMLInputElement>) => {
-    asYouType.reset();
+    asYouType.reset()
 
-    let value = event.currentTarget.value;
+    let value = event.currentTarget.value
     if (!value.startsWith("+")) {
-      value = `+${value}`;
+      value = `+${value}`
     }
 
-    const formattedValue = asYouType.input(value);
-    const number = asYouType.getNumber();
-    setCountryCode(number?.country || defaultCountry);
-    event.currentTarget.value = formattedValue;
-    handlers.set(formattedValue);
-  };
+    const formattedValue = asYouType.input(value)
+    const number = asYouType.getNumber()
+    setCountryCode(number?.country || defaultCountry)
+    event.currentTarget.value = formattedValue
+    handlers.set(formattedValue)
+  }
 
   const handleOnPaste = (event: React.ClipboardEvent<HTMLInputElement>) => {
-    event.preventDefault();
-    asYouType.reset();
+    event.preventDefault()
+    asYouType.reset()
 
-    const clipboardData = event.clipboardData;
+    const clipboardData = event.clipboardData
 
     if (clipboardData) {
-      const pastedData = clipboardData.getData("text/plain");
-      const formattedValue = asYouType.input(pastedData);
-      const number = asYouType.getNumber();
-      setCountryCode(number?.country || defaultCountry);
-      event.currentTarget.value = formattedValue;
-      handlers.set(formattedValue);
+      const pastedData = clipboardData.getData("text/plain")
+      const formattedValue = asYouType.input(pastedData)
+      const number = asYouType.getNumber()
+      setCountryCode(number?.country || defaultCountry)
+      event.currentTarget.value = formattedValue
+      handlers.set(formattedValue)
     }
-  };
+  }
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if ((event.metaKey || event.ctrlKey) && event.key === "z") {
-      handlers.back();
+      handlers.back()
       if (
         inputRef.current &&
         history.current > 0 &&
         history.history[history.current - 1] !== undefined
       ) {
-        event.preventDefault();
-        inputRef.current.value = history.history[history.current - 1] || "";
+        event.preventDefault()
+        inputRef.current.value = history.history[history.current - 1] || ""
       }
     }
-  };
+  }
 
   return (
     <div className={cn("flex gap-2", className)}>
@@ -157,7 +157,7 @@ export function PhoneInput({
             variant="outline"
             role="combobox"
             aria-expanded={openCommand}
-            className="w-max items-center border-none justify-between whitespace-nowrap"
+            className="w-max items-center justify-between border-none whitespace-nowrap"
           >
             {selectedCountry?.name ? (
               <>
@@ -196,12 +196,12 @@ export function PhoneInput({
                         value={`${country.name} (+${country.phone_code})`}
                         onSelect={() => {
                           if (inputRef.current) {
-                            inputRef.current.value = `+${country.phone_code}`;
-                            handlers.set(`+${country.phone_code}`);
-                            inputRef.current.focus();
+                            inputRef.current.value = `+${country.phone_code}`
+                            handlers.set(`+${country.phone_code}`)
+                            inputRef.current.focus()
                           }
-                          setCountryCode(country.iso2 as CountryCode);
-                          setOpenCommand(false);
+                          setCountryCode(country.iso2 as CountryCode)
+                          setOpenCommand(false)
                         }}
                       >
                         <Check
@@ -224,7 +224,7 @@ export function PhoneInput({
                           (+{country.phone_code})
                         </span>
                       </CommandItem>
-                    );
+                    )
                   })}
                 </CommandGroup>
               </ScrollArea>
@@ -246,8 +246,8 @@ export function PhoneInput({
         required={required}
         aria-required={required}
         {...rest}
-        className=" bg-background border-none"
+        className="border-none bg-background"
       />
     </div>
-  );
+  )
 }

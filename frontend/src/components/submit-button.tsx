@@ -1,10 +1,10 @@
-import React from "react";
-import { Button, ButtonProps } from "./ui/button";
-import { useFormStatus } from "react-dom";
-import Spinner from "./Spinner";
+import React from "react"
+import { Button, ButtonProps } from "./ui/button"
+import { useFormStatus } from "react-dom"
+import Spinner from "./Spinner"
 
 interface SubmitButton extends ButtonProps {
-  pendingLabel?: string;
+  pendingLabel?: string
 }
 const SubmitButton: React.FC<SubmitButton> = ({
   variant,
@@ -14,7 +14,7 @@ const SubmitButton: React.FC<SubmitButton> = ({
   children,
   pendingLabel,
 }) => {
-  const { pending } = useFormStatus();
+  const { pending } = useFormStatus()
   return (
     <Button
       disabled={disabled || pending}
@@ -24,7 +24,7 @@ const SubmitButton: React.FC<SubmitButton> = ({
     >
       {pending ? pendingLabel || <Spinner /> : children}
     </Button>
-  );
-};
+  )
+}
 
-export default SubmitButton;
+export default SubmitButton

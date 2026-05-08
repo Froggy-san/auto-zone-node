@@ -1,18 +1,18 @@
-import { createCarGeneration } from "@lib/services/car-generations";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { createCarGeneration } from "@lib/services/car-generations"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 
 export default function useCreateGeneration() {
-  const queryClient = useQueryClient();
+  const queryClient = useQueryClient()
   const { isLoading, mutateAsync: createGeneration } = useMutation({
     mutationFn: createCarGeneration,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["carMakers"] });
+      queryClient.invalidateQueries({ queryKey: ["carMakers"] })
     },
     onError: (error: any) => {
-      console.log(error);
-      throw new Error(error);
+      console.log(error)
+      throw new Error(error)
     },
-  });
+  })
 
-  return { isLoading, createGeneration };
+  return { isLoading, createGeneration }
 }

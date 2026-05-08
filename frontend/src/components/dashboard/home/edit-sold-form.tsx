@@ -1,8 +1,8 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import React, { useCallback, useEffect, useState } from "react"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/button"
 import {
   Form,
   FormControl,
@@ -11,7 +11,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
+} from "@/components/ui/form"
 
 import {
   Product,
@@ -19,37 +19,37 @@ import {
   ProductSoldSchema,
   ProductToSell,
   ProductWithCategory,
-} from "@lib/types";
+} from "@lib/types"
 
-import Spinner from "@components/Spinner";
+import Spinner from "@components/Spinner"
 
-import { useToast } from "@hooks/use-toast";
+import { useToast } from "@hooks/use-toast"
 import SuccessToastDescription, {
   ErorrToastDescription,
-} from "@components/toast-items";
+} from "@components/toast-items"
 
-import useObjectCompare from "@hooks/use-compare-objs";
-import DialogComponent from "@components/dialog-component";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import useObjectCompare from "@hooks/use-compare-objs"
+import DialogComponent from "@components/dialog-component"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
 
-import { Input } from "@components/ui/input";
-import { Textarea } from "@components/ui/textarea";
-import { Switch } from "@components/ui/switch";
-import { Label } from "@components/ui/label";
+import { Input } from "@components/ui/input"
+import { Textarea } from "@components/ui/textarea"
+import { Switch } from "@components/ui/switch"
+import { Label } from "@components/ui/label"
 import {
   createProductToSellAction,
   editProductToSellAction,
-} from "@lib/actions/product-sold-actions";
-import { ProductsComboBox } from "@components/proudcts-combo-box";
-import { formatCurrency } from "@lib/client-helpers";
-import { cn } from "@lib/utils";
-import { adjustProductsStockAction } from "@lib/actions/productsActions";
-import CurrencyInput from "react-currency-input-field";
-import supabase from "@utils/supabase";
+} from "@lib/actions/product-sold-actions"
+import { ProductsComboBox } from "@components/proudcts-combo-box"
+import { formatCurrency } from "@lib/client-helpers"
+import { cn } from "@lib/utils"
+import { adjustProductsStockAction } from "@lib/actions/productsActions"
+import CurrencyInput from "react-currency-input-field"
+import supabase from "@utils/supabase"
 
 interface ProById extends ProductSold {
-  id: number;
-  totalPriceAfterDiscount: number;
+  id: number
+  totalPriceAfterDiscount: number
 }
 
 const EditSoldForm = ({
@@ -59,18 +59,18 @@ const EditSoldForm = ({
   products,
   service,
 }: {
-  open: boolean;
-  proSold: ProductToSell | undefined | null;
-  addSoldId?: string;
-  products: ProductWithCategory[];
-  service: { id: number; totalPrice: number } | null;
+  open: boolean
+  proSold: ProductToSell | undefined | null
+  addSoldId?: string
+  products: ProductWithCategory[]
+  service: { id: number; totalPrice: number } | null
 }) => {
-  const [maxAmount, setMaxAmount] = useState<number>(0);
-  const [loading, setLoading] = useState(false);
-  const { toast } = useToast();
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
+  const [maxAmount, setMaxAmount] = useState<number>(0)
+  const [loading, setLoading] = useState(false)
+  const { toast } = useToast()
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
 
   const defaultValues = {
     pricePerUnit: proSold?.pricePerUnit || 0,
@@ -80,52 +80,52 @@ const EditSoldForm = ({
     note: proSold?.note || "",
     productId: proSold ? proSold.productId : 0,
     serviceId: addSoldId ? Number(addSoldId) : 1,
-  };
+  }
   const form = useForm<ProductSold>({
     mode: "onChange",
     resolver: zodResolver(ProductSoldSchema),
     defaultValues,
-  });
+  })
 
-  const { pricePerUnit, count, discount } = form.watch();
+  const { pricePerUnit, count, discount } = form.watch()
 
   useEffect(() => {
     if (pricePerUnit * count > discount) {
-      form.clearErrors("discount");
+      form.clearErrors("discount")
     }
-  }, [pricePerUnit, count, discount, form]);
+  }, [pricePerUnit, count, discount, form])
 
   useEffect(() => {
     const getStock = async () => {
-      setLoading(true);
+      setLoading(true)
       const { data, error } = await supabase
         .from("product")
         .select("stock")
         .eq("id", proSold?.productId)
-        .single();
+        .single()
 
-      setMaxAmount((data?.stock || 0) + (proSold?.count || 0));
+      setMaxAmount((data?.stock || 0) + (proSold?.count || 0))
 
-      setLoading(false);
-    };
+      setLoading(false)
+    }
 
-    getStock();
-  }, [proSold]);
+    getStock()
+  }, [proSold])
 
   useEffect(() => {
-    form.reset(defaultValues);
-  }, [open]);
+    form.reset(defaultValues)
+  }, [open])
 
-  const isEqual = useObjectCompare(form.getValues(), defaultValues);
+  const isEqual = useObjectCompare(form.getValues(), defaultValues)
   const handleClose = useCallback(() => {
-    const params = new URLSearchParams(searchParams);
-    params.delete("editSold");
-    params.delete("addSoldId");
-    router.push(`${pathname}?${String(params)}`, { scroll: false });
-    form.reset();
-  }, [open]);
+    const params = new URLSearchParams(searchParams)
+    params.delete("editSold")
+    params.delete("addSoldId")
+    router.push(`${pathname}?${String(params)}`, { scroll: false })
+    form.reset()
+  }, [open])
 
-  const isLoading = form.formState.isSubmitting;
+  const isLoading = form.formState.isSubmitting
 
   async function onSubmit({
     pricePerUnit,
@@ -138,11 +138,11 @@ const EditSoldForm = ({
   }: ProductSold) {
     try {
       if (!service)
-        throw new Error(`Something went wrong, please refresh the page.`);
+        throw new Error(`Something went wrong, please refresh the page.`)
 
-      if (isEqual) throw new Error("You haven't changed anything.");
+      if (isEqual) throw new Error("You haven't changed anything.")
 
-      const totalPriceAfterDiscount = (pricePerUnit - discount) * count; // Calc the new total of the service.
+      const totalPriceAfterDiscount = (pricePerUnit - discount) * count // Calc the new total of the service.
 
       const editData = {
         pricePerUnit,
@@ -151,28 +151,28 @@ const EditSoldForm = ({
         isReturned,
         note,
         totalPriceAfterDiscount,
-      };
-      const addSoldProduct = { ...editData, productId, serviceId };
+      }
+      const addSoldProduct = { ...editData, productId, serviceId }
 
       // If the admin wants to add a product sold of a service that is already performed.
       if (addSoldId) {
-        const chosenProduct = products.find((pro) => pro.id === productId); // get the data of the chosen product.
+        const chosenProduct = products.find((pro) => pro.id === productId) // get the data of the chosen product.
 
         if (!chosenProduct)
-          throw new Error(`There was a problem with picking the product sold.`);
+          throw new Error(`There was a problem with picking the product sold.`)
 
-        const { categories, productImages, ...product } = chosenProduct;
-        const proToUpdate = product as Product;
-        const newSerivceAmount = service.totalPrice + totalPriceAfterDiscount;
+        const { categories, productImages, ...product } = chosenProduct
+        const proToUpdate = product as Product
+        const newSerivceAmount = service.totalPrice + totalPriceAfterDiscount
         //   const stockUpdates = {
         // id:proToUpdate.id,
         //     quantity: proToUpdate.stock - count,
         //   }; // Calc the the new stock number.
         const { error } = await createProductToSellAction(
           addSoldProduct,
-          newSerivceAmount,
-        );
-        if (error) throw new Error(error);
+          newSerivceAmount
+        )
+        if (error) throw new Error(error)
       }
 
       // If the admin wants to edit a product sold entry of a service that is already performed
@@ -180,16 +180,16 @@ const EditSoldForm = ({
         const newSerivceAmount =
           service.totalPrice +
           totalPriceAfterDiscount -
-          proSold.totalPriceAfterDiscount;
+          proSold.totalPriceAfterDiscount
         const isEqual =
-          proSold.totalPriceAfterDiscount === totalPriceAfterDiscount;
+          proSold.totalPriceAfterDiscount === totalPriceAfterDiscount
         // const dir = count < proSold.count ? 1 : -1
-        const product = proSold.product;
+        const product = proSold.product
 
         const stockUpdates = {
           ...product,
           stock: product.stock - count + proSold.count,
-        };
+        }
 
         const { error } = await editProductToSellAction(
           {
@@ -197,25 +197,25 @@ const EditSoldForm = ({
             id: proSold.id,
           },
           { id: service.id, totalPrice: newSerivceAmount, isEqual },
-          stockUpdates,
-        );
-        if (error) throw new Error(error);
+          stockUpdates
+        )
+        if (error) throw new Error(error)
         // Track if ther user changed the is returned value, and adjust the stock number accordingly.
-        const previousIsReturned = proSold.isReturned;
-        const currentIsReturned = isReturned;
+        const previousIsReturned = proSold.isReturned
+        const currentIsReturned = isReturned
         if (previousIsReturned !== currentIsReturned) {
           const { error } = await adjustProductsStockAction(
             isReturned ? "increment" : "decrement",
-            [{ id: proSold.productId, quantity: count }],
-          );
+            [{ id: proSold.productId, quantity: count }]
+          )
 
           if (error)
             throw new Error(
-              `Failed to update the stock of the product #${proSold.productId} : ${error}`,
-            );
+              `Failed to update the stock of the product #${proSold.productId} : ${error}`
+            )
         }
       }
-      handleClose();
+      handleClose()
       toast({
         className: "bg-primary  text-primary-foreground",
         title: "Data updated.",
@@ -228,13 +228,13 @@ const EditSoldForm = ({
             }
           />
         ),
-      });
+      })
     } catch (error: any) {
       toast({
         variant: "destructive",
         title: "Something went wrong.",
         description: <ErorrToastDescription error={error.message} />,
-      });
+      })
     }
   }
 
@@ -242,11 +242,11 @@ const EditSoldForm = ({
 
   return (
     <DialogComponent open={open} onOpenChange={handleClose}>
-      <DialogComponent.Content className="  max-h-[65vh]  sm:max-h-[76vh] overflow-y-auto max-w-[1000px] sm:p-14 pb-0 sm:pb-0">
+      <DialogComponent.Content className="max-h-[65vh] max-w-[1000px] overflow-y-auto pb-0 sm:max-h-[76vh] sm:p-14 sm:pb-0">
         <DialogComponent.Header>
           <DialogComponent.Title>
             {!addSoldId && !proSold ? (
-              <p className=" text-destructive-foreground font-semibold">
+              <p className="text-destructive-foreground font-semibold">
                 Something went wrong!
               </p>
             ) : addSoldId ? (
@@ -262,8 +262,8 @@ const EditSoldForm = ({
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className={cn("space-y-8 ", {
-              " opacity-45 blur-sm pointer-events-none hover:cursor-not-allowed ":
+            className={cn("space-y-8", {
+              "pointer-events-none opacity-45 blur-sm hover:cursor-not-allowed":
                 !addSoldId && !proSold,
             })}
           >
@@ -273,25 +273,25 @@ const EditSoldForm = ({
                 control={form.control}
                 name={"productId"}
                 render={({ field }) => (
-                  <FormItem className=" flex-1">
+                  <FormItem className="flex-1">
                     <FormLabel>Product</FormLabel>
                     <FormControl>
                       <ProductsComboBox
                         value={field.value}
                         setValue={(value) => {
                           const product = products.find(
-                            (pro) => pro.id === value,
-                          );
+                            (pro) => pro.id === value
+                          )
 
-                          field.onChange(value);
+                          field.onChange(value)
 
                           if (product) {
-                            setMaxAmount(product.stock);
-                            form.setValue("pricePerUnit", product.listPrice);
+                            setMaxAmount(product.stock)
+                            form.setValue("pricePerUnit", product.listPrice)
                             form.setValue(
                               "discount",
-                              product.listPrice - product.salePrice,
-                            );
+                              product.listPrice - product.salePrice
+                            )
                           }
                         }}
                         options={products}
@@ -306,13 +306,13 @@ const EditSoldForm = ({
                 )}
               />
             )}
-            <div className=" flex    items-center gap-1 xs:gap-3">
+            <div className="flex items-center gap-1 xs:gap-3">
               <FormField
                 disabled={isLoading}
                 control={form.control}
                 name="pricePerUnit"
                 render={({ field }) => (
-                  <FormItem className=" w-full mb-auto">
+                  <FormItem className="mb-auto w-full">
                     <FormLabel htmlFor="price-per-unit">
                       Price per unit
                     </FormLabel>
@@ -329,9 +329,9 @@ const EditSoldForm = ({
                         onValueChange={(formattedValue, name, value) => {
                           // setFormattedListing(formattedValue || "");
 
-                          field.onChange(Number(value?.value) || 0);
+                          field.onChange(Number(value?.value) || 0)
                         }}
-                        className="input-field "
+                        className="input-field"
                       />
                     </FormControl>
 
@@ -345,7 +345,7 @@ const EditSoldForm = ({
                 control={form.control}
                 name="discount"
                 render={({ field }) => (
-                  <FormItem className=" w-full mb-auto">
+                  <FormItem className="mb-auto w-full">
                     <FormLabel htmlFor="discount-per-unit">
                       Discount per unit
                     </FormLabel>
@@ -362,9 +362,9 @@ const EditSoldForm = ({
                         onValueChange={(formattedValue, name, value) => {
                           // setFormattedListing(formattedValue || "");
 
-                          field.onChange(Number(value?.value) || 0);
+                          field.onChange(Number(value?.value) || 0)
                         }}
-                        className="input-field "
+                        className="input-field"
                       />
                     </FormControl>
 
@@ -378,7 +378,7 @@ const EditSoldForm = ({
                 control={form.control}
                 name="count"
                 render={({ field }) => (
-                  <FormItem className=" w-full mb-auto">
+                  <FormItem className="mb-auto w-full">
                     <FormLabel>Count</FormLabel>
                     <FormControl>
                       <CurrencyInput
@@ -391,9 +391,9 @@ const EditSoldForm = ({
                         groupSeparator="," // Use comma for thousands
                         value={field.value || ""}
                         onValueChange={(formattedValue, name, value) => {
-                          const newValue = value ? Number(value.value) : 0;
-                          const isMaxAmount = newValue > maxAmount;
-                          field.onChange(isMaxAmount ? maxAmount : newValue);
+                          const newValue = value ? Number(value.value) : 0
+                          const isMaxAmount = newValue > maxAmount
+                          field.onChange(isMaxAmount ? maxAmount : newValue)
                           if (isMaxAmount) {
                             toast({
                               variant: "destructive",
@@ -403,10 +403,10 @@ const EditSoldForm = ({
                                   error={`Count number must be lower than ${maxAmount}`}
                                 />
                               ),
-                            });
+                            })
                           }
                         }}
-                        className="input-field  "
+                        className="input-field"
                       />
                     </FormControl>
 
@@ -442,7 +442,7 @@ const EditSoldForm = ({
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
-                      <div className="flex  justify-end items-center space-x-2">
+                      <div className="flex items-center justify-end space-x-2">
                         <Switch
                           id="airplane-mode"
                           checked={field.value}
@@ -459,11 +459,11 @@ const EditSoldForm = ({
             )}
 
             <div className="w-[300px]">
-              <h3 className=" text-sm">Summary:</h3>
-              <div className=" py-2  border-b border-t space-y-2 text-xs text-muted-foreground">
+              <h3 className="text-sm">Summary:</h3>
+              <div className="space-y-2 border-t border-b py-2 text-xs text-muted-foreground">
                 <div>
                   Amount:{" "}
-                  <span className=" relative after:content-['units'] after:absolute after:-right-8 after:-top-1 after:text-dashboard-indigo ">
+                  <span className="after:text-dashboard-indigo relative after:absolute after:-top-1 after:-right-8 after:content-['units']">
                     {count}
                   </span>
                 </div>
@@ -473,19 +473,19 @@ const EditSoldForm = ({
                   {formatCurrency(pricePerUnit * count)}
                 </div>
                 <div>Total discount: {formatCurrency(discount)}</div>
-                <div className=" border-t pt-1">
+                <div className="border-t pt-1">
                   Net: {formatCurrency(pricePerUnit * count - discount)}
                 </div>
               </div>
             </div>
-            <DialogComponent.Footer className="  sm:pb-14 pb-5 pt-4 !mt-4 sticky  bg-background bottom-0 z-50 w-full">
+            <DialogComponent.Footer className="sticky bottom-0 z-50 !mt-4 w-full bg-background pt-4 pb-5 sm:pb-14">
               <Button
                 onClick={handleClose}
                 disabled={isLoading}
                 type="reset"
                 variant="secondary"
                 size="sm"
-                className=" w-full sm:w-[unset]"
+                className="w-full sm:w-[unset]"
               >
                 Cancel
               </Button>
@@ -493,10 +493,10 @@ const EditSoldForm = ({
                 type="submit"
                 size="sm"
                 disabled={isLoading || isEqual}
-                className=" w-full sm:w-[unset]"
+                className="w-full sm:w-[unset]"
               >
                 {isLoading ? (
-                  <Spinner className=" h-full" />
+                  <Spinner className="h-full" />
                 ) : addSoldId ? (
                   "Add"
                 ) : (
@@ -508,7 +508,7 @@ const EditSoldForm = ({
         </Form>
       </DialogComponent.Content>
     </DialogComponent>
-  );
-};
+  )
+}
 
-export default EditSoldForm;
+export default EditSoldForm

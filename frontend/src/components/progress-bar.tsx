@@ -1,13 +1,13 @@
-import { cn } from "@/lib/utils";
-import React, { type CSSProperties } from "react";
+import { cn } from "@/lib/utils"
+import React, { type CSSProperties } from "react"
 
 interface Props {
-  className?: string;
-  progressTrackClasses?: string;
-  style?: CSSProperties;
-  progressTrackStyles?: CSSProperties;
-  value: number;
-  maxValue: number;
+  className?: string
+  progressTrackClasses?: string
+  style?: CSSProperties
+  progressTrackStyles?: CSSProperties
+  value: number
+  maxValue: number
 }
 
 const ProgressBar = ({
@@ -18,20 +18,20 @@ const ProgressBar = ({
   style,
   progressTrackStyles,
 }: Props) => {
-  const progressPercentage = Math.min((value / maxValue) * 100, 100);
+  const progressPercentage = Math.min((value / maxValue) * 100, 100)
   return (
     <div
       className={cn(
-        `relative w-full overflow-hidden h-[0.3rem] rounded-full border `,
+        `relative h-[0.3rem] w-full overflow-hidden rounded-full border`,
         className
       )}
       style={style}
     >
       <div
         className={cn(
-          ` absolute  top-0 w-full h-full bg-red-600 rounded-full transition-all duration-500 `,
+          `absolute top-0 h-full w-full rounded-full bg-red-600 transition-all duration-500`,
           {
-            " bg-green-600": value < 3,
+            "bg-green-600": value < 3,
           },
           progressTrackClasses
         )}
@@ -40,7 +40,7 @@ const ProgressBar = ({
         }}
       />
     </div>
-  );
-};
+  )
+}
 
-export default ProgressBar;
+export default ProgressBar

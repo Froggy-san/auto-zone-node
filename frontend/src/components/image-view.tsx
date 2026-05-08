@@ -1,59 +1,58 @@
-import { useEffect } from "react";
+import { useEffect } from "react"
 
-
-import { motion, AnimatePresence } from "framer-motion";
-import { createPortal } from "react-dom";
-import { Button } from "./ui/button";
-import { X } from "lucide-react";
-import { ClickAwayListener, Portal } from "@mui/material";
+import { motion, AnimatePresence } from "framer-motion"
+import { createPortal } from "react-dom"
+import { Button } from "./ui/button"
+import { X } from "lucide-react"
+import { ClickAwayListener, Portal } from "@mui/material"
 
 const ImageView = ({
   handleClose,
   image,
 }: {
-  image: string | null;
-  handleClose: () => void;
+  image: string | null
+  handleClose: () => void
 }) => {
   // Define a function to reset the body styles
   const resetBodyStyle = () => {
-    const body = document.querySelector("body");
+    const body = document.querySelector("body")
     if (body) {
-      body.style.height = "unset";
-      body.style.overflow = "unset";
+      body.style.height = "unset"
+      body.style.overflow = "unset"
     }
-  };
+  }
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const body = document.querySelector("body");
+      const body = document.querySelector("body")
 
-      if (!body) return;
+      if (!body) return
 
       // Set the style when the image is open
       if (typeof image === "string" && body) {
-        body.style.height = "100vh";
-        body.style.overflow = "hidden";
+        body.style.height = "100vh"
+        body.style.overflow = "hidden"
       }
 
       const handleKeyDown = (event: KeyboardEvent) => {
         if (event.key === "Escape") {
-          event.preventDefault(); // Prevent default browser behavior
-          handleClose();
+          event.preventDefault() // Prevent default browser behavior
+          handleClose()
         }
-      };
+      }
 
       // Add event listener for browser navigation
-      window.addEventListener("keydown", handleKeyDown);
-      window.addEventListener("popstate", resetBodyStyle);
+      window.addEventListener("keydown", handleKeyDown)
+      window.addEventListener("popstate", resetBodyStyle)
 
       // Clean up the event listener and reset styles when the component unmounts or image changes
       return () => {
-        window.removeEventListener("popstate", resetBodyStyle);
-        window.removeEventListener("keydown", handleKeyDown);
-        resetBodyStyle(); // Reset styles on unmount or image change
-      };
+        window.removeEventListener("popstate", resetBodyStyle)
+        window.removeEventListener("keydown", handleKeyDown)
+        resetBodyStyle() // Reset styles on unmount or image change
+      }
     }
-  }, [image, handleClose]);
+  }, [image, handleClose])
 
   return (
     <>
@@ -64,11 +63,11 @@ const ImageView = ({
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2, type: "spring" }}
               key="container"
-              className="fixed flex items-center justify-center  left-0 top-0 w-full h-[100dvh] bg-[rgba(0,0,0,0.3)] select-none backdrop-blur-sm backdrop-brightness-50 z-[99999]"
+              className="fixed top-0 left-0 z-[99999] flex h-[100dvh] w-full items-center justify-center bg-[rgba(0,0,0,0.3)] backdrop-blur-sm backdrop-brightness-50 select-none"
             >
               <Button
                 variant="secondary"
-                className="absolute right-5 top-10 rounded-full w-7 h-7 p-0  z-[99999] bg-muted "
+                className="absolute top-10 right-5 z-[99999] h-7 w-7 rounded-full bg-muted p-0"
                 onClick={handleClose} // Ensure this button calls the handleClose function
               >
                 <X size={20} />
@@ -77,8 +76,8 @@ const ImageView = ({
                 mouseEvent="onMouseUp"
                 touchEvent="onTouchEnd"
                 onClickAway={(e) => {
-                  e.preventDefault();
-                  handleClose();
+                  e.preventDefault()
+                  handleClose()
                 }}
               >
                 <motion.img
@@ -89,7 +88,7 @@ const ImageView = ({
                   exit={{ scale: 1.1, opacity: 0 }}
                   transition={{ duration: 0.1, ease: "linear" }}
                   alt="Enlarged view"
-                  className="max-w-[100%] max-h-[90%] sm:max-h-[100%] object-contain   "
+                  className="max-h-[90%] max-w-[100%] object-contain sm:max-h-[100%]"
                 />
               </ClickAwayListener>
             </motion.div>
@@ -97,10 +96,10 @@ const ImageView = ({
         </AnimatePresence>
       </Portal>
     </>
-  );
-};
+  )
+}
 
-export default ImageView;
+export default ImageView
 
 // import { useEffect } from "react";
 // import { ClickAwayListener } from "@mui/base";

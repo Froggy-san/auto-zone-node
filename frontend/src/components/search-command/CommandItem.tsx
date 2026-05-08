@@ -1,31 +1,31 @@
 // src/components/cmdk/CommandItem.tsx
-import React, { useEffect, useRef, useId } from "react";
-import { useCommandPalette } from "./CommandPaletteContext";
+import React, { useEffect, useRef, useId } from "react"
+import { useCommandPalette } from "./CommandPaletteContext"
 
 // We need to extend the context type for CommandItem
 interface ExtendedCommandPaletteContextType {
-  searchTerm: string;
+  searchTerm: string
   registerItem: (item: {
-    id: string;
-    value: string;
-    keywords?: string[];
-    element: HTMLLIElement | null;
-  }) => void;
-  unregisterItem: (id: string) => void;
-  focusedIndex: number;
-  onItemSelect?: (value: string, index: number) => void;
+    id: string
+    value: string
+    keywords?: string[]
+    element: HTMLLIElement | null
+  }) => void
+  unregisterItem: (id: string) => void
+  focusedIndex: number
+  onItemSelect?: (value: string, index: number) => void
   registeredItems: {
-    id: string;
-    value: string;
-    keywords?: string[];
-    element: HTMLLIElement | null;
-  }[];
+    id: string
+    value: string
+    keywords?: string[]
+    element: HTMLLIElement | null
+  }[]
 }
 
 interface CommandItemProps extends React.ComponentPropsWithoutRef<"li"> {
-  value: string; // The value used for filtering and selection
-  keywords?: string[]; // Optional keywords for fuzzy matching
-  onValueSelect?: (value: string) => void; // Optional callback when item is selected (click or enter)
+  value: string // The value used for filtering and selection
+  keywords?: string[] // Optional keywords for fuzzy matching
+  onValueSelect?: (value: string) => void // Optional callback when item is selected (click or enter)
 }
 
 export const CommandItem: React.FC<CommandItemProps> = ({
@@ -37,34 +37,34 @@ export const CommandItem: React.FC<CommandItemProps> = ({
   onClick,
   ...rest
 }) => {
-  const itemRef = useRef<HTMLLIElement>(null);
-  const id = useId(); // Generate a stable ID for the item
+  const itemRef = useRef<HTMLLIElement>(null)
+  const id = useId() // Generate a stable ID for the item
 
   // Cast to extended context type
   const { registerItem, unregisterItem, onItemSelect, registeredItems } =
-    useCommandPalette();
+    useCommandPalette()
   useEffect(() => {
     // Register this item with the CommandPaletteContext (specifically the CommandList)
-    registerItem({ id, value, keywords, element: itemRef.current });
+    registerItem({ id, value, keywords, element: itemRef.current })
 
     // Cleanup: Unregister when component unmounts
     return () => {
-      unregisterItem(id);
-    };
-  }, [id, value, keywords, registerItem, unregisterItem]); // Dependencies for useEffect
+      unregisterItem(id)
+    }
+  }, [id, value, keywords, registerItem, unregisterItem]) // Dependencies for useEffect
 
   // Find own index in the registered items list
-  const ownIndex = registeredItems.findIndex((item) => item.id === id);
+  const ownIndex = registeredItems.findIndex((item) => item.id === id)
 
   const handleClick = (event: React.MouseEvent<HTMLLIElement>) => {
     if (onValueSelect) {
-      onValueSelect(value);
+      onValueSelect(value)
     }
     if (onItemSelect) {
-      onItemSelect(value, ownIndex); // Notify parent of selection
+      onItemSelect(value, ownIndex) // Notify parent of selection
     }
-    onClick?.(event); // Call any passed onClick handler
-  };
+    onClick?.(event) // Call any passed onClick handler
+  }
 
   return (
     <li
@@ -78,5 +78,5 @@ export const CommandItem: React.FC<CommandItemProps> = ({
     >
       <span id={`cmdk-item-label-${id}`}>{children}</span>
     </li>
-  );
-};
+  )
+}

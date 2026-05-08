@@ -1,5 +1,5 @@
-import { getCurrUser } from "@lib/services/user-servcies";
-import { useQuery } from "@tanstack/react-query";
+import { getCurrUser } from "@lib/services/user-servcies"
+import { useQuery } from "@tanstack/react-query"
 
 export default function useCurrUser() {
   const {
@@ -11,6 +11,6 @@ export default function useCurrUser() {
     queryKey: ["user"],
     staleTime: 100000 * 60 * 5, // Data is fresh for 5 minutes
     // refetchOnWindowFocus: false,
-  });
-  return { user, client, isLoading, error };
+  })
+  return { user, client, isLoading, error }
 }

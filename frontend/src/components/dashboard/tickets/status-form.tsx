@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react"
 import {
   Dialog,
   DialogContent,
@@ -6,106 +6,106 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { AnimatePresence } from "framer-motion";
-import ErrorMessage from "@components/error-message";
-import { Input } from "@components/ui/input";
+} from "@/components/ui/dialog"
+import { AnimatePresence } from "framer-motion"
+import ErrorMessage from "@components/error-message"
+import { Input } from "@components/ui/input"
 
-import { Textarea } from "@components/ui/textarea";
-import Spinner from "@components/Spinner";
-import { Button } from "@components/ui/button";
-import { RotateCcw } from "lucide-react";
-import useObjectCompare from "@hooks/use-compare-objs";
+import { Textarea } from "@components/ui/textarea"
+import Spinner from "@components/Spinner"
+import { Button } from "@components/ui/button"
+import { RotateCcw } from "lucide-react"
+import useObjectCompare from "@hooks/use-compare-objs"
 import {
   createTicketStatusAction,
   editTicketStatusAction,
-} from "@lib/actions/ticket-status-actions";
-import { useToast } from "@hooks/use-toast";
+} from "@lib/actions/ticket-status-actions"
+import { useToast } from "@hooks/use-toast"
 import SuccessToastDescription, {
   ErorrToastDescription,
-} from "@components/toast-items";
-import { FormLabel } from "@components/ui/form";
-import { cn } from "@lib/utils";
-import FormErrorMessage from "@components/form-error-message";
+} from "@components/toast-items"
+import { FormLabel } from "@components/ui/form"
+import { cn } from "@lib/utils"
+import FormErrorMessage from "@components/form-error-message"
 const StatusForm = ({
   statusToEdit,
   showBtn = true,
   isOpen,
   setIsOpen,
 }: {
-  statusToEdit?: any;
-  showBtn?: boolean;
-  isOpen?: boolean;
-  setIsOpen?: (open: boolean) => void;
+  statusToEdit?: any
+  showBtn?: boolean
+  isOpen?: boolean
+  setIsOpen?: (open: boolean) => void
 }) => {
-  const [open, setOpen] = useState(false);
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [nameError, setNameError] = useState("");
-  const [descriptionError, setDescriptionError] = useState("");
-  const [nameIsDirty, setNameIsDirty] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [open, setOpen] = useState(false)
+  const [name, setName] = useState("")
+  const [description, setDescription] = useState("")
+  const [nameError, setNameError] = useState("")
+  const [descriptionError, setDescriptionError] = useState("")
+  const [nameIsDirty, setNameIsDirty] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
 
-  const { toast } = useToast();
+  const { toast } = useToast()
 
-  const diaOpen = isOpen !== undefined ? isOpen : open;
+  const diaOpen = isOpen !== undefined ? isOpen : open
 
   const defaultValues = {
     name: statusToEdit?.name || "",
     description: statusToEdit?.description || "",
-  };
+  }
 
-  const isEqual = useObjectCompare(defaultValues, { name, description });
+  const isEqual = useObjectCompare(defaultValues, { name, description })
 
   const reset = useCallback(() => {
-    setName(defaultValues.name);
-    setDescription(defaultValues.description);
-    setNameError("");
-    setDescriptionError("");
-    setNameIsDirty(false);
-  }, [defaultValues]);
+    setName(defaultValues.name)
+    setDescription(defaultValues.description)
+    setNameError("")
+    setDescriptionError("")
+    setNameIsDirty(false)
+  }, [defaultValues])
 
   const handleClose = useCallback(() => {
-    setOpen(false);
-    setIsOpen?.(false);
-    reset();
-  }, [setOpen, reset]);
+    setOpen(false)
+    setIsOpen?.(false)
+    reset()
+  }, [setOpen, reset])
 
   const handleOpenChange = useCallback(() => {
-    setOpen((open) => !open);
-    setIsOpen?.(!diaOpen);
-    reset();
-  }, [setOpen, reset]);
+    setOpen((open) => !open)
+    setIsOpen?.(!diaOpen)
+    reset()
+  }, [setOpen, reset])
   useEffect(() => {
-    if (!nameIsDirty) return;
-    if (name.length <= 3) setNameError("Status name is too short.");
-    if (name.length > 200) setNameError("Status name is too long.");
-    if (name.length >= 3 && name.length < 200) setNameError("");
-  }, [name]);
+    if (!nameIsDirty) return
+    if (name.length <= 3) setNameError("Status name is too short.")
+    if (name.length > 200) setNameError("Status name is too long.")
+    if (name.length >= 3 && name.length < 200) setNameError("")
+  }, [name])
 
   useEffect(() => {
     // if(description.length < 3) setNameError("Status description is too short.")
     if (description.length > 200)
-      setDescriptionError("Status description is too long.");
-    else setDescriptionError("");
-  }, [description]);
+      setDescriptionError("Status description is too long.")
+    else setDescriptionError("")
+  }, [description])
 
   useEffect(() => {
-    if (isLoading) return;
-    reset();
-  }, [diaOpen]);
+    if (isLoading) return
+    reset()
+  }, [diaOpen])
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
+    e.preventDefault()
     try {
-      setIsLoading(true);
+      setIsLoading(true)
       if (statusToEdit) {
         const { error } = await editTicketStatusAction({
           id: statusToEdit.id,
           name,
           description,
-        });
-        if (error) throw new Error(error);
+        })
+        if (error) throw new Error(error)
 
         toast({
           className: "bg-primary  text-primary-foreground",
@@ -113,10 +113,10 @@ const StatusForm = ({
           description: (
             <SuccessToastDescription message="Ticket status has been updated." />
           ),
-        });
+        })
       } else {
-        const { error } = await createTicketStatusAction({ name, description });
-        if (error) throw new Error(error);
+        const { error } = await createTicketStatusAction({ name, description })
+        if (error) throw new Error(error)
 
         toast({
           className: "bg-primary  text-primary-foreground",
@@ -124,18 +124,18 @@ const StatusForm = ({
           description: (
             <SuccessToastDescription message="New ticket status created." />
           ),
-        });
+        })
       }
 
-      handleClose();
+      handleClose()
     } catch (error: any) {
       toast({
         variant: "destructive",
         title: "Uh oh! Something went wrong.",
         description: <ErorrToastDescription error={error.message} />,
-      });
+      })
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
   }
 
@@ -143,7 +143,7 @@ const StatusForm = ({
     <Dialog open={diaOpen} onOpenChange={handleOpenChange}>
       {showBtn && (
         <DialogTrigger asChild>
-          <Button size="sm" className=" w-full">
+          <Button size="sm" className="w-full">
             {" "}
             Create New Ticket{" "}
           </Button>
@@ -160,13 +160,13 @@ const StatusForm = ({
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className=" space-y-5">
-          <div className=" space-y-2 w-full mb-auto">
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div className="mb-auto w-full space-y-2">
             <label
               htmlFor="name"
               className={cn(
-                nameError && "text-destructive ",
-                "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                nameError && "text-destructive",
+                "text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
               )}
             >
               Name
@@ -178,8 +178,8 @@ const StatusForm = ({
               placeholder="Status Name..."
               value={name}
               onChange={(e) => {
-                setNameIsDirty(true);
-                setName(e.target.value);
+                setNameIsDirty(true)
+                setName(e.target.value)
               }}
             />
 
@@ -191,12 +191,12 @@ const StatusForm = ({
             </AnimatePresence>
           </div>
 
-          <div className=" space-y-2 w-full mb-auto">
+          <div className="mb-auto w-full space-y-2">
             <label
               htmlFor="description"
               className={cn(
-                descriptionError && "text-destructive ",
-                "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                descriptionError && "text-destructive",
+                "text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
               )}
             >
               Description
@@ -219,14 +219,14 @@ const StatusForm = ({
               )}
             </AnimatePresence>
           </div>
-          <div className=" relative flex flex-col-reverse sm:flex-row items-center justify-end  gap-3">
+          <div className="relative flex flex-col-reverse items-center justify-end gap-3 sm:flex-row">
             <Button
               onClick={reset}
               type="button"
-              className=" p-0 h-6 w-6  absolute left-5 bottom-0"
+              className="absolute bottom-0 left-5 h-6 w-6 p-0"
               variant="outline"
             >
-              <RotateCcw className=" w-4 h-4" />
+              <RotateCcw className="h-4 w-4" />
             </Button>
             <Button
               onClick={handleClose}
@@ -234,7 +234,7 @@ const StatusForm = ({
               type="reset"
               variant="secondary"
               size="sm"
-              className=" w-full sm:w-[unset]"
+              className="w-full sm:w-[unset]"
             >
               Cancel
             </Button>
@@ -242,10 +242,10 @@ const StatusForm = ({
               type="submit"
               size="sm"
               disabled={isLoading || isEqual}
-              className=" w-full sm:w-[unset]"
+              className="w-full sm:w-[unset]"
             >
               {isLoading ? (
-                <Spinner className=" h-full" />
+                <Spinner className="h-full" />
               ) : statusToEdit ? (
                 "Update"
               ) : (
@@ -256,7 +256,7 @@ const StatusForm = ({
         </form>
       </DialogContent>
     </Dialog>
-  );
-};
+  )
+}
 
-export default StatusForm;
+export default StatusForm

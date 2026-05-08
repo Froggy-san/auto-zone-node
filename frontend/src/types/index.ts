@@ -1,4 +1,10 @@
 export * from "./category"
 export * from "./product"
+export * from "./authTypes"
+export * from "./carMaker"
+export * from "./generalTypes"
+export * from "./productTypes"
+export * from "./carTypes"
+
 // export * from "./productBrand"
 // export * from "./productType"

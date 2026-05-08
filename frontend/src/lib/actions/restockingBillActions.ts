@@ -1,21 +1,21 @@
-"use server";
+"use server"
 
-import { PAGE_SIZE } from "@lib/constants";
-import { getToken } from "@lib/helper";
-import { createClient } from "@utils/supabase/server";
-import { revalidateTag } from "next/cache";
+import { PAGE_SIZE } from "@lib/constants"
+import { getToken } from "@lib/helper"
+import { createClient } from "@utils/supabase/server"
+import { revalidateTag } from "next/cache"
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
 interface GetRestockingProps {
-  pageNumber?: string;
-  name?: string;
-  shopName?: string;
-  dateOfOrderFrom?: string;
-  dateOfOrderTo?: string;
-  minTotalPrice?: string;
-  maxTotalPrice?: string;
+  pageNumber?: string
+  name?: string
+  shopName?: string
+  dateOfOrderFrom?: string
+  dateOfOrderTo?: string
+  minTotalPrice?: string
+  maxTotalPrice?: string
 }
 
 export async function getRestockingBillsAction({
@@ -27,39 +27,39 @@ export async function getRestockingBillsAction({
   minTotalPrice,
   maxTotalPrice,
 }: GetRestockingProps) {
-  const from = (Number(pageNumber) - 1) * PAGE_SIZE;
-  const to = from + PAGE_SIZE - 1;
+  const from = (Number(pageNumber) - 1) * PAGE_SIZE
+  const to = from + PAGE_SIZE - 1
 
-  let query = `${supabaseUrl}/rest/v1/productsRestockingBills?select=*,productsBought(*,product(*))&order=created_at.desc&productsBought.order=created_at.asc`;
+  let query = `${supabaseUrl}/rest/v1/productsRestockingBills?select=*,productsBought(*,product(*))&order=created_at.desc&productsBought.order=created_at.asc`
 
-  if (shopName) query = query + `&shopName=ilike.*${shopName}*`;
+  if (shopName) query = query + `&shopName=ilike.*${shopName}*`
   if (name) {
-    const escapedName = name.replace(/[%_]/g, "\\$&"); // Escaping % and _
-    query += `&productsBought.product.name=ilike.*${escapedName}*`;
+    const escapedName = name.replace(/[%_]/g, "\\$&") // Escaping % and _
+    query += `&productsBought.product.name=ilike.*${escapedName}*`
   }
 
   if (dateOfOrderFrom)
-    query += `&created_at=gte.${new Date(dateOfOrderFrom).toISOString()}`;
+    query += `&created_at=gte.${new Date(dateOfOrderFrom).toISOString()}`
 
   if (dateOfOrderTo) {
     /// If the user selects the 'Date to' at the same date of the 'Date from' and then turn them into ISOString, it will convert the 2 dates and add the time to them set to be in the begging of the day down to the seconds, i think, so to find matching data like that is very unlikely, so in order to avoid this we will set the time in  the 'Date to' to the end of the day, that way the 2 dates don't match down to the last second.
-    const dateToEndOfDay = new Date(dateOfOrderTo);
-    dateToEndOfDay.setHours(23, 59, 59, 999); // Setting time to end of the day
-    query += `&created_at=lte.${dateToEndOfDay.toISOString()}`;
+    const dateToEndOfDay = new Date(dateOfOrderTo)
+    dateToEndOfDay.setHours(23, 59, 59, 999) // Setting time to end of the day
+    query += `&created_at=lte.${dateToEndOfDay.toISOString()}`
   }
 
-  if (minTotalPrice) query = query + `&totalPrice=gte.${minTotalPrice}`;
+  if (minTotalPrice) query = query + `&totalPrice=gte.${minTotalPrice}`
 
-  if (maxTotalPrice) query = query + `&totalPrice=lte.${maxTotalPrice}`;
+  if (maxTotalPrice) query = query + `&totalPrice=lte.${maxTotalPrice}`
 
   const headers = {
     apikey: `${supabaseKey}`,
     Authorization: `Bearer ${supabaseKey}`,
     Prefer: "count=exact",
-  } as Record<string, string>;
+  } as Record<string, string>
 
   if (pageNumber) {
-    headers.Range = `${from}-${to}`;
+    headers.Range = `${from}-${to}`
   }
 
   const response = await fetch(query, {
@@ -68,80 +68,80 @@ export async function getRestockingBillsAction({
     next: {
       tags: ["restockingBills"],
     },
-  });
+  })
 
   if (!response.ok) {
     const error =
       (await response.json()).message ||
-      "Something went wrong while trying to fetch ProductsRestockingBills data.";
+      "Something went wrong while trying to fetch ProductsRestockingBills data."
 
-    console.log(error.message);
+    console.log(error.message)
     return {
       data: null,
       error,
-    };
+    }
   }
-  const count = response.headers.get("content-range")?.split("/")[1] || 0;
-  const data = await response.json();
-  return { data: { data, count }, error: "" };
+  const count = response.headers.get("content-range")?.split("/")[1] || 0
+  const data = await response.json()
+  return { data: { data, count }, error: "" }
 }
 
 interface CreateProps {
-  shopName: string;
-  totalPrice: number;
+  shopName: string
+  totalPrice: number
 }
 export async function createRestockingBillAction(billData: CreateProps) {
-  const supabase = await createClient();
+  const supabase = await createClient()
 
   const { data, error } = await supabase
     .from("productsRestockingBills")
     .insert([billData])
-    .select();
+    .select()
 
-  revalidateTag("restockingBills");
+  revalidateTag("restockingBills")
 
-  return { data, error };
+  return { data, error }
 }
 
 interface EditProps {
   restockingToEdit: {
-    shopName?: string;
-    created_at?: Date;
-    totalPrice?: number;
-  };
-  id: number;
+    shopName?: string
+    created_at?: Date
+    totalPrice?: number
+  }
+  id: number
 }
 
 export async function editRestockingBillAction({
   restockingToEdit,
   id,
 }: EditProps) {
-  const supabase = await createClient();
+  const supabase = await createClient()
 
   const { error } = await supabase
     .from("productsRestockingBills")
     .update(restockingToEdit)
-    .eq("id", id);
+    .eq("id", id)
 
-  if (error) return { data: null, error: error.message };
-  revalidateTag("restockingBills");
+  if (error) return { data: null, error: error.message }
+  revalidateTag("restockingBills")
   // const data = await response.json();
   // return data;
 
-  return { data: null, error: "" };
+  return { data: null, error: "" }
 }
 
 export async function deleteRestockingBillAction(id: string) {
-  const supabase = await createClient();
+  const supabase = await createClient()
 
   const { error } = await supabase
     .from("productsRestockingBills")
     .delete()
-    .eq("id", id);
-  if (error) return { data: null, error: error.message };
-  revalidateTag("restockingBills");
+    .eq("id", id)
+  if (error) return { data: null, error: error.message }
+  revalidateTag("restockingBills")
 
-  return { data: null, error: "" };
+  return { data: null, error: "" }
 }
 
 export async function getProductsRestockingBillsCountAction({
@@ -151,48 +151,48 @@ export async function getProductsRestockingBillsCountAction({
   maxTotalPrice,
   minTotalPrice,
 }: {
-  shopName?: string;
-  dateOfOrderFrom?: string;
-  dateOfOrderTo?: string;
-  minTotalPrice?: string;
-  maxTotalPrice?: string;
+  shopName?: string
+  dateOfOrderFrom?: string
+  dateOfOrderTo?: string
+  minTotalPrice?: string
+  maxTotalPrice?: string
 }) {
-  const token = getToken();
+  const token = getToken()
 
   if (!token)
-    return { data: null, error: "You are not authorized to make this action." };
+    return { data: null, error: "You are not authorized to make this action." }
 
-  let query = `${process.env.API_URL}/api/ProductsRestockingBills/count?`;
+  let query = `${process.env.API_URL}/api/ProductsRestockingBills/count?`
 
-  if (shopName) query = query + `&shopName=${shopName}`;
+  if (shopName) query = query + `&shopName=${shopName}`
 
-  if (dateOfOrderFrom) query = query + `&dateOfOrderFrom=${dateOfOrderFrom}`;
+  if (dateOfOrderFrom) query = query + `&dateOfOrderFrom=${dateOfOrderFrom}`
 
-  if (dateOfOrderTo) query = query + `&dateOfOrderTo=${dateOfOrderTo}`;
+  if (dateOfOrderTo) query = query + `&dateOfOrderTo=${dateOfOrderTo}`
 
-  if (minTotalPrice) query = query + `&minTotalPrice=${minTotalPrice}`;
+  if (minTotalPrice) query = query + `&minTotalPrice=${minTotalPrice}`
 
-  if (maxTotalPrice) query = query + `&maxTotalPrice=${maxTotalPrice}`;
+  if (maxTotalPrice) query = query + `&maxTotalPrice=${maxTotalPrice}`
   const response = await fetch(query, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${token}`,
     },
-  });
+  })
 
   if (!response.ok) {
     console.log(
       "Something went wrong while trying to fetch ProductsRestockingBills count."
-    );
+    )
     return {
       data: null,
       error:
         "Something went wrong while trying to fetch ProductsRestockingBills count.",
-    };
+    }
   }
 
-  const data = await response.json();
-  return { data, error: "" };
+  const data = await response.json()
+  return { data, error: "" }
 }
 
 // --------------

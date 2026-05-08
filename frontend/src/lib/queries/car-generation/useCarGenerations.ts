@@ -1,10 +1,9 @@
-
-import { PILL_SIZE } from "@lib/constants";
-import { getCarGenerations } from "@lib/services/car-generations";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { PILL_SIZE } from "@lib/constants"
+import { getCarGenerations } from "@lib/services/car-generations"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 
 export default function useCarGenerations(page: number) {
-  const queryClient = useQueryClient();
+  const queryClient = useQueryClient()
   const {
     data: { carGenerations, count } = {},
     isLoading,
@@ -13,22 +12,22 @@ export default function useCarGenerations(page: number) {
     queryFn: () => getCarGenerations(page),
     queryKey: ["carGenerations", page],
     enabled: !!page,
-  });
+  })
 
-  const pageCount = count ? Math.ceil(count / PILL_SIZE) : 0;
+  const pageCount = count ? Math.ceil(count / PILL_SIZE) : 0
 
   if (page < pageCount) {
     queryClient.prefetchQuery({
       queryFn: () => getCarGenerations(page + 1),
       queryKey: ["carGenerations", page + 1],
-    });
+    })
   }
 
   if (page > pageCount) {
     queryClient.prefetchQuery({
       queryFn: () => getCarGenerations(page - 1),
       queryKey: ["carGenerations", page - 1],
-    });
+    })
   }
-  return { carGenerations, pageCount, isLoading, error };
+  return { carGenerations, pageCount, isLoading, error }
 }

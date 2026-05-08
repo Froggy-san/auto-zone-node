@@ -1,51 +1,51 @@
-"use server";
+"use server"
 
-import { PILL_SIZE } from "@lib/constants";
-import { getToken } from "@lib/helper";
-import { CarGeneration } from "@lib/types";
-import { revalidateTag } from "next/cache";
+import { PILL_SIZE } from "@lib/constants"
+import { getToken } from "@lib/helper"
+import { CarGeneration } from "@lib/types"
+import { revalidateTag } from "next/cache"
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
 export async function revalidateCarGenerations() {
-  revalidateTag("carGenerations");
+  revalidateTag("carGenerations")
 }
 
 export async function getAllCarGenerationsAction(page?: number) {
-  const from = page ? (page - 1) * PILL_SIZE : 0;
-  const to = from + PILL_SIZE - 1;
-  const query = `${supabaseUrl}/rest/v1/carGenerations?select=*&order=created_at.asc`;
+  const from = page ? (page - 1) * PILL_SIZE : 0
+  const to = from + PILL_SIZE - 1
+  const query = `${supabaseUrl}/rest/v1/carGenerations?select=*&order=created_at.asc`
   const headers = {
     apikey: `${supabaseKey}`,
     Authorization: `Bearer ${supabaseKey}`,
     Prefer: "count=exact",
-  } as Record<string, string>;
+  } as Record<string, string>
 
   if (!page) {
-    headers.Range = `${from}-${to}`;
+    headers.Range = `${from}-${to}`
   }
 
   const response = await fetch(query, {
     method: "GET",
     headers,
-  });
+  })
 
   if (!response.ok) {
     const error =
-      (await response.json()).message || "Failed to get the generations data.";
+      (await response.json()).message || "Failed to get the generations data."
 
     return {
       data: null,
       error,
-    };
+    }
   }
 
-  const carGenerationsData = await response.json();
+  const carGenerationsData = await response.json()
 
-  const count = response.headers.get("content-range")?.split("/")[1] || 0;
+  const count = response.headers.get("content-range")?.split("/")[1] || 0
 
-  return { data: { carGenerationsData, count }, error: "" };
+  return { data: { carGenerationsData, count }, error: "" }
 }
 
 export async function createCarGenerationAction(generations: CarGeneration) {
@@ -57,24 +57,24 @@ export async function createCarGenerationAction(generations: CarGeneration) {
       Prefer: "return=minimal",
     },
     body: JSON.stringify(generations),
-  });
+  })
   if (!response.ok) {
     const error =
-      (await response.json()).message || "Failed to create a new generation";
+      (await response.json()).message || "Failed to create a new generation"
 
-    return { data: null, error };
+    return { data: null, error }
   }
 
-  const data = await response.json();
-  return { data, error: "" };
+  const data = await response.json()
+  return { data, error: "" }
 }
 
 export async function editCarGenerationAction({
   generation,
   id,
 }: {
-  generation: { name: string; notes: string };
-  id: number;
+  generation: { name: string; notes: string }
+  id: number
 }) {
   const response = await fetch(
     `${supabaseUrl}/rest/v1/carGenerations?id=eq.${id}`,
@@ -87,16 +87,16 @@ export async function editCarGenerationAction({
       },
       body: JSON.stringify(generation),
     }
-  );
+  )
   if (!response.ok) {
     const error =
       (await response.json()).message ||
-      "Failed to edit t the generation data.he generation data.";
+      "Failed to edit t the generation data.he generation data."
 
-    return { data: null, error };
+    return { data: null, error }
   }
 
-  return { data: null, error: "" };
+  return { data: null, error: "" }
 }
 
 export async function deleteCarGenerationAction(id: number) {
@@ -109,19 +109,19 @@ export async function deleteCarGenerationAction(id: number) {
         Authorization: `Bearer ${supabaseKey}`,
       },
     }
-  );
+  )
   if (!response.ok) {
     const error =
       (await response.json()).message ||
-      "Failed to delete the generation data. ";
+      "Failed to delete the generation data. "
   }
 }
 
 export async function getCarGenerationCountAction() {
-  const token = getToken();
+  const token = getToken()
 
   if (!token)
-    return { data: null, error: "You are not authorized to make this action." };
+    return { data: null, error: "You are not authorized to make this action." }
   const response = await fetch(
     `${process.env.API_URL}/api/cargenerations/count`,
     {
@@ -130,17 +130,17 @@ export async function getCarGenerationCountAction() {
         Authorization: `Bearer ${token}`,
       },
     }
-  );
+  )
 
   if (!response.ok) {
     return {
       data: null,
       error: "Something went wrong while trying to fetch car generations data.",
-    };
+    }
   }
 
-  const data = await response.json();
-  return { data, error: "" };
+  const data = await response.json()
+  return { data, error: "" }
 }
 
 // export async function getAllCarGenerationsAction(page?: number) {

@@ -1,7 +1,6 @@
-
-import Spinner from "@components/Spinner";
-import React, { SetStateAction, useCallback, useState } from "react";
-import { Button } from "@/components/ui/button";
+import Spinner from "@components/Spinner"
+import React, { SetStateAction, useCallback, useState } from "react"
+import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogClose,
@@ -11,39 +10,39 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { useToast } from "@hooks/use-toast";
-import { Category } from "@lib/types";
+} from "@/components/ui/dialog"
+import { useToast } from "@hooks/use-toast"
+import { Category } from "@lib/types"
 import SuccessToastDescription, {
   ErorrToastDescription,
-} from "@components/toast-items";
-import { Cross2Icon } from "@radix-ui/react-icons";
-import TextInputSwitch from "@components/text-input-switch";
-import { deleteCategoryAction } from "@lib/actions/categoriesAction";
-import { deleteProductTypeAction } from "@lib/actions/productTypeActions";
-import { deleteProductBrandAction } from "@lib/actions/productBrandsActions";
-type ItemType = "category" | "productType" | "productBrand";
+} from "@components/toast-items"
+import { Cross2Icon } from "@radix-ui/react-icons"
+import TextInputSwitch from "@components/text-input-switch"
+import { deleteCategoryAction } from "@lib/actions/categoriesAction"
+import { deleteProductTypeAction } from "@lib/actions/productTypeActions"
+import { deleteProductBrandAction } from "@lib/actions/productBrandsActions"
+type ItemType = "category" | "productType" | "productBrand"
 const PillITem = ({
   item,
   itemType,
   handleResetPage,
 }: {
-  itemType: ItemType;
-  handleResetPage: () => void;
-  item: { id: number; name: string };
+  itemType: ItemType
+  handleResetPage: () => void
+  item: { id: number; name: string }
 }) => {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false)
   return (
-    <li className=" w-full max-w-full  xs:w-fit px-3 py-2 flex items-center gap-2   text-sm border rounded-lg">
+    <li className="flex w-full max-w-full items-center gap-2 rounded-lg border px-3 py-2 text-sm xs:w-fit">
       <TextInputSwitch
         item={item}
         ItemType={itemType}
         isLoading={loading}
         setLoading={setLoading}
       />
-      <div className=" flex items-center  gap-2">
+      <div className="flex items-center gap-2">
         {loading ? (
-          <Spinner className=" h-full ml-auto" size={10} />
+          <Spinner className="ml-auto h-full" size={10} />
         ) : (
           <DeleteBtn
             itemType={itemType}
@@ -55,8 +54,8 @@ const PillITem = ({
         )}
       </div>
     </li>
-  );
-};
+  )
+}
 
 function DeleteBtn({
   item,
@@ -65,16 +64,16 @@ function DeleteBtn({
   handleResetPage,
   itemType,
 }: {
-  itemType: ItemType;
-  handleResetPage: () => void;
-  isDeleting: boolean;
-  setIsDeleting: React.Dispatch<SetStateAction<boolean>>;
-  item: { id: number; name: string };
+  itemType: ItemType
+  handleResetPage: () => void
+  isDeleting: boolean
+  setIsDeleting: React.Dispatch<SetStateAction<boolean>>
+  item: { id: number; name: string }
 }) {
-  const { toast } = useToast();
+  const { toast } = useToast()
   // const { deleteCargeneration, isDeleting } = useDeleteCarGenerations();
 
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(false)
 
   const handleDelete = useCallback(async () => {
     try {
@@ -90,11 +89,11 @@ function DeleteBtn({
       // }
 
       if (itemType === "productBrand") {
-        const data = await deleteProductBrandAction(item.id);
-        if (data?.error) throw new Error(data.error);
+        const data = await deleteProductBrandAction(item.id)
+        if (data?.error) throw new Error(data.error)
       }
-      setOpen(false);
-      handleResetPage();
+      setOpen(false)
+      handleResetPage()
 
       toast({
         className: "bg-primary  text-primary-foreground",
@@ -105,44 +104,44 @@ function DeleteBtn({
               itemType === "category"
                 ? "Category"
                 : itemType === "productBrand"
-                ? "Product brand"
-                : "Product type"
+                  ? "Product brand"
+                  : "Product type"
             } has been deleted.`}
           />
         ),
-      });
+      })
     } catch (error: any) {
       toast({
         variant: "destructive",
         title: "Something went wrong.",
         description: <ErorrToastDescription error={error.message} />,
-      });
+      })
     } finally {
-      setIsDeleting(false);
+      setIsDeleting(false)
     }
-  }, [item]);
+  }, [item])
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <button className="  rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground  -mr-1">
+        <button className="-mr-1 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
           {isDeleting ? (
-            <Spinner className=" h-full" size={14} />
+            <Spinner className="h-full" size={14} />
           ) : (
             <Cross2Icon className="h-4 w-4" />
           )}
           {/* <span className="sr-only">Close</span> */}
         </button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px] border-none">
+      <DialogContent className="border-none sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>
             Delete{" "}
             {itemType === "category"
               ? "Category"
               : itemType === "productBrand"
-              ? "Product brand"
-              : "Product Type"}{" "}
+                ? "Product brand"
+                : "Product Type"}{" "}
             &apos;{item.name}&apos;
           </DialogTitle>
           <DialogDescription>
@@ -150,7 +149,7 @@ function DeleteBtn({
           </DialogDescription>
         </DialogHeader>
 
-        <DialogFooter className="   gap-2 sm:gap-0">
+        <DialogFooter className="gap-2 sm:gap-0">
           <DialogClose asChild>
             <Button size="sm" variant="secondary">
               Cancel
@@ -161,12 +160,12 @@ function DeleteBtn({
             size="sm"
             onClick={async () => handleDelete()}
           >
-            {isDeleting ? <Spinner className=" h-full" /> : "Confrim"}
+            {isDeleting ? <Spinner className="h-full" /> : "Confrim"}
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  );
+  )
 }
 
-export default PillITem;
+export default PillITem

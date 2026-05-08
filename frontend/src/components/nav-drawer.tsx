@@ -31,9 +31,10 @@ import { MdOutlineCarRepair } from "react-icons/md"
 import Spinner from "./Spinner"
 import { TbMessageReport } from "react-icons/tb"
 import { Link } from "react-router"
+import useCurrentUser from "@/features/users/useCurrentUser"
 const NavDrawer = () => {
   const [open, setOpen] = useState(false)
-  // const { user, isLoading } = useCurrUser();
+  const { user, isLoading } = useCurrentUser()
   const userBtns = (
     <>
       <div className="mx-auto my-3 h-[1px] w-[90%] bg-muted-foreground/55" />
@@ -72,7 +73,7 @@ const NavDrawer = () => {
       </Button>
     </>
   )
-  const isAdmin = true
+  const isAdmin = user?.role === "admin"
   //  user?.user_metadata.role.toLowerCase() === "admin";
   const adminBtn = isAdmin ? (
     <>
@@ -210,11 +211,11 @@ const NavDrawer = () => {
                 Products
               </Link>
             </Button>
-            {/* {isLoading ? (
-              <Spinner className=" static w-7 h-7 mx-auto" />
-            ) : !user ? null : ( */}
-            {adminBtn}
-            {/* )} */}
+            {isLoading ? (
+              <Spinner className="static mx-auto h-7 w-7" />
+            ) : !user ? null : (
+              adminBtn
+            )}
           </div>
 
           {/* <UserUi showName /> */}

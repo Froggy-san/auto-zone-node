@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react"
 import {
   Dialog,
   DialogContent,
@@ -6,106 +6,106 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { AnimatePresence } from "framer-motion";
-import ErrorMessage from "@components/error-message";
-import { Input } from "@components/ui/input";
+} from "@/components/ui/dialog"
+import { AnimatePresence } from "framer-motion"
+import ErrorMessage from "@components/error-message"
+import { Input } from "@components/ui/input"
 
-import { Textarea } from "@components/ui/textarea";
-import Spinner from "@components/Spinner";
-import { Button } from "@components/ui/button";
-import { RotateCcw } from "lucide-react";
-import useObjectCompare from "@hooks/use-compare-objs";
+import { Textarea } from "@components/ui/textarea"
+import Spinner from "@components/Spinner"
+import { Button } from "@components/ui/button"
+import { RotateCcw } from "lucide-react"
+import useObjectCompare from "@hooks/use-compare-objs"
 import {
   createTicketStatusAction,
   editTicketStatusAction,
-} from "@lib/actions/ticket-status-actions";
-import { useToast } from "@hooks/use-toast";
+} from "@lib/actions/ticket-status-actions"
+import { useToast } from "@hooks/use-toast"
 import SuccessToastDescription, {
   ErorrToastDescription,
-} from "@components/toast-items";
-import { cn } from "@lib/utils";
-import FormErrorMessage from "@components/form-error-message";
-import { TicketCategory } from "@lib/types";
+} from "@components/toast-items"
+import { cn } from "@lib/utils"
+import FormErrorMessage from "@components/form-error-message"
+import { TicketCategory } from "@lib/types"
 import {
   createTicketCategoryAction,
   editTicketCategoryAction,
-} from "@lib/actions/ticket-category-action";
+} from "@lib/actions/ticket-category-action"
 import {
   createTicketPriorityAction,
   editTicketPriorityAction,
-} from "@lib/actions/ticket-priority-action";
+} from "@lib/actions/ticket-priority-action"
 const TicketPriorityForm = ({
   ticketPriorityToEdit,
   showBtn = true,
   isOpen,
   setIsOpen,
 }: {
-  ticketPriorityToEdit?: TicketCategory;
-  showBtn?: boolean;
-  isOpen?: boolean;
-  setIsOpen?: (open: boolean) => void;
+  ticketPriorityToEdit?: TicketCategory
+  showBtn?: boolean
+  isOpen?: boolean
+  setIsOpen?: (open: boolean) => void
 }) => {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(false)
 
-  const [name, setName] = useState(ticketPriorityToEdit?.name || "");
-  const [categoryTitleError, setCategoryTitleError] = useState("");
+  const [name, setName] = useState(ticketPriorityToEdit?.name || "")
+  const [categoryTitleError, setCategoryTitleError] = useState("")
 
-  const [titleDirty, setTitleDirty] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [titleDirty, setTitleDirty] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
 
-  const { toast } = useToast();
+  const { toast } = useToast()
 
-  const diaOpen = isOpen !== undefined ? isOpen : open;
+  const diaOpen = isOpen !== undefined ? isOpen : open
 
   const defaultValues = {
     name: ticketPriorityToEdit?.name || "",
-  };
+  }
 
-  const isEqual = useObjectCompare(defaultValues, { name });
+  const isEqual = useObjectCompare(defaultValues, { name })
 
   const reset = useCallback(() => {
-    setName(defaultValues.name);
-    setCategoryTitleError("");
-    setTitleDirty(false);
-  }, [defaultValues]);
+    setName(defaultValues.name)
+    setCategoryTitleError("")
+    setTitleDirty(false)
+  }, [defaultValues])
 
   const handleClose = useCallback(() => {
-    setOpen(false);
-    setIsOpen?.(false);
+    setOpen(false)
+    setIsOpen?.(false)
     // reset();
-  }, [setOpen, setIsOpen]);
+  }, [setOpen, setIsOpen])
 
   const handleOpenChange = useCallback(() => {
-    setOpen((open) => !open);
-    setIsOpen?.(!diaOpen);
+    setOpen((open) => !open)
+    setIsOpen?.(!diaOpen)
     // reset();
-  }, [setOpen, setIsOpen]);
+  }, [setOpen, setIsOpen])
 
   useEffect(() => {
-    if (!titleDirty) return;
-    if (name.length <= 3) setCategoryTitleError("Status name is too short.");
-    if (name.length > 200) setCategoryTitleError("Status name is too long.");
-    if (name.length >= 3 && name.length < 200) setCategoryTitleError("");
-  }, [name]);
+    if (!titleDirty) return
+    if (name.length <= 3) setCategoryTitleError("Status name is too short.")
+    if (name.length > 200) setCategoryTitleError("Status name is too long.")
+    if (name.length >= 3 && name.length < 200) setCategoryTitleError("")
+  }, [name])
 
   useEffect(() => {
-    if (isLoading) return;
+    if (isLoading) return
 
-    reset();
-  }, [diaOpen]);
+    reset()
+  }, [diaOpen])
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    if (categoryTitleError) return;
+    e.preventDefault()
+    if (categoryTitleError) return
     try {
-      setIsLoading(true);
+      setIsLoading(true)
       if (ticketPriorityToEdit) {
         const { error } = await editTicketPriorityAction({
           id: ticketPriorityToEdit.id,
           name,
-        });
-        if (error) throw new Error(error);
+        })
+        if (error) throw new Error(error)
 
         toast({
           className: "bg-primary  text-primary-foreground",
@@ -113,10 +113,10 @@ const TicketPriorityForm = ({
           description: (
             <SuccessToastDescription message="Ticket priority has been updated." />
           ),
-        });
+        })
       } else {
-        const { error } = await createTicketPriorityAction({ name });
-        if (error) throw new Error(error);
+        const { error } = await createTicketPriorityAction({ name })
+        if (error) throw new Error(error)
 
         toast({
           className: "bg-primary  text-primary-foreground",
@@ -124,18 +124,18 @@ const TicketPriorityForm = ({
           description: (
             <SuccessToastDescription message="New ticket priority created." />
           ),
-        });
+        })
       }
 
-      handleClose();
+      handleClose()
     } catch (error: any) {
       toast({
         variant: "destructive",
         title: "Uh oh! Something went wrong.",
         description: <ErorrToastDescription error={error.message} />,
-      });
+      })
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
   }
 
@@ -143,7 +143,7 @@ const TicketPriorityForm = ({
     <Dialog open={diaOpen} onOpenChange={handleOpenChange}>
       {showBtn && (
         <DialogTrigger asChild>
-          <Button size="sm" className=" w-full">
+          <Button size="sm" className="w-full">
             {" "}
             Create New Ticket{" "}
           </Button>
@@ -159,13 +159,13 @@ const TicketPriorityForm = ({
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className=" space-y-5">
-          <div className=" space-y-2 w-full mb-auto">
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div className="mb-auto w-full space-y-2">
             <label
               htmlFor="name"
               className={cn(
-                categoryTitleError && "text-destructive ",
-                "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                categoryTitleError && "text-destructive",
+                "text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
               )}
             >
               Name
@@ -177,8 +177,8 @@ const TicketPriorityForm = ({
               placeholder="Status Name..."
               value={name}
               onChange={(e) => {
-                setTitleDirty(true);
-                setName(e.target.value);
+                setTitleDirty(true)
+                setName(e.target.value)
               }}
             />
 
@@ -192,15 +192,15 @@ const TicketPriorityForm = ({
             </AnimatePresence>
           </div>
 
-          <div className=" relative flex flex-col-reverse sm:flex-row items-center justify-end  gap-3">
+          <div className="relative flex flex-col-reverse items-center justify-end gap-3 sm:flex-row">
             <Button
               onClick={reset}
               disabled={isLoading}
               type="button"
-              className=" p-0 h-6 w-6  absolute left-5 bottom-0"
+              className="absolute bottom-0 left-5 h-6 w-6 p-0"
               variant="outline"
             >
-              <RotateCcw className=" w-4 h-4" />
+              <RotateCcw className="h-4 w-4" />
             </Button>
             <Button
               onClick={handleClose}
@@ -208,7 +208,7 @@ const TicketPriorityForm = ({
               type="reset"
               variant="secondary"
               size="sm"
-              className=" w-full sm:w-[unset]"
+              className="w-full sm:w-[unset]"
             >
               Cancel
             </Button>
@@ -216,10 +216,10 @@ const TicketPriorityForm = ({
               type="submit"
               size="sm"
               disabled={isLoading || isEqual || categoryTitleError.length > 1}
-              className=" w-full sm:w-[unset]"
+              className="w-full sm:w-[unset]"
             >
               {isLoading ? (
-                <Spinner className=" h-full" />
+                <Spinner className="h-full" />
               ) : ticketPriorityToEdit ? (
                 "Update"
               ) : (
@@ -230,7 +230,7 @@ const TicketPriorityForm = ({
         </form>
       </DialogContent>
     </Dialog>
-  );
-};
+  )
+}
 
-export default TicketPriorityForm;
+export default TicketPriorityForm

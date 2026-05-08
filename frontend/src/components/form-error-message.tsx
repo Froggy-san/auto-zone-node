@@ -1,13 +1,13 @@
-import React from "react";
-import { motion, MotionProps } from "framer-motion";
-import { cn } from "@lib/utils";
+import React from "react"
+import { motion, type MotionProps } from "framer-motion"
+import { cn } from "@/lib/utils"
 // Because 'HTMLParagraphElement' has some of the same properties of 'Motion Props' we are telling typescript to remove the samiliar types from one of them.
 type HTMLParagraphProps = Omit<
   React.HTMLAttributes<HTMLParagraphElement>,
   "onAnimationStart" | "onDrag" | "onDragEnd" | "onDragStart" | "style"
->;
+>
 interface ErrorMessageProps extends HTMLParagraphProps, MotionProps {
-  children: React.ReactNode;
+  children: React.ReactNode
 }
 const FormErrorMessage = React.forwardRef<
   HTMLParagraphElement,
@@ -37,9 +37,9 @@ const FormErrorMessage = React.forwardRef<
     >
       {children}
     </motion.p>
-  );
-});
+  )
+})
 
-FormErrorMessage.displayName = "FormErrorMessage"; // Optional: Helps with debugging in React DevTools
+FormErrorMessage.displayName = "FormErrorMessage" // Optional: Helps with debugging in React DevTools
 
-export default FormErrorMessage;
+export default FormErrorMessage

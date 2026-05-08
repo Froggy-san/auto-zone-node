@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { Button } from "@/components/ui/button";
+import React, { useEffect, useState } from "react"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
+import { z } from "zod"
+import { Button } from "@/components/ui/button"
 import {
   Form,
   FormControl,
@@ -11,16 +11,16 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { CarMaker, CarMakersData, CreateCarMakerScehma } from "@lib/types";
-import { Textarea } from "@components/ui/textarea";
+} from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
+import { CarMaker, CarMakersData, CreateCarMakerScehma } from "@lib/types"
+import { Textarea } from "@components/ui/textarea"
 
-import Spinner from "@components/Spinner";
-import { useToast } from "@hooks/use-toast";
+import Spinner from "@components/Spinner"
+import { useToast } from "@hooks/use-toast"
 import SuccessToastDescription, {
   ErorrToastDescription,
-} from "@components/toast-items";
+} from "@components/toast-items"
 
 import {
   Dialog,
@@ -28,58 +28,58 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { FileUploader } from "../../file-uploader";
+} from "@/components/ui/dialog"
+import { FileUploader } from "../../file-uploader"
 
-import useObjectCompare from "@hooks/use-compare-objs";
-import { useQueryClient } from "@tanstack/react-query";
-import { createCarMaker, editCarMaker } from "@lib/services/car-maker-services";
+import useObjectCompare from "@hooks/use-compare-objs"
+import { useQueryClient } from "@tanstack/react-query"
+import { createCarMaker, editCarMaker } from "@lib/services/car-maker-services"
 
 const CarkMakerForm = ({
   carMakerToEdit,
   showOpenButton = true,
   handleCloseEdit,
 }: {
-  carMakerToEdit?: CarMakersData;
-  showOpenButton?: boolean;
-  handleCloseEdit?: () => void;
+  carMakerToEdit?: CarMakersData
+  showOpenButton?: boolean
+  handleCloseEdit?: () => void
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
+  const [isOpen, setIsOpen] = useState(false)
+  const { toast } = useToast()
+  const queryClient = useQueryClient()
 
-  const open = carMakerToEdit ? true : isOpen;
+  const open = carMakerToEdit ? true : isOpen
   const defaultValues = {
     name: carMakerToEdit?.name || "",
     notes: carMakerToEdit?.notes || "",
     logo: [],
-  };
+  }
   const form = useForm<z.infer<typeof CreateCarMakerScehma>>({
     resolver: zodResolver(CreateCarMakerScehma),
     defaultValues,
-  });
+  })
 
-  const isEqual = useObjectCompare(form.getValues(), defaultValues);
+  const isEqual = useObjectCompare(form.getValues(), defaultValues)
 
   useEffect(() => {
-    const body = document.querySelector("body");
-    form.reset(defaultValues);
+    const body = document.querySelector("body")
+    form.reset(defaultValues)
 
     if (body) {
-      body.style.pointerEvents = "auto";
+      body.style.pointerEvents = "auto"
     }
     return () => {
-      if (body) body.style.pointerEvents = "auto";
-    };
-  }, [open]);
+      if (body) body.style.pointerEvents = "auto"
+    }
+  }, [open])
 
   function handleClose() {
     // form.reset(defaultValues);
-    handleCloseEdit?.();
-    setIsOpen(false);
+    handleCloseEdit?.()
+    setIsOpen(false)
   }
 
-  const isLoading = form.formState.isSubmitting;
+  const isLoading = form.formState.isSubmitting
 
   async function onSubmit({
     name,
@@ -87,7 +87,7 @@ const CarkMakerForm = ({
     logo,
   }: z.infer<typeof CreateCarMakerScehma>) {
     try {
-      if (isEqual) throw new Error("You haven't changed anything.");
+      if (isEqual) throw new Error("You haven't changed anything.")
       if (carMakerToEdit) {
         // const formData = new FormData();
         // formData.append("name", name);
@@ -101,10 +101,10 @@ const CarkMakerForm = ({
           name,
           notes,
           logo: carMakerToEdit.logo,
-        };
+        }
 
-        await editCarMaker({ carMakerToEdit: newCarMaker, newLogo: logo?.[0] });
-        queryClient.invalidateQueries({ queryKey: ["carMakers"] });
+        await editCarMaker({ carMakerToEdit: newCarMaker, newLogo: logo?.[0] })
+        queryClient.invalidateQueries({ queryKey: ["carMakers"] })
       } else {
         // const formData = new FormData();
         // formData.append("name", name);
@@ -113,42 +113,42 @@ const CarkMakerForm = ({
         // const res = await createCarMakerAction(formData);
         // if (res.error) throw new Error(res.error);
 
-        await createCarMaker({ name, notes, logo: logo?.[0] });
+        await createCarMaker({ name, notes, logo: logo?.[0] })
 
-        queryClient.invalidateQueries({ queryKey: ["carMakers"] });
+        queryClient.invalidateQueries({ queryKey: ["carMakers"] })
       }
-      handleClose();
+      handleClose()
       toast({
         className: "bg-primary  text-primary-foreground",
         title: "Success.",
         description: (
           <SuccessToastDescription message="Car maker has been created." />
         ),
-      });
-      setIsOpen(false);
+      })
+      setIsOpen(false)
     } catch (error: any) {
       toast({
         variant: "destructive",
         title: "Error",
         description: <ErorrToastDescription error={error.message} />,
-      });
+      })
     }
   }
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       {showOpenButton && (
-        <Button onClick={() => setIsOpen(true)} size="sm" className=" w-full">
+        <Button onClick={() => setIsOpen(true)} size="sm" className="w-full">
           Create car maker
         </Button>
       )}
 
-      <DialogContent className=" max-h-[65vh]   sm:max-h-[76vh]  overflow-y-auto max-w-[1000px] sm:p-14">
+      <DialogContent className="max-h-[65vh] max-w-[1000px] overflow-y-auto sm:max-h-[76vh] sm:p-14">
         <DialogHeader>
           <DialogTitle>Car makers</DialogTitle>
           <DialogDescription>Create a new car maker.</DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 ">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <FormField
               disabled={isLoading}
               control={form.control}
@@ -208,14 +208,14 @@ const CarkMakerForm = ({
               )}
             />
 
-            <div className=" flex flex-col-reverse sm:flex-row items-center justify-end  gap-3">
+            <div className="flex flex-col-reverse items-center justify-end gap-3 sm:flex-row">
               <Button
                 onClick={handleClose}
                 disabled={isLoading}
                 type="reset"
                 variant="secondary"
                 size="sm"
-                className=" w-full sm:w-[unset]"
+                className="w-full sm:w-[unset]"
               >
                 Cancel
               </Button>
@@ -223,10 +223,10 @@ const CarkMakerForm = ({
                 type="submit"
                 size="sm"
                 disabled={isLoading || isEqual}
-                className=" w-full sm:w-[unset]"
+                className="w-full sm:w-[unset]"
               >
                 {isLoading ? (
-                  <Spinner className=" h-full" />
+                  <Spinner className="h-full" />
                 ) : carMakerToEdit ? (
                   "Update"
                 ) : (
@@ -238,7 +238,7 @@ const CarkMakerForm = ({
         </Form>
       </DialogContent>
     </Dialog>
-  );
-};
+  )
+}
 
-export default CarkMakerForm;
+export default CarkMakerForm

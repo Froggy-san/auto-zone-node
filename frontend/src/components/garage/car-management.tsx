@@ -1,15 +1,8 @@
-import React from "react";
-import CarForm from "./car-form";
-import {
-  CarGeneration,
-  CarGenerationProps,
-  CarItem,
-  CarMaker,
-  CarMakersData,
-  CarModelProps,
-  ClientWithPhoneNumbers,
-} from "@lib/types";
-import { cn } from "@lib/utils";
+import React from "react"
+import CarForm from "./car-form"
+
+import { cn } from "@/lib/utils"
+import type { Car, CarMaker, User } from "@/types"
 
 const CarManagement = ({
   carToEdit,
@@ -17,16 +10,16 @@ const CarManagement = ({
   className,
   clients,
   // carGenerations,
-  carMakers,
+  // carMakers,
   clientId,
 }: {
-  useParams?: boolean;
-  carToEdit?: CarItem;
-  className?: string;
-  clientId?: number;
-  carMakers: CarMakersData[];
+  useParams?: boolean
+  carToEdit?: Car
+  className?: string
+  clientId?: number
+  // carMakers: CarMaker[]
   // carGenerations: CarGenerationProps[] | null;
-  clients?: ClientWithPhoneNumbers[] | null;
+  clients?: User[] | null
 }) => {
   // const [carInfos, clients] = await Promise.all([
   //   getAllCarsInfoAction(),
@@ -41,27 +34,27 @@ const CarManagement = ({
   return (
     <div
       className={cn(
-        "flex  flex-col   w-full gap-y-2 xs:flex-row xs:items-center justify-between rounded-lg border p-3 shadow-sm gap-x-7",
+        "flex w-full flex-col justify-between gap-x-7 gap-y-2 rounded-lg border p-3 shadow-sm xs:flex-row xs:items-center",
         className
       )}
     >
-      <div className="space-y-0.5   ">
-        <label className=" font-semibold">Cars</label>
-        <p className=" text-muted-foreground text-sm">
+      <div className="space-y-0.5">
+        <label className="font-semibold">Cars</label>
+        <p className="text-sm text-muted-foreground">
           {carToEdit ? "Edit car" : "Create a new car."}
         </p>
       </div>
-      <div className=" sm:pr-2">
+      <div className="sm:pr-2">
         <CarForm
           useParams={useParams}
           carToEdit={carToEdit}
-          carMakers={carMakers}
-          clientId={clientId}
+          // carMakers={carMakers}
+          // clientId={clientId}
           clients={clients || []}
         />
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default CarManagement;
+export default CarManagement

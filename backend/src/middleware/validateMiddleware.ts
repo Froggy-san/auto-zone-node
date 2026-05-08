@@ -7,8 +7,8 @@ import { ProductImage } from "../@types";
 export const validate =
   (schema: ZodTypeAny) =>
   async (req: Request, res: Response, next: NextFunction) => {
+    console.log(req.body, "BODDY");
     try {
-      console.log("PPPPPPPPPPPPPPPPPPPP");
       // 1. Capture the transformed data
       const parsedData = (await schema.parseAsync({
         body: req.body,
@@ -25,19 +25,17 @@ export const validate =
       // 1. Check if it's a Zod Error\
 
       // 3. Check if there are files to be deleted
-      console.log(req.body, "AYOOO BODY");
+
       if (req.file || req.files) {
-        console.log("AYOO FROM VALIDATION");
         const logo = (req.body.logo || "") as string;
+        const image = req.body.image || "";
         const productImages = (req.body.productImages || []) as ProductImage[];
 
-        const image = req.body.image || "";
+        const fileName = req.file ? req.file.originalname : "";
         const imagesToDelete = [
           ...productImages.map((img) => img.imageUrl),
-          logo,
-          image,
+          fileName,
         ].filter((item) => item);
-        console.log(imagesToDelete, "DELETE THIS");
 
         if (imagesToDelete.length) deleteFiles(imagesToDelete);
       }

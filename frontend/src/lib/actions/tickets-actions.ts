@@ -1,6 +1,6 @@
-"use server";
+"use server"
 
-import { PAGE_SIZE } from "@lib/constants";
+import { PAGE_SIZE } from "@lib/constants"
 import {
   CreateTicket,
   CreateTicketProps,
@@ -8,25 +8,25 @@ import {
   CreateTicketStatus,
   Ticket,
   TicketStatus,
-} from "@lib/types";
-import { PostgrestError, SupabaseClient } from "@supabase/supabase-js";
-import { createClient } from "@utils/supabase/server";
+} from "@lib/types"
+import { PostgrestError, SupabaseClient } from "@supabase/supabase-js"
+import { createClient } from "@utils/supabase/server"
 
-import { revalidateTag, unstable_cache } from "next/cache";
-import { z } from "zod";
+import { revalidateTag, unstable_cache } from "next/cache"
+import { z } from "zod"
 
 export async function revalidateTickets() {
-  revalidateTag("tickets");
+  revalidateTag("tickets")
 }
 
 interface GetTickets {
-  pageNumber: string;
-  sort?: string;
-  name?: string;
-  dateFrom?: string;
-  dateTo?: string;
-  status?: string;
-  clientId?: number;
+  pageNumber: string
+  sort?: string
+  name?: string
+  dateFrom?: string
+  dateTo?: string
+  status?: string
+  clientId?: number
 }
 
 async function getTickets(
@@ -41,46 +41,46 @@ async function getTickets(
   }: GetTickets,
   supabase: SupabaseClient
 ): Promise<{
-  tickets: Ticket[] | null;
-  count: number | null;
-  error: PostgrestError | null;
+  tickets: Ticket[] | null
+  count: number | null
+  error: PostgrestError | null
 }> {
-  const from = (Number(pageNumber) - 1) * PAGE_SIZE;
-  const to = from + PAGE_SIZE - 1;
-  const sortBy = sort ? sort === "asc" : false;
+  const from = (Number(pageNumber) - 1) * PAGE_SIZE
+  const to = from + PAGE_SIZE - 1
+  const sortBy = sort ? sort === "asc" : false
 
   let query = supabase
     .from("tickets")
     .select(
       "*,admin_assigned_to(*),client:client_id!inner(*),ticketStatus_id(*),ticketPriority_id(*),ticketCategory_id(*)",
       { count: "exact" }
-    );
+    )
 
-  if (name) query = query.ilike("client_id.name", `%${name}%`);
-  if (status) query = query.eq("ticketStatus_id", status);
-  if (dateFrom) query = query.gte("created_at", dateFrom);
-  if (dateTo) query = query.lte("created_at", dateTo);
-  if (clientId) query = query.eq("client_id", clientId);
+  if (name) query = query.ilike("client_id.name", `%${name}%`)
+  if (status) query = query.eq("ticketStatus_id", status)
+  if (dateFrom) query = query.gte("created_at", dateFrom)
+  if (dateTo) query = query.lte("created_at", dateTo)
+  if (clientId) query = query.eq("client_id", clientId)
 
   const {
     data: tickets,
     count,
     error,
-  } = await query.order("id", { ascending: sortBy }).range(from, to);
+  } = await query.order("id", { ascending: sortBy }).range(from, to)
 
-  return { tickets, count, error };
+  return { tickets, count, error }
 }
 
 export const getTicketsAction = unstable_cache(getTickets, ["tickets"], {
   tags: ["tickets"],
-});
+})
 interface TicketLogData {
-  ticket_id: number;
-  actor_id: number; // Assuming actor_id is a string/UUID based on previous discussion
-  action: string;
-  details: object;
-  message_id?: number | null;
-  created_at?: string; // We'll set this automatically
+  ticket_id: number
+  actor_id: number // Assuming actor_id is a string/UUID based on previous discussion
+  action: string
+  details: object
+  message_id?: number | null
+  created_at?: string // We'll set this automatically
 }
 export async function logTicketActions(
   supabase: SupabaseClient,
@@ -93,14 +93,14 @@ export async function logTicketActions(
   // }));
 
   // Perform a single bulk insert
-  const { error } = await supabase.from("ticketHistory").insert(logs);
+  const { error } = await supabase.from("ticketHistory").insert(logs)
 
   if (error) {
     // IMPORTANT: Only log the critical error. Do not throw, as the main ticket update succeeded.
     console.error(
       "CRITICAL HISTORY ERROR: Failed to bulk log ticket history:",
       error
-    );
+    )
     // You might integrate with a monitoring tool like Sentry here.
   }
 }
@@ -108,20 +108,20 @@ export async function createTicketAction(
   insert: z.infer<typeof CreateTicketSchema>
 ) {
   try {
-    const supabase = await createClient();
+    const supabase = await createClient()
     const { data: createdTicket, error } = await supabase
       .from("tickets")
       .insert(insert)
-      .select("*,ticketStatus_id(*)");
+      .select("*,ticketStatus_id(*)")
 
     if (error) {
-      throw new Error(error.message);
+      throw new Error(error.message)
     }
-    revalidateTag("tickets");
+    revalidateTag("tickets")
     if (!createdTicket || createdTicket.length === 0)
-      throw new Error("Could not create ticket");
-    console.log("Created Ticket:", createdTicket[0]);
-    console.log(createdTicket[0].ticketStatus_id, "AYYOO");
+      throw new Error("Could not create ticket")
+    console.log("Created Ticket:", createdTicket[0])
+    console.log(createdTicket[0].ticketStatus_id, "AYYOO")
     await logTicketActions(supabase, [
       {
         ticket_id: createdTicket[0].id,
@@ -138,48 +138,48 @@ export async function createTicketAction(
           ticket_cotent: insert.description,
         },
       },
-    ]);
+    ])
 
-    return { data: createdTicket, error: "" };
+    return { data: createdTicket, error: "" }
   } catch (error: any) {
-    return { data: null, error: error.message };
+    return { data: null, error: error.message }
   }
 }
 
 interface EditProps {
-  id: number;
-  subject?: string;
-  description?: string;
-  client_id?: number;
-  updated_at?: string;
-  admin_assigned_to?: string | null;
-  ticketStatus_id?: number;
-  ticketPriority_id?: number;
-  ticketCategory_id?: number;
+  id: number
+  subject?: string
+  description?: string
+  client_id?: number
+  updated_at?: string
+  admin_assigned_to?: string | null
+  ticketStatus_id?: number
+  ticketPriority_id?: number
+  ticketCategory_id?: number
 }
 export async function editTicketAction(data: EditProps) {
   try {
-    const supabase = await createClient();
+    const supabase = await createClient()
     const { error } = await supabase
       .from("tickets")
       .update(data)
-      .eq("id", data.id);
+      .eq("id", data.id)
 
-    if (error) throw new Error(error.message);
-    revalidateTag("tickets");
+    if (error) throw new Error(error.message)
+    revalidateTag("tickets")
 
-    return { error: "" };
+    return { error: "" }
   } catch (error: any) {
-    return { error: error.message };
+    return { error: error.message }
   }
 }
 
 export async function deleteTicketAction(id: number) {
-  const supabase = await createClient();
-  const { error } = await supabase.from("tickets").delete().eq("id", id);
+  const supabase = await createClient()
+  const { error } = await supabase.from("tickets").delete().eq("id", id)
 
-  if (error) return { error: error.message };
+  if (error) return { error: error.message }
 
-  revalidateTag("tickets");
-  return { error: "" };
+  revalidateTag("tickets")
+  return { error: "" }
 }

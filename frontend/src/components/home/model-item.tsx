@@ -1,16 +1,16 @@
-import { CarModelProps } from "@lib/types";
-import { cn } from "@lib/utils";
-import React from "react";
-import { motion } from "framer-motion";
+import { CarModelProps } from "@lib/types"
+import { cn } from "@lib/utils"
+import React from "react"
+import { motion } from "framer-motion"
 interface Model extends React.HTMLAttributes<HTMLLIElement> {
-  model: CarModelProps;
+  model: CarModelProps
 }
 
 const Model = ({ model, className, ...props }: Model) => {
   return (
     <li
       className={cn(
-        `relative w-[48%] h-fit  sm:w-fit px-3 py-2 flex flex-col  items-center    hover:bg-accent/30  transition-all duration-200  cursor-pointer  gap-2 text-sm border rounded-lg `,
+        `relative flex h-fit w-[48%] cursor-pointer flex-col items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-all duration-200 hover:bg-accent/30 sm:w-fit`,
         className
       )}
       {...props}
@@ -24,7 +24,7 @@ const Model = ({ model, className, ...props }: Model) => {
       ) : null}
       <p className="text-center font-semibold">{model.name}</p>
     </li>
-  );
-};
+  )
+}
 
-export default Model;
+export default Model

@@ -10,8 +10,6 @@ export interface Category {
   updatedAt: string
 }
 
-
-
-export interface categoryResult  extends Omit<Category, "productTypes"> {
+export interface categoryResult extends Omit<Category, "productTypes"> {
   products: Product[]
 }

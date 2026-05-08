@@ -1,5 +1,5 @@
-import * as React from "react";
-import { Label, Pie, PieChart, TooltipProps } from "recharts";
+import * as React from "react"
+import { Label, Pie, PieChart, TooltipProps } from "recharts"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -7,7 +7,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@/components/ui/dropdown-menu"
 import {
   Card,
   CardContent,
@@ -15,22 +15,22 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "@/components/ui/card"
 import {
   ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-} from "@/components/ui/chart";
-import { Service } from "@lib/types";
-import { formatCurrency } from "@lib/client-helpers";
-import { cn } from "@lib/utils";
-import { useRouter } from "next/navigation";
-import { useMediaQuery } from "@mui/material";
-import { Button } from "@components/ui/button";
-import { Check, Ellipsis } from "lucide-react";
-import { GiTumbleweed } from "react-icons/gi";
-import SoldMoreDetails from "./sold-more-details";
+} from "@/components/ui/chart"
+import { Service } from "@lib/types"
+import { formatCurrency } from "@lib/client-helpers"
+import { cn } from "@lib/utils"
+import { useRouter } from "next/navigation"
+import { useMediaQuery } from "@mui/material"
+import { Button } from "@components/ui/button"
+import { Check, Ellipsis } from "lucide-react"
+import { GiTumbleweed } from "react-icons/gi"
+import SoldMoreDetails from "./sold-more-details"
 
 const chartData = [
   { browser: "chrome", visitors: 275, fill: "var(--color-chrome)" },
@@ -38,7 +38,7 @@ const chartData = [
   { browser: "firefox", visitors: 287, fill: "var(--color-firefox)" },
   { browser: "edge", visitors: 173, fill: "var(--color-edge)" },
   { browser: "other", visitors: 190, fill: "var(--color-other)" },
-];
+]
 
 const chartConfig = {
   visitors: {
@@ -65,7 +65,7 @@ const chartConfig = {
     label: "Other",
     color: "hsl(var(--chart-5))",
   },
-} satisfies ChartConfig;
+} satisfies ChartConfig
 
 const colors = [
   "hsl(var(--chart-1))",
@@ -74,29 +74,29 @@ const colors = [
   "hsl(var(--chart-4))",
   "hsl(var(--chart-5))",
   "var(--dashboard-orange)",
-];
+]
 
 interface ProductPie {
-  id: number;
-  productName: string;
-  productImage: string;
-  pricePerUnit: number;
-  totalCount: number;
-  totalDiscount: number;
-  totalPriceAfterDiscount: number;
+  id: number
+  productName: string
+  productImage: string
+  pricePerUnit: number
+  totalCount: number
+  totalDiscount: number
+  totalPriceAfterDiscount: number
 }
 
 interface Props {
-  productsPieData: ProductPie[];
-  date: (string | Date | undefined)[];
-  description: string;
+  productsPieData: ProductPie[]
+  date: (string | Date | undefined)[]
+  description: string
 }
 export function SoldProductsPie({ productsPieData, date, description }: Props) {
   const [sortDataBy, setSortDataBy] = React.useState<
     "totalPriceAfterDiscount" | "totalCount"
-  >("totalCount");
-  const isBigScreen = useMediaQuery("(min-width: 768px)");
-  const router = useRouter();
+  >("totalCount")
+  const isBigScreen = useMediaQuery("(min-width: 768px)")
+  const router = useRouter()
   // const flatData = salesData.flat();
   // const products = flatData.map((item) => item.productsToSell).flat();
 
@@ -141,23 +141,23 @@ export function SoldProductsPie({ productsPieData, date, description }: Props) {
   const productsPie = productsPieData
     .sort((a, b) => b[sortDataBy] - a[sortDataBy])
     .map((item, index) => {
-      return { ...item, fill: colors[index] || "hsl(0deg 0% 50.2%)" };
-    });
+      return { ...item, fill: colors[index] || "hsl(0deg 0% 50.2%)" }
+    })
   // If there is more than 6 items we want to grop the rest into the others group.
   const productMoreThanSix = React.useMemo(() => {
     if (productsPie.length > 6) {
       const firstSix = productsPie.slice(0, 6).map((item, index) => {
-        return { ...item, fill: colors[index] };
-      });
-      const fromSix = productsPie.slice(6);
+        return { ...item, fill: colors[index] }
+      })
+      const fromSix = productsPie.slice(6)
 
       const theTotalsFromSix = fromSix.reduce(
         (acc, currItem) => {
-          acc.totalCount += currItem.totalCount;
-          acc.totalDiscount += currItem.totalDiscount;
-          acc.totalPriceAfterDiscount += currItem.totalPriceAfterDiscount;
+          acc.totalCount += currItem.totalCount
+          acc.totalDiscount += currItem.totalDiscount
+          acc.totalPriceAfterDiscount += currItem.totalPriceAfterDiscount
 
-          return acc;
+          return acc
         },
         {
           productName: "Other",
@@ -165,27 +165,27 @@ export function SoldProductsPie({ productsPieData, date, description }: Props) {
           totalCount: 0,
           totalDiscount: 0,
           totalPriceAfterDiscount: 0,
-        },
-      );
-      return [...firstSix, theTotalsFromSix];
-    } else return [];
-  }, [productsPie]);
+        }
+      )
+      return [...firstSix, theTotalsFromSix]
+    } else return []
+  }, [productsPie])
 
   const productsSoldData = productMoreThanSix.length
     ? productMoreThanSix
-    : productsPie;
+    : productsPie
 
   const finalTotals = React.useMemo(() => {
     return productsSoldData.reduce(
       (acc, curr) => {
-        acc.totalPriceAfterDiscount += curr.totalPriceAfterDiscount;
-        acc.totalCount += curr.totalCount;
+        acc.totalPriceAfterDiscount += curr.totalPriceAfterDiscount
+        acc.totalCount += curr.totalCount
 
-        return acc;
+        return acc
       },
-      { totalCount: 0, totalPriceAfterDiscount: 0 },
-    );
-  }, [productsSoldData]);
+      { totalCount: 0, totalPriceAfterDiscount: 0 }
+    )
+  }, [productsSoldData])
   // const config : any = {
   //   soldProducts: {
   //     label: "Sold Products",
@@ -202,41 +202,41 @@ export function SoldProductsPie({ productsPieData, date, description }: Props) {
   // });
 
   return (
-    <Card className="flex flex-col  w-full  relative  ">
+    <Card className="relative flex w-full flex-col">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
             disabled={!productsSoldData.length}
             variant="outline"
             size="icon"
-            className="absolute right-5 top-5  p-0 h-6 w-6"
+            className="absolute top-5 right-5 h-6 w-6 p-0"
           >
-            <Ellipsis className=" w-4 h-4" />
+            <Ellipsis className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className=" w-52">
+        <DropdownMenuContent className="w-52">
           <DropdownMenuLabel>Sort by</DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuItem
-            className=" justify-between"
+            className="justify-between"
             onClick={() => {
-              if (sortDataBy !== "totalCount") setSortDataBy("totalCount");
+              if (sortDataBy !== "totalCount") setSortDataBy("totalCount")
             }}
           >
             Total units sold
-            {sortDataBy === "totalCount" && <Check className=" w-3 h-3" />}
+            {sortDataBy === "totalCount" && <Check className="h-3 w-3" />}
           </DropdownMenuItem>
 
           <DropdownMenuItem
-            className=" justify-between"
+            className="justify-between"
             onClick={() => {
               if (sortDataBy !== "totalPriceAfterDiscount")
-                setSortDataBy("totalPriceAfterDiscount");
+                setSortDataBy("totalPriceAfterDiscount")
             }}
           >
             Total revenue generated
             {sortDataBy === "totalPriceAfterDiscount" && (
-              <Check className=" w-3 h-3" />
+              <Check className="h-3 w-3" />
             )}
           </DropdownMenuItem>
         </DropdownMenuContent>
@@ -249,8 +249,8 @@ export function SoldProductsPie({ productsPieData, date, description }: Props) {
       </CardHeader>
       <CardContent className="flex-1 pb-0">
         {!productsSoldData.length ? (
-          <div className="   flex   justify-center my-7 items-center gap-1 ">
-            No data <GiTumbleweed className=" w-4 h-4" />
+          <div className="my-7 flex items-center justify-center gap-1">
+            No data <GiTumbleweed className="h-4 w-4" />
           </div>
         ) : (
           <ChartContainer
@@ -261,10 +261,10 @@ export function SoldProductsPie({ productsPieData, date, description }: Props) {
               <ChartTooltip cursor={false} content={<ProductSoldTooltip />} />
               <Pie
                 onClick={(e) => {
-                  if (!isBigScreen) return;
-                  const data = e.payload;
+                  if (!isBigScreen) return
+                  const data = e.payload
 
-                  if (data.id) router.push(`products/${data.id}`);
+                  if (data.id) router.push(`products/${data.id}`)
                 }}
                 data={productsSoldData}
                 dataKey={sortDataBy}
@@ -297,7 +297,7 @@ export function SoldProductsPie({ productsPieData, date, description }: Props) {
                             {sortDataBy === "totalCount" ? "Units" : "EGP"}
                           </tspan>
                         </text>
-                      );
+                      )
                     }
                   }}
                 />
@@ -310,44 +310,44 @@ export function SoldProductsPie({ productsPieData, date, description }: Props) {
         {/* <div className="flex items-center gap-2 font-medium leading-none">
           Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
         </div> */}
-        <div className="leading-none text-muted-foreground text-center">
+        <div className="text-center leading-none text-muted-foreground">
           Showing total products sold {description}
         </div>
 
         <SoldMoreDetails products={productsPie} date={date} />
       </CardFooter>
     </Card>
-  );
+  )
 }
 
 interface ProductSoldPayload {
-  id: number;
-  productName?: string;
-  productImage: string | null;
-  pricePerUnit: number;
-  totalCount: number;
-  totalDiscount: number;
-  fill?: string;
-  totalPriceAfterDiscount: number;
-  [key: string]: any;
+  id: number
+  productName?: string
+  productImage: string | null
+  pricePerUnit: number
+  totalCount: number
+  totalDiscount: number
+  fill?: string
+  totalPriceAfterDiscount: number
+  [key: string]: any
 }
 interface ChartTooltipContentProps extends TooltipProps<number, string> {
-  payload?: { payload: ProductSoldPayload }[];
-  label?: string;
+  payload?: { payload: ProductSoldPayload }[]
+  label?: string
 }
 const ProductSoldTooltip: React.FC<ChartTooltipContentProps> = ({
   payload,
   label,
 }) => {
-  if (!payload || payload.length === 0) return null;
-  const data = payload[0].payload;
+  if (!payload || payload.length === 0) return null
+  const data = payload[0].payload
   return (
-    <div className=" grid min-w-[8rem] items-start gap-1.5 rounded-lg border border-border/50 bg-background px-2.5 py-1.5 text-xs shadow-xl">
+    <div className="grid min-w-[8rem] items-start gap-1.5 rounded-lg border border-border/50 bg-background px-2.5 py-1.5 text-xs shadow-xl">
       {" "}
-      <div className=" flex items-start  break-all gap-1">
+      <div className="flex items-start gap-1 break-all">
         <div
           className={cn(
-            `shrink-0 rounded-[2px] border-[--color-border]  mt-[3.2px] h-2.5 w-2.5`,
+            `mt-[3.2px] h-2.5 w-2.5 shrink-0 rounded-[2px] border-[--color-border]`
           )}
           style={{ backgroundColor: `${data.fill} ` }}
         />
@@ -358,58 +358,58 @@ const ProductSoldTooltip: React.FC<ChartTooltipContentProps> = ({
           <img
             src={data.productImage}
             alt="Product Image"
-            className=" w-6 h-6 rounded-sm  ml-auto object-cover"
+            className="ml-auto h-6 w-6 rounded-sm object-cover"
           />
         )}
       </div>{" "}
       {data.productName !== "Other" && (
         <div
           className={cn(
-            "flex flex-1 gap-1 justify-between leading-none items-center",
+            "flex flex-1 items-center justify-between gap-1 leading-none"
           )}
         >
           <div className="grid gap-1.5">
             <span className="text-muted-foreground">Price per unit:</span>
           </div>
 
-          <span className="font-mono font-medium tabular-nums text-foreground">
+          <span className="font-mono font-medium text-foreground tabular-nums">
             {formatCurrency(data.pricePerUnit)}
           </span>
         </div>
       )}
       <div
         className={cn(
-          "flex flex-1 gap-1 justify-between leading-none items-center",
+          "flex flex-1 items-center justify-between gap-1 leading-none"
         )}
       >
         <span className="text-muted-foreground">Total count:</span>
 
-        <span className="font-mono font-medium tabular-nums text-foreground">
+        <span className="font-mono font-medium text-foreground tabular-nums">
           {data.totalCount} units
         </span>
       </div>
       <div
         className={cn(
-          "flex flex-1 gap-1 justify-between leading-none items-center",
+          "flex flex-1 items-center justify-between gap-1 leading-none"
         )}
       >
         <span className="text-muted-foreground">Total Discount:</span>
 
-        <span className="font-mono font-medium tabular-nums text-foreground">
+        <span className="font-mono font-medium text-foreground tabular-nums">
           {formatCurrency(data.totalDiscount)}
         </span>
       </div>
       <div
         className={cn(
-          "flex flex-1 gap-1 justify-between leading-none items-center",
+          "flex flex-1 items-center justify-between gap-1 leading-none"
         )}
       >
         <span className="text-muted-foreground">Net:</span>
 
-        <span className="font-mono font-medium tabular-nums text-foreground">
+        <span className="font-mono font-medium text-foreground tabular-nums">
           {formatCurrency(data.totalPriceAfterDiscount)}
         </span>
       </div>
     </div>
-  );
-};
+  )
+}

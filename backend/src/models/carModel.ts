@@ -1,5 +1,6 @@
-import mongoose, { Schema, model, Document } from "mongoose";
+import mongoose, { Schema, model, Document, Query } from "mongoose";
 import { CarImage } from "../@types/cars";
+import { IUser } from "./userModel";
 
 const CarImageSchema = new Schema({
   imagePath: {
@@ -14,13 +15,15 @@ const CarImageSchema = new Schema({
 });
 
 export interface ICar extends Document {
+  id: string;
   plateNumber: string;
   chassisNumber: string;
   motorNumber: string;
   color?: string;
   odometer?: string; // Sticking to string as per your SQL 'character varying'
   notes?: string;
-  client: mongoose.Types.ObjectId;
+  user: mongoose.Types.ObjectId;
+  client?: IUser;
   carGeneration: mongoose.Types.ObjectId;
   mainImageName: string;
   carImages: CarImage[];
@@ -59,7 +62,7 @@ const carSchema = new Schema<ICar>(
       type: String,
       default: "",
     },
-    client: {
+    user: {
       type: Schema.Types.ObjectId,
       ref: "users",
       required: [true, "A car must belong to a client"],
@@ -75,7 +78,35 @@ const carSchema = new Schema<ICar>(
     },
     carImages: [CarImageSchema],
   },
-  { timestamps: true },
+  {
+    virtuals: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+    timestamps: true, // This automatically creates 'createdAt' and 'updatedAt'
+  },
 );
 
-export const CarModel = model<ICar>("Cars", carSchema);
+carSchema.pre(/^find/, function (this: Query<any, any>) {
+  this.populate([
+    {
+      path: "carGeneration",
+      // select: "name image"x, // 👈 Only get what you need for the UI
+      populate: {
+        path: "carModel",
+        model: "carModels",
+        // select: "name",
+        populate: {
+          path: "carMaker",
+          model: "carMakers",
+          // select: "name logo",
+        },
+      },
+    },
+    {
+      path: "user",
+      // select: "username picture", // 👈 Crucial: Don't fetch email/password here
+    },
+  ]);
+});
+
+export const CarModel = model<ICar>("cars", carSchema);

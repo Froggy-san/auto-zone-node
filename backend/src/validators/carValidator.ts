@@ -8,16 +8,19 @@ export const carImageSchema = z.object({
 
 export const createCarSchema = z.object({
   body: z.object({
-    plateNumber: z.string().min(3, "Invalid plate number"),
-    chassisNumber: z.string().min(5, "Chassis number is required"),
-    motorNumber: z.string().min(5, "Motor number is required"),
+    plateNumber: z
+      .string()
+      .min(3, "Invalid plate number")
+      .max(30, { message: "Plate number is too long." }),
+    chassisNumber: z.string(),
+    motorNumber: z.string(),
     color: z.string().optional(),
     odometer: z.string().optional(),
     notes: z.string().optional(),
-    carImages: z.array(carImageSchema),
+    carImages: z.array(carImageSchema).default([]),
     mainImageName: z.string().optional().default(""),
     // References
-    client: objectIdSchema,
+    user: objectIdSchema,
     carGeneration: objectIdSchema,
   }),
 });

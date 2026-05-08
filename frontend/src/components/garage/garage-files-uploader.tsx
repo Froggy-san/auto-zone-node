@@ -1,21 +1,27 @@
-import { Button } from "@components/ui/button";
-import { CarImage, FileWithPreview, ProductImage } from "@lib/types";
-import { cn } from "@lib/utils";
-import { ImageUp, X } from "lucide-react";
-import { AnimatePresence, motion } from "framer-motion";
-import React, { SetStateAction, useCallback, useEffect, useMemo } from "react";
-import { FileRejection, FileWithPath, useDropzone } from "react-dropzone";
-import ProgressBar from "@components/progress-bar";
+import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
+import { ImageUp, X } from "lucide-react"
+import { AnimatePresence, motion } from "framer-motion"
+
+import ProgressBar from "@/components/progress-bar"
+import { useCallback, useEffect, useMemo, type SetStateAction } from "react"
+import type { FileWithPreview } from "@/lib/types"
+import type { CarImage } from "@/types"
+import {
+  useDropzone,
+  type FileRejection,
+  type FileWithPath,
+} from "react-dropzone"
 
 interface MultiFileUploaderProps {
-  fieldChange: React.Dispatch<SetStateAction<File[]>>;
-  selectedFiles: FileWithPreview[];
-  mediaUrl?: CarImage[];
-  disabled?: boolean;
-  handleDeleteMedia: (image: CarImage) => void;
+  fieldChange: React.Dispatch<SetStateAction<File[]>>
+  selectedFiles: FileWithPreview[]
+  mediaUrl?: CarImage[]
+  disabled?: boolean
+  handleDeleteMedia: (image: CarImage) => void
 }
 
-const byteSize = 1048576;
+const byteSize = 1048576
 
 export function GarageFileUploader({
   selectedFiles,
@@ -26,46 +32,46 @@ export function GarageFileUploader({
 }: MultiFileUploaderProps) {
   const totalFileSizesMB = useMemo(() => {
     const totalSize = selectedFiles.reduce((acc, curr) => {
-      acc += curr.size;
+      acc += curr.size
 
-      return acc;
-    }, 0);
+      return acc
+    }, 0)
 
     // To convert the total size of the image files to megabytes, you'll need to divide the total size (which is usually in bytes) by 1,048,576 (since 1 megabyte is  1,048,576bytes).
-    return totalSize / byteSize;
-  }, [selectedFiles]);
+    return totalSize / byteSize
+  }, [selectedFiles])
 
   // Handle file drop
   const onDrop = useCallback(
     (acceptedFiles: FileWithPath[], rejectedFiles: FileRejection[]) => {
       const addedImages = acceptedFiles.map((file) =>
         Object.assign(file, { preview: URL.createObjectURL(file) })
-      );
+      )
 
-      fieldChange([...selectedFiles, ...addedImages]);
+      fieldChange([...selectedFiles, ...addedImages])
     },
     [fieldChange, selectedFiles]
-  );
+  )
 
   // Handle deletion of selected images
   function handleDeleteSelectedImages(viewedFile: FileWithPreview) {
-    URL.revokeObjectURL(viewedFile.preview); // Revoke the URL of the deleted file
-    const newArr = selectedFiles.filter((file) => file !== viewedFile);
-    fieldChange(newArr);
+    URL.revokeObjectURL(viewedFile.preview) // Revoke the URL of the deleted file
+    const newArr = selectedFiles.filter((file) => file !== viewedFile)
+    fieldChange(newArr)
   }
 
   // Cleanup object URLs on component unmount
   useEffect(() => {
     return () => {
-      selectedFiles.forEach((file) => URL.revokeObjectURL(file.preview));
-    };
-  }, []);
+      selectedFiles.forEach((file) => URL.revokeObjectURL(file.preview))
+    }
+  }, [])
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     disabled: disabled,
     accept: { "image/*": [] },
-  });
+  })
 
   return (
     <>
@@ -80,50 +86,50 @@ export function GarageFileUploader({
         {selectedFiles.length || mediaUrl?.length ? (
           <ul
             className={cn(
-              "flex flex-col sm:flex-row   sm:flex-wrap  max-h-[500px] w-full  overflow-y-auto  px-4 sm:px-0   gap-5",
+              "flex max-h-[500px] w-full flex-col gap-5 overflow-y-auto px-4 sm:flex-row sm:flex-wrap sm:px-0",
               {
                 "opacity-55": isDragActive,
               }
             )}
           >
             {mediaUrl?.map((media, i) => (
-              <li key={i} className="relative flex justify-center items-center">
+              <li key={i} className="relative flex items-center justify-center">
                 <Button
                   disabled={disabled}
                   type="button"
                   onClick={(e) => {
-                    e.stopPropagation();
-                    handleDeleteMedia(media);
+                    e.stopPropagation()
+                    handleDeleteMedia(media)
                     // handleDeleteSelectedImages(file);
                   }}
                   aria-label={`the remove button for the image number ${
                     i + 1
                   } and with the name of ${media}}`}
-                  className="absolute right-0 top-0 z-10 h-5 w-5 p-0"
+                  className="absolute top-0 right-0 z-10 h-5 w-5 p-0"
                 >
                   <X size={15} />
                 </Button>
                 <img
                   src={media.imagePath}
                   alt="Image selected"
-                  className=" max-h-[250px] sm:max-h-[120px]"
+                  className="max-h-[250px] sm:max-h-[120px]"
                 />
               </li>
             ))}
 
             {selectedFiles.map((file, i) => (
-              <li key={i} className="relative flex justify-center items-center">
+              <li key={i} className="relative flex items-center justify-center">
                 <Button
                   disabled={disabled}
                   type="button"
                   onClick={(e) => {
-                    e.stopPropagation();
-                    handleDeleteSelectedImages(file);
+                    e.stopPropagation()
+                    handleDeleteSelectedImages(file)
                   }}
                   aria-label={`the remove button for the image number ${
                     i + 1
                   } and with the name of ${file.name}`}
-                  className="absolute right-0 top-0 z-10 h-5 w-5 p-0"
+                  className="absolute top-0 right-0 z-10 h-5 w-5 p-0"
                 >
                   <X size={15} />
                 </Button>
@@ -141,14 +147,14 @@ export function GarageFileUploader({
             {isDragActive ? (
               <p>Drop the files here ...</p>
             ) : (
-              <div className="flex items-center justify-center gap-3 flex-col">
+              <div className="flex flex-col items-center justify-center gap-3">
                 <ImageUp size={40} />
-                <p className=" hidden sm:block">
+                <p className="hidden sm:block">
                   {" "}
                   Drag &apos;n&apos; drop some files here, or click to select
                   files
                 </p>
-                <p className="  sm:hidden">
+                <p className="sm:hidden">
                   {" "}
                   touch to upload files here, or click to select files
                 </p>
@@ -159,7 +165,7 @@ export function GarageFileUploader({
       </div>
       <div>
         {/* <progress value={70} max={100}></progress> */}
-        <div className="  font-semibold text-xs text-muted-foreground flex items-center justify-between">
+        <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground">
           <h3>Size</h3> <p>{totalFileSizesMB.toFixed(2)} MB</p>
         </div>
         <ProgressBar value={totalFileSizesMB} maxValue={4} />
@@ -178,7 +184,7 @@ export function GarageFileUploader({
                 type: "tween",
               }}
               className={cn(
-                `text-center mt-1 hidden text-destructive text-xs   `
+                `mt-1 hidden text-center text-xs text-destructive`
                 // { " opacity-100 block ": totalFileSizesMB > 4 }
               )}
             >
@@ -206,5 +212,5 @@ export function GarageFileUploader({
         </div> */}
       </div>
     </>
-  );
+  )
 }

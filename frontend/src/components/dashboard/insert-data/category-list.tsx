@@ -1,23 +1,23 @@
-import { CategoryProps } from "@lib/types";
-import React, { useState } from "react";
-import Category from "./categroy";
-import CategoryDetails from "./category-details";
-import CategroyForm from "./category-form";
-import { cn } from "@lib/utils";
+import { CategoryProps } from "@lib/types"
+import React, { useState } from "react"
+import Category from "./categroy"
+import CategoryDetails from "./category-details"
+import CategroyForm from "./category-form"
+import { cn } from "@lib/utils"
 interface Props {
-  className?: string;
-  categories: CategoryProps[];
+  className?: string
+  categories: CategoryProps[]
 }
 const CategoryList = ({ categories, className }: Props) => {
-  const [catToEdit, setCatToEdit] = useState<number | null>();
-  const [openDetails, setOpenDetails] = useState<number | null>();
-  const categoryToEdit = categories.find((cat) => cat.id === catToEdit);
-  const currCategory = categories.find((cat) => cat.id === openDetails);
+  const [catToEdit, setCatToEdit] = useState<number | null>()
+  const [openDetails, setOpenDetails] = useState<number | null>()
+  const categoryToEdit = categories.find((cat) => cat.id === catToEdit)
+  const currCategory = categories.find((cat) => cat.id === openDetails)
   return (
     <>
       <ul
         className={cn(
-          "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5  xl:grid-cols-7 gap-3  items-center",
+          "grid grid-cols-2 items-center gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7",
           className
         )}
       >
@@ -43,7 +43,7 @@ const CategoryList = ({ categories, className }: Props) => {
         categoryToEdit={categoryToEdit}
       />
     </>
-  );
-};
+  )
+}
 
-export default CategoryList;
+export default CategoryList

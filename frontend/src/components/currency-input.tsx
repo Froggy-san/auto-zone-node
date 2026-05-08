@@ -1,17 +1,17 @@
-import { cn } from "@lib/utils";
-import React, { useCallback, useEffect, useState } from "react";
+import { cn } from "@lib/utils"
+import React, { useCallback, useEffect, useState } from "react"
 import CurrencyInput, {
   CurrencyInputOnChangeValues,
-} from "react-currency-input-field";
+} from "react-currency-input-field"
 
 interface Props {
-  onChange?: React.Dispatch<React.SetStateAction<number>>;
-  className?: string;
+  onChange?: React.Dispatch<React.SetStateAction<number>>
+  className?: string
 }
 
 const CurrencyField = ({ onChange, className }: Props) => {
-  const [value, setValue] = useState("");
-  console.log("VALUE", value);
+  const [value, setValue] = useState("")
+  console.log("VALUE", value)
   const handleValueChange = useCallback(
     (
       formattedValue: string | undefined,
@@ -22,9 +22,9 @@ const CurrencyField = ({ onChange, className }: Props) => {
       // Option 1: If formattedValue is empty or contains only non-numeric chars (like prefix)
       // and values.value (the raw numeric string) is null/empty, then truly clear.
       if (!formattedValue || (values && !values.value)) {
-        setValue("");
-        onChange?.(0);
-        return; // Stop further processing
+        setValue("")
+        onChange?.(0)
+        return // Stop further processing
       }
 
       // Option 2 (More specific for your problem): If the raw numeric value is '0' or '0.00'
@@ -33,26 +33,26 @@ const CurrencyField = ({ onChange, className }: Props) => {
       if (values && values.value === "0") {
         // You might also check if the formattedValue is just the prefix + '0' or '0.00'
         const isJustZero =
-          formattedValue === "EGP 0" || formattedValue === "EGP 0.00"; // Adjust based on your actual prefix and decimal settings
+          formattedValue === "EGP 0" || formattedValue === "EGP 0.00" // Adjust based on your actual prefix and decimal settings
 
         if (isJustZero) {
-          setValue("");
-          onChange?.(0);
-          return;
+          setValue("")
+          onChange?.(0)
+          return
         }
       }
 
       // Default behavior: update states normally
-      setValue(formattedValue);
+      setValue(formattedValue)
       if (values) {
-        onChange?.(Number(values.value)); // Store the clean numeric string
+        onChange?.(Number(values.value)) // Store the clean numeric string
       }
     },
     [value, setValue, onChange]
-  );
+  )
   useEffect(() => {
-    setValue("");
-  }, []);
+    setValue("")
+  }, [])
 
   return (
     <CurrencyInput
@@ -67,7 +67,7 @@ const CurrencyField = ({ onChange, className }: Props) => {
       onValueChange={handleValueChange}
       className={cn("input-field", className)}
     />
-  );
-};
+  )
+}
 
-export default CurrencyField;
+export default CurrencyField

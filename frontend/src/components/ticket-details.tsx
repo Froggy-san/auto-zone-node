@@ -9,8 +9,8 @@ import {
   TicketPriority,
   TicketStatus as TicketStatusType,
   User,
-} from "@lib/types";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+} from "@lib/types"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import React, {
   useState,
   useRef,
@@ -18,54 +18,54 @@ import React, {
   useEffect,
   useOptimistic,
   useReducer,
-} from "react";
-import BackBtn from "./products/back-btn";
-import { cn } from "@lib/utils";
-import { Button } from "./ui/button";
-import useTicketById from "@lib/queries/tickets/useTicketById";
-import TicketTextField from "./ticket-text-field";
-import { ArrowLeft, MailSearch } from "lucide-react";
-import Spinner from "./Spinner";
-import useMessages from "@lib/queries/tickets/useMessages";
-import useCurrUser from "@lib/queries/useCurrUser";
-import ErrorMessage from "./error-message";
-import { format, formatDistance, formatDistanceToNow } from "date-fns";
-import TicketStatus from "./ticket-status";
-import useClientById from "@lib/queries/client/useClient";
-import TicketMessage from "./ticket-message";
-import { AnimatePresence } from "framer-motion";
-import { Switch } from "./ui/switch";
+} from "react"
+import BackBtn from "./products/back-btn"
+import { cn } from "@lib/utils"
+import { Button } from "./ui/button"
+import useTicketById from "@lib/queries/tickets/useTicketById"
+import TicketTextField from "./ticket-text-field"
+import { ArrowLeft, MailSearch } from "lucide-react"
+import Spinner from "./Spinner"
+import useMessages from "@lib/queries/tickets/useMessages"
+import useCurrUser from "@lib/queries/useCurrUser"
+import ErrorMessage from "./error-message"
+import { format, formatDistance, formatDistanceToNow } from "date-fns"
+import TicketStatus from "./ticket-status"
+import useClientById from "@lib/queries/client/useClient"
+import TicketMessage from "./ticket-message"
+import { AnimatePresence } from "framer-motion"
+import { Switch } from "./ui/switch"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "./ui/select";
-import { editTicket } from "@lib/services/ticket";
-import SuccessToastDescription, { ErorrToastDescription } from "./toast-items";
-import { useToast } from "@hooks/use-toast";
-import { useQueryClient } from "@tanstack/react-query";
-import { Action, TicketDetailStates } from "@lib/ticket-details-types";
-import useCreateMessage from "@lib/queries/tickets/useCreateMessage";
-import ShowTicketHistory from "./show-ticket-history";
-import { ActionBadge } from "./dashboard/tickets/action-badge";
-import { z } from "zod";
-import { useMediaQuery } from "@mui/material";
-type ActionType = z.infer<typeof TicketHistoryAction>;
+} from "./ui/select"
+import { editTicket } from "@lib/services/ticket"
+import SuccessToastDescription, { ErorrToastDescription } from "./toast-items"
+import { useToast } from "@hooks/use-toast"
+import { useQueryClient } from "@tanstack/react-query"
+import { Action, TicketDetailStates } from "@lib/ticket-details-types"
+import useCreateMessage from "@lib/queries/tickets/useCreateMessage"
+import ShowTicketHistory from "./show-ticket-history"
+import { ActionBadge } from "./dashboard/tickets/action-badge"
+import { z } from "zod"
+import { useMediaQuery } from "@mui/material"
+type ActionType = z.infer<typeof TicketHistoryAction>
 interface TicketDetailsProps {
-  ticket?: Ticket;
-  className?: string;
-  ticketPriorities: TicketPriority[];
-  ticketStatus: TicketStatusType[];
+  ticket?: Ticket
+  className?: string
+  ticketPriorities: TicketPriority[]
+  ticketStatus: TicketStatusType[]
 }
 
 // Define the threshold for closing (e.g., if dragged down 80 pixels)
 // Let's set the CLOSE_DRAG_THRESHOLD to a percentage of the travel distance (e.g., 50% of 90, which is 45)
-const CLOSE_DRAG_THRESHOLD = 40; // 45% is half the travel distance
-const OPEN_DRAG_THRESHOLD = 70;
-const CLOSED_POSITION = 100;
-const OPEN_POSITION = 0;
+const CLOSE_DRAG_THRESHOLD = 40 // 45% is half the travel distance
+const OPEN_DRAG_THRESHOLD = 70
+const CLOSED_POSITION = 100
+const OPEN_POSITION = 0
 const initalState = {
   positionY: CLOSED_POSITION,
   isDragging: false,
@@ -78,63 +78,63 @@ const initalState = {
   isLoading: false,
   statusId: undefined,
   failedMessages: [],
-};
+}
 
 function reducer(
   state: TicketDetailStates,
-  action: Action,
+  action: Action
 ): TicketDetailStates {
   switch (action.type) {
     case "position":
       // The old state destructuring used 'positionY' but the action type was 'position'.
       // Assuming 'position' sets the Y position.
-      return { ...state, positionY: action.payload };
+      return { ...state, positionY: action.payload }
 
     case "is-mounted":
-      return { ...state, isMounted: action.payload };
+      return { ...state, isMounted: action.payload }
 
     case "is-dragging":
       // In the original component, setIsDragging was called with a boolean argument.
       // I'll update the reducer to expect a boolean payload for clarity and consistency
       // with how it's used in the refactored component.
-      return { ...state, isDragging: action.payload };
+      return { ...state, isDragging: action.payload }
 
     case "set-is-internal-only": // Corresponds to setIsInternalOnly
-      return { ...state, isInternalOnly: action.payload };
+      return { ...state, isInternalOnly: action.payload }
 
     case "set-is-messages-only": // Corresponds to setIsMessagesOnly
-      return { ...state, isMessagesOnly: action.payload };
+      return { ...state, isMessagesOnly: action.payload }
 
     case "set-is-loading": // Corresponds to setIsLoading
-      return { ...state, isLoading: action.payload };
+      return { ...state, isLoading: action.payload }
     case "set-focused-message":
-      return { ...state, focusedMessage: action.payload };
+      return { ...state, focusedMessage: action.payload }
 
     case "set-is-history":
-      return { ...state, isHistory: action.payload };
+      return { ...state, isHistory: action.payload }
     case "set-status-id": // Corresponds to setStatusId
-      return { ...state, statusId: action.payload };
+      return { ...state, statusId: action.payload }
 
     case "set-selected-message-id": // Corresponds to setSelectedMessageId
-      return { ...state, selectedMessageId: action.payload };
+      return { ...state, selectedMessageId: action.payload }
     case "add-failed-message":
       return {
         ...state,
         failedMessages: [...state.failedMessages, action.payload],
-      };
+      }
 
     case "remove-failed-message":
       return {
         ...state,
         failedMessages: state.failedMessages.filter(
-          (failed) => failed.id !== action.payload.id,
+          (failed) => failed.id !== action.payload.id
         ),
-      };
+      }
     case "reset":
-      return initalState;
+      return initalState
 
     default:
-      return state;
+      return state
   }
 }
 const TicketDetails = ({
@@ -158,46 +158,46 @@ const TicketDetails = ({
       isMessagesOnly,
     },
     dispatch,
-  ] = useReducer(reducer, initalState);
+  ] = useReducer(reducer, initalState)
 
-  const queryClient = useQueryClient();
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const pathname = usePathname();
-  const params = new URLSearchParams(searchParams);
-  const { toast } = useToast();
+  const queryClient = useQueryClient()
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const pathname = usePathname()
+  const params = new URLSearchParams(searchParams)
+  const { toast } = useToast()
 
-  const open = searchParams.get("ticket") ?? undefined;
-  const messageId = searchParams.get("messageId") ?? undefined;
-  const details = searchParams.get("details") ?? false;
-  const isShowHistory = searchParams.get("showHistory") ?? false;
-  const containerRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLTextAreaElement>(null);
-  const startYRef = useRef(0);
-  const positionYRef = useRef(CLOSED_POSITION);
+  const open = searchParams.get("ticket") ?? undefined
+  const messageId = searchParams.get("messageId") ?? undefined
+  const details = searchParams.get("details") ?? false
+  const isShowHistory = searchParams.get("showHistory") ?? false
+  const containerRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLTextAreaElement>(null)
+  const startYRef = useRef(0)
+  const positionYRef = useRef(CLOSED_POSITION)
 
   // Get the Ticket's details.
   const {
     ticket: ticketData,
     error,
     isLoading: ticketByIdLoading,
-  } = useTicketById(open);
+  } = useTicketById(open)
 
   const {
     messages,
     error: messagesError,
     isMessagesLoading,
-  } = useMessages(open);
+  } = useMessages(open)
 
-  const ticketViewed = ticketData;
+  const ticketViewed = ticketData
 
   const currentStatus = ticketStatus.find(
-    (status) => status.id === ticketViewed?.ticketStatus_id.id,
-  );
+    (status) => status.id === ticketViewed?.ticketStatus_id.id
+  )
   // Get the currently logged in user.
-  const { user, isLoading: userLoading, error: userError } = useCurrUser();
+  const { user, isLoading: userLoading, error: userError } = useCurrUser()
 
-  const isAdmin = user?.user_metadata.role.toLowerCase() === "admin";
+  const isAdmin = user?.user_metadata.role.toLowerCase() === "admin"
   // Get the client that issued the ticket.
   const {
     clientById,
@@ -206,19 +206,19 @@ const TicketDetails = ({
   } = useClientById({
     id: user?.id || "",
     getBy: "user_id",
-  });
-  const isMessageAssigned = ticketData?.admin_assigned_to;
-  const allMessages = messages ? [...messages, ...failedMessages] : [];
-  let filteredMessages = allMessages;
+  })
+  const isMessageAssigned = ticketData?.admin_assigned_to
+  const allMessages = messages ? [...messages, ...failedMessages] : []
+  let filteredMessages = allMessages
 
   if (isInternalOnly)
     filteredMessages = allMessages?.filter(
-      (messages) => messages.is_internal_note,
-    );
+      (messages) => messages.is_internal_note
+    )
   if (isMessagesOnly || !isAdmin)
     filteredMessages = allMessages?.filter(
-      (messages) => !messages.is_internal_note,
-    );
+      (messages) => !messages.is_internal_note
+    )
 
   // useEffect(() => {
   //   async function ayoo() {
@@ -233,7 +233,7 @@ const TicketDetails = ({
     // ... (optimistic reducer logic remains the same) ...
     (
       currentOptimisticMessages: Message[],
-      action: OptimisticAction,
+      action: OptimisticAction
     ): Message[] => {
       switch (action.type) {
         case "add":
@@ -241,51 +241,51 @@ const TicketDetails = ({
           return [
             ...currentOptimisticMessages,
             { ...action.message, status: "pending" },
-          ];
+          ]
 
         case "fail":
           // Find the message by its temporary ID and mark it as failed
           return currentOptimisticMessages.map((msg) =>
             msg.id === action.tempId
               ? { ...msg, status: "failed", error: action.error }
-              : msg,
-          );
+              : msg
+          )
 
         case "succeed":
           return currentOptimisticMessages.filter(
-            (msg) => msg.id !== action.tempId,
-          );
+            (msg) => msg.id !== action.tempId
+          )
 
         case "remove":
           // Manually remove a failed message
           return currentOptimisticMessages.filter(
-            (msg) => msg.id !== action.tempId,
-          );
+            (msg) => msg.id !== action.tempId
+          )
 
         default:
-          return currentOptimisticMessages;
+          return currentOptimisticMessages
       }
-    },
-  );
+    }
+  )
 
   const selectedMessage = optimisticMessages?.find(
-    (message) => message.id === selectedMessageId,
-  );
+    (message) => message.id === selectedMessageId
+  )
   const loading =
     isLoading ||
     userLoading ||
     isMessagesLoading ||
     isClientLoading ||
-    ticketByIdLoading;
+    ticketByIdLoading
   const isError =
     !!messagesError?.message.length ||
     !!error?.message.length ||
-    !!clientError?.message.length;
+    !!clientError?.message.length
 
   useEffect(() => {
     if (messageId)
-      dispatch({ type: "set-focused-message", payload: Number(messageId) });
-  }, [messageId]);
+      dispatch({ type: "set-focused-message", payload: Number(messageId) })
+  }, [messageId])
 
   useEffect(() => {
     // Replaced setStatusId with dispatch
@@ -293,38 +293,38 @@ const TicketDetails = ({
       dispatch({
         type: "set-status-id",
         payload: ticketViewed.ticketStatus_id.id,
-      });
-      dispatch({ type: "is-mounted", payload: true });
+      })
+      dispatch({ type: "is-mounted", payload: true })
     }
-  }, [ticketViewed, dispatch]);
+  }, [ticketViewed, dispatch])
 
   useEffect(() => {
     // Replaced setPositionY with dispatch
     if (open) {
-      dispatch({ type: "position", payload: OPEN_POSITION });
+      dispatch({ type: "position", payload: OPEN_POSITION })
     } else {
-      dispatch({ type: "position", payload: CLOSED_POSITION });
-      dispatch({ type: "reset" });
+      dispatch({ type: "position", payload: CLOSED_POSITION })
+      dispatch({ type: "reset" })
     }
-  }, [open, dispatch]); // Added dispatch to dependency array
+  }, [open, dispatch]) // Added dispatch to dependency array
 
   const handleViewDetails = useCallback(
     (ticketId: number, messageId?: number) => {
-      const newSearchParams = new URLSearchParams(searchParams);
-      newSearchParams.set("ticket", String(ticketId));
-      if (messageId) newSearchParams.set("messageId", `${messageId}`);
+      const newSearchParams = new URLSearchParams(searchParams)
+      newSearchParams.set("ticket", String(ticketId))
+      if (messageId) newSearchParams.set("messageId", `${messageId}`)
       router.push(`${pathname}?${newSearchParams.toString()}`, {
         scroll: false,
-      });
+      })
     },
-    [router, searchParams, pathname],
-  );
+    [router, searchParams, pathname]
+  )
 
   const handleRemoveMessageId = useCallback(() => {
-    if (!messageId) return;
-    params.delete("messageId");
-    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
-  }, [router, pathname, params]);
+    if (!messageId) return
+    params.delete("messageId")
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false })
+  }, [router, pathname, params])
 
   const handleEditTicket = useCallback(
     async ({
@@ -332,19 +332,19 @@ const TicketDetails = ({
       message,
       updatedMessageMessage,
     }: {
-      ticketStatus_id?: number;
-      message?: Message;
-      updatedMessageMessage?: EditMessageProps;
+      ticketStatus_id?: number
+      message?: Message
+      updatedMessageMessage?: EditMessageProps
     }) => {
       try {
         if (!ticketViewed)
           throw new Error(
-            `The ticket data is incomplete please refresh the page.`,
-          );
+            `The ticket data is incomplete please refresh the page.`
+          )
         if (!user || !user)
           throw new Error(
-            `Unauthorized action, please make sure that you are logged in.`,
-          );
+            `Unauthorized action, please make sure that you are logged in.`
+          )
 
         // const previousStatus = ticketData[0].ticketStatus_id;
         // const isSameStatus = previousStatus.id === ticketStatus_id;
@@ -378,8 +378,8 @@ const TicketDetails = ({
         // if (!data.admin_assigned_to) data.admin_assigned_to = user.user.id;
 
         // Replaced setIsLoading(true) with dispatch
-        dispatch({ type: "set-is-loading", payload: true });
-        if (!clientById) throw new Error(`Incomplete data.`);
+        dispatch({ type: "set-is-loading", payload: true })
+        if (!clientById) throw new Error(`Incomplete data.`)
         await editTicket({
           message,
           messageToEdit: updatedMessageMessage,
@@ -393,12 +393,12 @@ const TicketDetails = ({
           currentClient: clientById,
           ticketStatuses: ticketStatus,
           ticketPriorities: ticketPriorities,
-        });
+        })
 
-        if (error) throw new Error(error.message);
+        if (error) throw new Error(error.message)
         queryClient.invalidateQueries({
           queryKey: ["ticketById", String(ticketViewed.id)],
-        });
+        })
         // toast({
         //   className: "bg-primary text-primary-foreground",
         //   title: `Done.`,
@@ -411,180 +411,180 @@ const TicketDetails = ({
           variant: "destructive",
           title: "Something went wrong.",
           description: <ErorrToastDescription error={error.message} />,
-        });
+        })
       } finally {
         // Replaced setIsLoading(false) with dispatch
-        dispatch({ type: "set-is-loading", payload: false });
+        dispatch({ type: "set-is-loading", payload: false })
       }
     },
     // statusId is now read from state, but its value is already in ticketStatus_id
     // for the editTicket call. The dependency array is fine.
-    [dispatch, statusId, ticketViewed, clientById, queryClient, toast, isAdmin], // Added dispatch, queryClient, toast
-  );
+    [dispatch, statusId, ticketViewed, clientById, queryClient, toast, isAdmin] // Added dispatch, queryClient, toast
+  )
 
   // 1. handleMouseMove (Corrected)
   const handleMouseMove = useCallback(
     (e: MouseEvent) => {
-      if (!startYRef.current) return;
+      if (!startYRef.current) return
 
-      const deltaY = e.clientY - startYRef.current;
+      const deltaY = e.clientY - startYRef.current
 
       // 1. Get the last position from the Ref (the last dispatched state value)
-      const currentPrevY = positionYRef.current;
+      const currentPrevY = positionYRef.current
 
-      const newPosition = currentPrevY + (deltaY / window.innerHeight) * 100;
+      const newPosition = currentPrevY + (deltaY / window.innerHeight) * 100
       const clampedPosition = Math.max(
         OPEN_POSITION,
-        Math.min(CLOSED_POSITION, newPosition),
-      );
+        Math.min(CLOSED_POSITION, newPosition)
+      )
 
       // 2. Update the ref for the next move and for handleMouseUp
-      positionYRef.current = clampedPosition;
+      positionYRef.current = clampedPosition
 
       // 3. Dispatch the calculated position (Action object)
-      dispatch({ type: "position", payload: clampedPosition });
+      dispatch({ type: "position", payload: clampedPosition })
 
       // 4. Update startYRef for the next delta calculation
-      startYRef.current = e.clientY;
+      startYRef.current = e.clientY
     },
-    [dispatch],
-  ); // dispatch is stable, but included for completeness
+    [dispatch]
+  ) // dispatch is stable, but included for completeness
   // 2. handleMouseUp: Handles the snap decision and cleanup
   const handleMouseUp = useCallback(() => {
     // Replaced setIsDragging(false) with dispatch
-    dispatch({ type: "is-dragging", payload: false });
+    dispatch({ type: "is-dragging", payload: false })
 
     // Cleanup: Remove the global listeners
-    window.removeEventListener("mousemove", handleMouseMove);
-    window.removeEventListener("mouseup", handleMouseUp);
+    window.removeEventListener("mousemove", handleMouseMove)
+    window.removeEventListener("mouseup", handleMouseUp)
 
     // 💡 FIX: Read the final position from the Ref instead of the stale state value
-    const finalPositionY = positionYRef.current;
+    const finalPositionY = positionYRef.current
 
     // Re-evaluate the snap decision using the actual final position
     if (finalPositionY > CLOSE_DRAG_THRESHOLD) {
       // It was dragged past the threshold, snap closed.
 
       // Replaced setPositionY(CLOSED_POSITION) with dispatch
-      dispatch({ type: "position", payload: CLOSED_POSITION });
+      dispatch({ type: "position", payload: CLOSED_POSITION })
 
       setTimeout(() => {
-        params.delete("ticket");
-        router.push(`${pathname}?${params.toString()}`, { scroll: false });
-      }, 500);
+        params.delete("ticket")
+        router.push(`${pathname}?${params.toString()}`, { scroll: false })
+      }, 500)
     } else {
       // It was NOT dragged past the threshold, snap open.
       // Replaced setPositionY(OPEN_POSITION) with dispatch
-      dispatch({ type: "position", payload: OPEN_POSITION });
+      dispatch({ type: "position", payload: OPEN_POSITION })
     }
 
-    startYRef.current = 0;
-  }, [handleMouseMove, router, pathname, params, dispatch]); // Added dispatch
+    startYRef.current = 0
+  }, [handleMouseMove, router, pathname, params, dispatch]) // Added dispatch
 
   // 3. handleMouseDown: Starts the drag and attaches global listeners
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     // 1. Set isDragging state
-    dispatch({ type: "is-dragging", payload: true });
+    dispatch({ type: "is-dragging", payload: true })
 
     // 2. Set the starting point
-    startYRef.current = e.clientY;
+    startYRef.current = e.clientY
 
     // 3. Critically, set positionYRef to the current visual position
     // This ensures handleMouseMove starts calculation from the current visual point,
     // preventing a jump to CLOSED_POSITION if the state update lagged.
-    positionYRef.current = positionY;
+    positionYRef.current = positionY
 
     // Attach listeners to the global window
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("mouseup", handleMouseUp);
+    window.addEventListener("mousemove", handleMouseMove)
+    window.addEventListener("mouseup", handleMouseUp)
 
-    e.preventDefault();
-  };
+    e.preventDefault()
+  }
 
   // 1. handleTouchMove (Corrected)
   const handleTouchMove = useCallback(
     (e: TouchEvent) => {
-      if (!startYRef.current || e.touches.length === 0) return;
+      if (!startYRef.current || e.touches.length === 0) return
       // Prevent the browser from scrolling the background or refreshing
       if (e.cancelable) {
-        e.preventDefault();
+        e.preventDefault()
       }
-      const currentY = e.touches[0].clientY;
-      const deltaY = currentY - startYRef.current;
+      const currentY = e.touches[0].clientY
+      const deltaY = currentY - startYRef.current
 
       // 1. Get the last position from the Ref
-      const currentPrevY = positionYRef.current;
+      const currentPrevY = positionYRef.current
 
-      const newPosition = currentPrevY + (deltaY / window.innerHeight) * 100;
+      const newPosition = currentPrevY + (deltaY / window.innerHeight) * 100
       const clampedPosition = Math.max(
         OPEN_POSITION,
-        Math.min(CLOSED_POSITION, newPosition),
-      );
+        Math.min(CLOSED_POSITION, newPosition)
+      )
 
       // 2. Update the ref for handleTouchEnd
-      positionYRef.current = clampedPosition;
+      positionYRef.current = clampedPosition
 
       // 3. Dispatch the calculated position (Action object)
-      dispatch({ type: "position", payload: clampedPosition });
+      dispatch({ type: "position", payload: clampedPosition })
 
       // 4. Update the startYRef for the next move calculation
-      startYRef.current = currentY;
+      startYRef.current = currentY
     },
-    [dispatch],
-  );
+    [dispatch]
+  )
 
   // 2. handleTouchEnd: Handles the snap decision and cleanup
   const handleTouchEnd = useCallback(() => {
     // Replaced setIsDragging(false) with dispatch
-    dispatch({ type: "is-dragging", payload: false });
+    dispatch({ type: "is-dragging", payload: false })
 
     // Cleanup: Remove the global listeners
-    window.removeEventListener("touchmove", handleTouchMove);
-    window.removeEventListener("touchend", handleTouchEnd);
+    window.removeEventListener("touchmove", handleTouchMove)
+    window.removeEventListener("touchend", handleTouchEnd)
 
     // 💡 Read the final position from the Ref instead of the stale state value
-    const finalPositionY = positionYRef.current;
+    const finalPositionY = positionYRef.current
 
     // Re-evaluate the snap decision using the actual final position
     if (finalPositionY > CLOSE_DRAG_THRESHOLD) {
       // It was dragged past the threshold, snap closed.
       // Replaced setPositionY(CLOSED_POSITION) with dispatch
-      dispatch({ type: "position", payload: CLOSED_POSITION });
+      dispatch({ type: "position", payload: CLOSED_POSITION })
 
       // Perform navigation/param cleanup after a delay (matching handleMouseUp)
       setTimeout(() => {
-        params.delete("ticket");
-        router.push(`${pathname}?${params.toString()}`, { scroll: false });
-      }, 500);
+        params.delete("ticket")
+        router.push(`${pathname}?${params.toString()}`, { scroll: false })
+      }, 500)
     } else {
       // It was NOT dragged past the threshold, snap open.
       // Replaced setPositionY(OPEN_POSITION) with dispatch
-      dispatch({ type: "position", payload: OPEN_POSITION });
+      dispatch({ type: "position", payload: OPEN_POSITION })
     }
 
-    startYRef.current = 0;
-  }, [handleTouchMove, router, pathname, params, dispatch]); // Added dispatch
+    startYRef.current = 0
+  }, [handleTouchMove, router, pathname, params, dispatch]) // Added dispatch
 
   // 3. handleTouchStart: Starts the drag and attaches global listeners
   const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
-    if (e.touches.length === 0) return;
+    if (e.touches.length === 0) return
 
     // 1. Set isDragging state
-    dispatch({ type: "is-dragging", payload: true });
+    dispatch({ type: "is-dragging", payload: true })
 
     // 2. Set the starting point
-    startYRef.current = e.touches[0].clientY;
+    startYRef.current = e.touches[0].clientY
 
     // 3. Set positionYRef to the current visual position
-    positionYRef.current = positionY;
+    positionYRef.current = positionY
 
     // Attach listeners to the global window
-    window.addEventListener("touchmove", handleTouchMove, { passive: false });
-    window.addEventListener("touchend", handleTouchEnd);
+    window.addEventListener("touchmove", handleTouchMove, { passive: false })
+    window.addEventListener("touchend", handleTouchEnd)
 
     // Optional: Add e.preventDefault() here if vertical scrolling is an issue during drag start
     // e.preventDefault();
-  };
+  }
 
   const handleScrollContainer = useCallback(() => {
     setTimeout(() => {
@@ -592,41 +592,41 @@ const TicketDetails = ({
         containerRef.current.scrollTo({
           top: containerRef.current.scrollHeight,
           behavior: "smooth",
-        });
+        })
       }
 
       if (inputRef.current) {
-        const inputElement = inputRef.current;
-        inputElement.focus();
+        const inputElement = inputRef.current
+        inputElement.focus()
 
         // FIX: Set cursor to the end
-        const textLength = inputElement.value.length;
-        inputElement.setSelectionRange(textLength, textLength);
+        const textLength = inputElement.value.length
+        inputElement.setSelectionRange(textLength, textLength)
       }
-    }, 220);
-  }, [containerRef, inputRef]); // Add refs as dependencies if they can change
+    }, 220)
+  }, [containerRef, inputRef]) // Add refs as dependencies if they can change
 
   useEffect(() => {
-    if (selectedMessage) handleScrollContainer();
-  }, [selectedMessage, handleScrollContainer]);
+    if (selectedMessage) handleScrollContainer()
+  }, [selectedMessage, handleScrollContainer])
 
   const handleOpen = useCallback(
     (open: boolean) => {
-      dispatch({ type: "set-is-history", payload: open });
+      dispatch({ type: "set-is-history", payload: open })
     },
-    [dispatch],
-  );
+    [dispatch]
+  )
   // Replaced openDrawer with dispatch
   const openDrawer = () =>
-    dispatch({ type: "position", payload: OPEN_POSITION });
+    dispatch({ type: "position", payload: OPEN_POSITION })
 
   return (
     <div
       ref={containerRef}
       className={cn(
-        "w-full h-full overflow-y-auto  fixed left-0 top-0 transition-all ease-out duration-700 bg-background sm:border overflow-x-hidden  z-50  overscroll-contain ",
+        "fixed top-0 left-0 z-50 h-full w-full overflow-x-hidden overflow-y-auto overscroll-contain bg-background transition-all duration-700 ease-out sm:border",
         { "overflow-hidden": isDragging },
-        className,
+        className
       )}
       style={{
         transform: `translateY(${positionY}%)`,
@@ -637,14 +637,14 @@ const TicketDetails = ({
     >
       <div
         className={cn(
-          "h-10 w-full flex justify-center items-center cursor-grab  touch-none",
-          isDragging ? "cursor-grabbing" : "cursor-grab",
+          "flex h-10 w-full cursor-grab touch-none items-center justify-center",
+          isDragging ? "cursor-grabbing" : "cursor-grab"
         )}
         onTouchStart={handleTouchStart}
         onMouseDown={handleMouseDown}
         onDragStart={(e) => e.preventDefault()}
       >
-        <div className="w-10 h-1 bg-gray-300 rounded-full" />
+        <div className="h-1 w-10 rounded-full bg-gray-300" />
       </div>
 
       <Button
@@ -652,14 +652,14 @@ const TicketDetails = ({
         size="sm"
         onClick={(e) => {
           // Replaced setPositionY(CLOSED_POSITION) with dispatch
-          dispatch({ type: "position", payload: CLOSED_POSITION });
+          dispatch({ type: "position", payload: CLOSED_POSITION })
           setTimeout(() => {
-            router.back();
-          }, 700);
+            router.back()
+          }, 700)
         }}
-        className={cn(" ml-4 group")}
+        className={cn("group ml-4")}
       >
-        <ArrowLeft className=" icon w-4 h-4 sm:w-6 sm:h-6 group-hover:-translate-x-1 transition-all" />
+        <ArrowLeft className="icon h-4 w-4 transition-all group-hover:-translate-x-1 sm:h-6 sm:w-6" />
       </Button>
 
       {/* {open && isLoading && <Spinner size={30} />} */}
@@ -668,21 +668,21 @@ const TicketDetails = ({
       ) : isError ? (
         <>
           {error && (
-            <p className=" text-lg text-muted-foreground w-full text-center">
+            <p className="w-full text-center text-lg text-muted-foreground">
               {error.message}
             </p>
           )}
           {messagesError && (
             <ErrorMessage>
               {" "}
-              <p className=" text-center">{messagesError.message}</p>
+              <p className="text-center">{messagesError.message}</p>
             </ErrorMessage>
           )}
 
           {clientError && (
             <ErrorMessage>
               {" "}
-              <p className=" text-center">{clientError.message}</p>
+              <p className="text-center">{clientError.message}</p>
             </ErrorMessage>
           )}
         </>
@@ -697,38 +697,38 @@ const TicketDetails = ({
           </div>
 
           {/*          */}
-          <div className=" flex  flex-col md:flex-row mt-14">
+          <div className="mt-14 flex flex-col md:flex-row">
             <main
               className={cn(
-                " flex flex-col   sm:flex-row  flex-1  max-w-[1000px] mx-auto gap-10  px-4 md:px-10  ",
-                { " md:flex-col lg:flex-row": isHistory },
+                "mx-auto flex max-w-[1000px] flex-1 flex-col gap-10 px-4 sm:flex-row md:px-10",
+                { "md:flex-col lg:flex-row": isHistory }
               )}
             >
               <div>
-                <div className=" sm:sticky top-5">
-                  <div className=" space-y-6 mb-20 text-sm">
-                    <div className=" space-y-2">
-                      <p className=" text-muted-foreground ">TICKET ID</p>
-                      <p className=" font-semibold">#{ticketViewed?.id}</p>
+                <div className="top-5 sm:sticky">
+                  <div className="mb-20 space-y-6 text-sm">
+                    <div className="space-y-2">
+                      <p className="text-muted-foreground">TICKET ID</p>
+                      <p className="font-semibold">#{ticketViewed?.id}</p>
                     </div>
 
-                    <div className=" space-y-2">
-                      <p className=" text-muted-foreground">CREATED AT</p>
-                      <p className=" font-semibold">
+                    <div className="space-y-2">
+                      <p className="text-muted-foreground">CREATED AT</p>
+                      <p className="font-semibold">
                         {" "}
                         {ticketViewed &&
                           format(
                             ticketViewed.created_at,
-                            "MMMM d, yyyy h:mm aa",
+                            "MMMM d, yyyy h:mm aa"
                           )}
                       </p>
                     </div>
 
-                    <div className=" space-y-2">
-                      <p className=" text-muted-foreground text-nowrap">
+                    <div className="space-y-2">
+                      <p className="text-nowrap text-muted-foreground">
                         LAST ACTIVITY
                       </p>
-                      <p className=" font-semibold">
+                      <p className="font-semibold">
                         {" "}
                         {ticketViewed &&
                           formatDistanceToNow(ticketViewed.updated_at) + ` ago`}
@@ -737,14 +737,14 @@ const TicketDetails = ({
                     {isAdmin && ticketData && (
                       <>
                         {ticketData.firstResponseTime && (
-                          <div className=" space-y-2">
-                            <p className=" text-muted-foreground text-nowrap">
+                          <div className="space-y-2">
+                            <p className="text-nowrap text-muted-foreground">
                               FIRST RESPONSE TIME
                             </p>
-                            <p className=" font-semibold">
+                            <p className="font-semibold">
                               {format(
                                 ticketData.firstResponseTime,
-                                "MMMM d, yyyy h:mm aa",
+                                "MMMM d, yyyy h:mm aa"
                               )}
                               {/* {ticketData &&
                               formatDistance(
@@ -756,15 +756,15 @@ const TicketDetails = ({
                         )}
 
                         {ticketData.resolveTime && (
-                          <div className=" space-y-2">
-                            <p className=" text-muted-foreground text-nowrap">
+                          <div className="space-y-2">
+                            <p className="text-nowrap text-muted-foreground">
                               RESOLVED AT
                             </p>
-                            <p className=" font-semibold text-primary">
+                            <p className="font-semibold text-primary">
                               {" "}
                               {format(
                                 ticketData.resolveTime,
-                                "MMMM d, yyyy h:mm aa",
+                                "MMMM d, yyyy h:mm aa"
                               )}
                               {/* {ticketData &&
                               formatDistance(
@@ -777,8 +777,8 @@ const TicketDetails = ({
                       </>
                     )}
 
-                    <div className=" space-y-2">
-                      <p className=" text-muted-foreground">STATUS</p>
+                    <div className="space-y-2">
+                      <p className="text-muted-foreground">STATUS</p>
                       <p className=" ">
                         {ticketData && (
                           <TicketStatus
@@ -789,8 +789,8 @@ const TicketDetails = ({
                     </div>
                   </div>
                   {isAdmin && (
-                    <div className=" p-3 space-y-6 rounded-xl bg-accent/30 ">
-                      <div className=" flex gap-2">
+                    <div className="space-y-6 rounded-xl bg-accent/30 p-3">
+                      <div className="flex gap-2">
                         <Switch
                           id="is-internal-only"
                           checked={isInternalOnly}
@@ -799,22 +799,22 @@ const TicketDetails = ({
                             dispatch({
                               type: "set-is-internal-only",
                               payload: value,
-                            });
+                            })
                             // Replaced setIsMessagesOnly(false) with dispatch
                             dispatch({
                               type: "set-is-messages-only",
                               payload: false,
-                            });
+                            })
                           }}
                         />{" "}
                         <label
                           htmlFor="is-internal-only"
-                          className=" text-xs text-muted-foreground "
+                          className="text-xs text-muted-foreground"
                         >
                           Internal messages only
                         </label>
                       </div>
-                      <div className=" flex gap-2">
+                      <div className="flex gap-2">
                         <Switch
                           id="is-visible-only"
                           checked={isMessagesOnly}
@@ -823,17 +823,17 @@ const TicketDetails = ({
                             dispatch({
                               type: "set-is-messages-only",
                               payload: value,
-                            });
+                            })
                             // Replaced setIsInternalOnly(false) with dispatch
                             dispatch({
                               type: "set-is-internal-only",
                               payload: false,
-                            });
+                            })
                           }}
                         />{" "}
                         <label
                           htmlFor="is-visible-only"
-                          className=" text-xs text-muted-foreground "
+                          className="text-xs text-muted-foreground"
                         >
                           Visible messages only
                         </label>
@@ -848,13 +848,13 @@ const TicketDetails = ({
                           dispatch({
                             type: "set-status-id",
                             payload: Number(value),
-                          });
+                          })
                           await handleEditTicket({
                             ticketStatus_id: Number(value),
-                          });
+                          })
                         }}
                       >
-                        <SelectTrigger className="w-full h-fit gap-2">
+                        <SelectTrigger className="h-fit w-full gap-2">
                           <SelectValue placeholder="Ticket Status" />
                         </SelectTrigger>
                         <SelectContent>
@@ -871,7 +871,7 @@ const TicketDetails = ({
                               </SelectItem>
                             ))
                           ) : (
-                            <p className=" text-muted-foreground text-center w-full">
+                            <p className="w-full text-center text-muted-foreground">
                               No ticket status
                             </p>
                           )}
@@ -881,12 +881,12 @@ const TicketDetails = ({
                   )}
                 </div>
               </div>
-              <div className=" w-full ">
-                <div className=" pb-5 border-b">
-                  <h2 className=" text-xl font-semibold mb-4">
+              <div className="w-full">
+                <div className="border-b pb-5">
+                  <h2 className="mb-4 text-xl font-semibold">
                     {ticketData?.subject}
                   </h2>
-                  <p className=" text-sm"> {ticketData?.description}</p>
+                  <p className="text-sm"> {ticketData?.description}</p>
                 </div>
 
                 {optimisticMessages && (
@@ -941,7 +941,7 @@ const TicketDetails = ({
                       !ticketViewed ||
                       ticketViewed.ticketStatus_id.name.toLowerCase() ===
                         "close"
-                        ? "opacity-75 pointer-events-none"
+                        ? "pointer-events-none opacity-75"
                         : ""
                     }
                   />
@@ -959,8 +959,8 @@ const TicketDetails = ({
                   dispatch({ type: "set-focused-message", payload: id })
                 }
                 handleFocusMessage={(messageId: number | null) => {
-                  handleRemoveMessageId();
-                  dispatch({ type: "set-focused-message", payload: messageId });
+                  handleRemoveMessageId()
+                  dispatch({ type: "set-focused-message", payload: messageId })
                 }}
                 handleViewDetails={handleViewDetails}
                 setIsOpen={handleOpen}
@@ -972,10 +972,10 @@ const TicketDetails = ({
         </>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default TicketDetails;
+export default TicketDetails
 
 function Messages({
   messages,
@@ -991,60 +991,60 @@ function Messages({
   setSelectedMessageId,
   setFocusedMessage,
 }: {
-  messageId?: string;
-  messages: Message[];
-  focusedMessage: number | null;
-  selectedMessageId: number | null;
-  ticketHistory?: TicketHistory[];
-  currentUser?: User | null;
-  isDragging?: boolean;
-  setFocusedMessage: (id: number | null) => void;
-  handleRemoveMessageId: () => void;
-  removeFailedMessage: (message: Message) => void;
-  handleScrollContainer: () => void;
-  setSelectedMessageId: (id: number | null) => void;
+  messageId?: string
+  messages: Message[]
+  focusedMessage: number | null
+  selectedMessageId: number | null
+  ticketHistory?: TicketHistory[]
+  currentUser?: User | null
+  isDragging?: boolean
+  setFocusedMessage: (id: number | null) => void
+  handleRemoveMessageId: () => void
+  removeFailedMessage: (message: Message) => void
+  handleScrollContainer: () => void
+  setSelectedMessageId: (id: number | null) => void
 }) {
-  const [messagesLoadingIds, setMessagesLoadingIds] = useState<number[]>([]);
-  const { createMessage, isLoading } = useCreateMessage();
-  const messageRefs = useRef<Record<string, HTMLDivElement>>({});
-  const isBigScreen = useMediaQuery(`(min-width: 640px)`);
-  const { toast } = useToast();
+  const [messagesLoadingIds, setMessagesLoadingIds] = useState<number[]>([])
+  const { createMessage, isLoading } = useCreateMessage()
+  const messageRefs = useRef<Record<string, HTMLDivElement>>({})
+  const isBigScreen = useMediaQuery(`(min-width: 640px)`)
+  const { toast } = useToast()
 
-  const currentUserRole = currentUser?.user_metadata.role || "client";
+  const currentUserRole = currentUser?.user_metadata.role || "client"
 
   // 3. Define a function to set the ref for each message element
   const setRef = useCallback((el: HTMLDivElement | null, messageId: number) => {
     if (el) {
       // Store the element reference using its ID as the key
-      messageRefs.current[messageId] = el;
+      messageRefs.current[messageId] = el
     } else {
       // Cleanup on unmount
-      delete messageRefs.current[messageId];
+      delete messageRefs.current[messageId]
     }
-  }, []);
+  }, [])
 
   useEffect(() => {
     if (focusedMessage || messageId) {
       // 1. Get the actual DOM element reference
       const targetElement =
-        messageRefs.current[messageId || String(focusedMessage)];
+        messageRefs.current[messageId || String(focusedMessage)]
 
       if (targetElement) {
         // 2. Use the native browser method to scroll
         targetElement.scrollIntoView({
           behavior: "smooth", // Optional: provides a smooth animation
           block: isBigScreen ? "center" : "start", // Scrolls the target to the center of the viewport
-        });
+        })
         // handleRemoveMessageId();
       }
     }
-  }, [focusedMessage, messageId, isBigScreen]); // Run this effect whenever the target ID changes
+  }, [focusedMessage, messageId, isBigScreen]) // Run this effect whenever the target ID changes
   const handleResend = useCallback(
     async (message: Message) => {
       try {
-        if (!message.client || !currentUser) return;
+        if (!message.client || !currentUser) return
 
-        setMessagesLoadingIds((prev) => [...prev, message.id]);
+        setMessagesLoadingIds((prev) => [...prev, message.id])
         const data = {
           content: message.content,
           is_internal_note: message.is_internal_note,
@@ -1052,41 +1052,41 @@ function Messages({
           ticket_id: message.ticket_id,
           senderId: message.senderId,
           client_id: message.client_id,
-        };
+        }
 
         const files = message.attachments.length
           ? message.attachments.map(
-              (attachment) => attachment.file as FileWithPreview,
+              (attachment) => attachment.file as FileWithPreview
             )
-          : [];
+          : []
         const realMessage = await createMessage({
           data,
           files: files,
           client: message.client,
-        });
+        })
 
         if (files.length) {
-          files.forEach((file) => URL.revokeObjectURL(file.preview));
+          files.forEach((file) => URL.revokeObjectURL(file.preview))
         }
-        removeFailedMessage(message);
+        removeFailedMessage(message)
       } catch (error: any) {
         // 4. On Error: Mark optimistic message as failed and Show Toast
-        console.error("Message creation failed:", error);
+        console.error("Message creation failed:", error)
 
         // Show the toast notification manually here
         toast({
           variant: "destructive",
           title: "Failed to send message.",
           description: <ErorrToastDescription error={error.message} />,
-        });
+        })
       } finally {
-        setMessagesLoadingIds((prev) => prev.filter((id) => id !== message.id));
+        setMessagesLoadingIds((prev) => prev.filter((id) => id !== message.id))
       }
     },
-    [removeFailedMessage, setMessagesLoadingIds],
-  );
+    [removeFailedMessage, setMessagesLoadingIds]
+  )
   return (
-    <div className=" mb-6">
+    <div className="mb-6">
       <AnimatePresence>
         {messages.map((message) => (
           <TicketMessage
@@ -1101,9 +1101,9 @@ function Messages({
             currentUser={currentUser}
             handleSelect={() => {
               if (message.id === selectedMessageId) {
-                setSelectedMessageId(null);
+                setSelectedMessageId(null)
               } else {
-                setSelectedMessageId(message.id);
+                setSelectedMessageId(message.id)
                 // handleScrollContainer();
               }
             }}
@@ -1114,18 +1114,18 @@ function Messages({
       </AnimatePresence>
       {/* <ChangesSeparator action="solved" /> */}
     </div>
-  );
+  )
 }
 
 function ChangesSeparator({ action }: { action: ActionType }) {
   return (
-    <div className="   bg-border my-6 relative  h-[1px] w-full ">
+    <div className="relative my-6 h-[1px] w-full bg-border">
       <ActionBadge
         action={action}
-        className=" absolute left-1/2 top-1/2  -translate-x-1/2 -translate-y-1/2 z-30"
+        className="absolute top-1/2 left-1/2 z-30 -translate-x-1/2 -translate-y-1/2"
       />
     </div>
-  );
+  )
 }
 // ! OLD CODE
 

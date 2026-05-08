@@ -1,7 +1,9 @@
 import mongoose, { Document, Query, Schema, model } from "mongoose";
 import { Provider, Role } from "../@types";
 import { NextFunction } from "express";
+import crypto from "crypto";
 import bcrypt from "bcryptjs";
+import { ICar } from "./carModel";
 export interface IUser extends Document {
   id: string;
   createdAt: Date;
@@ -14,6 +16,8 @@ export interface IUser extends Document {
   provider: Provider;
   isDeleted?: boolean;
   deletedAt?: Date; // Optional because it's only set on delete
+  cars?: ICar[];
+  phones: string[];
   role: Role;
   passwordChangedAt?: Date;
   passwordResetToken?: string;
@@ -23,6 +27,7 @@ export interface IUser extends Document {
     passwordInDb: string,
   ): Promise<boolean>;
   isPassChangedAfterJWT: (JWTTimeStamp: number) => boolean;
+  createPasswordResetToken: () => string;
 }
 
 declare global {
@@ -57,7 +62,7 @@ export const userSchema = new Schema<IUser>(
         },
         "Please provide a password",
       ],
-      minlength: 8,
+      minlength: [8, "Password is too short"],
       select: false, // DO NOT leak this to the frontend
     },
     picture: {
@@ -85,6 +90,7 @@ export const userSchema = new Schema<IUser>(
       default: false,
       select: false, // Professional tip: Hide this from normal queries
     },
+    phones: [String],
     deletedAt: Date, // Match JS naming convention (deletedAt vs deleted_at)
     passwordChangedAt: Date,
     passwordResetToken: String,
@@ -97,6 +103,11 @@ export const userSchema = new Schema<IUser>(
   },
 );
 
+userSchema.virtual("cars", {
+  ref: "cars",
+  foreignField: "user",
+  localField: "_id",
+});
 // 1. We specify { query: true } in the options object
 
 // userSchema.pre(/^find/, {  query: true }, function (this: Query<any, IUser>, next: NextFunction) {
@@ -110,8 +121,7 @@ userSchema.pre(/^find|^count/, function (
   next: NextFunction,
 ) {
   if (this.getOptions().showDelete) return;
-  this.find({ active: { $ne: false } });
-  next();
+  this.where({ active: { $ne: false } });
 } as any); // The 'as any' here only applies to the hook registration, not your logic
 
 userSchema.pre("save", async function () {
@@ -125,14 +135,6 @@ userSchema.pre("save", async function () {
 
   this.passwordChangedAt = new Date(Date.now() - 1000);
 });
-
-userSchema.methods.isCorrectPassword = async (
-  endteredPassword: string,
-  passwordInDb: string,
-): Promise<boolean> => {
-  return await bcrypt.compare(endteredPassword, passwordInDb);
-};
-
 userSchema.methods.isPassChangedAfterJWT = function (
   JWTTimeStamp: number,
 ): boolean {
@@ -144,11 +146,30 @@ userSchema.methods.isPassChangedAfterJWT = function (
 
     // If the time the password changed is greater than the time the token was issued
     // it means the password was changed AFTER the token was created.
+
     return JWTTimeStamp < changedTimeStamp;
   }
 
   // False means NOT changed (password is still valid)
   return false;
+};
+
+userSchema.methods.isCorrectPassword = async (
+  endteredPassword: string,
+  passwordInDb: string,
+): Promise<boolean> => {
+  return await bcrypt.compare(endteredPassword, passwordInDb);
+};
+
+userSchema.methods.createPasswordResetToken = function () {
+  const token = crypto.randomBytes(32).toString("hex");
+
+  this.passwordResetToken = crypto
+    .createHash("sh256")
+    .update(token)
+    .digest("hex");
+  this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
+  return token;
 };
 
 export const User = model<IUser>("users", userSchema);

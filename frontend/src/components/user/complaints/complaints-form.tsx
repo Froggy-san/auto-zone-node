@@ -1,7 +1,7 @@
-import React from "react";
+import React from "react"
 
 const ComplaintsForm = () => {
-  return <div>ComplaintsForm</div>;
-};
+  return <div>ComplaintsForm</div>
+}
 
-export default ComplaintsForm;
+export default ComplaintsForm

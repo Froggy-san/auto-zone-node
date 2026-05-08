@@ -1,25 +1,30 @@
-import { Input } from "@components/ui/input";
-import { Label } from "@components/ui/label";
-import { downloadImage, urlToFile } from "@lib/client-helpers";
-import { maxFiles, maxSize } from "@lib/constants";
-import { RejectionFiles } from "@lib/types";
-import { cn } from "@lib/utils";
-import { debounce } from "lodash";
-import { Upload } from "lucide-react";
-import React, { useCallback, useEffect, useState } from "react";
-import { FileRejection, FileWithPath, useDropzone } from "react-dropzone";
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { downloadImage, urlToFile } from "@/lib/client-helpers"
+import { maxFiles, maxSize } from "@/lib/constants"
+import type { RejectionFiles } from "@/lib/types"
+
+import { cn } from "@/lib/utils"
+import { debounce } from "lodash"
+import { Upload } from "lucide-react"
+import React, { useCallback, useEffect, useState } from "react"
+import {
+  useDropzone,
+  type FileRejection,
+  type FileWithPath,
+} from "react-dropzone"
 
 interface Image extends FileWithPath {
-  preview: string;
+  preview: string
 }
 
 interface Props {
-  image: FileWithPath | null;
-  disabled: boolean;
-  currPic: string;
-  rejectedFiles: RejectionFiles[];
-  setRejectedFiles: React.Dispatch<React.SetStateAction<RejectionFiles[]>>;
-  setFile: React.Dispatch<React.SetStateAction<FileWithPath | null>>;
+  image: FileWithPath | null
+  disabled: boolean
+  currPic: string
+  rejectedFiles: RejectionFiles[]
+  setRejectedFiles: React.Dispatch<React.SetStateAction<RejectionFiles[]>>
+  setFile: React.Dispatch<React.SetStateAction<FileWithPath | null>>
 }
 
 export default function ProfilePicture({
@@ -83,69 +88,69 @@ export default function ProfilePicture({
   //   });
   // }, 200);
 
-  const viewedImage = image ? URL.createObjectURL(image) : currPic;
-  const fileType = image ? image.type.split("/")[0] : "";
+  const viewedImage = image ? URL.createObjectURL(image) : currPic
+  const fileType = image ? image.type.split("/")[0] : ""
 
   useEffect(() => {
     return () => {
-      URL.revokeObjectURL(viewedImage);
-    };
-  }, [viewedImage]);
+      URL.revokeObjectURL(viewedImage)
+    }
+  }, [viewedImage])
 
   useEffect(() => {
     return () => {
-      rejectedFiles.forEach((file) => URL.revokeObjectURL(file.preview));
-    };
-  }, []);
+      rejectedFiles.forEach((file) => URL.revokeObjectURL(file.preview))
+    }
+  }, [])
 
   const onDrop = useCallback(
     (acceptedFiles: FileWithPath[], rejectedFiles: FileRejection[]) => {
       // Do something with the files
 
       if (rejectedFiles.length) {
-        console.log("REJECTED", rejectedFiles[0]);
+        console.log("REJECTED", rejectedFiles[0])
         const rejectedFile = Object.assign(rejectedFiles[0], {
           preview: URL.createObjectURL(rejectedFiles[0].file),
-        });
+        })
 
-        setRejectedFiles((rejected) => [...rejected, rejectedFile]);
+        setRejectedFiles((rejected) => [...rejected, rejectedFile])
       }
 
-      if (!acceptedFiles.length) return;
+      if (!acceptedFiles.length) return
       // const image: Image = Object.assign(acceptedFiles[0], {
       //   preview: URL.createObjectURL(acceptedFiles[0]),
       // });
 
-      setFile(acceptedFiles[0]);
+      setFile(acceptedFiles[0])
     },
     []
-  );
+  )
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     disabled,
     maxSize,
     maxFiles,
     // accept: { "image/*": [] },
-  });
+  })
 
   return (
     <>
       <div {...getRootProps()}>
         <input {...getInputProps()} />
-        <div className=" flex flex-col md:flex-row md:items-center gap-x-5 justify-between ">
+        <div className="flex flex-col justify-between gap-x-5 md:flex-row md:items-center">
           <Label>Profile image:</Label>
 
-          <div className=" flex items-center gap-3 md:flex-1 md:max-w-[85%]  ">
+          <div className="flex items-center gap-3 md:max-w-[85%] md:flex-1">
             <Input
               onClick={(e) => e.stopPropagation()}
               value={image ? image.path : viewedImage}
-              className="  flex-1 "
+              className="flex-1"
             />
             <div
               className={cn(
-                " w-14 h-14 flex mt-3  mx-auto cursor-pointer   items-center overflow-hidden  justify-center rounded-xl border",
+                "mx-auto mt-3 flex h-14 w-14 cursor-pointer items-center justify-center overflow-hidden rounded-xl border",
                 {
-                  " opacity-55": isDragActive,
+                  "opacity-55": isDragActive,
                 }
               )}
             >
@@ -157,12 +162,12 @@ export default function ProfilePicture({
                     controls={false}
                     muted
                     loop
-                    className=" w-full h-full object-cover  object-top   "
+                    className="h-full w-full object-cover object-top"
                   />
                 ) : (
                   <img
                     src={viewedImage}
-                    className=" w-full h-full object-cover  object-top   "
+                    className="h-full w-full object-cover object-top"
                   />
                 )
               ) : (
@@ -173,5 +178,5 @@ export default function ProfilePicture({
         </div>
       </div>
     </>
-  );
+  )
 }

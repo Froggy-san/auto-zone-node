@@ -1,5 +1,5 @@
-import NextAuth from "next-auth";
-import GoogleProvider from "next-auth/providers/google";
+import NextAuth from "next-auth"
+import GoogleProvider from "next-auth/providers/google"
 
 const authConfig = {
   providers: [
@@ -8,9 +8,9 @@ const authConfig = {
       clientSecret: process.env.AUTH_GOOGLE_SECRET,
     }),
   ],
-};
+}
 
 export const {
   auth,
   handlers: { GET, POST },
-} = NextAuth(authConfig);
+} = NextAuth(authConfig)

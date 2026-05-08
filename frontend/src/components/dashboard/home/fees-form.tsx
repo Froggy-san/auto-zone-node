@@ -1,8 +1,8 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm, useWatch } from "react-hook-form";
-import { z } from "zod";
-import { Button } from "@/components/ui/button";
+import React, { useCallback, useEffect, useState } from "react"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm, useWatch } from "react-hook-form"
+import { z } from "zod"
+import { Button } from "@/components/ui/button"
 import {
   Form,
   FormControl,
@@ -11,7 +11,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
+} from "@/components/ui/form"
 
 import {
   ServiceFee,
@@ -19,33 +19,33 @@ import {
   EditServiceFee,
   ServiceFeeSchema,
   CategoryProps,
-} from "@lib/types";
+} from "@lib/types"
 
-import Spinner from "@components/Spinner";
+import Spinner from "@components/Spinner"
 
-import { useToast } from "@hooks/use-toast";
+import { useToast } from "@hooks/use-toast"
 import SuccessToastDescription, {
   ErorrToastDescription,
-} from "@components/toast-items";
+} from "@components/toast-items"
 
-import useObjectCompare from "@hooks/use-compare-objs";
-import DialogComponent from "@components/dialog-component";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { ComboBox } from "@components/combo-box";
-import { Input } from "@components/ui/input";
-import { Textarea } from "@components/ui/textarea";
-import { Switch } from "@components/ui/switch";
-import { Label } from "@components/ui/label";
+import useObjectCompare from "@hooks/use-compare-objs"
+import DialogComponent from "@components/dialog-component"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
+import { ComboBox } from "@components/combo-box"
+import { Input } from "@components/ui/input"
+import { Textarea } from "@components/ui/textarea"
+import { Switch } from "@components/ui/switch"
+import { Label } from "@components/ui/label"
 import {
   createServiceFeeAction,
   editServiceFeeAction,
-} from "@lib/actions/serviceFeeAction";
-import CurrencyInput from "react-currency-input-field";
+} from "@lib/actions/serviceFeeAction"
+import CurrencyInput from "react-currency-input-field"
 
 const formatCurrency = (value: number) =>
   new Intl.NumberFormat("en", { style: "currency", currency: "egp" }).format(
-    value,
-  );
+    value
+  )
 const FeesForm = ({
   open,
   feesToEdit,
@@ -53,16 +53,16 @@ const FeesForm = ({
   categories,
   service,
 }: {
-  open: boolean;
-  feesToEdit: ServiceFee;
-  addFeeId?: string;
-  categories: CategoryProps[];
-  service: { id: number; totalPrice: number } | null;
+  open: boolean
+  feesToEdit: ServiceFee
+  addFeeId?: string
+  categories: CategoryProps[]
+  service: { id: number; totalPrice: number } | null
 }) => {
-  const { toast } = useToast();
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
+  const { toast } = useToast()
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
 
   const defaultValues = {
     price: feesToEdit?.price || 0,
@@ -70,36 +70,36 @@ const FeesForm = ({
     isReturned: feesToEdit?.isReturned || false,
     notes: feesToEdit?.notes || "",
     categoryId: feesToEdit?.categoryId || 0,
-  };
+  }
   const form = useForm<z.infer<typeof ServiceFeeSchema>>({
     mode: "onChange",
     resolver: zodResolver(ServiceFeeSchema),
     defaultValues,
-  });
+  })
 
-  const { discount, price } = form.watch();
+  const { discount, price } = form.watch()
 
-  const isEqual = useObjectCompare(form.getValues(), defaultValues);
+  const isEqual = useObjectCompare(form.getValues(), defaultValues)
 
   useEffect(() => {
-    form.reset(defaultValues);
-  }, [open]);
+    form.reset(defaultValues)
+  }, [open])
 
   useEffect(() => {
     if (price > discount) {
-      form.clearErrors("discount");
+      form.clearErrors("discount")
     }
-  }, [discount, price, form]);
+  }, [discount, price, form])
 
   const handleClose = useCallback(() => {
-    const params = new URLSearchParams(searchParams);
-    params.delete("editFee");
-    params.delete("addFeeId");
-    router.push(`${pathname}?${String(params)}`, { scroll: false });
-    form.reset();
-  }, [open]);
+    const params = new URLSearchParams(searchParams)
+    params.delete("editFee")
+    params.delete("addFeeId")
+    router.push(`${pathname}?${String(params)}`, { scroll: false })
+    form.reset()
+  }, [open])
 
-  const isLoading = form.formState.isSubmitting;
+  const isLoading = form.formState.isSubmitting
 
   async function onSubmit({
     price,
@@ -110,11 +110,11 @@ const FeesForm = ({
   }: EditServiceFee) {
     try {
       // If the user hasn't changed anything about the form values.
-      if (isEqual) throw new Error("You haven't changed anything.");
+      if (isEqual) throw new Error("You haven't changed anything.")
       if (!service)
-        throw new Error(`Something went wrong please refresh the page.`);
+        throw new Error(`Something went wrong please refresh the page.`)
 
-      const totalPriceAfterDiscount = price - discount;
+      const totalPriceAfterDiscount = price - discount
 
       // In case of adding a new service fee.
       if (addFeeId) {
@@ -130,20 +130,20 @@ const FeesForm = ({
           {
             id: service.id,
             totalPrice: service.totalPrice + totalPriceAfterDiscount,
-          },
-        );
-        if (error) throw new Error(error);
+          }
+        )
+        if (error) throw new Error(error)
       }
       // In the case of editting a serivce fee.
       if (feesToEdit) {
         const newSerivceTotal =
           service.totalPrice +
           totalPriceAfterDiscount -
-          feesToEdit.totalPriceAfterDiscount;
+          feesToEdit.totalPriceAfterDiscount
         // Check if the user changed the total price of the fee before updating the total service amount.
         const isEqual =
-          feesToEdit.totalPriceAfterDiscount === totalPriceAfterDiscount;
-        console.log("isEqual", isEqual);
+          feesToEdit.totalPriceAfterDiscount === totalPriceAfterDiscount
+        console.log("isEqual", isEqual)
         const { error } = await editServiceFeeAction(
           {
             serviceFee: {
@@ -156,14 +156,14 @@ const FeesForm = ({
             },
             id: feesToEdit.id,
           },
-          { id: service.id, totalPrice: newSerivceTotal, isEqual },
-        );
+          { id: service.id, totalPrice: newSerivceTotal, isEqual }
+        )
 
-        if (error) throw new Error(error);
+        if (error) throw new Error(error)
       }
 
       // Close the dialog and reset the form values to the default values.
-      handleClose();
+      handleClose()
 
       // Display a toast depending on the actions made.
       toast({
@@ -178,13 +178,13 @@ const FeesForm = ({
             }
           />
         ),
-      });
+      })
     } catch (error: any) {
       toast({
         variant: "destructive",
         title: "Something went wrong.",
         description: <ErorrToastDescription error={error.message} />,
-      });
+      })
     }
   }
 
@@ -192,22 +192,22 @@ const FeesForm = ({
 
   return (
     <DialogComponent open={open} onOpenChange={handleClose}>
-      <DialogComponent.Content className="  max-h-[65vh]  sm:max-h-[76vh] overflow-y-auto max-w-[1000px] sm:p-14">
+      <DialogComponent.Content className="max-h-[65vh] max-w-[1000px] overflow-y-auto sm:max-h-[76vh] sm:p-14">
         <DialogComponent.Header>
           <DialogComponent.Title>
             {addFeeId ? `Add More Service Fees` : "Edit Service Fee"}
           </DialogComponent.Title>
-          <DialogComponent.Description className=" hidden"></DialogComponent.Description>
+          <DialogComponent.Description className="hidden"></DialogComponent.Description>
         </DialogComponent.Header>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 ">
-            <div className=" flex    items-center gap-3">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <div className="flex items-center gap-3">
               <FormField
                 disabled={isLoading}
                 control={form.control}
                 name="price"
                 render={({ field }) => (
-                  <FormItem className=" w-full mb-auto">
+                  <FormItem className="mb-auto w-full">
                     <FormLabel htmlFor="fees-price">Price</FormLabel>
                     <FormControl>
                       <CurrencyInput
@@ -222,9 +222,9 @@ const FeesForm = ({
                         onValueChange={(formattedValue, name, value) => {
                           // setFormattedListing(formattedValue || "");
 
-                          field.onChange(Number(value?.value) || 0);
+                          field.onChange(Number(value?.value) || 0)
                         }}
-                        className="input-field "
+                        className="input-field"
                       />
                     </FormControl>
 
@@ -238,7 +238,7 @@ const FeesForm = ({
                 control={form.control}
                 name="discount"
                 render={({ field }) => (
-                  <FormItem className=" w-full mb-auto">
+                  <FormItem className="mb-auto w-full">
                     <FormLabel htmlFor="disocunt">Discount</FormLabel>
                     <FormControl>
                       <CurrencyInput
@@ -253,9 +253,9 @@ const FeesForm = ({
                         onValueChange={(formattedValue, name, value) => {
                           // setFormattedListing(formattedValue || "");
 
-                          field.onChange(Number(value?.value) || 0);
+                          field.onChange(Number(value?.value) || 0)
                         }}
-                        className="input-field "
+                        className="input-field"
                       />
                     </FormControl>
                     <FormMessage />
@@ -269,7 +269,7 @@ const FeesForm = ({
               control={form.control}
               name="categoryId"
               render={({ field }) => (
-                <FormItem className=" w-full mb-auto">
+                <FormItem className="mb-auto w-full">
                   <FormLabel>Category</FormLabel>
                   <FormControl>
                     {categories && (
@@ -302,8 +302,8 @@ const FeesForm = ({
                 </FormItem>
               )}
             />
-            <div className=" flex   flex-wrap-reverse items-center   gap-y-4 gap-x-4 justify-between">
-              <div className=" text-xs text-muted-foreground">
+            <div className="flex flex-wrap-reverse items-center justify-between gap-x-4 gap-y-4">
+              <div className="text-xs text-muted-foreground">
                 Net: {formatCurrency(price - discount)}
               </div>
 
@@ -315,7 +315,7 @@ const FeesForm = ({
                   render={({ field }) => (
                     <FormItem className="">
                       <FormControl>
-                        <div className="flex  justify-end items-center space-x-2">
+                        <div className="flex items-center justify-end space-x-2">
                           <Switch
                             id="returned-switch"
                             checked={field.value}
@@ -341,7 +341,7 @@ const FeesForm = ({
                 type="reset"
                 variant="secondary"
                 size="sm"
-                className=" w-full sm:w-[unset]"
+                className="w-full sm:w-[unset]"
               >
                 Cancel
               </Button>
@@ -349,10 +349,10 @@ const FeesForm = ({
                 type="submit"
                 size="sm"
                 disabled={isLoading || isEqual}
-                className=" w-full sm:w-[unset]"
+                className="w-full sm:w-[unset]"
               >
                 {isLoading ? (
-                  <Spinner className=" h-full" />
+                  <Spinner className="h-full" />
                 ) : addFeeId ? (
                   "add"
                 ) : (
@@ -364,7 +364,7 @@ const FeesForm = ({
         </Form>
       </DialogComponent.Content>
     </DialogComponent>
-  );
-};
+  )
+}
 
-export default FeesForm;
+export default FeesForm

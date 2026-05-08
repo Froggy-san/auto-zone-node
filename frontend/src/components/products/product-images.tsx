@@ -72,7 +72,7 @@ const ProductImages = ({
               controls={false}
               playsInline
               key={i}
-            src={`${API_URL}${url}`}
+              src={`${API_URL}${url}`}
               className={cn(
                 "absolute inset-0 h-full w-full object-cover transition-all",
                 {
@@ -81,7 +81,7 @@ const ProductImages = ({
                 }
               )}
             >
-              <source src={`${API_URL}${url}`}/>
+              <source src={`${API_URL}${url}`} />
             </video>
           ) : (
             <img

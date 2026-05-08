@@ -1,11 +1,12 @@
-import { PAGE_SIZE } from "@lib/constants";
-import * as React from "react";
-import usePagination from "@mui/material/usePagination/usePagination";
-import { Button } from "@components/ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useMediaQuery } from "@mui/material";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useIntersectionProvidor } from "@components/products/intersection-providor";
+import { PAGE_SIZE } from "@/lib/constants"
+import * as React from "react"
+
+import { Button } from "@/components/ui/button"
+import { ChevronLeft, ChevronRight } from "lucide-react"
+import { useMediaQuery } from "@mui/material"
+import { useIntersectionProvidor } from "@/components/products/intersection-providor"
+import { useLocation, useNavigate, useSearchParams } from "react-router"
+import usePagination from "@mui/material/usePagination"
 
 interface GaragePaginationProps {
   // color: string;
@@ -14,7 +15,7 @@ interface GaragePaginationProps {
   // motorNumber: string;
   // clientId: string;
   // carGenerationId: string;
-  count: number;
+  count: number
 }
 const GaragePagination: React.FC<GaragePaginationProps> = ({
   // color,
@@ -25,11 +26,11 @@ const GaragePagination: React.FC<GaragePaginationProps> = ({
   // carGenerationId,
   count,
 }) => {
-  const { ref } = useIntersectionProvidor();
+  const { ref } = useIntersectionProvidor()
 
-  const searchParam = useSearchParams();
-  const router = useRouter();
-  const pathname = usePathname();
+  const [searchParam] = useSearchParams()
+  const navigate = useNavigate()
+  const pathname = useLocation().pathname
 
   // const { count, error, isLoading } = useGragePagination({
   //   color,
@@ -40,10 +41,10 @@ const GaragePagination: React.FC<GaragePaginationProps> = ({
   //   carInfoId: carGenerationId,
   // });
 
-  const defaultValue = searchParam.get("page") ?? "1";
-  const numberOfPages = Math.ceil(count / PAGE_SIZE);
+  const defaultValue = searchParam.get("page") ?? "1"
+  const numberOfPages = Math.ceil(count / PAGE_SIZE)
 
-  const isSmallScreen = useMediaQuery("(max-width:600px)");
+  const isSmallScreen = useMediaQuery("(max-width:600px)")
 
   const { items } = usePagination({
     // defaultPage: Number(defaultValue),
@@ -51,25 +52,25 @@ const GaragePagination: React.FC<GaragePaginationProps> = ({
     siblingCount: isSmallScreen ? 0 : 1, // No sibling buttons on small screens
     boundaryCount: 1, // Only 1 boundary button on small screens
     onChange: (event: React.ChangeEvent<unknown>, page: number) => {
-      if (page > numberOfPages || page < 1) return;
-      const params = new URLSearchParams(searchParam);
-      params.set("page", String(page));
-      router.push(`${pathname}?${params.toString()}`);
+      if (page > numberOfPages || page < 1) return
+      const params = new URLSearchParams(searchParam)
+      params.set("page", String(page))
+      navigate(`${pathname}?${params.toString()}`)
     },
-  });
+  })
 
   // if (isLoading) return <Spinner className=" h-52" />;
   // if (error) return <p>{error}</p>;
-  if (!count) return null;
+  if (!count) return null
   return (
-    <nav ref={ref} className=" w-full my-4">
-      <ul className="  flex gap-3  w-full justify-center">
+    <nav ref={ref} className="my-4 w-full">
+      <ul className="flex w-full justify-center gap-3">
         {/* eslint-disable-next-line @typescript-eslint/no-unused-vars */}
         {items.map(({ page, type, disabled, ...item }, index) => {
-          let children = null;
+          let children = null
 
           if (type === "start-ellipsis" || type === "end-ellipsis") {
-            children = "…";
+            children = "…"
           } else if (type === "page") {
             children = (
               <Button
@@ -85,7 +86,7 @@ const GaragePagination: React.FC<GaragePaginationProps> = ({
               >
                 {page}
               </Button>
-            );
+            )
           } else {
             children = (
               <Button
@@ -109,14 +110,14 @@ const GaragePagination: React.FC<GaragePaginationProps> = ({
                   </>
                 )}
               </Button>
-            );
+            )
           }
 
-          return <li key={index}>{children}</li>;
+          return <li key={index}>{children}</li>
         })}
       </ul>
     </nav>
-  );
-};
+  )
+}
 
-export default GaragePagination;
+export default GaragePagination

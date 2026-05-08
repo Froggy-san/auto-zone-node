@@ -1,33 +1,33 @@
-import { cn } from "@lib/utils";
-import React, { useState } from "react";
-import StatusFormDialog from "./status-form-dialog";
-import { Button } from "@components/ui/button";
+import { cn } from "@lib/utils"
+import React, { useState } from "react"
+import StatusFormDialog from "./status-form-dialog"
+import { Button } from "@components/ui/button"
 
 interface Props {
-  className?: string;
+  className?: string
 }
 
 const StatusManagement = ({ className }: Props) => {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(false)
   return (
     <>
       <div
         className={cn(
-          "flex  flex-col  gap-y-2 xs:flex-row xs:items-center justify-between rounded-lg border p-3 shadow-sm gap-x-7",
+          "flex flex-col justify-between gap-x-7 gap-y-2 rounded-lg border p-3 shadow-sm xs:flex-row xs:items-center",
           className
         )}
       >
         <div className="space-y-0.5">
-          <label className=" font-semibold">Status</label>
-          <p className=" text-muted-foreground text-sm">
+          <label className="font-semibold">Status</label>
+          <p className="text-sm text-muted-foreground">
             Create a service status badge.
           </p>
         </div>
-        <div className="  sm:pr-2">
+        <div className="sm:pr-2">
           <Button
             onClick={() => setOpen((is) => !is)}
             size="sm"
-            className=" w-full sm:w-fit"
+            className="w-full sm:w-fit"
           >
             Create Service status{" "}
           </Button>
@@ -35,7 +35,7 @@ const StatusManagement = ({ className }: Props) => {
       </div>
       <StatusFormDialog open={open} setOpen={setOpen} />
     </>
-  );
-};
+  )
+}
 
-export default StatusManagement;
+export default StatusManagement
