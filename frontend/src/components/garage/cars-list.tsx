@@ -22,25 +22,10 @@ import GaragePagination from "./garage-pagination"
 // }
 
 interface CarsListProps {
-  cars: CarType[] | undefined
-  error: string
-  clients: User[]
+  cars: CarType[]
+  count: number
 }
-const CarsList = () => {
-  const [searchParams] = useSearchParams()
-  const page = getParam(searchParams, "page", "1")
-  const { data, isLoading, error } = useCars({ page, limit: "12" })
-
-  const cars = data?.data
-  if (!isLoading && error) return <ErrorMessage>{error.message}</ErrorMessage>
-  if (!cars && !isLoading) return <p>Something went wrong</p>
-  if (!cars?.length && !isLoading)
-    return (
-      <div className="flex h-32 flex-col-reverse items-center justify-center gap-2 text-center font-semibold">
-        No cars. <Car className="h-10 w-10" />
-      </div>
-    )
-
+const CarsList = ({ cars, count }: CarsListProps) => {
   return (
     <>
       <ul className="grid grid-cols-1 gap-3 border-t px-2 pt-2">
@@ -50,7 +35,7 @@ const CarsList = () => {
           ))}
       </ul>
 
-      <GaragePagination count={data?.pagination.totalCount || 0} />
+      <GaragePagination count={count} />
     </>
   )
 }

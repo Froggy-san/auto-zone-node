@@ -3,7 +3,8 @@ import { objectIdSchema } from "./commen";
 
 export const carImageSchema = z.object({
   imagePath: z.string(),
-  isMian: z.boolean().default(false).optional(),
+  filename: z.string(),
+  isMain: z.boolean().default(false).optional(),
 });
 
 export const createCarSchema = z.object({

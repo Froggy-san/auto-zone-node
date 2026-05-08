@@ -8,11 +8,11 @@ export interface GetCarsProps {
   plateNumber?: string
   chassisNumber?: string
   motorNumber?: string
-  clientId?: string
-  carGenerationId?: string
+  user?: string
+  carGeneration?: string
   pageNumber?: string
-  carMakerId?: string
-  carModelId?: string
+  carMaker?: string
+  carModel?: string
 }
 
 export async function getCars(filters?: GetCarsProps): Promise<{
@@ -24,6 +24,7 @@ export async function getCars(filters?: GetCarsProps): Promise<{
     limit: number
   }
 }> {
+  console.log(filters, "FILTERS")
   const searchParams = new URLSearchParams()
 
   Object.entries(filters || {}).forEach(([key, value]) => {

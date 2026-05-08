@@ -1,4 +1,5 @@
 import { getParam } from "@//lib/getParam"
+import ErrorMessage from "@/components/error-message"
 import CarManagement from "@/components/garage/car-management"
 
 import CarsList from "@/components/garage/cars-list"
@@ -8,6 +9,8 @@ import Header from "@/components/header"
 import Footer from "@/components/home/footer"
 import IntersectionProvidor from "@/components/products/intersection-providor"
 import Spinner from "@/components/Spinner"
+import useCars from "@/features/cars/useCars"
+import { Car } from "lucide-react"
 
 import React, { Suspense } from "react"
 import { useSearchParams } from "react-router"
@@ -34,15 +37,31 @@ const Garage = () => {
   // const carModelId = searchParams.carModelId ?? "";
   // const carGenerationId = searchParams.carGenerationId ?? "";
   const [searchParams] = useSearchParams()
-  const pageNumber = getParam(searchParams, "pageNumber", "1")
+  const page = getParam(searchParams, "pageNumber", "1")
+  const limit = getParam(searchParams, "limit", "12")
   const color = getParam(searchParams, "color", "")
   const plateNumber = getParam(searchParams, "plateNumber", "")
   const chassisNumber = getParam(searchParams, "chassisNumber", "")
   const motorNumber = getParam(searchParams, "motorNumber", "")
-  const client = getParam(searchParams, "client", "")
+  const user = getParam(searchParams, "user", "")
   const carMaker = getParam(searchParams, "carMaker", "")
   const carModel = getParam(searchParams, "carModel", "")
-  const generations = getParam(searchParams, "generations", "")
+  const carGeneration = getParam(searchParams, "generations", "")
+
+  const { data, isLoading, error } = useCars({
+    page,
+    limit,
+    color,
+    chassisNumber,
+    motorNumber,
+    user,
+    carGeneration,
+    carMaker,
+    carModel,
+  })
+
+  const cars = data?.data || []
+  const count = data?.pagination.totalCount || 0
 
   // const [clients, carMakers, carsData] = await Promise.all([
   //   // getAllCarGenerationsAction(),
@@ -92,22 +111,30 @@ const Garage = () => {
       <IntersectionProvidor>
         <div className="flex w-full flex-1">
           <GarageFilterbar
-            // carMakers={carMakersData || []}
-            // carModels={carModelsData?.models}
-            // carGenerations={carGenerationsData?.carGenerationsData}
-            // clients={clientsData?.clients || []}
             color={color}
             chassisNumber={chassisNumber}
             motorNumber={motorNumber}
             plateNumber={plateNumber}
-            clientId={client}
-            carGenerationId={generations}
-            pageNumber={pageNumber}
-            carMakerId={carMaker}
-            carModelId={carModel}
+            user={user}
+            carGeneration={carGeneration}
+            page={page}
+            limit={limit}
+            carMaker={carMaker}
+            carModel={carModel}
+            count={0}
           />
           <section className="flex-1">
-            <CarsList />
+            {isLoading ? (
+              <Spinner className="h-screen" size={25} />
+            ) : error ? (
+              <ErrorMessage>{error.message}</ErrorMessage>
+            ) : !cars.length ? (
+              <div className="flex h-32 flex-col-reverse items-center justify-center gap-2 text-center font-semibold">
+                No cars. <Car className="h-10 w-10" />
+              </div>
+            ) : (
+              <CarsList cars={cars} count={count} />
+            )}
 
             {/* {error ? (
               <ErrorMessage>{error} </ErrorMessage>

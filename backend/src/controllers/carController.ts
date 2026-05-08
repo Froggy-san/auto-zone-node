@@ -7,6 +7,7 @@ import { CarModel } from "../models/carModel";
 import { deleteFiles } from "../utils/helper";
 import { CarImage } from "../@types/cars";
 import { getAll, getOne } from "../utils/controllerFactory";
+import { stripTypeScriptTypes } from "node:module";
 const storage = multer.memoryStorage();
 
 const fileFilter = (req: Request, file: Express.Multer.File, cb: any) => {
@@ -36,48 +37,58 @@ export const processCarImages = catchAsync(
     if (!files || !files.length) return next();
 
     req.body.carImages = [];
-    const filePromises = files.map(async (file) => {
+    for (const file of files) {
       const imageName = `car-${Date.now()}-${Math.round(Math.random() * 1e9)}.jpeg`;
 
       await sharp(file.buffer)
+        // .resize(800, 800) // Recommended to keep  your garage catalog looking uniform
         .toFormat("jpeg")
+        // .jpeg({ quality: 90 })
         .toFile(`public/uploads/cars/${imageName}`);
 
-      const mainImage = req.body.mainImageName || "";
+      // 3. Robust isMain logic
+      // It's main if: it matches the name OR if it's the first image and no name was provided
+      let isMain = file.originalname === req.body.mainImageName;
 
       req.body.carImages.push({
-        imagePath: imageName,
-        isMain: mainImage === file.originalname,
+        imagePath: `/uploads/cars/${imageName}`,
+        filename: file.originalname,
+        isMain: isMain,
       });
-    });
+    }
 
-    await Promise.all(filePromises);
     next();
   },
 );
 
 export const createCar = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    console.log(req.body, "BODY FROM THE REQUEST");
     const carImages = (req.body.carImages || []) as CarImage[];
-    const car = await CarModel.create(req.body);
+    try {
+      const car = await CarModel.create(req.body);
 
-    if (!car && carImages.length) {
+      if (!car && carImages.length) {
+        const imagesToDelete = carImages.map((m) => m.imagePath);
+        deleteFiles(imagesToDelete);
+        res.status(500).json({
+          status: "error",
+          message: "Failed to create the car data",
+        });
+        return;
+      }
+
+      res.status(201).json({
+        status: "success",
+        data: {
+          data: car,
+        },
+      });
+    } catch (error: any) {
       const imagesToDelete = carImages.map((m) => m.imagePath);
       deleteFiles(imagesToDelete);
-      res.status(500).json({
-        status: "error",
-        message: "Failed to create the car data",
-      });
-      return;
+      console.log("ERRORRRR", imagesToDelete);
+      throw new Error(error.message || "Failed to create a new car");
     }
-
-    res.status(201).json({
-      status: "success",
-      data: {
-        data: car,
-      },
-    });
   },
 );
 

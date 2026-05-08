@@ -22,11 +22,11 @@ interface CarsListProps {
   plateNumber: string
   chassisNumber: string
   motorNumber: string
-  clientId: string
-  carMakerId: string
-  carModelId: string
-  carGenerationId: string
-  pageNumber: string
+  user: string
+  carMaker: string
+  carModel: string
+  carGeneration: string
+  page: string
   // clients: User[]
   // carMakers: CarMaker[]
   // We want the filter to disapear in the case of the page count i more than 3 pages and the pageSize i more than 2 cars in a single page.
@@ -34,15 +34,15 @@ interface CarsListProps {
 }
 
 const GarageFilter: React.FC<CarsListProps> = ({
-  carMakerId,
-  carModelId,
+  carMaker,
+  carModel,
   // carMakers,
   color,
   plateNumber,
   chassisNumber,
   motorNumber,
-  clientId,
-  carGenerationId,
+  user,
+  carGeneration,
   // clients,
   count,
 }) => {
@@ -50,11 +50,11 @@ const GarageFilter: React.FC<CarsListProps> = ({
   const [plateNumberValue, setPlateNumberValue] = useState(plateNumber)
   const [motorValue, setMotorValue] = useState(motorNumber)
   const [chassieValue, setChassieValue] = useState(chassisNumber)
-  const [chosenClient, setChosenClient] = useState<string | null>(clientId)
-  const [chosenMaker, setchosenMaker] = useState<string | null>(carMakerId)
-  const [chosenModel, setchosenModel] = useState<string | null>(carModelId)
-  const [chosenCarGenerationId, setCarGenerationId] = useState<string | null>(
-    carGenerationId
+  const [chosenClient, setChosenClient] = useState<string | null>(user)
+  const [chosenMaker, setchosenMaker] = useState<string | null>(carMaker)
+  const [chosenModel, setchosenModel] = useState<string | null>(carModel)
+  const [chosenCarGeneration, setCarGeneration] = useState<string | null>(
+    carGeneration
   )
   const [models, setModels] = useState<CarModel[]>([])
 
@@ -69,7 +69,7 @@ const GarageFilter: React.FC<CarsListProps> = ({
   const disapear = count > 2 && Math.ceil(count / PAGE_SIZE) > 3
 
   // const models = chosenMaker
-  //   ? carModels.filter((item) => item.carMakerId === chosenMaker)
+  //   ? carModels.filter((item) => item.carMaker === chosenMaker)
   //   : carModels;
 
   // const models =
@@ -77,7 +77,7 @@ const GarageFilter: React.FC<CarsListProps> = ({
   const generations =
     models.find((model) => model._id === chosenModel)?.generations || []
   // const generations = chosenModel
-  //   ? carGeneration.filter((item) => item.carModelId === chosenModel)
+  //   ? carGeneration.filter((item) => item.carModel === chosenModel)
   //   : carGeneration;
 
   async function handleSubmit() {
@@ -101,10 +101,10 @@ const GarageFilter: React.FC<CarsListProps> = ({
       params.set("chassisNumber", chassieValue)
     }
 
-    if (!chosenCarGenerationId) {
+    if (!chosenCarGeneration) {
       params.delete("carGeneration")
     } else {
-      params.set("carGeneration", String(chosenCarGenerationId))
+      params.set("carGeneration", String(chosenCarGeneration))
     }
 
     if (!chosenMaker) {
@@ -158,7 +158,7 @@ const GarageFilter: React.FC<CarsListProps> = ({
               setValue={(value) => {
                 setchosenMaker(value)
                 setchosenModel("")
-                setCarGenerationId("")
+                setCarGeneration("")
               }}
             />
           </div>
@@ -170,7 +170,7 @@ const GarageFilter: React.FC<CarsListProps> = ({
               options={models}
               setValue={(value) => {
                 setchosenModel(value)
-                setCarGenerationId("")
+                setCarGeneration("")
               }}
             />
           </div>
@@ -179,9 +179,9 @@ const GarageFilter: React.FC<CarsListProps> = ({
             <ComboBox
               placeholder="Select generation..."
               disabled={!chosenModel}
-              value={chosenCarGenerationId || undefined}
+              value={chosenCarGeneration || undefined}
               options={generations}
-              setValue={setCarGenerationId}
+              setValue={setCarGeneration}
             />
           </div>
 
@@ -282,9 +282,9 @@ const GarageFilter: React.FC<CarsListProps> = ({
                   <div className="space-y-2">
                     <label className="text-sm">Car generation</label>
                     <ComboBox
-                      value={chosenCarGenerationId || undefined}
+                      value={chosenCarGeneration || undefined}
                       options={generations}
-                      setValue={setCarGenerationId}
+                      setValue={setCarGeneration}
                     />
                   </div>
 
