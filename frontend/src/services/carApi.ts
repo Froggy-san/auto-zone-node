@@ -87,16 +87,8 @@ export async function updateCar({
   return updatedProduct.data
 }
 
-export async function getProductById(
-  id: string,
-  searchParams: URLSearchParams
-): Promise<{
-  car: Car
-  nextProductId: string | null
-  prevProductId: string | null
-}> {
-  const queryString = searchParams.toString()
-  const url = `${BASE_URL}/api/v1/cars/${id}${queryString ? `?${queryString}` : ""}`
+export async function getCarById(userId: string, carId: string): Promise<Car> {
+  const url = `${BASE_URL}/api/v1/cars/getCarAndRelated/${userId}}?carId=${carId}`
   const res = await fetch(url, {
     credentials: "include",
   })
@@ -109,13 +101,8 @@ export async function getProductById(
   const result = await res.json()
 
   const data = result.data
-  console.log(result, "DDDDDDD")
 
-  return {
-    car: data.product,
-    nextProductId: data.nextDoc?._id || null,
-    prevProductId: data.prevDoc?._id || null,
-  }
+  return data
 }
 
 export async function deleteCar(id: string) {

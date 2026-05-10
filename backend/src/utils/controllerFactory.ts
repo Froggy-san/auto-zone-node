@@ -113,8 +113,6 @@ export const getAll = (
   options?: Record<string, any>,
 ) =>
   catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    console.log(req.query, "QUERY");
-    console.log(req.params, "PARAMs");
     // 1. Initialize the base query with options
     let baseQuery = Model.find();
     if (options) baseQuery = baseQuery.setOptions(options);

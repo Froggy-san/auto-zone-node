@@ -1,5 +1,16 @@
 import { processReqQuery } from "./helper";
-
+const EXCLUDED_REX_FIELDS = [
+  "category",
+  "productType",
+  "productBrand",
+  "carMaker",
+  "carModel",
+  "_id",
+  "plateNumber",
+  "motorNumber",
+  "chassisNumber",
+  "odometer",
+];
 class APIFeatures {
   public queryString;
   public query;
@@ -12,14 +23,7 @@ class APIFeatures {
     this.filtersObj = processReqQuery({
       query: queryString,
       excludedFields: ["page", "sort", "limit", "fields"],
-      fieldsToPreventRegex: [
-        "category",
-        "productType",
-        "productBrand",
-        "carMaker",
-        "carModel",
-        "_id",
-      ],
+      fieldsToPreventRegex: EXCLUDED_REX_FIELDS,
     });
 
     // const queryObj = { ...queryString };

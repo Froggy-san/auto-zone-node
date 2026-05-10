@@ -10,26 +10,22 @@ export function normalizeReqQuery(req: Request) {
   return normalizedQuery;
 }
 
-
-
-
-
 export const deleteFiles = async (filePaths: string[]): Promise<void> => {
   // Use Promise.all to run all deletions in parallel!
   await Promise.all(
     filePaths.map(async (file) => {
       const filePath = path.join(__dirname, "../../public", file);
-      
+
       try {
         // Just try to delete it directly
         await fs.unlink(filePath);
       } catch (err: any) {
         // ENOENT means "File not found" - we can ignore that
-        if (err.code !== 'ENOENT') {
+        if (err.code !== "ENOENT") {
           console.error(`[FileHelper] Error deleting ${file}:`, err);
         }
       }
-    })
+    }),
   );
 };
 
@@ -68,7 +64,11 @@ export function processReqQuery({
 
   // 2. Handle numeric comparisons ($gte, $lt, etc.)
   let queryStr = JSON.stringify(queryObj);
-  queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
+
+  queryStr = queryStr.replace(
+    /\b(gte|gt|lte|lt|in|ne)\b/g,
+    (match) => `$${match}`,
+  );
   const filtersObj = JSON.parse(queryStr);
 
   // 3. Helper to identify MongoDB IDs

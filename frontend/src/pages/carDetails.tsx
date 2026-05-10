@@ -1,34 +1,30 @@
-import FullImagesGallery from "@components/full-images-gallery"
-import { getCarByIdAction } from "@lib/actions/carsAction"
+import FullImagesGallery from "@/components/full-images-gallery"
+import { getCarByIdAction } from "@/lib/actions/carsAction"
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/components/ui/accordion"
+} from "@//components/ui/accordion"
 import React from "react"
-import CarManagement from "@components/garage/car-management"
-import DeleteCar from "@components/garage/delete-car"
-import { Card } from "@components/ui/card"
+import CarManagement from "@/components/garage/car-management"
+import DeleteCar from "@/components/garage/delete-car"
+import { Card } from "@/components/ui/card"
 import { ArrowLeft, Blend, Car, ImageOff } from "lucide-react"
-import NoteDialog from "@components/garage/note-dialog"
+import NoteDialog from "@/components/garage/note-dialog"
 import { VscTypeHierarchySuper } from "react-icons/vsc"
 import { TbBoxModel2 } from "react-icons/tb"
 import { BsFillPersonLinesFill } from "react-icons/bs"
-import { Button } from "@components/ui/button"
-import Link from "next/link"
-import ServiceManagement from "@components/garage/add-service"
-import { getAllCarGenerationsAction } from "@lib/actions/carGenerationsActions"
-import { getAllCarMakersAction } from "@lib/actions/carMakerActions"
-import { Metadata } from "next"
-import { CarItem as CarItemType } from "@lib/types"
-import CarItem from "@components/garage/car-item"
-import ErrorMessage from "@components/error-message"
-import Footer from "@components/home/footer"
+import { Button } from "@/components/ui/button"
+import ServiceManagement from "@/components/garage/add-service"
+import { getAllCarGenerationsAction } from "@/lib/actions/carGenerationsActions"
 
-export const metadata: Metadata = {
-  title: "Car Details",
-}
+import CarItem from "@/components/garage/car-item"
+import ErrorMessage from "@/components/error-message"
+import Footer from "@/components/home/footer"
+import { Link, useParams } from "react-router"
+import useCarById from "@/features/cars/useCarById"
+import Spinner from "@/components/Spinner"
 
 interface Params {
   carId: string
@@ -38,47 +34,45 @@ interface searchParams {
   car?: string
 }
 
-const Page = async ({
-  params,
-  searchParams,
-}: {
-  params: Params
-  searchParams: searchParams
-}) => {
+const CarDetails = () => {
   // const { data, error } = await getCarByIdAction(params.carId);
-  const carId = searchParams.car || ""
+  const { carId, userId } = useParams()
 
-  const [carData, carGeneration, carMakers] = await Promise.all([
-    getCarByIdAction(params.carId),
-    getAllCarGenerationsAction(),
-    getAllCarMakersAction(),
-  ])
+  const { data: car, isLoading, error } = useCarById(userId, carId)
 
-  const { data, error } = carData
-  const { data: carGenerationData, error: carGenerationError } = carGeneration
-  const { data: carMakersData, error: carMakersError } = carMakers
-  if (error) return <p>{error}</p>
-  if (!data) return <p>Couldn&apos;t find a car with that id {params.carId}</p>
+  // const [carData, carGeneration, carMakers] = await Promise.all([
+  //   getCarByIdAction(params.carId),
+  //   getAllCarGenerationsAction(),
+  //   getAllCarMakersAction(),
+  // ])
 
-  const carGenerations = carGenerationData?.carGenerationsData
-  const car = data.cars.find((car) => car.id === Number(carId)) as CarItemType // Client's information with client's cars.
+  // const { data, error } = carData
+  // const { data: carGenerationData, error: carGenerationError } = carGeneration
+  // const { data: carMakersData, error: carMakersError } = carMakers
+
+  if (isLoading) return <Spinner size={23} />
+  if (!isLoading && error) return <p>{error.message}</p>
+  if (!car) return <p>Couldn&apos;t find a car with that id: {carId}</p>
+
+  // const carGenerations = carGenerationData?.carGenerationsData
+  // const car = data.cars.find((car) => car.id === Number(carId)) as CarItemType // Client's information with client's cars.
 
   if (!car) return <ErrorMessage>Failed to fine matching cars.</ErrorMessage>
   const images = car.carImages.map((image) => image.imagePath)
-  const carInfo = car.carGenerations
-  const carModel = carInfo.carModels
-  const carMaker = carModel.carMakers
-  const clinetPhones = data.phones
-  const client = {
-    name: data.name,
-    email: data.email,
-    id: data?.id,
-    phones: clinetPhones,
-  }
+  const carInfo = car.carGeneration
+  const carModel = carInfo.carModel
+  const carMaker = carModel.carMaker
+  const clinetPhones = car.user.phones
+  // const client = {
+  //   name: data.name,
+  //   email: data.email,
+  //   id: data?.id,
+  //   phones: clinetPhones,
+  // }
 
-  const clientOtherCars = data.cars.filter((car) => car.id !== Number(carId))
+  const clientOtherCars = car?.relatedCars || []
   console.log(clientOtherCars, "OTHER CARS")
-  // const client: ClientWithPhoneNumbers = data.client;
+  const client = car.user
   return (
     <main className="mx-auto min-h-screen max-w-[2200px]">
       {images && images.length ? (
@@ -93,7 +87,7 @@ const Page = async ({
         {/* Car Information  starts*/}
         <div className="space-y-5">
           <Button asChild variant="secondary" size="sm">
-            <Link href="/garage" className="group">
+            <Link to="/garage" className="group">
               <ArrowLeft
                 size={25}
                 className="transition-all group-hover:-translate-x-1"
@@ -243,7 +237,7 @@ const Page = async ({
             <div className="space-y-2">
               <div>
                 Name:{" "}
-                <span className="text-muted-foreground">{client.name}</span>
+                <span className="text-muted-foreground">{client.username}</span>
               </div>
 
               <div>
@@ -255,9 +249,7 @@ const Page = async ({
                 <h3 className="font-semibold">Phones:</h3>
                 <ul className="flex list-inside list-decimal flex-wrap gap-3 text-muted-foreground">
                   {clinetPhones.length ? (
-                    clinetPhones.map((phone, i) => (
-                      <li key={i}>{phone.number}</li>
-                    ))
+                    clinetPhones.map((phone, i) => <li key={i}>{phone}</li>)
                   ) : (
                     <span className="text-muted-foreground">No phones.</span>
                   )}
@@ -273,15 +265,13 @@ const Page = async ({
             <CarManagement
               useParams
               carToEdit={car}
-              clientId={client.id}
+              // clientId={client.id}
               // carGenerations={carGenerations}
-              carMakers={carMakersData || []}
+              // carMakers={carMakersData || []}
               className="sm:flex-col sm:items-stretch lg:flex-row lg:items-center"
             />
             <DeleteCar
               carId={car.id}
-              clientId={client.id}
-              imagePaths={images}
               className="sm:flex-col sm:items-stretch lg:flex-row lg:items-center"
             />
             <ServiceManagement
@@ -323,4 +313,4 @@ const Page = async ({
   )
 }
 
-export default Page
+export default CarDetails

@@ -1,11 +1,12 @@
 import React from "react"
 import CarForm from "./car-form"
-import { CarItem, PhoneNumber } from "@lib/types"
+import { CarItem, PhoneNumber } from "@/lib/types"
 import ServicesForm from "./services-form"
 import { getProductsAction } from "@lib/actions/productsActions"
 import { getServiceStatusAction } from "@lib/actions/serviceStatusAction"
 import { cn } from "@lib/utils"
 import { getAllCategoriesAction } from "@lib/actions/categoriesAction"
+import type { Car } from "@/types"
 
 interface Client {
   name: string
@@ -16,16 +17,12 @@ interface Client {
 
 const ServiceManagement = ({
   carToEdit,
-  className,
-  car,
-  client,
   useParams,
+  className,
 }: {
   useParams?: boolean
-  carToEdit?: CarItem
+  carToEdit?: Car
   className?: string
-  car?: CarItem
-  client?: Client
 }) => {
   const [productsData, serviceStatusData, categories] = await Promise.all([
     getProductsAction({}),
@@ -33,13 +30,13 @@ const ServiceManagement = ({
     getAllCategoriesAction(),
   ])
 
-  const { data: products, error: productError } = productsData
-  const { data: serviceStatus, error: serviceStatusError } = serviceStatusData
-  const { data: categoriesData, error: categoriesError } = categories
-  if (productError || serviceStatusError)
-    return <p>{productError || serviceStatusError}</p>
+  // const { data: products, error: productError } = productsData
+  // const { data: serviceStatus, error: serviceStatusError } = serviceStatusData
+  // const { data: categoriesData, error: categoriesError } = categories
+  // if (productError || serviceStatusError)
+  //   return <p>{productError || serviceStatusError}</p>
 
-  if (!products || !car || !client) return <p>Soemthng went wrong</p>
+  // if (!products || !car || !client) return <p>Soemthng went wrong</p>
   return (
     <div
       className={cn(

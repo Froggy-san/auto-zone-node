@@ -33,5 +33,27 @@ export interface Car {
   mainImageName: string
   carImages: CarImage[]
   createdAt: Date
-  updatedAt: Date
+  updatedAt?: Date
+  relatedCars?: Car
+}
+
+export type CarList = Omit<Car, "user" | "carGeneration"> & {
+  user: {
+    id: string
+    _id: string
+    username: string
+    picture: string
+  }
+  carGeneration: {
+    name: string
+    image: string
+    carModel: {
+      name: string
+      image: string
+      carMaker: {
+        name: string
+        logo: string
+      }
+    }
+  }
 }

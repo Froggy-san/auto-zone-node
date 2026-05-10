@@ -17,13 +17,13 @@ import { Button } from "@/components/ui/button"
 import { useCallback, useState } from "react"
 import CarDeleteDialog from "./car-delete-dialog"
 import { useLocation, useNavigate, useSearchParams } from "react-router"
-import type { Car } from "@/types"
+import type { Car, CarList } from "@/types"
 
 export default function CarAction({
   pageSize,
   car,
 }: {
-  car: Car
+  car: CarList
   pageSize?: number
 }) {
   const [open, setOpen] = useState(false)

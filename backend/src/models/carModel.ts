@@ -90,27 +90,27 @@ const carSchema = new Schema<ICar>(
   },
 );
 
-carSchema.pre(/^find/, function (this: Query<any, any>) {
-  this.populate([
-    {
-      path: "carGeneration",
-      // select: "name image"x, // 👈 Only get what you need for the UI
-      populate: {
-        path: "carModel",
-        model: "carModels",
-        // select: "name",
-        populate: {
-          path: "carMaker",
-          model: "carMakers",
-          // select: "name logo",
-        },
-      },
-    },
-    {
-      path: "user",
-      // select: "username picture", // 👈 Crucial: Don't fetch email/password here
-    },
-  ]);
-});
+// carSchema.pre(/^find/, function (this: Query<any, any>) {
+//   this.populate([
+//     {
+//       path: "carGeneration",
+//       // select: "name image"x, // 👈 Only get what you need for the UI
+//       populate: {
+//         path: "carModel",
+//         model: "carModels",
+//         // select: "name",
+//         populate: {
+//           path: "carMaker",
+//           model: "carMakers",
+//           // select: "name logo",
+//         },
+//       },
+//     },
+//     {
+//       path: "user",
+//       // select: "username picture", // 👈 Crucial: Don't fetch email/password here
+//     },
+//   ]);
+// });
 
-export const CarModel = model<ICar>("cars", carSchema);
+export const Car = model<ICar>("cars", carSchema);

@@ -1,103 +1,85 @@
-import DialogComponent from "@components/dialog-component"
+import DialogComponent from "@/components/dialog-component"
 import SuccessToastDescription, {
   ErorrToastDescription,
-} from "@components/toast-items"
-import { Button } from "@components/ui/button"
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form"
-import { Input } from "@components/ui/input"
+} from "@/components/toast-items"
+import { Button } from "@/components/ui/button"
+
+import { Input } from "@/components/ui/input"
 import { zodResolver } from "@hookform/resolvers/zod"
-import useObjectCompare from "@hooks/use-compare-objs"
-import { useToast } from "@hooks/use-toast"
-import {
-  CarItem,
-  Category,
-  CategoryProps,
-  CreateService,
-  CreateServiceSchema,
-  PhoneNumber,
-  Product,
-  ProductWithCategory,
-  ServiceStatus,
-} from "@lib/types"
+import useObjectCompare from "@/hooks/use-compare-objs"
+import { useToast } from "@/hooks/use-toast"
+
 import React, { useEffect, useMemo, useState } from "react"
 import { useFieldArray, useForm, useWatch } from "react-hook-form"
 import { RotateCcw } from "lucide-react"
-import Spinner from "@components/Spinner"
-import { Textarea } from "@components/ui/textarea"
+import Spinner from "@/components/Spinner"
+import { Textarea } from "@/components/ui/textarea"
 
-import { usePathname, useRouter, useSearchParams } from "next/navigation"
-
-import { ServiceStatusCombobox } from "@components/service-status-combobox"
+import { ServiceStatusCombobox } from "@/components/service-status-combobox"
 
 import { motion } from "framer-motion"
 import { Cross2Icon } from "@radix-ui/react-icons"
-import { Label } from "@components/ui/label"
-import { cn } from "@lib/utils"
-import { ComboBox } from "@components/combo-box"
-import { ProductsComboBox } from "@components/proudcts-combo-box"
-import { createServiceAction } from "@lib/actions/serviceActions"
+import { Label } from "@/components/ui/label"
+import { cn } from "@/lib/utils"
+import { ComboBox } from "@/components/combo-box"
+import { ProductsComboBox } from "@/components/proudcts-combo-box"
+import { createServiceAction } from "@/lib/actions/serviceActions"
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/components/ui/accordion"
-import Alert from "@components/alert"
+} from "@//components/ui/accordion"
+import Alert from "@/components/alert"
 import { isNull } from "lodash"
-import { formatCurrency } from "@lib/client-helpers"
+import { formatCurrency } from "@/lib/client-helpers"
 import CurrencyInput from "react-currency-input-field"
-import PrioritySelect from "@components/priority-select"
-import { checkStock } from "@lib/services/products"
+import PrioritySelect from "@/components/priority-select"
+import { checkStock } from "@/lib/services/products"
+import type { Car } from "@/types"
+import { useLocation, useNavigate, useSearchParams } from "react-router"
+import { CreateServiceSchema, type CreateService } from "@/lib/types"
 
-interface Client {
-  name: string
-  email: string
-  id: number | undefined
-  phones: PhoneNumber[]
-}
+// interface Client {
+//   name: string
+//   email: string
+//   id: number | undefined
+//   phones: PhoneNumber[]
+// }
 const ServicesForm = ({
   useParams,
-  carToEdit,
-  categories,
+  // carToEdit,
+  // categories,
   products,
   car,
-  client,
+  // client,
   serviceStatus,
   open,
   handleClose: handleCloseExternal,
 }: {
   useParams?: boolean
-  carToEdit?: CarItem
-  car?: CarItem
-  client?: Client
-  categories: CategoryProps[]
+  // carToEdit?: CarItem
+  car?: Car
+  // client?: Client
+  // categories: CategoryProps[]
   products: ProductWithCategory[]
   serviceStatus: ServiceStatus[]
   open?: boolean
   handleClose?: () => void
 }) => {
-  const searchParam = useSearchParams()
-  const router = useRouter()
-  const pathname = usePathname()
+  const [searchParam] = useSearchParams()
+  const navigate = useNavigate()
+  const pathname = useLocation().pathname
   const serivceParam = searchParam.get("service")
   const [isOpen, setIsOpen] = useState(!isNull(serivceParam) ? true : false)
   const [currTab, setCurrTab] = useState("item-1")
-  const { toast } = useToast()
 
   const defaultValues = {
-    clientId: (client && client.id) || 0,
-    carId: (car && car.id) || 0,
+    clientId: car?.user.id || "",
+    carId: car?.id || "",
     serviceStatusId: 0,
     note: "",
-    kmCount: "",
+    kmCount: car?.odometer || "",
     priority: "",
     productsToSell: [],
     serviceFees: [{ price: 0, discount: 0, categoryId: 0, notes: "" }],
@@ -186,7 +168,7 @@ const ServicesForm = ({
   function handleOpen(filter: string) {
     if (!isNull(serivceParam)) {
       params.set("edit", filter)
-      router.replace(`${pathname}?${params.toString()}`, { scroll: false })
+      navigate(`${pathname}?${params.toString()}`, { replace: true })
     } else {
       setIsOpen(true)
     }
@@ -196,7 +178,7 @@ const ServicesForm = ({
     if (!isNull(serivceParam)) {
       const params = new URLSearchParams(searchParam)
       params.delete("service")
-      router.replace(`${pathname}?${params.toString()}`, { scroll: false })
+      navigate(`${pathname}?${params.toString()}`, { replace: true })
     }
     setIsOpen(false)
 

@@ -6,20 +6,11 @@ import CarAction from "./car-item-actions"
 import { CircleUser, ImageOff } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { formatNumber } from "@/lib/helper"
-import type { Car, User } from "@/types"
+import type { Car, CarList, User } from "@/types"
 import { Link } from "react-router"
+import { BASE_URL } from "@/lib/constants"
 
-const CarItem = ({
-  clientId,
-  // client,
-  car,
-  pageSize,
-}: {
-  clientId?: number
-  // client: User | undefined
-  pageSize?: number
-  car: Car
-}) => {
+const CarItem = ({ car, pageSize }: { pageSize?: number; car: CarList }) => {
   const carImages = car.carImages.map((image) => image.imagePath)
 
   const viewedImages = carImages.length ? carImages : []
@@ -28,9 +19,9 @@ const CarItem = ({
   const carMaker = carModel.carMaker
 
   return (
-    <Card className="mx-auto min-h-[250px] w-full max-w-[2000px] border">
+    <Card className="mx-auto min-h-[250px] w-full max-w-[2000px] border p-0">
       <Link
-        to={`/garage/${car.user || clientId}?car=${car.id}`}
+        to={`/garage/${car.user.id}?car=${car.id}`}
         className="relative flex h-full w-full flex-col items-start lg:flex-row"
       >
         <div className="h-full min-h-[250px] w-full flex-1 md:min-w-[350px] lg:min-h-[300px] lg:min-w-[470px]">
@@ -51,7 +42,7 @@ const CarItem = ({
             <Badge variant="secondary" className="gap-2">
               {carMaker.logo ? (
                 <img
-                  src={carMaker.logo}
+                  src={`${BASE_URL}/${carMaker.logo}`}
                   alt={`${carMaker.name} logo`}
                   className="h-7 object-contain"
                 />
@@ -72,7 +63,7 @@ const CarItem = ({
             <Badge variant="secondary" className="gap-2">
               {carInfo.image ? (
                 <img
-                  src={carInfo.image}
+                  src={`${BASE_URL}/${carInfo.image}`}
                   alt={`${carInfo.name} Image`}
                   className="h-7 object-contain"
                 />
@@ -112,9 +103,9 @@ const CarItem = ({
               <Badge variant="secondary" className="gap-2">
                 {car.user.picture ? (
                   <img
-                    src={car.user.picture}
+                    src={`${BASE_URL}/${car.user.picture}`}
                     alt={`${car.user?.username} Profile picture`}
-                    className="h-7 w-7 rounded-full object-cover"
+                    className="h-4 w-4 rounded-full object-cover"
                   />
                 ) : (
                   <CircleUser className="h-5 w-5" />
