@@ -28,7 +28,10 @@ export const createCarSchema = z.object({
 
 export const updateCarSchema = createCarSchema.partial().extend({
   body: createCarSchema.shape.body.partial().extend({
-    imagesToDelete: z.array(z.string()).optional(),
+    imagesToDelete: z.preprocess((val) => {
+      if (typeof val === "string") return JSON.parse(val);
+      return val;
+    }, z.array(z.string()).optional()),
   }),
 });
 

@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dialog"
 import Spinner from "@/components/Spinner"
 import { useToast } from "@/hooks/use-toast"
-import { deleteCarAction } from "@/lib/actions/carsAction"
+
 import SuccessToastDescription, {
   ErorrToastDescription,
 } from "@/components/toast-items"
@@ -19,6 +19,9 @@ import SuccessToastDescription, {
 import { cn } from "@/lib/utils"
 import { useNavigate } from "react-router"
 import useDeleteCar from "@/features/cars/useDeleteCar"
+import { toast } from "sonner"
+import { useQueryClient } from "@tanstack/react-query"
+import { deleteCar } from "@/services/carApi"
 const DeleteCar = ({
   carId,
   className,
@@ -46,34 +49,40 @@ const DeleteCar = ({
 
 function DeleteDialog({ carId }: { carId: string }) {
   const [open, setOpen] = useState(false)
-  const { deleteCar, isLoading } = useDeleteCar()
-  // const [isLoading, setIsLoading] = useState(false)
-  // const { toast } = useToast()
-  // const navigate = useNavigate()
-  // async function handleDelete() {
-  //   try {
-  //     if (!carId) return
-  //     setIsLoading(true)
-  //     // await deleteCarAction(clientId, carId, imagePaths)
-  //     navigate(-1)
-  //     //   checkIfLastItem();
-  //     //   queryClient.invalidateQueries({ queryKey: ["carCount"] });
-  //     setOpen(false)
 
-  //     toast({
-  //       className: "bg-primary  text-primary-foreground",
-  //       variant: "default",
-  //       title: "Data deleted!.",
-  //       description: <SuccessToastDescription message="Car has been deleted" />,
-  //     })
-  //   } catch (error: any) {
-  //     toast({
-  //       variant: "destructive",
-  //       title: "Something went wrong.",
-  //       description: <ErorrToastDescription error={error.message} />,
-  //     })
-  //   }
-  // }
+  const [isLoading, setIsLoading] = useState(false)
+  const queryClient = useQueryClient()
+  // const { toast } = useToast()
+  const navigate = useNavigate()
+  async function handleDelete() {
+    try {
+      if (!carId) return
+      setIsLoading(true)
+      await deleteCar(carId)
+      // await deleteCarAction(clientId, carId, imagePaths)
+      navigate(-1)
+      //   checkIfLastItem();
+      queryClient.invalidateQueries({ queryKey: ["cars"] })
+      queryClient.removeQueries({ queryKey: ["carById", carId] })
+      setOpen(false)
+
+      toast.success("Deleted car successfuly")
+
+      // toast({
+      //   className: "bg-primary  text-primary-foreground",
+      //   variant: "default",
+      //   title: "Data deleted!.",
+      //   description: <SuccessToastDescription message="Car has been deleted" />,
+      // })
+    } catch (error: any) {
+      toast.error("Failed to delete car")
+      // toast({
+      //   variant: "destructive",
+      //   title: "Something went wrong.",
+      //   description: <ErorrToastDescription error={error.message} />,
+      // })
+    }
+  }
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -102,7 +111,7 @@ function DeleteDialog({ carId }: { carId: string }) {
           </Button>
           <Button
             variant="destructive"
-            onClick={() => deleteCar(carId)}
+            onClick={handleDelete}
             type="submit"
             size="sm"
             disabled={isLoading}

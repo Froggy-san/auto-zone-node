@@ -7,6 +7,8 @@ export interface IProduct extends Document {
   description: string;
   listPrice: number;
   salePrice: number;
+  minStockLevel: number;
+  lastCostPrice: number; // The price you paid in the latest restock
   stock: number;
   isAvailable: boolean;
   generations: mongoose.Types.ObjectId[];
@@ -72,6 +74,8 @@ const productSchema = new Schema<IProduct>(
       //     "Sale price ({VALUE}) must be lower than or equal to list price",
       // },
     },
+    minStockLevel: { type: Number, default: 2 },
+    lastCostPrice: Number,
     stock: {
       type: Number,
       default: 0,
@@ -149,3 +153,23 @@ const productSchema = new Schema<IProduct>(
 // });
 
 export const Product = model<IProduct>("products", productSchema);
+
+/*
+ok, i like the idea alot but am forced to put it aside along with the other middlewares where we set the serviceStatus and the isAvailable middleware, becasue currently i have alot to do in the front, but i want you to put those in mind for later, i will diffidently do them later, but for now, i can't seem to access this route router.get(
+
+  "getCarAndRelated/:userId",
+
+  validate(
+
+    z.object({
+
+      params: z.object({ userId: objectIdSchema }),
+
+    }),
+
+  ),
+
+  getCarAndRelated,
+
+);, /api/v1/cars/getCarAndRelated/69f6a2092502128b46337f4a?carId=69fe43efc8a6b5b03a60cc2e 404
+*/

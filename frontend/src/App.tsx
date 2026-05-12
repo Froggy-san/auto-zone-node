@@ -9,6 +9,7 @@ import UserLayout from "./pages/user/UserLayout"
 import UserActivity from "./pages/user/UserActivity"
 import UserSettings from "./pages/user/UserSettings"
 import Garage from "./pages/Garage"
+import CarDetails from "./pages/CarDetails"
 export function App() {
   return (
     <BrowserRouter>
@@ -21,6 +22,7 @@ export function App() {
         <Route path="/" element={<Home />} />
         <Route path="/products" element={<Products />} />
         <Route path="/garage" element={<Garage />} />
+        <Route path="/garage/:userId" element={<CarDetails />} />
         <Route path="/products/:id" element={<ProductDetails />} />
 
         <Route path="user/:userId" element={<UserLayout />}>

@@ -21,7 +21,7 @@ const CarItem = ({ car, pageSize }: { pageSize?: number; car: CarList }) => {
   return (
     <Card className="mx-auto min-h-[250px] w-full max-w-[2000px] border p-0">
       <Link
-        to={`/garage/${car.user.id}?car=${car.id}`}
+        to={`/garage/${car.user._id}?car=${car._id}`}
         className="relative flex h-full w-full flex-col items-start lg:flex-row"
       >
         <div className="h-full min-h-[250px] w-full flex-1 md:min-w-[350px] lg:min-h-[300px] lg:min-w-[470px]">

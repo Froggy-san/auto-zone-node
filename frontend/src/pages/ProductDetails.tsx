@@ -121,7 +121,7 @@ const ProductDetails = () => {
   if (!product || !id?.length) return <div>Couldn&apos;t find the product.</div>
 
   const imageUrls = product.productImages.map(
-    (image: ProductImage) => `${BASE_URL}${image.imageUrl}`
+    (image: ProductImage) => image.imageUrl
   )
   const isAdmin = true
 

@@ -1,14 +1,14 @@
 import { Request, Response, NextFunction } from "express";
 import { Product } from "../models/productModel";
 import { catchAsync } from "../utils/catchAsync";
-import multer, { Multer } from "multer";
+
 import { AppError } from "../utils/appError";
 import sharp from "sharp";
-import path from "path";
-import fs from "fs";
+
 import { ProductImage } from "../@types";
 import { deleteFiles, processReqQuery } from "../utils/helper";
 import APIFeatures from "../utils/apiFeatures";
+import multer from "multer";
 
 // export const getProducts = catchAsync(
 //   async (req: Request, res: Response, next: NextFunction) => {
@@ -213,7 +213,6 @@ export const convertProductImages = catchAsync(
 
 export const createProduct = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    console.log("AYOOO from the creation process");
     const createdProduct = await Product.create(req.body);
 
     if (!createdProduct) {

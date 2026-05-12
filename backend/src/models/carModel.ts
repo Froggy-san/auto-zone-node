@@ -8,13 +8,13 @@ const CarImageSchema = new Schema({
 
     requried: true,
   },
-  filebane: {
+  filename: {
     type: String,
     default: "",
   },
   isMain: {
     type: Boolean,
-    default: "",
+    default: false,
   },
 });
 

@@ -17,33 +17,40 @@ import { objectIdSchema, paramIdSchema } from "../validators/commen";
 import z from "zod";
 
 const router = express.Router();
+router.use((req, res, next) => {
+  console.log(`Incoming Request: ${req.method} ${req.path}`);
+  // console.log("Full Params:", req.params);
+  // console.log("Route Path:", req.route.path); // This tells you which pattern Express matched
+  next();
+});
 
+router.get(
+  "/getCarAndRelated/:userId",
+  validate(
+    z.object({
+      params: z.object({ userId: objectIdSchema }),
+      query: z.object({ carId: objectIdSchema }),
+    }),
+  ),
+  getCarAndRelated,
+);
 router
   .route("/")
   .get(handleCarFilters, getCars)
   .post(
     uploadCarImages,
     processCarImages,
-    ensureArray(["carImages"]),
+    ensureArray(["carImages", "imagesToDelete"]),
     validate(createCarSchema),
     createCar,
   );
 
-router.get(
-  "getCarAndRelated/:userId",
-  validate(
-    z.object({
-      params: z.object({ userId: objectIdSchema }),
-    }),
-  ),
-  getCarAndRelated,
-);
 router
   .route("/:id")
   .patch(
     uploadCarImages,
     processCarImages,
-    ensureArray(["carImages", "imagesToDelete"]),
+    ensureArray(["carImages"]),
     validate(updateCarSchema),
     updateCar,
   )

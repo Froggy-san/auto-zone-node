@@ -24,7 +24,6 @@ export async function getCars(filters?: GetCarsProps): Promise<{
     limit: number
   }
 }> {
-  console.log(filters, "FILTERS")
   const searchParams = new URLSearchParams()
 
   Object.entries(filters || {}).forEach(([key, value]) => {
@@ -60,7 +59,7 @@ export async function createCar(data: FormData): Promise<Car> {
   }
 
   const createdProduct = await res.json()
-  console.log("Created Product:", createdProduct.data)
+
   return createdProduct.data
 }
 
@@ -88,7 +87,7 @@ export async function updateCar({
 }
 
 export async function getCarById(userId: string, carId: string): Promise<Car> {
-  const url = `${BASE_URL}/api/v1/cars/getCarAndRelated/${userId}}?carId=${carId}`
+  const url = `${BASE_URL}/api/v1/cars/getCarAndRelated/${userId}?carId=${carId}`
   const res = await fetch(url, {
     credentials: "include",
   })

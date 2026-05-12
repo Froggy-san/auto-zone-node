@@ -7,6 +7,7 @@ import helmet from "helmet";
 import ExpressMongoSanitize from "express-mongo-sanitize";
 import { globalErrorHandler } from "./controllers/errorController";
 
+import path from "path";
 import productRouter from "./routes/productRoutes";
 
 import productBrandRouter from "./routes/productBrandRoutes";
@@ -16,8 +17,11 @@ import carModelRouter from "./routes/carModelRoutes";
 import categoryRouter from "./routes/categoryRoutes";
 import userRouter from "./routes/userRoutes";
 import carRouter from "./routes/carRoutes";
-import path from "path";
 import carGenerationRouter from "./routes/carGenerationRoutes";
+import productSoldRoueter from "./routes/productSoldRoutes";
+import serviceStatusesRouter from "./routes/serviceStatusRoutes";
+import serviceFeesRouter from "./routes/serviceFeeRoutes";
+import serviceRouter from "./routes/serviceRoute";
 const app = express();
 
 // Middlewares
@@ -53,6 +57,7 @@ if (process.env.NODE_ENV === "development") {
 }
 // This line tells Express: "If someone asks for /uploads, look inside the public/uploads folder"
 app.use("/uploads", express.static(path.join(__dirname, "../public/uploads")));
+
 app.use("/api/v1/products", productRouter);
 app.use("/api/v1/productBrands", productBrandRouter);
 app.use("/api/v1/productTypes", productTypeRouter);
@@ -62,6 +67,11 @@ app.use("/api/v1/carModels", carModelRouter);
 app.use("/api/v1/carGenerations", carGenerationRouter);
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/cars", carRouter);
+
+app.use("/api/v1/productSold", productSoldRoueter);
+app.use("/api/v1/serviceFees", serviceFeesRouter);
+app.use("/api/v1/serviceStatuses", serviceStatusesRouter);
+app.use("/api/v1/services", serviceRouter);
 // 2) HEALTH CHECK ROUTE
 app.get("/health", (req: Request, res: Response) => {
   res.status(200).json({

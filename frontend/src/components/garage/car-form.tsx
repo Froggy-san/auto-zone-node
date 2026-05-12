@@ -84,7 +84,7 @@ const CarForm = ({
     motorNumber: carToEdit?.motorNumber || "",
     odometer: carToEdit?.odometer || "",
     notes: carToEdit?.notes || "",
-    user: clientId || "",
+    user: carToEdit?.user._id || "",
     carGeneration: carInfo?._id || "",
     images: [],
     mainImageName: carToEdit?.mainImageName || "",
@@ -157,28 +157,26 @@ const CarForm = ({
 
       images.forEach((image) => formData.append("carImages", image))
 
+      if (deletedMedia.length)
+        formData.append(
+          "imagesToDelete",
+          JSON.stringify(deletedMedia.map((img) => img.imagePath))
+        )
+
       if (carToEdit) {
-        await updateCar({ id: carToEdit.id, data: formData })
-        // await editCar({
-        //   car,
-        //   imagesToDelete: deletedMedia,
-        //   imagesToUpload,
-        //   isEqual,
-        //   id: carToEdit.id.toString(),
-        // })
-        queryClient.invalidateQueries({ queryKey: ["cars"] })
-        queryClient.invalidateQueries({ queryKey: ["carById", carToEdit.id] })
+        await updateCar({ id: carToEdit._id, data: formData })
+
+        queryClient.invalidateQueries({
+          queryKey: ["carById", carToEdit.user._id],
+        })
+        toast.success("Car edited")
       } else {
         await createCar(formData)
-        // await createCar({
-        //   car,
-        //   images: imagesToUpload,
-        // })
-        queryClient.invalidateQueries({ queryKey: ["cars"] })
+
+        toast.success("Car created")
       }
       handleClose()
-
-      toast.success("Car created")
+      queryClient.invalidateQueries({ queryKey: ["cars"] })
       // toast({
       //   className: "bg-primary  text-primary-foreground",
       //   title: carToEdit ? "Data updated." : "A new car has been created",

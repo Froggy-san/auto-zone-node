@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react"
 import { AnimatePresence, motion } from "framer-motion"
 import ImageView from "@/components/image-view"
 import ViewCarousel from "@/components/view-carousel"
+import { BASE_URL } from "@/lib/constants"
 
 const FullImagesGallery = ({
   images,
@@ -80,18 +81,26 @@ const FullImagesGallery = ({
                 {" "}
                 <video
                   playsInline
-                  src={url.startsWith("blob") ? url.split(" ")[0] : url}
+                  src={
+                    url.startsWith("blob")
+                      ? url.split(" ")[0]
+                      : `${BASE_URL}${url}`
+                  }
                   className="absolute inset-0 z-10 h-full w-full origin-top object-cover blur-lg"
                 >
-                  <source src={url} />
+                  <source src={`${BASE_URL}${url}`} />
                 </video>
                 <video
                   controls={false}
                   playsInline
-                  src={url.startsWith("blob") ? url.split(" ")[0] : url}
+                  src={
+                    url.startsWith("blob")
+                      ? url.split(" ")[0]
+                      : `${BASE_URL}${url}`
+                  }
                   className={cn("z-30 max-h-full max-w-full object-contain")}
                 >
-                  <source src={url} />
+                  <source src={`${BASE_URL}${url}`} />
                 </video>
               </div>
             ) : (
@@ -107,12 +116,12 @@ const FullImagesGallery = ({
               >
                 <img
                   loading="lazy"
-                  src={url}
+                  src={`${BASE_URL}${url}`}
                   className="absolute inset-0 z-10 h-full w-full origin-top object-cover blur-lg"
                 />
                 <img
                   loading="lazy"
-                  src={url}
+                  src={`${BASE_URL}${url}`}
                   className={cn("z-30 max-h-full max-w-full object-contain")}
                 />
               </div>

@@ -12,6 +12,7 @@ import {
   type FileRejection,
   type FileWithPath,
 } from "react-dropzone"
+import { BASE_URL } from "@/lib/constants"
 
 interface MultiFileUploaderProps {
   fieldChange: React.Dispatch<SetStateAction<File[]>>
@@ -110,7 +111,7 @@ export function GarageFileUploader({
                   <X size={15} />
                 </Button>
                 <img
-                  src={media.imagePath}
+                  src={`${BASE_URL}${media.imagePath}`}
                   alt="Image selected"
                   className="max-h-[250px] sm:max-h-[120px]"
                 />

@@ -16,6 +16,7 @@ import SuccessToastDescription, {
 } from "@/components/toast-items"
 
 import { deleteCar } from "@/services/carApi"
+import { useQueryClient } from "@tanstack/react-query"
 
 interface Props {
   checkIfLastItem: () => void
@@ -25,7 +26,7 @@ interface Props {
   open: boolean
   setOpen: React.Dispatch<SetStateAction<boolean>>
   // imagePaths: string[]
-  // clientId: string
+  clientId: string
 }
 
 const CarDeleteDialog = ({
@@ -36,14 +37,9 @@ const CarDeleteDialog = ({
   isLoading,
   setIsLoading,
   // imagePaths,
-  // clientId,
+  clientId,
 }: Props) => {
-  useEffect(() => {
-    return () => {
-      const body = document.querySelector("body")
-      if (body) body.style.pointerEvents = "auto"
-    }
-  }, [open])
+  const queryClient = useQueryClient()
 
   async function handleDelete() {
     try {
@@ -51,7 +47,8 @@ const CarDeleteDialog = ({
       // const { error } = await deleteCarAction(clientId, carId, imagePaths)
 
       await deleteCar(carId)
-
+      queryClient.invalidateQueries({ queryKey: ["cars"] })
+      queryClient.removeQueries({ queryKey: ["carById", clientId] })
       checkIfLastItem()
       // queryClient.invalidateQueries({ queryKey: ["carCount"] });
       setOpen(false)
@@ -74,6 +71,12 @@ const CarDeleteDialog = ({
     }
   }
 
+  useEffect(() => {
+    return () => {
+      const body = document.querySelector("body")
+      if (body) body.style.pointerEvents = "auto"
+    }
+  }, [open])
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="border-none sm:max-w-[425px]">

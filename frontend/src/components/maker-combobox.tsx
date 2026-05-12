@@ -47,12 +47,20 @@ export const MakerCombobox: React.FC<CarModelComboBoxProps> = ({
   const { data, fetchNextPage, isFetchingNextPage, isFetching, error } =
     useInfiniteCarMakers(debouncedSearch)
 
-  const options = data?.pages.flatMap((item) => item.data)
+  const options = React.useMemo(() => {
+    return data?.pages.flatMap((item) => item.data)
+  }, [data?.pages])
 
   React.useEffect(() => {
     if (!inView || isFetching) return
     fetchNextPage()
   }, [inView, isFetching])
+
+  React.useEffect(() => {
+    const selectedModel = options?.find((maker) => maker._id === value)
+
+    setModels?.(selectedModel?.carModels || [])
+  }, [value, options])
 
   const selectedItem = options?.find((option) => option._id === value)
 
@@ -101,7 +109,7 @@ export const MakerCombobox: React.FC<CarModelComboBoxProps> = ({
                   onSelect={() => {
                     const isSame = option._id === value
                     setValue(isSame ? null : option._id)
-                    setModels?.(isSame ? [] : option.carModels || [])
+                    // setModels?.(isSame ? [] : option.carModels || [])
                     setOpen(false)
                   }}
                 >

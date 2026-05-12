@@ -13,6 +13,7 @@ import { ClickAwayListener } from "@mui/material"
 import { Button } from "@/components/ui/button"
 import { X } from "lucide-react"
 import { createPortal } from "react-dom"
+import { BASE_URL } from "@/lib/constants"
 
 interface ViewCarouselProps {
   images: string[]
@@ -95,7 +96,11 @@ const ViewCarousel = ({
                     key="container"
                     className="z-50 flex h-[100dvh] w-full items-center justify-center select-none"
                   >
-                    <VideoSlide url={image} i={i} index={current} />
+                    <VideoSlide
+                      url={`${BASE_URL}${image}`}
+                      i={i}
+                      index={current}
+                    />
                     {/* <motion.video
                       controls
                       autoPlay={index === i}
@@ -118,7 +123,7 @@ const ViewCarousel = ({
                     className="z-50 flex h-[100dvh] w-full items-center justify-center select-none"
                   >
                     <motion.img
-                      src={image}
+                      src={`${BASE_URL}${image}`}
                       initial={{ scale: 1.1, opacity: 0 }}
                       animate={{
                         scale: current === i ? 1 : 0.95,

@@ -57,7 +57,7 @@ export const processCarImages = catchAsync(
       req.body.carImages.push({
         imagePath: `/uploads/cars/${imageName}`,
         filename: file.originalname,
-        isMain: isMain,
+        isMain,
       });
     }
 
@@ -68,6 +68,7 @@ export const processCarImages = catchAsync(
 export const createCar = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const carImages = (req.body.carImages || []) as CarImage[];
+
     try {
       const car = await Car.create(req.body);
 
@@ -110,7 +111,6 @@ export const handleCarFilters = catchAsync(
     if (carGeneration && (carGeneration as string).trim() !== "") return next();
 
     if (carMaker && !carModel) {
-      console.log(carMaker, "CAR MAKER");
       const models = await Model.find({ carMaker: carMaker as string }).select(
         "_id",
       );
@@ -194,8 +194,8 @@ export const getCars = getAll(Car, [
 
 export const getCarAndRelated = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const { userId } = req.query;
-    const { carId } = req.params;
+    const { carId } = req.query;
+    const { userId } = req.params;
 
     const generationPopOpts = {
       path: "carGeneration",
@@ -213,13 +213,15 @@ export const getCarAndRelated = catchAsync(
     if (!carId) return next(new AppError(`Invaild carId: ${carId}`, 400));
     if (!userId) return next(new AppError(`Invaild userId: ${userId}`, 400));
 
-    const car = await Car.findById({ id: carId }).populate([
-      generationPopOpts,
-      {
-        path: "user",
-        select: "-password",
-      },
-    ]);
+    const car = await Car.findById(carId)
+      .populate([
+        generationPopOpts,
+        {
+          path: "user",
+          select: "-password -role -passwordChangedAt -updatedAt -createdAt",
+        },
+      ])
+      .lean();
 
     if (!car) return next(new AppError(`Failed to find car data`, 500));
 
@@ -265,46 +267,52 @@ export const getCar = getOne(Car);
 export const updateCar = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id;
+
     const newImages = (req.body.carImages || []) as CarImage[];
     const imagesToDelete = (req.body.imagesToDelete || []) as string[];
 
-    const previousData = await Car.findById(id);
+    try {
+      const previousData = await Car.findById(id);
 
-    if (!previousData) {
-      if (newImages.length) {
-        deleteFiles(newImages.map((m) => m.imagePath));
+      if (!previousData) {
+        if (newImages.length) {
+          deleteFiles(newImages.map((m) => m.imagePath));
+        }
+
+        return next(
+          new AppError(
+            "Faild to get the related car you are trying to update, Please try again",
+            404,
+          ),
+        );
       }
 
-      return next(
-        new AppError(
-          "Faild to get the related car you are trying to update, Please try again",
-          404,
-        ),
+      const remainingImages = previousData.carImages.filter(
+        (image) => !imagesToDelete.includes(image.imagePath),
       );
+
+      req.body.carImages = [...remainingImages, ...newImages];
+      console.log(imagesToDelete, "-----------------");
+      const updatedCar = await Car.findByIdAndUpdate(id, req.body, {
+        returnDocument: "after",
+        runValidators: true,
+      });
+
+      if (!updatedCar) {
+        if (newImages.length) deleteFiles(newImages.map((m) => m.imagePath));
+        return next(new AppError(`Failed to update car data`, 500));
+      }
+
+      if (imagesToDelete.length) deleteFiles(imagesToDelete);
+
+      res.status(200).json({
+        status: "success",
+        data: { data: updatedCar },
+      });
+    } catch (error: any) {
+      deleteFiles(newImages.map((m) => m.imagePath));
+      throw new Error(error.message);
     }
-
-    const remainingImages = previousData.carImages.filter(
-      (image) => !imagesToDelete.includes(image.imagePath),
-    );
-
-    req.body.carImages = [...remainingImages, ...newImages];
-
-    const updatedCar = await Car.findByIdAndUpdate(id, req.body, {
-      new: true,
-      runValidators: true,
-    });
-
-    if (!updatedCar) {
-      if (newImages.length) deleteFiles(newImages.map((m) => m.imagePath));
-      return next(new AppError(`Failed to update car data`, 500));
-    }
-
-    if (imagesToDelete.length) deleteFiles(imagesToDelete);
-
-    res.status(200).json({
-      status: "success",
-      data: { data: updatedCar },
-    });
   },
 );
 

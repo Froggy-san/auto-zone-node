@@ -106,7 +106,7 @@ export default function CarAction({
         open={open}
         setOpen={setOpen}
         // imagePaths={imagesToDelete}
-        // clientId={car.clientId}
+        clientId={car.user._id}
         carId={car.id}
       />
     </div>

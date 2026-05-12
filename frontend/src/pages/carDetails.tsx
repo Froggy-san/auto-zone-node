@@ -1,5 +1,5 @@
 import FullImagesGallery from "@/components/full-images-gallery"
-import { getCarByIdAction } from "@/lib/actions/carsAction"
+// import { getCarByIdAction } from "@/lib/actions/carsAction"
 import {
   Accordion,
   AccordionContent,
@@ -16,15 +16,16 @@ import { VscTypeHierarchySuper } from "react-icons/vsc"
 import { TbBoxModel2 } from "react-icons/tb"
 import { BsFillPersonLinesFill } from "react-icons/bs"
 import { Button } from "@/components/ui/button"
-import ServiceManagement from "@/components/garage/add-service"
-import { getAllCarGenerationsAction } from "@/lib/actions/carGenerationsActions"
+// import ServiceManagement from "@/components/garage/add-service"
+// import { getAllCarGenerationsAction } from "@/lib/actions/carGenerationsActions"
 
 import CarItem from "@/components/garage/car-item"
 import ErrorMessage from "@/components/error-message"
 import Footer from "@/components/home/footer"
-import { Link, useParams } from "react-router"
+import { Link, useParams, useSearchParams } from "react-router"
 import useCarById from "@/features/cars/useCarById"
 import Spinner from "@/components/Spinner"
+import type { Car as CarType } from "@/types"
 
 interface Params {
   carId: string
@@ -36,7 +37,9 @@ interface searchParams {
 
 const CarDetails = () => {
   // const { data, error } = await getCarByIdAction(params.carId);
-  const { carId, userId } = useParams()
+  const { userId } = useParams()
+  const [searchParams] = useSearchParams()
+  const carId = searchParams.get("car") ?? ""
 
   const { data: car, isLoading, error } = useCarById(userId, carId)
 
@@ -62,7 +65,7 @@ const CarDetails = () => {
   const carInfo = car.carGeneration
   const carModel = carInfo.carModel
   const carMaker = carModel.carMaker
-  const clinetPhones = car.user.phones
+  const clinetPhones = car.user?.phones || []
   // const client = {
   //   name: data.name,
   //   email: data.email,
@@ -70,7 +73,7 @@ const CarDetails = () => {
   //   phones: clinetPhones,
   // }
 
-  const clientOtherCars = car?.relatedCars || []
+  const clientOtherCars: CarType[] = car?.relatedCars || []
   console.log(clientOtherCars, "OTHER CARS")
   const client = car.user
   return (
@@ -271,14 +274,14 @@ const CarDetails = () => {
               className="sm:flex-col sm:items-stretch lg:flex-row lg:items-center"
             />
             <DeleteCar
-              carId={car.id}
+              carId={car._id}
               className="sm:flex-col sm:items-stretch lg:flex-row lg:items-center"
             />
-            <ServiceManagement
+            {/* <ServiceManagement
               car={car}
               client={client}
               className="sm:flex-col sm:items-stretch lg:flex-row lg:items-center"
-            />
+            /> */}
           </div>
         </div>
         {/* Related */}
@@ -292,12 +295,7 @@ const CarDetails = () => {
                 <AccordionContent>
                   <ul className="mt-10 grid gap-3 px-4">
                     {clientOtherCars.map((car, i) => (
-                      <CarItem
-                        clientId={client.id}
-                        car={car}
-                        client={undefined}
-                        key={i}
-                      />
+                      <CarItem key={i} car={car} />
                     ))}
                   </ul>
                 </AccordionContent>

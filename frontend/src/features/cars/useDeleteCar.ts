@@ -10,6 +10,7 @@ export default function useDeleteCar() {
     mutationFn: deleteCarApi,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["cars"] })
+
       toast.success("Car deleted")
       navigate(-1)
     },
