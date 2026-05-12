@@ -1,0 +1,49 @@
+import mongoose, { Schema, Document } from "mongoose";
+
+export type StockChangeReason =
+  | "service-sale"
+  | "return"
+  | "restock"
+  | "retail-sale"
+  | "adjustment"
+  | "manual-correction";
+
+export interface IStockLog extends Document {
+  product: mongoose.Types.ObjectId;
+  change: number;
+  previousStock: number;
+  currentStock: number;
+  reason: StockChangeReason;
+  referenceId?: mongoose.Types.ObjectId;
+  user?: mongoose.Types.ObjectId;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const StockLogSchema = new Schema<IStockLog>(
+  {
+    product: { type: Schema.Types.ObjectId, ref: "products", required: true },
+    change: { type: Number, required: true }, // e.g., -2 or +10
+    previousStock: { type: Number, required: true },
+    currentStock: { type: Number, required: true },
+    reason: {
+      type: String,
+      enum: [
+        "service-sale",
+        "retail-sale",
+        "return",
+        "restock",
+        "adjustment",
+        "manual-correction",
+      ],
+      required: true,
+    },
+    referenceId: { type: Schema.Types.ObjectId }, // Flexible: could be Service ID or Restock ID
+    user: { type: Schema.Types.ObjectId, ref: "users" }, // Who did it?
+  },
+  { timestamps: true },
+);
+
+const StockLogs = mongoose.model<IStockLog>("StockLog", StockLogSchema);
+
+export default StockLogs;

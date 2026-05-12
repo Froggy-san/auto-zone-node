@@ -3,16 +3,15 @@ import CarForm from "./car-form"
 
 import ServicesForm from "./services-form"
 // import { getProductsAction } from "@/lib/actions/productsActions"
-import { getServiceStatusAction } from "@/lib/actions/serviceStatusAction"
+// import { getServiceStatusAction } from "@/lib/actions/serviceStatusAction"
 import { cn } from "@/lib/utils"
-import { getAllCategoriesAction } from "@/lib/actions/categoriesAction"
+// import { getAllCategoriesAction } from "@/lib/actions/categoriesAction"
 import type { Car } from "@/types"
 
 interface Client {
   name: string
   email: string
   id: number | undefined
-  phones: PhoneNumber[]
 }
 
 const ServiceManagement = ({
@@ -24,11 +23,11 @@ const ServiceManagement = ({
   carToEdit?: Car
   className?: string
 }) => {
-  const [productsData, serviceStatusData, categories] = await Promise.all([
-    getProductsAction({}),
-    getServiceStatusAction(),
-    getAllCategoriesAction(),
-  ])
+  // const [productsData, serviceStatusData, categories] = await Promise.all([
+  //   getProductsAction({}),
+  //   getServiceStatusAction(),
+  //   getAllCategoriesAction(),
+  // ])
 
   // const { data: products, error: productError } = productsData
   // const { data: serviceStatus, error: serviceStatusError } = serviceStatusData

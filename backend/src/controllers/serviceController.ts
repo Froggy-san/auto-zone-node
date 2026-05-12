@@ -18,6 +18,7 @@ export const getService = getOne(Service);
 
 import mongoose from "mongoose";
 import { IProduct, Product } from "../models/productModel";
+import StockLogs, { IStockLog } from "../models/stockLogsModel";
 
 export const createService = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -30,6 +31,13 @@ export const createService = catchAsync(
 
     const session = await mongoose.startSession();
     session.startTransaction();
+
+    const user = req.user;
+    if (!user)
+      return new AppError(
+        "Unauthorized action, make usre you are logged in with an admin account",
+        403,
+      );
 
     try {
       // 1. Fetch Products & Validate Stock (DO THIS FIRST)
@@ -61,26 +69,48 @@ export const createService = catchAsync(
         totalDiscount += Number(fee.discount);
       });
 
+      const logs: any[] = [];
+
       // Calculate from Products
       const processedProducts = productsSoldData?.map((p: IProductSold) => {
         const dbP = dbProducts.find(
           (db) => db._id.toString() === p.product.toString(),
         );
+
+        // --- BUG FIX: INSUFFICIENT STOCK CHECK ---
+        if (!dbP || dbP.stock < p.count) {
+          throw new AppError(
+            `Not enough stock for ${dbP?.name || "product"}.`,
+            400,
+          );
+        }
+
         const itemSubTotal = p.pricePerUnit * p.count;
         const itemDiscount = p.discountPerUnit * p.count;
-        const isBecameOutOfStock = dbP?.stock || 0 - p.count;
-        if (isBecameOutOfStock && dbP)
+
+        // --- BUG FIX: PROPER OUT OF STOCK CALCULATION ---
+        const remaining = dbP.stock - p.count;
+        if (remaining <= 0) {
           productsOutStockAfter.push(dbP._id as mongoose.Types.ObjectId);
+        }
 
         subTotal += itemSubTotal;
         totalDiscount += itemDiscount;
 
+        logs.push({
+          product: p.product,
+          change: -p.count, // Negative because stock is leaving
+          previousStock: dbP.stock,
+          currentStock: remaining,
+          reason: "service-sale", // Use your enum: 'sale'
+          user: user._id,
+        });
+
         return {
           ...p,
           totalPriceAfterDiscount: itemSubTotal - itemDiscount,
-          originalPricePerUnit: dbP?.listPrice,
-          originalDiscountPerUnit:
-            (dbP?.listPrice || 0) - (dbP?.salePrice || 0),
+          originalPricePerUnit: dbP.listPrice,
+          originalDiscountPerUnit: (dbP.listPrice || 0) - (dbP.salePrice || 0),
         };
       });
 
@@ -136,6 +166,14 @@ export const createService = catchAsync(
           service: createdService._id,
         }));
         await ServiceFee.create(feesWithServiceId, { session });
+      }
+
+      if (logs.length) {
+        const stockLogs = logs.map((log) => ({
+          ...log,
+          referenceId: createdService._id,
+        }));
+        await StockLogs.create(stockLogs, { session });
       }
 
       await session.commitTransaction();

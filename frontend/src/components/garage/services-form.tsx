@@ -50,10 +50,10 @@ const ServicesForm = ({
   useParams,
   // carToEdit,
   // categories,
-  products,
+  // products,
   car,
   // client,
-  serviceStatus,
+  // serviceStatus,
   open,
   handleClose: handleCloseExternal,
 }: {
@@ -62,8 +62,8 @@ const ServicesForm = ({
   car?: Car
   // client?: Client
   // categories: CategoryProps[]
-  products: ProductWithCategory[]
-  serviceStatus: ServiceStatus[]
+  // products: ProductWithCategory[]
+  // serviceStatus: ServiceStatus[]
   open?: boolean
   handleClose?: () => void
 }) => {

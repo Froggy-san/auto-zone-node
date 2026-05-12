@@ -34,7 +34,7 @@ export interface Car {
   carImages: CarImage[]
   createdAt: Date
   updatedAt?: Date
-  relatedCars?: Car[]
+  relatedCars?: CarList[]
 }
 
 export type CarList = Omit<Car, "user" | "carGeneration"> & {
