@@ -3,16 +3,26 @@ import { useInfiniteQuery } from "@tanstack/react-query"
 
 // We make the filters partial so we don't have to provide every single string
 // when calling the hook from a component.
-export default function useInfiniteUsers(searchTerm: string) {
-  const filters = searchTerm
+export default function useInfiniteUsers({
+  searchTerm,
+  adminOnly = false,
+}: {
+  searchTerm: string
+  adminOnly?: boolean
+}) {
+  const filters: Record<string, string> = searchTerm
     ? {
         username: `username[or]=${searchTerm}`,
         email: `email[or]=${searchTerm}`,
         phones: `phones[or]=${searchTerm}`,
       }
     : {}
+
+  if (adminOnly) {
+    filters["role"] = "admin"
+  }
   return useInfiniteQuery({
-    queryKey: ["users", searchTerm],
+    queryKey: ["users", searchTerm, adminOnly],
     queryFn: ({ pageParam = 1 }) => {
       // We override the 'page' from filters with the 'pageParam' from React Query
       return getUsers({

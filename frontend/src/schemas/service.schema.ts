@@ -1,0 +1,32 @@
+import z, { string } from "zod"
+import { ServiceFeeSchema } from "./serviceFee.schema"
+import { productSoldSchema } from "./productSold.schema"
+
+export const CreateServiceSchema = z
+  .object({
+    user: string().min(1, { message: "User ID is required" }),
+    car: string().min(1, { message: "Car ID is required" }),
+    serviceStatus: string().min(1, {
+      message: "Service Status ID is required",
+    }),
+    technician: z.array(
+      string().min(1, { message: "Technician ID is required" })
+    ),
+    odometer: z.string().min(1, { message: "Odometer is required" }),
+    subTotal: z.number().positive(),
+    taxAmount: z.number().positive(),
+    totalDiscount: z.number().positive(),
+    grandTotal: z.number().positive(),
+    amountReceived: z.number().positive(),
+    paymentStatus: z.enum(["unpaid", "partially-paid", "paid", "refunded"]),
+    priority: z.enum(["low", "medium", "high"]),
+    note: z.string(),
+    serviceFees: z.array(ServiceFeeSchema),
+    productsSold: z.array(productSoldSchema),
+    serviceDate: z.date(),
+    laborTime: z.number(),
+  })
+  .refine((data) => data.grandTotal > data.totalDiscount, {
+    path: ["totalDiscount"],
+    message: "Total discount amount must be lower than the grand total amount",
+  })

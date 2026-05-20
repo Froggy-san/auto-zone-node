@@ -1,12 +1,14 @@
 import React from "react"
-import CarForm from "./car-form"
+// import CarForm from "./car-form"
 
-import ServicesForm from "./services-form"
+// import ServicesForm from "./services-form"
 // import { getProductsAction } from "@/lib/actions/productsActions"
 // import { getServiceStatusAction } from "@/lib/actions/serviceStatusAction"
 import { cn } from "@/lib/utils"
+import type { Car } from "@/types/carTypes"
+import ServiceForm from "@/features/services/ServiceForm"
+import { Button } from "../ui/button"
 // import { getAllCategoriesAction } from "@/lib/actions/categoriesAction"
-import type { Car } from "@/types"
 
 interface Client {
   name: string
@@ -16,13 +18,16 @@ interface Client {
 
 const ServiceManagement = ({
   carToEdit,
+  car,
   useParams,
   className,
 }: {
+  car: Car
   useParams?: boolean
   carToEdit?: Car
   className?: string
 }) => {
+  const [open, setOpen] = React.useState(false)
   // const [productsData, serviceStatusData, categories] = await Promise.all([
   //   getProductsAction({}),
   //   getServiceStatusAction(),
@@ -50,13 +55,16 @@ const ServiceManagement = ({
         </p>
       </div>
       <div className="sm:pr-2">
-        <ServicesForm
+        {/* <Button onClick={() => setOpen(true)}>Add Service</Button> */}
+        <ServiceForm open={open} setOpen={setOpen} car={car} />
+
+        {/* <ServicesForm
           categories={categoriesData || []}
           client={client}
           car={car}
           products={products}
           serviceStatus={serviceStatus || []}
-        />
+        /> */}
       </div>
     </div>
   )

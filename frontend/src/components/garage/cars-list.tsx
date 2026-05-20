@@ -1,11 +1,5 @@
-import React from "react"
-// import CarItem from "./car-item"
-import { Car } from "lucide-react"
-import ErrorMessage from "@/components/error-message"
-import type { Car as CarType, User } from "@/types"
-import useCars from "@/features/cars/useCars"
-import { getParam } from "@/lib/getParam"
-import { useSearchParams } from "react-router"
+import type { CarList as CarType, User } from "@/types"
+
 import CarItem from "./car-item"
 import GaragePagination from "./garage-pagination"
 

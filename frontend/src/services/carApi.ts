@@ -1,5 +1,5 @@
 import { BASE_URL } from "@/lib/constants"
-import type { Car } from "@/types"
+import type { Car, CarList } from "@/types"
 
 export interface GetCarsProps {
   page: string
@@ -16,7 +16,7 @@ export interface GetCarsProps {
 }
 
 export async function getCars(filters?: GetCarsProps): Promise<{
-  data: Car[]
+  data: CarList[]
   pagination: {
     totalCount: number
     totalPages: number

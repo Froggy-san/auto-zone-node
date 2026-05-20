@@ -16,9 +16,9 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { ServiceStatus } from "@lib/types"
-import { DEFAULT_CAR_LOGO } from "@lib/constants"
+
 import StatusBadge from "./dashboard/status-badge"
+import useServiceStatuses from "@/features/services/useServiceStatuses"
 
 // const frameworks = [
 //   {
@@ -44,9 +44,9 @@ import StatusBadge from "./dashboard/status-badge"
 // ];
 
 interface ComboBoxProps {
-  setValue: React.Dispatch<React.SetStateAction<number>>
-  value: number
-  options: ServiceStatus[]
+  setValue: React.Dispatch<React.SetStateAction<string>>
+  value: string
+  // options: ServiceStatus[]
   disabled?: boolean
   className?: string
 }
@@ -54,23 +54,36 @@ interface ComboBoxProps {
 export const ServiceStatusCombobox: React.FC<ComboBoxProps> = ({
   setValue,
   value,
-  options,
+  // options,
   className,
   disabled,
 }) => {
   const [open, setOpen] = React.useState(false)
+  const { data, isLoading, error } = useServiceStatuses()
   // const [value, setValue] = React.useState(0);
-  const selected = options.find((option) => option.id === value)
+
+  if (!isLoading && error) {
+    return (
+      <div className="text-destructive">Failed to load service statuses</div>
+    )
+  }
+  const options = data?.data || []
+
+  const selected = options.find((option) => option._id === value)
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
-          disabled={disabled}
+          disabled={disabled || isLoading}
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className={cn("h-fit w-full justify-between", className)}
+          className={cn(
+            "w-full justify-between",
+            { "animate-pulse": isLoading },
+            className
+          )}
         >
           {selected ? (
             <div className="flex max-w-full items-center gap-2">
@@ -95,10 +108,10 @@ export const ServiceStatusCombobox: React.FC<ComboBoxProps> = ({
             <CommandGroup>
               {options?.map((option) => (
                 <CommandItem
-                  key={option.id}
-                  value={option.name + String(option.id)} // to avoid selecting two or more items that has the same name proprty.
+                  key={option._id}
+                  value={option.name + String(option._id)} // to avoid selecting two or more items that has the same name proprty.
                   onSelect={() => {
-                    setValue(option.id === value ? 0 : option.id)
+                    setValue(option._id === value ? "" : option._id)
                     setOpen(false)
                   }}
                   className="gap-2"
@@ -106,7 +119,7 @@ export const ServiceStatusCombobox: React.FC<ComboBoxProps> = ({
                   <Check
                     className={cn(
                       "mr-2 h-4 w-4",
-                      value === option.id ? "opacity-100" : "opacity-0"
+                      value === option._id ? "opacity-100" : "opacity-0"
                     )}
                   />
                   <div className="flex items-center gap-2">

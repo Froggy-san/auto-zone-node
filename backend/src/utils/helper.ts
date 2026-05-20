@@ -66,7 +66,7 @@ export function processReqQuery({
   let queryStr = JSON.stringify(queryObj);
 
   queryStr = queryStr.replace(
-    /\b(gte|gt|lte|lt|in|ne)\b/g,
+    /\b(gte|gt|lte|lt|or|in|regex|options)\b/g,
     (match) => `$${match}`,
   );
   const filtersObj = JSON.parse(queryStr);
@@ -75,9 +75,17 @@ export function processReqQuery({
   const isObjectId = (val: string) => /^[0-9a-fA-F]{24}$/.test(val);
 
   // 4. Apply Regex ONLY to non-ID strings
+  const orConditions: Record<string, any>[] = [];
   Object.keys(filtersObj).forEach((key) => {
     const value = filtersObj[key];
 
+    if (value && typeof value === "object" && "$or" in value) {
+      orConditions.push({ [key]: new RegExp(value.$or as string, "i") });
+
+      filtersObj["$or"] = orConditions;
+      delete filtersObj[key];
+    }
+    if (orConditions.length) filtersObj["$or"] = orConditions;
     if (typeof value === "string") {
       // Logic: Is it an ID? Is it a boolean string? Is it explicitly blocked?
       const isID = isObjectId(value);

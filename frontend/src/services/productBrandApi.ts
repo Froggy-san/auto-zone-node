@@ -43,7 +43,7 @@ export async function getProductBrands(filters?: Filters): Promise<{
   }
 
   const data = await response.json()
-  console.log(data, "DATTTTTTTTTTTTTTT")
+
   return data.data
 }
 

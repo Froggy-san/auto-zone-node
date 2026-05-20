@@ -13,34 +13,56 @@ import Spinner from "../Spinner"
 interface ProductsListProps {
   pageNumber: string
   name?: string
+  limit?: string
   category?: string
   productType?: string
   productBrand?: string
   isAvailable?: string
   carMaker?: string
   carModel?: string
+  carBrand?: string
   generations?: string
+  priceFrom?: string
+  priceTo?: string
   user: any | null
 }
 
 const ProductsList: React.FC<ProductsListProps> = ({
   user,
   pageNumber,
+  limit,
   name,
   category,
   productType,
   productBrand,
   carMaker,
   carModel,
+  carBrand,
   generations,
   isAvailable,
+  priceFrom,
+  priceTo,
 }) => {
   const [searchParams, setSearchParams] = useSearchParams()
+
   const currPage = getParam(searchParams, "page", "1")
   const contianerRef = useRef<HTMLUListElement | null>(null)
   const params = new URLSearchParams(searchParams.toString())
 
-  const { products, pagination, isError, isLoading, error } = useProducts()
+  const { products, pagination, isError, isLoading, error } = useProducts({
+    page: pageNumber,
+    limit: "12",
+    name,
+    carMaker,
+    carBrand,
+    carModel,
+    category,
+    productBrand,
+    productType,
+    generations,
+    priceFrom,
+    priceTo,
+  })
 
   if (products) params.set("size", products.length.toString())
 
@@ -75,17 +97,7 @@ const ProductsList: React.FC<ProductsListProps> = ({
       </ErrorMessage>
     )
 
-  const filters = {
-    name,
-    category,
-    productType,
-    productBrand,
-    isAvailable,
-    carMaker,
-    carModel,
-    generations,
-  }
-  const encondedFilters = encodeURIComponent(JSON.stringify(filters))
+  // const encondedFilters = encodeURIComponent(JSON.stringify(filters))
   return (
     <>
       {isLoading ? (

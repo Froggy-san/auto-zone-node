@@ -43,11 +43,13 @@ export const createService = catchAsync(
       // 1. Fetch Products & Validate Stock (DO THIS FIRST)
       const productSoldIds: mongoose.Types.ObjectId[] =
         productsSoldData?.map((p: any) => p.product) || [];
+
       const dbProducts = await Product.find({
         _id: { $in: productSoldIds },
       }).session(session);
 
       //!important: Even though the user is allowed one entry of each product, some people might want to miss with the site and send multiple entries of the same product. So we want check for any duplicates. This is done becasue we are checking for the stock availablity once for each sold product rather than grouping them.
+
       productSoldIds.forEach((id) => {
         const otherIds = productSoldIds.filter(
           (otherIds) => otherIds.toString() === id.toString(),
@@ -61,7 +63,7 @@ export const createService = catchAsync(
       // 2. CALCULATE TOTALS FIRST (The "Math Office")
       let subTotal = 0;
       let totalDiscount = 0;
-      const productsOutStockAfter: mongoose.Types.ObjectId[] = [];
+      // const productsOutStockAfter: mongoose.Types.ObjectId[] = [];
 
       // Calculate from Service Fees
       serviceFeesData?.forEach((fee: IServiceFee) => {
@@ -90,19 +92,27 @@ export const createService = catchAsync(
 
         // --- BUG FIX: PROPER OUT OF STOCK CALCULATION ---
         const remaining = dbP.stock - p.count;
-        if (remaining <= 0) {
-          productsOutStockAfter.push(dbP._id as mongoose.Types.ObjectId);
-        }
+        // if (remaining <= 0) {
+        //   productsOutStockAfter.push(dbP._id as mongoose.Types.ObjectId);
+        // }
 
         subTotal += itemSubTotal;
         totalDiscount += itemDiscount;
+
+        // Check that the discount for each item doesn't exceed the total price for that item.
+        if (itemDiscount > itemSubTotal) {
+          throw new AppError(
+            `Discount for ${dbP?.name || "product"} cannot exceed the total price.`,
+            400,
+          );
+        }
 
         logs.push({
           product: p.product,
           change: -p.count, // Negative because stock is leaving
           previousStock: dbP.stock,
           currentStock: remaining,
-          reason: "service-sale", // Use your enum: 'sale'
+          reason: "service-sale",
           user: user._id,
         });
 
@@ -146,14 +156,12 @@ export const createService = catchAsync(
         await ProductSold.create(productsWithServiceId, { session });
 
         // 4. BULK UPDATE STOCK
-        const bulkOps = processedProducts.map((item: any) => ({
+        const bulkOps = logs.map((item: any) => ({
           updateOne: {
             filter: { _id: item.product },
             update: {
-              $inc: { stock: -item.count },
-              isAvailable: productsOutStockAfter.includes(item.product)
-                ? false
-                : true,
+              $inc: { stock: item.count },
+              $set: { isAvailable: !item.currentStock },
             },
           },
         }));

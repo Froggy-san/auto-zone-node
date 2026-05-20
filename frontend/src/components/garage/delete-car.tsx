@@ -10,15 +10,9 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import Spinner from "@/components/Spinner"
-import { useToast } from "@/hooks/use-toast"
-
-import SuccessToastDescription, {
-  ErorrToastDescription,
-} from "@/components/toast-items"
 
 import { cn } from "@/lib/utils"
 import { useNavigate } from "react-router"
-import useDeleteCar from "@/features/cars/useDeleteCar"
 import { toast } from "sonner"
 import { useQueryClient } from "@tanstack/react-query"
 import { deleteCar } from "@/services/carApi"

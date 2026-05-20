@@ -25,8 +25,9 @@ import Footer from "@/components/home/footer"
 import { Link, useParams, useSearchParams } from "react-router"
 import useCarById from "@/features/cars/useCarById"
 import Spinner from "@/components/Spinner"
-import type { CarList, Car as CarType } from "@/types"
+
 import ServiceManagement from "@/components/garage/add-service"
+import type { CarList } from "@/types/carTypes"
 
 interface Params {
   carId: string
@@ -66,7 +67,7 @@ const CarDetails = () => {
   const carInfo = car.carGeneration
   const carModel = carInfo.carModel
   const carMaker = carModel.carMaker
-  const clinetPhones = car.user?.phones || []
+  const clinetPhones: string[] = car.user?.phones || []
   // const client = {
   //   name: data.name,
   //   email: data.email,
@@ -280,7 +281,7 @@ const CarDetails = () => {
             />
             <ServiceManagement
               car={car}
-              client={client}
+              // client={client}
               className="sm:flex-col sm:items-stretch lg:flex-row lg:items-center"
             />
           </div>

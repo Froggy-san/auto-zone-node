@@ -1,6 +1,5 @@
 import ProductImages from "@/components/products/product-images"
 import { Card } from "@/components/ui/card"
-import React from "react"
 import CarAction from "./car-item-actions"
 
 import { CircleUser, ImageOff } from "lucide-react"

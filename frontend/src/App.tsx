@@ -9,7 +9,8 @@ import UserLayout from "./pages/user/UserLayout"
 import UserActivity from "./pages/user/UserActivity"
 import UserSettings from "./pages/user/UserSettings"
 import Garage from "./pages/Garage"
-import CarDetails from "./pages/CarDetails"
+import CarDetails from "./pages/carDetails"
+
 export function App() {
   return (
     <BrowserRouter>

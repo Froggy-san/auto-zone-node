@@ -51,6 +51,7 @@ interface ClientsComboBoxProps {
   setValue: React.Dispatch<React.SetStateAction<string | null>>
   value: string | null
   // options: User[]
+  adminOnly?: boolean
   disabled?: boolean
 }
 
@@ -58,6 +59,7 @@ export const ClientsComboBox: React.FC<ClientsComboBoxProps> = ({
   setValue,
   value,
   // options,
+  adminOnly = false,
   disabled,
 }) => {
   const [open, setOpen] = React.useState(false)
@@ -67,7 +69,7 @@ export const ClientsComboBox: React.FC<ClientsComboBoxProps> = ({
 
   const debouncedValue = useDebounce(searchTerm, 500)
   const { data, fetchNextPage, isFetchingNextPage, error, isFetching } =
-    useInfiniteUsers(debouncedValue)
+    useInfiniteUsers({ searchTerm: debouncedValue, adminOnly })
 
   const options = data?.pages.flatMap((item) => item.data) || []
   // const [value, setValue] = React.useState(0);

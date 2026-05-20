@@ -1,4 +1,4 @@
-import React, { SetStateAction } from "react"
+import React, { type SetStateAction } from "react"
 import {
   Dialog,
   DialogContent,
@@ -8,7 +8,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import ServiceStatusForm from "./service-status-form"
-import { ServiceStatus } from "@lib/types"
+import type { ServiceStatus } from "@/types"
 
 interface Props {
   open: boolean

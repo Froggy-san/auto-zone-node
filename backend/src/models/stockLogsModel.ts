@@ -16,8 +16,8 @@ export interface IStockLog extends Document {
   reason: StockChangeReason;
   referenceId?: mongoose.Types.ObjectId;
   user?: mongoose.Types.ObjectId;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 const StockLogSchema = new Schema<IStockLog>(

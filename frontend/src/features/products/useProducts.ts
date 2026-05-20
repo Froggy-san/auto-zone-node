@@ -1,59 +1,67 @@
 import useDebounce from "@/hooks/useDebounce"
 import { getProducts } from "@/services/productApi"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { useEffect } from "react"
+import { useEffect, useMemo } from "react"
 import { useSearchParams } from "react-router"
 
 interface Filters {
   priceFrom?: string
   priceTo?: string
+  carMaker?: string
   carBrand?: string
   carModel?: string
   generations?: string
   category?: string
-  subCategory?: string
+  productType?: string
   productBrand?: string
-  isAvailable?: boolean
+  isAvailable?: string
   name?: string
-  page?: number
-  limit?: number
+  page?: string
+  limit?: string
 }
 
-export default function useProducts() {
-  const [searchParams] = useSearchParams()
+export default function useProducts(props?: Filters) {
+  // const [searchParams] = useSearchParams()
   const queryClient = useQueryClient()
+  const page = Number(props?.page) || 1
 
-  // 1. Better defaults for Numbers
-  const page = Number(searchParams.get("page")) || 1
-  const limit = Number(searchParams.get("limit")) || 12
+  const filters = useMemo(() => {
+    const queryObj: Record<string, any> = {
+      page,
+      limit: Number(props?.limit) || undefined,
+      carBrand: props?.carBrand,
+      carMaker: props?.carMaker,
+      carModel: props?.carModel,
+      generations: props?.generations,
+      category: props?.category,
+      productType: props?.productType,
+      productBrand: props?.productBrand,
+      isAvailable:
+        props?.isAvailable === "true"
+          ? true
+          : props?.isAvailable === "false"
+            ? false
+            : undefined,
+    }
 
-  // 2. Simple helper for string params
-  const getParam = (key: string) => searchParams.get(key) || undefined
+    if (props?.name && props.name.trim() !== "") {
+      queryObj.$or = [
+        { name: { $regex: props.name, $options: "i" } },
+        { description: { $regex: props.name, $options: "i" } },
+      ]
+    }
+    if (props?.priceFrom) queryObj.listPrice = { $gte: Number(props.priceFrom) }
+    if (props?.priceTo) queryObj.listPrice = { $lte: Number(props.priceTo) }
 
-  const name = getParam("name")
-  const debouncedName = useDebounce(name, 500)
-
-  // 3. Construct the filters object
-  // We wrap this in useMemo so the queryKey doesn't "change" unless a value changes
-  const filters: Filters = {
-    page,
-    limit,
-    name: debouncedName,
-    priceFrom: getParam("priceFrom"),
-    priceTo: getParam("priceTo"),
-    carBrand: getParam("carBrand"),
-    carModel: getParam("carModel"),
-    generations: getParam("generations"),
-    category: getParam("category"),
-    subCategory: getParam("subCategory"),
-    productBrand: getParam("productBrand"),
-    isAvailable:
-      searchParams.get("isAvailable") === "true"
-        ? true
-        : searchParams.get("isAvailable") === "false"
-          ? false
-          : undefined,
-  }
+    console.log(queryObj, "QUERY")
+    // Clean out undefined parameters completely so they don't pollute the URL string
+    return Object.fromEntries(
+      Object.entries(queryObj).filter(
+        ([_, v]) => v !== undefined && v !== "" && v !== null
+      )
+    )
+  }, [props])
+  console.log(filters, "FILTERS")
 
   const { data, isLoading, isError, error, ...rest } = useQuery({
     queryKey: ["products", filters],
@@ -85,7 +93,7 @@ export default function useProducts() {
   }, [data, page, filters, queryClient]) // Only run when these change
 
   return {
-    products: data?.data || [],
+    products: data?.products || [],
     pagination: data?.pagination,
     isLoading,
     isError,

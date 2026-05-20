@@ -10,6 +10,7 @@ export interface IProduct extends Document {
   minStockLevel: number;
   lastCostPrice: number; // The price you paid in the latest restock
   stock: number;
+  constPrice: number;
   isAvailable: boolean;
   generations: mongoose.Types.ObjectId[];
   moreDetails: MoreDetail[];
@@ -75,6 +76,7 @@ const productSchema = new Schema<IProduct>(
       // },
     },
     minStockLevel: { type: Number, default: 2 },
+    constPrice: { type: Number, default: 0 },
     lastCostPrice: Number,
     stock: {
       type: Number,
@@ -127,6 +129,13 @@ const productSchema = new Schema<IProduct>(
     toObject: { virtuals: true },
   },
 );
+
+productSchema.pre("save", function () {
+  if (this.isModified("isAvailable")) return; // if the user explicitly sets the is available on the front end, then use that value.
+  if (this.isModified("stock")) {
+    this.isAvailable = this.stock > 0;
+  }
+});
 
 // productSchema.pre("findOne", function (this: Query<any, any>, next : NextFunction) {
 //   // Get the fields being selected in the query

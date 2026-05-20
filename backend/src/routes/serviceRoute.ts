@@ -17,6 +17,7 @@ const router = express.Router();
 
 router.use(protect);
 router.use(restrictTo("admin"));
+
 router
   .route("/")
   .get(getAllServices)

@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import ColoredSignalIcon from "./ColoredSignals"
-import { cn } from "@lib/utils"
+import { cn } from "@/lib/utils"
 
 interface Props {
   value: string
@@ -27,7 +27,7 @@ export default function PrioritySelect({ value, onChange, className }: Props) {
       <SelectContent>
         <SelectGroup>
           <SelectLabel>Priority</SelectLabel>
-          <SelectItem value="Low" className="flex items-center justify-between">
+          <SelectItem value="low" className="flex items-center justify-between">
             <Priority priority="low" />{" "}
             {/* <div className="  pl-10 relative w-full h-fit flex items-center gap-2">
               <ColoredSignalIcon
@@ -39,7 +39,7 @@ export default function PrioritySelect({ value, onChange, className }: Props) {
               <span>Low</span>
             </div> */}
           </SelectItem>
-          <SelectItem value="Medium">
+          <SelectItem value="medium">
             <Priority priority="medium" />
 
             {/* <div className="  pl-10 relative w-full h-fit flex items-center gap-2">
@@ -52,7 +52,7 @@ export default function PrioritySelect({ value, onChange, className }: Props) {
               <span>Medium</span>
             </div> */}
           </SelectItem>
-          <SelectItem value="High">
+          <SelectItem value="high">
             <Priority priority="high" />
             {/* <div className="  pl-10 relative w-full h-fit flex items-center gap-2">
               <ColoredSignalIcon
@@ -88,7 +88,7 @@ export function Priority({ priority, className, ...props }: PriorityProps) {
           bar1Color="hsl(127.46deg 89.33% 44.12%)"
           bar2Color="hsla(127.46deg, 89.33%, 44.12%, 25%)"
           bar3Color="hsla(127.46deg, 89.33%, 44.12%, 25%)"
-          className="absolute bottom-0 left-0 h-9 w-9"
+          className="absolute bottom-0 left-0 !h-9 !w-9"
         />
         <span className="text-muted-foreground">Low</span>
       </div>
@@ -107,7 +107,7 @@ export function Priority({ priority, className, ...props }: PriorityProps) {
           bar1Color="hsl(207.95deg 93.06% 66.08%)"
           bar2Color="hsl(207.95deg 93.06% 66.08%)"
           bar3Color="hsla(207.95deg, 93.06%, 66.08%, 25%)"
-          className="absolute bottom-0 left-0 h-9 w-9"
+          className="absolute bottom-0 left-0 !h-9 !w-9"
         />
         <span className="text-muted-foreground">Medium</span>
       </div>
@@ -126,7 +126,7 @@ export function Priority({ priority, className, ...props }: PriorityProps) {
           bar1Color="hsl(353.94deg 100% 63.14%)"
           bar2Color="hsl(353.94deg 100% 63.14%)"
           bar3Color="hsl(353.94deg 100% 63.14%)"
-          className="absolute bottom-0 left-0 h-9 w-9"
+          className="absolute bottom-0 left-0 !h-9 !w-9"
         />
         <span className="text-muted-foreground">High</span>
       </div>

@@ -11,8 +11,6 @@ import IntersectionProvidor from "@/components/products/intersection-providor"
 import Spinner from "@/components/Spinner"
 import useCars from "@/features/cars/useCars"
 import { Car } from "lucide-react"
-
-import React, { Suspense } from "react"
 import { useSearchParams } from "react-router"
 
 interface SearchParams {

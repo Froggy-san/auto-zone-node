@@ -1,4 +1,5 @@
 import type { CarMaker } from "./carMaker"
+import type { CarGeneration } from "./carTypes"
 import type { Category } from "./category"
 import type { ProductType } from "./productTypes"
 
@@ -16,15 +17,15 @@ export interface ProductImage {
   isMain: boolean
 }
 
-export interface CarGeneration {
-  _id: string
-  name: string
-  notes: string
-  image: string
-  carMaker: CarMaker
-  createdAt: string
-  updatedAt: string
-}
+// export interface CarGeneration {
+//   _id: string
+//   name: string
+//   notes: string
+//   image: string
+//   carMaker: CarMaker
+//   createdAt: string
+//   updatedAt: string
+// }
 
 export interface ProductBrand {
   _id: string
@@ -61,6 +62,7 @@ export interface Brand {
 
 // 2. Update your main Product interface
 export interface ProductWithDetails {
+  id: string
   _id: string
   name: string
   description: string
@@ -83,9 +85,8 @@ export interface ProductWithDetails {
 
 export type Product = Omit<
   ProductWithDetails,
-  "category" | "productType" | "productBrand" | "carMaker" | "carModel"
+  "productType" | "productBrand" | "carMaker" | "carModel"
 > & {
-  category: string // Just the name or ID, depending on what you prefer
   productType: string
   productBrand: string
   carMaker: string

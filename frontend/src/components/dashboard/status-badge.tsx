@@ -5,10 +5,10 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 
-import { Badge } from "@components/ui/badge"
-import { ServiceStatus } from "@lib/types"
-import { cn } from "@lib/utils"
-import React, { SetStateAction, useCallback, useState } from "react"
+import { Badge } from "@/components/ui/badge"
+
+import { cn } from "@/lib/utils"
+import React, { useCallback, useState, type SetStateAction } from "react"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -20,12 +20,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { useToast } from "@hooks/use-toast"
-import SuccessToastDescription, {
-  ErorrToastDescription,
-} from "@components/toast-items"
-import { deleteServiceStatus } from "@lib/actions/serviceStatusAction"
-import Spinner from "@components/Spinner"
+
+import Spinner from "@/components/Spinner"
 import { Cross2Icon } from "@radix-ui/react-icons"
 import StatusFormDialog from "./insert-data/status-form-dialog"
 import { RiCircleLine, RiProgress3Line, RiProgress4Line } from "react-icons/ri"
@@ -38,6 +34,8 @@ import {
   Clock4,
   ClockAlert,
 } from "lucide-react"
+import type { ServiceStatus } from "@/types"
+import { toast } from "sonner"
 type Status =
   | "Pending"
   | "InProgress"
@@ -179,7 +177,6 @@ function DeleteBtn({
   isDeleting: boolean
   setIsDeleting: React.Dispatch<SetStateAction<boolean>>
 }) {
-  const { toast } = useToast()
   // const { deleteCargeneration, isDeleting } = useDeleteCarGenerations();
 
   const [open, setOpen] = useState(false)
@@ -187,25 +184,28 @@ function DeleteBtn({
   const handleDelete = useCallback(async () => {
     try {
       setIsDeleting(true)
-      const {} = await deleteServiceStatus(item.id)
+      // const {} = await deleteServiceStatus(item.id)
       setOpen(false)
       handleResetPage?.()
 
-      toast({
-        className: "bg-primary  text-primary-foreground",
-        title: "Data deleted.",
-        description: (
-          <SuccessToastDescription
-            message={`Service status has been deleted.`}
-          />
-        ),
-      })
+      toast.success("Deleted status badge successfuly")
+
+      // toast({
+      //   className: "bg-primary  text-primary-foreground",
+      //   title: "Data deleted.",
+      //   description: (
+      //     <SuccessToastDescription
+      //       message={`Service status has been deleted.`}
+      //     />
+      //   ),
+      // })
     } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Something went wrong.",
-        description: <ErorrToastDescription error={error.message} />,
-      })
+      toast.error("Failed to delete status badge")
+      // toast({
+      //   variant: "destructive",
+      //   title: "Something went wrong.",
+      //   description: <ErorrToastDescription error={error.message} />,
+      // })
     } finally {
       setIsDeleting(false)
     }

@@ -1,13 +1,9 @@
 import DialogComponent from "@/components/dialog-component"
-import SuccessToastDescription, {
-  ErorrToastDescription,
-} from "@/components/toast-items"
 import { Button } from "@/components/ui/button"
 
 import { Input } from "@/components/ui/input"
 
 import useObjectCompare from "@/hooks/use-compare-objs"
-import { useToast } from "@/hooks/use-toast"
 
 import React, { useMemo, useState } from "react"
 import { Controller, useForm } from "react-hook-form"
@@ -23,13 +19,14 @@ import { MakerCombobox } from "@/components/maker-combobox"
 import { ModelCombobox } from "@/components/model-combobox"
 
 import CurrencyInput from "react-currency-input-field"
-import type { Car, CarImage, CarMaker, CarModel, User } from "@/types"
+import type { CarMaker, CarModel, User } from "@/types"
 import { useLocation, useNavigate, useSearchParams } from "react-router"
 import { CreateCarSchema, type CreateCar } from "@/lib/types"
 import { Field, FieldDescription, FieldError, FieldLabel } from "../ui/field"
 import { createCar, updateCar } from "@/services/carApi"
 import { toast } from "sonner"
 import { zodResolver } from "@hookform/resolvers/zod"
+import type { Car, CarImage } from "@/types/carTypes"
 
 const CarForm = ({
   useParams,
@@ -212,7 +209,7 @@ const CarForm = ({
         <DialogComponent.Header>
           <DialogComponent.Title>
             {" "}
-            {carToEdit ? "Update car's data" : " Create a new car"}r
+            {carToEdit ? "Update car's data" : " Create a new car"}
           </DialogComponent.Title>
           {/* <DialogComponent.Description>
             Create a new car.
@@ -269,7 +266,6 @@ const CarForm = ({
                     disabled={isLoading || !carModelId || !models.length}
                     options={generations}
                     setValue={(value) => {
-                      console.log(value, "VVVVV")
                       field.onChange(value)
                     }}
                     value={field.value}

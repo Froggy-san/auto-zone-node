@@ -1,4 +1,5 @@
 import mongoose, { model, Schema } from "mongoose";
+import { SERVICE_STATUS_DONE_ID } from "../constants";
 
 export interface IService {
   id: string;
@@ -32,7 +33,7 @@ export interface IService {
   updatedAt: Date;
 }
 
-const SerivceSchema = new Schema<IService>(
+const ServiceSchema = new Schema<IService>(
   {
     user: {
       type: mongoose.Types.ObjectId,
@@ -108,4 +109,28 @@ const SerivceSchema = new Schema<IService>(
   },
 );
 
-export const Service = model<IService>("services", SerivceSchema);
+ServiceSchema.pre("save", function () {
+  if (this.paymentStatus === "refunded") {
+    // If it's already marked as refunded, don't let the payment math overwrite it!
+    return;
+  }
+
+  if (this.amountReceived === 0) {
+    this.paymentStatus = "unpaid";
+  } else if (this.amountReceived >= this.grandTotal) {
+    this.paymentStatus = "paid";
+  } else {
+    this.paymentStatus = "partially-paid";
+  }
+
+  // Only set completedAt when status becomes 'finished' and it's not already set
+  if (
+    this.isModified("serviceStatus") &&
+    this.serviceStatus.toString() === SERVICE_STATUS_DONE_ID &&
+    !this.completedAt
+  ) {
+    this.completedAt = new Date();
+  }
+});
+
+export const Service = model<IService>("services", ServiceSchema);

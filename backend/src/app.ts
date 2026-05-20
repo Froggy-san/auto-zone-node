@@ -22,9 +22,24 @@ import productSoldRoueter from "./routes/productSoldRoutes";
 import serviceStatusesRouter from "./routes/serviceStatusRoutes";
 import serviceFeesRouter from "./routes/serviceFeeRoutes";
 import serviceRouter from "./routes/serviceRoute";
+import qs from "qs";
 const app = express();
-
-// Middlewares
+// Override Express default query parser with explicit, powerful native 'qs' parsing
+// app.use((req, res, next) => {
+//   if (req.url.includes("?")) {
+//     const rawQuery = req.url.split("?")[1];
+//     Object.defineProperty(req, "query", {
+//       value: { ...qs.parse(rawQuery || "") },
+//       writable: true,
+//       configurable: true,
+//       enumerable: true,
+//     });
+//     req.query = qs.parse(rawQuery || ""); // Perfectly rebuilds deep objects and arrays!
+//   }
+//   next();
+// });
+app.set("query parser", "extended"); // extends the queries
+// // Middlewares
 app.use(
   helmet({
     crossOriginResourcePolicy: { policy: "cross-origin" },

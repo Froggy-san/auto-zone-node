@@ -21,7 +21,9 @@ export const createProductSchema = z.object({
     description: z.string().optional().default(""),
     listPrice: z.coerce.number().positive(),
     salePrice: z.coerce.number().positive(),
+    constPrice: z.coerce.number().positive().optional(),
     stock: z.coerce.number().int().nonnegative().optional(),
+    minStockLevel: z.coerce.number().int().nonnegative().optional(),
     isAvailable: z.coerce.boolean().optional(),
 
     // Now expecting an array of string IDs, not numbers

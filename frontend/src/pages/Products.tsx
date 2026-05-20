@@ -45,7 +45,7 @@ const Page = () => {
   const productsSectionRef = useRef<HTMLDivElement | null>(null)
   const name = getParam(searchParams, "name", "")
   const pageNumber = getParam(searchParams, "page", "1")
-  const limit = getParam(searchParams, "limit", "20")
+  const limit = getParam(searchParams, "limit", "12")
   const category = getParam(searchParams, "category", "")
   const productType = getParam(searchParams, "productType", "")
   const productBrand = getParam(searchParams, "productBrand", "")
@@ -53,6 +53,9 @@ const Page = () => {
   const carMaker = getParam(searchParams, "carMaker", "")
   const carModel = getParam(searchParams, "carModel", "")
   const generations = getParam(searchParams, "generations", "")
+  const carBrand = getParam(searchParams, "carBrand", "")
+  const priceFrom = getParam(searchParams, "priceFrom", "")
+  const priceTo = getParam(searchParams, "priceTo", "")
 
   useEffect(() => {
     window.scrollTo({
@@ -133,6 +136,7 @@ const Page = () => {
             <ProductsList
               user={null}
               name={name}
+              limit={limit}
               pageNumber={pageNumber}
               category={category}
               productType={productType}
@@ -141,6 +145,8 @@ const Page = () => {
               carModel={carModel}
               generations={generations}
               isAvailable={isAvailable}
+              priceFrom={priceFrom}
+              priceTo={priceTo}
             />
 
             {/* {!user || user.sub !== "admin" ? null : (

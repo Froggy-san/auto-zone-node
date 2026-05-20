@@ -1,24 +1,11 @@
 import type { Product, ProductWithDetails } from "@/types/product"
+import qs from "qs"
 
 const BASE_URL = import.meta.env.VITE_API_URL
 
-interface Filters {
-  priceFrom?: string
-  priceTo?: string
-  carBrand?: string
-  carModel?: string
-  carGeneration?: string
-  category?: string
-  subCategory?: string
-  productBrand?: string
-  isAvailable?: boolean
-  name?: string
-  page?: number
-  limit?: number
-}
-
-export async function getProducts(filters?: Filters): Promise<{
-  data: Product[]
+// Update your Filters type definition if you have one, or use Record<string, any>
+export async function getProducts(filters?: Record<string, any>): Promise<{
+  products: Product[]
   pagination: {
     totalCount: number
     totalPages: number
@@ -26,23 +13,19 @@ export async function getProducts(filters?: Filters): Promise<{
     limit: number
   }
 }> {
-  // 1. Use URLSearchParams to handle formatting and encoding automatically
-  const searchParams = new URLSearchParams()
-
-  // 2. Loop through filters and only append if they have a value
-  Object.entries(filters || {}).forEach(([key, value]) => {
-    if (value !== undefined && value !== null && value !== "") {
-      searchParams.append(key, value.toString())
-    }
+  // 1. Serialize the nested filters object using the 'qs' library standard
+  // - allowDots: true turns { price: { $gte: 10 } } into "price.$gte=10" (very clean for Mongoose backends)
+  // - skipNulls: true strips away fields explicitly set to null
+  const queryString = qs.stringify(filters || {}, {
+    arrayFormat: "indices", // Explicitly forces clean [0], [1] formatting
+    skipNulls: true,
+    encode: true,
   })
-  console.log(searchParams.toString(), "PARAMS")
 
-  const query = `${BASE_URL}/api/v1/products?${searchParams.toString()}`
+  const query = `${BASE_URL}/api/v1/products?${queryString}`
 
   const response = await fetch(query, {
     method: "GET",
-    // Note: You don't actually need "Content-Type" for a GET request
-    // because there is no body, but keeping it doesn't hurt.
     headers: {
       "Content-Type": "application/json",
     },
@@ -51,15 +34,75 @@ export async function getProducts(filters?: Filters): Promise<{
 
   if (!response.ok) {
     const error = await response.json()
-
     console.error("Error fetching products:", error || response.statusText)
     throw new Error(error.message || "Failed to get products")
   }
 
-  const data = await response.json()
+  const resBody = await response.json()
 
-  return data.data
+  // Crucial Fix: Return the root payload object envelope (resBody), NOT just resBody.data!
+  // Your TypeScript return signature promises an object with BOTH { data, pagination }.
+  // If you return resBody.data, you strip the pagination metadata away from React Query.
+  return resBody.data
 }
+
+// interface Filters {
+//   priceFrom?: string
+//   priceTo?: string
+//   carBrand?: string
+//   carModel?: string
+//   carGeneration?: string
+//   category?: string
+//   subCategory?: string
+//   productBrand?: string
+//   isAvailable?: boolean
+//   name?: string
+//   page?: number
+//   limit?: number
+// }
+
+// API CALLS BEFORE THE 'qs' library
+// export async function getProducts(filters?: Filters): Promise<{
+//   data: Product[]
+//   pagination: {
+//     totalCount: number
+//     totalPages: number
+//     currentPage: number
+//     limit: number
+//   }
+// }> {
+//   // 1. Use URLSearchParams to handle formatting and encoding automatically
+//   const searchParams = new URLSearchParams()
+
+//   // 2. Loop through filters and only append if they have a value
+//   Object.entries(filters || {}).forEach(([key, value]) => {
+//     if (value !== undefined && value !== null && value !== "") {
+//       searchParams.append(key, value.toString())
+//     }
+//   })
+//   console.log(searchParams.toString(), "PARAMS")
+
+//   const query = `${BASE_URL}/api/v1/products?${searchParams.toString()}`
+
+//   const response = await fetch(query, {
+//     method: "GET",
+//     headers: {
+//       "Content-Type": "application/json",
+//     },
+//     credentials: "include",
+//   })
+
+//   if (!response.ok) {
+//     const error = await response.json()
+
+//     console.error("Error fetching products:", error || response.statusText)
+//     throw new Error(error.message || "Failed to get products")
+//   }
+
+//   const data = await response.json()
+
+//   return data.data
+// }
 
 export async function createProduct(data: FormData): Promise<Product> {
   const res = await fetch(`${BASE_URL}/api/v1/products`, {

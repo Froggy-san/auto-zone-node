@@ -1,5 +1,5 @@
-import { cn } from "@lib/utils"
-import React, { SVGProps } from "react"
+import { cn } from "@/lib/utils"
+import React, { type SVGProps } from "react"
 
 // Define the interface for our component's props
 interface ColoredSignalIconProps extends SVGProps<SVGSVGElement> {

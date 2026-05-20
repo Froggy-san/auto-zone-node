@@ -86,7 +86,7 @@ import multer from "multer";
 export const getProducts = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     // 1. Filtering Logic
-
+    console.log(req.query, "REQUEST QUERY");
     const features = new APIFeatures(Product.find(), req.query)
       .filter()
       .sort()
@@ -98,7 +98,7 @@ export const getProducts = catchAsync(
     const limitNum = parseInt(req.query.limit as string, 100) || 100; // Default to 100 for better performance
 
     // 7. Execution & Meta Data
-    const products = await features.query;
+    const products = await features.query.populate("category");
     const totalCount = await Product.countDocuments(features.filtersObj);
     const totalPages = Math.ceil(totalCount / limitNum);
 
@@ -110,7 +110,7 @@ export const getProducts = catchAsync(
       status: "success",
       results: products.length,
       data: {
-        data: products,
+        products,
         pagination: {
           totalCount,
           totalPages,

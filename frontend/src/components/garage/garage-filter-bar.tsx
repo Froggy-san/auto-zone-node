@@ -1,8 +1,6 @@
 import React from "react"
 
 import GarageFilter from "./garage-fiter"
-import type { CarMaker, User } from "@/types"
-import useCars from "@/features/cars/useCars"
 
 // interface CarsListProps {
 //   color: string
