@@ -1,7 +1,7 @@
 type DownloadType = "inSamePage" | "separate"
 
 export default async function downloadAsPdf(
-  ids: number[],
+  ids: string[],
   type: DownloadType = "inSamePage"
 ) {
   const idsArr = JSON.stringify(ids)

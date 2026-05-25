@@ -1,37 +1,19 @@
-import React, { SetStateAction, useCallback, useEffect, useState } from "react"
+import React, {
+  type SetStateAction,
+  useCallback,
+  useEffect,
+  useState,
+} from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
+import { Controller, useForm } from "react-hook-form"
 
 import { Button } from "@/components/ui/button"
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form"
 
-import {
-  CarItem,
-  ClientWithPhoneNumbers,
-  EditService,
-  EditServiceSchema,
-  Service,
-  ServiceStatus,
-} from "@lib/types"
+import Spinner from "@/components/Spinner"
 
-import Spinner from "@components/Spinner"
+import useObjectCompare from "@/hooks/use-compare-objs"
+import DialogComponent from "@/components/dialog-component"
 
-import { useToast } from "@hooks/use-toast"
-import SuccessToastDescription, {
-  ErorrToastDescription,
-} from "@components/toast-items"
-
-import useObjectCompare from "@hooks/use-compare-objs"
-import DialogComponent from "@components/dialog-component"
-import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { format } from "date-fns"
 import { CalendarIcon, ReceiptText } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -41,39 +23,59 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { Textarea } from "@components/ui/textarea"
-import { ServiceStatusCombobox } from "@components/service-status-combobox"
-import { editServiceAction } from "@lib/actions/serviceActions"
-import { ClientsComboBox } from "@components/clients-combobox"
-import { CarsComboBox } from "@components/car-combo-box"
+import { Textarea } from "@/components/ui/textarea"
+import { ServiceStatusCombobox } from "@/components/service-status-combobox"
+// import { editServiceAction } from "@lib/actions/serviceActions"
+import { ClientsComboBox } from "@/components/clients-combobox"
+// import { CarsComboBox } from "@/components/car-combo-box"
+import type { Service, ServiceStatus, User } from "@/types"
+import { EditServiceSchema } from "@/schemas/service.schema"
+
+import type z from "zod"
+import { toast } from "sonner"
+import { updateService } from "@/services/servicesApi"
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+} from "@/components/ui/field"
+import CurrencyInput from "react-currency-input-field"
+import PrioritySelect from "@/components/priority-select"
+import { Input } from "@/components/ui/input"
+import DatePicker from "@/components/DatePicker"
 
 const EditServiceForm = ({
-  clients,
-  cars,
+  // clients,
+  // cars,
   status,
   service,
   open,
   setOpen,
   setIsLoading,
 }: {
-  clients: ClientWithPhoneNumbers[]
-  cars: CarItem[]
+  // clients: User[]
+  // cars: CarI[]
   open: boolean
   setOpen: React.Dispatch<SetStateAction<"edit" | "delete" | "note" | "">>
   setIsLoading: React.Dispatch<SetStateAction<boolean>>
   service: Service
   status: ServiceStatus[]
 }) => {
-  const { toast } = useToast()
-
   const defaultValues = {
-    created_at: new Date(service.created_at),
-    clientId: service.clients.id || 0,
-    carId: service.cars.id || 0,
-    serviceStatusId: service.serviceStatuses.id || 0,
+    serviceDate: new Date(service.serviceDate),
+    user: service.user._id || "",
+    car: service.car._id || "",
+    serviceStatus: service.serviceStatus._id || "",
+    odometer: service.odometer || "",
+    amountReceived: service.amountReceived || 0,
+    paymentStatus: service.paymentStatus || "unpaid",
+    priority: service.priority || "low",
+    laborTime: service.laborTime || 0,
+    technician: service.technician.map((t) => t._id) || [],
     note: service.note || "",
   }
-  const form = useForm<EditService>({
+  const form = useForm<z.infer<typeof EditServiceSchema>>({
     mode: "onChange",
     resolver: zodResolver(EditServiceSchema),
     defaultValues,
@@ -93,11 +95,11 @@ const EditServiceForm = ({
   }, [open])
   const isLoading = form.formState.isSubmitting
 
-  async function onSubmit(data: EditService) {
+  async function onSubmit(data: z.infer<typeof EditServiceSchema>) {
     // format(value, "yyyy-MM-dd")
     const editedData = {
       ...data,
-      created_at: data.created_at.toISOString(),
+      created_at: data.serviceDate.toISOString(),
       id: service.id,
     }
 
@@ -105,22 +107,12 @@ const EditServiceForm = ({
       if (isEqual) throw new Error("You haven't changed anything.")
       setIsLoading(true)
 
-      const { error } = await editServiceAction(editedData)
+      const { error } = await updateService(editedData, service._id)
       if (error) throw new Error(error)
       setOpen("")
-      toast({
-        className: "bg-primary  text-primary-foreground",
-        title: "Success!.",
-        description: (
-          <SuccessToastDescription message="Service data has been updated." />
-        ),
-      })
+      toast.success("Serivce details has been updated")
     } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Something went wrong while updating the service fee data.",
-        description: <ErorrToastDescription error={error.message} />,
-      })
+      toast.error("Failedto edit service details")
     } finally {
       setIsLoading(false)
     }
@@ -141,153 +133,227 @@ const EditServiceForm = ({
             Create a new car information.
           </DialogComponent.Description>
         </DialogComponent.Header>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <div className="flex items-center gap-3">
-              <FormField
-                disabled={isLoading}
-                control={form.control}
-                name="carId"
-                render={({ field }) => (
-                  <FormItem className="mb-auto w-full">
-                    <FormLabel>Car</FormLabel>
-                    <FormControl>
-                      <CarsComboBox
-                        value={field.value}
-                        setValue={field.onChange}
-                        options={cars}
-                      />
-                    </FormControl>
 
-                    <FormMessage />
-                  </FormItem>
-                )}
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <div className="flex flex-col gap-2 space-y-4 sm:flex-row sm:space-y-0">
+            <div className="group/field flex w-full flex-col gap-3 *:w-full data-[invalid=true]:text-destructive [&>.sr-only]:w-auto">
+              <FieldLabel>Client</FieldLabel>
+              <Input
+                disabled
+                placeholder="Client"
+                value={service.user.username}
               />
-
-              <FormField
-                disabled={isLoading}
-                control={form.control}
-                name="clientId"
-                render={({ field }) => (
-                  <FormItem className="mb-auto w-full">
-                    <FormLabel>Client</FormLabel>
-                    <FormControl>
-                      <ClientsComboBox
-                        value={field.value}
-                        setValue={field.onChange}
-                        options={clients}
-                      />
-                    </FormControl>
-
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <FieldDescription>Car owner.</FieldDescription>
             </div>
 
-            <div className="flex flex-col items-center gap-3 xs:flex-row">
-              <FormField
-                disabled={isLoading}
-                control={form.control}
-                name="created_at"
-                render={({ field }) => (
-                  <FormItem className="mb-auto w-full">
-                    <FormLabel>Date</FormLabel>
-                    <FormControl>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant={"outline"}
-                            className={cn(
-                              "w-full justify-start gap-2 text-left font-normal",
-                              !field.value && "text-muted-foreground"
-                            )}
-                          >
-                            <CalendarIcon />
-                            {field.value ? (
-                              format(field.value, "PPP")
-                            ) : (
-                              <span>Pick a date</span>
-                            )}
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={field.value}
-                            onSelect={field.onChange}
-                            initialFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
-                    </FormControl>
-
-                    <FormMessage />
-                  </FormItem>
-                )}
+            <div className="group/field flex w-full flex-col gap-3 *:w-full data-[invalid=true]:text-destructive [&>.sr-only]:w-auto">
+              <FieldLabel>Car</FieldLabel>
+              <Input
+                disabled
+                placeholder="Car"
+                value={service.car.plateNumber}
               />
-
-              <FormField
-                disabled={isLoading}
-                control={form.control}
-                name="serviceStatusId"
-                render={({ field }) => (
-                  <FormItem className="mb-auto w-full">
-                    <FormLabel>Status</FormLabel>
-                    <FormControl>
-                      <ServiceStatusCombobox
-                        value={field.value}
-                        setValue={field.onChange}
-                        options={status}
-                      />
-                    </FormControl>
-
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <FieldDescription>
+                Plate number of the car being serviced.
+              </FieldDescription>
             </div>
-
-            <FormField
-              disabled={isLoading}
+            <Controller
+              name="odometer"
               control={form.control}
-              name={`note`}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Notes</FormLabel>
-                  <FormControl>
-                    <Textarea placeholder="note..." {...field} />
-                  </FormControl>
-                  <FormDescription>
-                    Enter any additional detials.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid} className="mb-auto">
+                  <FieldLabel htmlFor={field.name}>Km Count</FieldLabel>
+                  <CurrencyInput
+                    id={field.name}
+                    name={field.name}
+                    placeholder={field.name}
+                    decimalsLimit={2} // Max number of decimal places
+                    prefix="Km " // Currency symbol (e.g., Egyptian Pound)
+                    decimalSeparator="." // Use dot for decimal
+                    groupSeparator="," // Use comma for thousands
+                    value={field.value || ""}
+                    onValueChange={(formattedValue, name, value) => {
+                      // setFormattedListing(formattedValue || "");
+
+                      field.onChange(formattedValue || "")
+                    }}
+                    className="input-field"
+                  />
+
+                  <FieldDescription>
+                    Enter the distance traveled in kilometers.
+                  </FieldDescription>
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
+          </div>
+
+          <div className="flex flex-col gap-2 space-y-4 sm:flex-row sm:space-y-0">
+            <Controller
+              name="serviceStatus"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid} className="mb-auto">
+                  <FieldLabel htmlFor={field.name}>Service Status</FieldLabel>
+                  <ServiceStatusCombobox
+                    setValue={field.onChange}
+                    value={field.value}
+                    disabled={isLoading}
+                  />
+                  <FieldDescription>
+                    Select the status of the service.
+                  </FieldDescription>
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
+            <Controller
+              name="priority"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid} className="mb-auto">
+                  <FieldLabel htmlFor={field.name}>Priority</FieldLabel>
+                  <PrioritySelect
+                    value={field.value}
+                    onChange={field.onChange}
+                    className="flex w-full items-center"
+                  />
+                  <FieldDescription>
+                    Select the priority of the service.
+                  </FieldDescription>
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
               )}
             />
 
-            <DialogComponent.Footer>
-              <Button
-                onClick={() => setOpen("")}
-                disabled={isLoading}
-                type="reset"
-                variant="secondary"
-                size="sm"
-                className="w-full sm:w-[unset]"
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                size="sm"
-                disabled={isLoading || isEqual}
-                className="w-full sm:w-[unset]"
-              >
-                {isLoading ? <Spinner className="h-full" /> : "Update"}
-              </Button>
-            </DialogComponent.Footer>
-          </form>
-        </Form>
+            <Controller
+              name="technician"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid} className="mb-auto">
+                  <FieldLabel htmlFor={field.name}>Tecnician</FieldLabel>
+                  <ClientsComboBox
+                    setValue={(value) => field.onChange([value])}
+                    value={field.value[0]}
+                    disabled={isLoading}
+                    adminOnly
+                  />
+
+                  <FieldDescription>
+                    Enter the tecnician performing the service.
+                  </FieldDescription>
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
+          </div>
+          <div className="flex flex-col gap-2 space-y-4 sm:flex-row sm:space-y-0">
+            <Controller
+              name="laborTime"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid} className="mb-auto">
+                  <FieldLabel htmlFor={field.name}>Labor Time</FieldLabel>
+                  <CurrencyInput
+                    id="labor-time"
+                    name="labor-time"
+                    placeholder="labor-time"
+                    decimalsLimit={2} // Max number of decimal places
+                    prefix="Hrs " // Currency symbol (e.g., Egyptian Pound)
+                    decimalSeparator="." // Use dot for decimal
+                    groupSeparator="," // Use comma for thousands
+                    value={field.value || ""}
+                    onValueChange={(formattedValue, name, value) => {
+                      // setFormattedListing(formattedValue || "");
+
+                      field.onChange(Number(formattedValue) || 0)
+                    }}
+                    className="input-field"
+                  />
+
+                  <FieldDescription>
+                    Enter the labor time in hours.
+                  </FieldDescription>
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
+
+            <Controller
+              name="serviceDate"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid} className="mb-auto">
+                  <FieldLabel htmlFor={field.name}>Service Date</FieldLabel>
+                  <DatePicker
+                    disabled={isLoading}
+                    placeholder="Service Date"
+                    date={field.value}
+                    setDate={field.onChange}
+                  />
+                  <FieldDescription>
+                    Enter the date when the service was initalized.
+                  </FieldDescription>
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
+          </div>
+          <Controller
+            name="note"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid} className="mb-auto">
+                <FieldLabel htmlFor={field.name}>Note</FieldLabel>
+                <Textarea
+                  disabled={isLoading}
+                  placeholder="Additional details..."
+                  {...field}
+                />
+
+                <FieldDescription>
+                  Enter the tecnician performing the service.
+                </FieldDescription>
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
+          <DialogComponent.Footer>
+            <Button
+              onClick={() => setOpen("")}
+              disabled={isLoading}
+              type="reset"
+              variant="secondary"
+              size="sm"
+              className="w-full sm:w-[unset]"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              size="sm"
+              disabled={isLoading || isEqual}
+              className="w-full sm:w-[unset]"
+            >
+              {isLoading ? <Spinner className="h-full" /> : "Update"}
+            </Button>
+          </DialogComponent.Footer>
+        </form>
       </DialogComponent.Content>
     </DialogComponent>
   )

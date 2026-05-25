@@ -9,12 +9,13 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 
-import { Button } from "@components/ui/button"
-import { Service } from "@lib/types"
-import ProductImages from "@components/products/product-images"
+import { Button } from "@/components/ui/button"
+import ProductImages from "@/components/products/product-images"
+
+import NoteDialog from "@/components/garage/note-dialog"
+import type { Service } from "@/types"
 import { ImageOff } from "lucide-react"
-import Link from "next/link"
-import NoteDialog from "@components/garage/note-dialog"
+import { Link } from "react-router"
 
 const CarDialog = ({
   service,
@@ -25,7 +26,7 @@ const CarDialog = ({
 }) => {
   const [noteOpen, setNoteOpen] = useState(false)
 
-  const car = service.cars
+  const car = service.car
 
   const carImages = car.carImages.map((image) => image.imagePath)
 
@@ -69,12 +70,11 @@ const CarDialog = ({
             )}
             {isAdmin ? (
               <Link
-                prefetch={false}
-                href={`/garage/${service.clients.id}?car=${car.id}`}
+                to={`/garage/${service.user._id}?car=${car._id}`}
                 className="space-y-1 text-sm text-muted-foreground"
               >
                 <div className="line-clamp-1">
-                  Client: {service.clients.name}
+                  Client: {service.user.username}
                 </div>
 
                 <div className="line-clamp-2">
@@ -112,7 +112,7 @@ Generation: {carInfo.carModel.name}
             ) : (
               <div className="space-y-1 text-sm text-muted-foreground">
                 <div className="line-clamp-1">
-                  Client: {service.clients.name}
+                  Client: {service.user.username}
                 </div>
 
                 <div className="line-clamp-2">

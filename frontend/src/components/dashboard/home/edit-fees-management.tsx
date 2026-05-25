@@ -1,9 +1,10 @@
-import { getServiceFeesById } from "@lib/actions/serviceFeeAction"
+import { getServiceFeesById } from "@/lib/actions/serviceFeeAction"
 import React from "react"
 
-import { getAllCategoriesAction } from "@lib/actions/categoriesAction"
-import { getServiceById } from "@lib/actions/serviceActions"
+import { getAllCategoriesAction } from "@/lib/actions/categoriesAction"
+import { getServiceById } from "@/lib/actions/serviceActions"
 import FeesForm from "./fees-form"
+import useServiceFeeById from "@/features/services/useServiceFeeById"
 
 const EditFeesManagement = ({
   feesId,
@@ -15,12 +16,15 @@ const EditFeesManagement = ({
   let categoriesArr
   let fee
 
-  if (feesId) {
-    const data = await getServiceFeesById(feesId)
-    fee = data
-  }
+  // if (feesId) {
+  //   const data = await getServiceFeesById(feesId)
+  //   fee = data
+  // }
 
-  const serviceId = fee ? fee.data.serviceId : Number(addFeeId)
+  const { data: serviceFee, isLoading } = useServiceFeeById(feesId)
+
+  const serviceId = serviceFee ? serviceFee.service : Number(addFeeId)
+
   const [serviceData, categoriesData] = await Promise.all([
     getServiceById(serviceId, "id,totalPrice"),
     getAllCategoriesAction(),

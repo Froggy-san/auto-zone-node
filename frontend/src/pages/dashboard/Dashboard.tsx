@@ -5,16 +5,6 @@ import { ModeToggle } from "@/components/theme-switch"
 
 import React from "react"
 
-export const metadata: Metadata = {
-  // title: "The Wild Oasis",
-  title: {
-    template: "%s / Dashboard",
-    default: "Home / Dashboard",
-  },
-
-  description: "Manage your business.",
-}
-
 import {
   ArrowLeftToLine,
   ArrowRightToLine,
@@ -30,6 +20,7 @@ import {
   SlidersVertical,
   Ticket,
 } from "lucide-react"
+import { Link, Outlet } from "react-router"
 
 const ICON_SIZE = 22
 
@@ -84,7 +75,7 @@ const links = [
   },
 ]
 
-const Layout = ({ children }: { children: React.ReactNode }) => {
+const Dashboard = ({ children }: { children?: React.ReactNode }) => {
   return (
     <main
       data-vaul-drawer-wrapper
@@ -92,7 +83,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
     >
       <div className="flex items-center justify-between border-b py-1 pr-2">
         <div className="flex items-center gap-2">
-          <Link href="/">
+          <Link to="/">
             <h1 className="text-3xl font-semibold sm:text-6xl">DASHBOARD</h1>
           </Link>
           <NavDrawer />
@@ -104,7 +95,9 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
         <SideBar links={links} />
 
         <div className="max-h-full flex-1 overflow-y-auto p-2">
-          <div className="mx-auto max-w-[1600px]">{children}</div>
+          <div className="mx-auto max-w-[1600px]">
+            <Outlet />
+          </div>
         </div>
       </div>
 
@@ -113,4 +106,4 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   )
 }
 
-export default Layout
+export default Dashboard

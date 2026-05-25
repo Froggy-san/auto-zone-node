@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Button } from "@components/ui/button"
+import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogClose,
@@ -10,17 +10,18 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
+} from "@//components/ui/dialog"
 import { Download, Trash2 } from "lucide-react"
-import { useToast } from "@hooks/use-toast"
+import { useToast } from "@/hooks/use-toast"
 import SuccessToastDescription, {
   ErorrToastDescription,
-} from "@components/toast-items"
-import downloadAsPdf from "@lib/services/download-pdf"
-import CloseButton from "@components/close-button"
-import { deleteMultiServicesAction } from "@lib/actions/serviceActions"
-import { usePathname, useRouter, useSearchParams } from "next/navigation"
+} from "@/components/toast-items"
+import downloadAsPdf from "@/lib/services/download-pdf"
+import CloseButton from "@/components/close-button"
+// import { deleteMultiServicesAction } from "@/lib/actions/serviceActions"
+
 import { useQueryClient } from "@tanstack/react-query"
+import { useLocation, useNavigate, useSearchParams } from "react-router"
 const ServiceSelectControls = ({
   isAdmin,
   selected,
@@ -30,11 +31,11 @@ const ServiceSelectControls = ({
   setLoadingIds,
 }: {
   isAdmin: boolean
-  selected: number[]
-  setSelected: React.Dispatch<React.SetStateAction<number[]>>
+  selected: string[]
+  setSelected: React.Dispatch<React.SetStateAction<string[]>>
   currentPage: number
   pageSize: number
-  setLoadingIds: React.Dispatch<React.SetStateAction<number[]>>
+  setLoadingIds: React.Dispatch<React.SetStateAction<string[]>>
 }) => {
   const [isLoading, setIsLoading] = useState(false)
   const handleRemove = useCallback(
@@ -118,18 +119,18 @@ function DeleteDia({
 }: {
   currentPage: number
   pageSize: number
-  selected: number[]
+  selected: string[]
   isLoading: boolean
-  setSelected: React.Dispatch<React.SetStateAction<number[]>>
+  setSelected: React.Dispatch<React.SetStateAction<string[]>>
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
-  setLoadingIds: React.Dispatch<React.SetStateAction<number[]>>
+  setLoadingIds: React.Dispatch<React.SetStateAction<string[]>>
 }) {
   const [open, setOpen] = useState(false)
   const { toast } = useToast()
   const queryClient = useQueryClient()
-  const router = useRouter()
-  const searchParam = useSearchParams()
-  const pathname = usePathname()
+  const navigate = useNavigate()
+  const [searchParam] = useSearchParams()
+  const pathname = useLocation().pathname
 
   function checkIfLastItem() {
     const params = new URLSearchParams(searchParam)
@@ -146,16 +147,16 @@ function DeleteDia({
       if (Number(currentPage) > 1) {
         params.set("page", String(Number(currentPage) - 1))
       }
-      router.push(`${pathname}?${params.toString()}`, { scroll: false })
+      navigate(`${pathname}?${params.toString()}`)
     }
   }
   async function handleDelete() {
     try {
       setIsLoading(true)
       setLoadingIds(selected)
-      const { error } = await deleteMultiServicesAction(selected)
+      // const { error } = await deleteMultiServicesAction(selected)
 
-      if (error) throw new Error(error)
+      // if (error) throw new Error(error)
       setSelected([])
       setOpen(false)
       checkIfLastItem()
@@ -230,11 +231,11 @@ function DownloadPdfDia({
   setIsLoading,
   setLoadingIds,
 }: {
-  selected: number[]
+  selected: string[]
   isLoading: boolean
-  setSelected: React.Dispatch<React.SetStateAction<number[]>>
+  setSelected: React.Dispatch<React.SetStateAction<string[]>>
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
-  setLoadingIds: React.Dispatch<React.SetStateAction<number[]>>
+  setLoadingIds: React.Dispatch<React.SetStateAction<string[]>>
 }) {
   const [open, setOpen] = useState(false)
 

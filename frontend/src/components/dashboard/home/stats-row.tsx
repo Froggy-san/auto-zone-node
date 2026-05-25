@@ -1,11 +1,12 @@
-import { Button } from "@components/ui/button"
-import { TableCell, TableRow } from "@components/ui/table"
-import { formatCurrency } from "@lib/client-helpers"
-import useServicesStats from "@lib/queries/dashboard/home/useServicesStats"
-import { cn } from "@lib/utils"
+import { Button } from "@/components/ui/button"
+import { TableCell, TableRow } from "@/components/ui/table"
+import { formatCurrency } from "@/lib/client-helpers"
+import useServicesStats from "@/lib/queries/dashboard/home/useServicesStats"
+import { cn } from "@/lib/utils"
 import { RefreshCcw } from "lucide-react"
-import { useRouter } from "next/navigation"
+
 import React from "react"
+import { useNavigate } from "react-router"
 type Params = {
   dateFrom?: string
   dateTo?: string
@@ -17,11 +18,11 @@ type Params = {
 }
 
 const StatsRow = (filters: Params) => {
-  const router = useRouter()
+  const navigate = useNavigate()
   const { data, isLoading, error } = useServicesStats(filters)
 
   const RefreshButton = (
-    <Button size="sm" onClick={() => router.refresh()}>
+    <Button size="sm" onClick={() => navigate(0)}>
       <span>Refresh</span> <RefreshCcw className="h-4 w-4" />
     </Button>
   )

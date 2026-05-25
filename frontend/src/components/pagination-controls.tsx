@@ -1,9 +1,10 @@
-import { Button } from "@components/ui/button"
-import { PAGE_SIZE } from "@lib/constants"
-import { cn } from "@lib/utils"
+import { Button } from "@/components/ui/button"
+import { PAGE_SIZE } from "@/lib/constants"
+import { cn } from "@/lib/utils"
 import { MoveLeft, MoveRight } from "lucide-react"
-import { usePathname, useRouter, useSearchParams } from "next/navigation"
+
 import React, { useEffect } from "react"
+import { useLocation, useNavigate, useSearchParams } from "react-router"
 
 interface PaginationControlProps {
   currPage: string
@@ -18,21 +19,21 @@ const PaginationControl = ({
 }: PaginationControlProps) => {
   const page = Number(currPage)
   const pageCount = Math.ceil(Number(count) / PAGE_SIZE)
-  const searchParam = useSearchParams()
-  const pathname = usePathname()
-  const router = useRouter()
+  const [searchParam] = useSearchParams()
+  const pathname = useLocation().pathname
+  const navigate = useNavigate()
   const params = new URLSearchParams(searchParam)
 
   function handleNext() {
     if (page === pageCount) return
     params.set("page", String(page + 1))
-    router.push(`${pathname}?${params.toString()}`, { scroll: false })
+    navigate(`${pathname}?${params.toString()}`)
   }
 
   function handlePrev() {
     if (page === 1) return
     params.set("page", String(page - 1))
-    router.push(`${pathname}?${params.toString()}`, { scroll: false })
+    navigate(`${pathname}?${params.toString()}`)
   }
 
   useEffect(() => {
@@ -40,14 +41,12 @@ const PaginationControl = ({
     const prefechParams = new URLSearchParams(searchParam)
     if (currentPage < pageCount) {
       prefechParams.set("page", String(currentPage + 1))
-      router.prefetch(`${pathname}?${prefechParams.toString()}`)
     }
 
     if (currentPage > 1) {
       prefechParams.set("page", String(currentPage - 1))
-      router.prefetch(`${pathname}?${prefechParams.toString()}`)
     }
-  }, [page, searchParam, pathname, pageCount, router])
+  }, [page, searchParam, pathname, pageCount])
 
   return (
     <div className={cn("flex items-center justify-between px-4", className)}>

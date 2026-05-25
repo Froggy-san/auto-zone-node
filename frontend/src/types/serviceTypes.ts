@@ -1,4 +1,5 @@
 import type { User } from "./authTypes"
+import type { Car } from "./carTypes"
 import type { ProductSold } from "./productSoldTypes"
 import type { ServiceFee } from "./serviceFeesTypes"
 import type { ServiceStatus } from "./serviceStatusTypes"
@@ -7,7 +8,7 @@ export interface Service {
   id: string
   _id: string
   user: User // The Client/Owner
-  car: string
+  car: Car
   serviceStatus: ServiceStatus
   technician: User[] // The Worker
 

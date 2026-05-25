@@ -1,11 +1,11 @@
-import React, { useState } from "react"
+import React, { useMemo, useState } from "react"
 import { Button } from "@/components/ui/button"
-import DialogComponent from "@components/dialog-component"
+import DialogComponent from "@/components/dialog-component"
 import { Input } from "@/components/ui/input"
 import { RotateCcw } from "lucide-react"
 import { CalendarIcon } from "@radix-ui/react-icons"
 import { format } from "date-fns"
-import { DateRange } from "react-day-picker"
+import { type DateRange } from "react-day-picker"
 import { cn } from "@/lib/utils"
 import Box from "@mui/joy/Box"
 import Slider from "@mui/joy/Slider"
@@ -15,13 +15,13 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { useToast } from "@hooks/use-toast"
-import { CarItem, ClientWithPhoneNumbers, ServiceStatus } from "@lib/types"
-import { ServiceStatusCombobox } from "@components/service-status-combobox"
-import { CarsComboBox } from "@components/car-combo-box"
-import { ClientsComboBox } from "@components/clients-combobox"
-import { formatCurrency } from "@lib/client-helpers"
+
+import { ServiceStatusCombobox } from "@/components/service-status-combobox"
+import { CarsComboBox } from "@/components/car-combo-box"
+import { ClientsComboBox } from "@/components/clients-combobox"
+import { formatCurrency } from "@/lib/client-helpers"
+import type { Car, ServiceStatus } from "@/types"
+import { useLocation, useNavigate, useSearchParams } from "react-router"
 
 function valueText(value: any) {
   return `price range ${value}`
@@ -39,15 +39,15 @@ interface SearchProps {
   maxPrice: string
   serviceStatusId: string
   status: ServiceStatus[]
-  cars: CarItem[]
-  clients: ClientWithPhoneNumbers[]
+  // cars: Car[]
+  // clients: Clien[]
   className?: string
 }
 
 const SearchDialog = ({
   isAdmin,
-  cars,
-  clients,
+  // cars,
+  // clients,
   currPage,
   carId,
   clientId,
@@ -59,22 +59,23 @@ const SearchDialog = ({
   maxPrice,
   className,
 }: SearchProps) => {
-  const initalValus = {
-    minPrice: Number(minPrice) || 0,
-    maxPrice: Number(maxPrice) || 0,
-    dateFrom: dateFrom ? new Date(dateFrom) : undefined,
-    dateTo: dateTo ? new Date(dateTo) : undefined,
-    carId: Number(carId) || 0,
-    clientId: Number(clientId) || 0,
-    statusId: Number(serviceStatusId) || 0,
-  }
+  const initalValus = useMemo(() => {
+    return {
+      minPrice: Number(minPrice) || 0,
+      maxPrice: Number(maxPrice) || 0,
+      dateFrom: dateFrom ? new Date(dateFrom) : undefined,
+      dateTo: dateTo ? new Date(dateTo) : undefined,
+      carId: carId || "",
+      clientId: clientId || "",
+      statusId: serviceStatusId || "",
+    }
+  }, [])
 
   const rangeValues = [initalValus.minPrice, initalValus.maxPrice]
-  const { toast } = useToast()
   const [open, setOpen] = React.useState(false)
-  const [car, setCar] = useState<number>(initalValus.carId)
-  const [client, setClient] = useState<number>(initalValus.clientId)
-  const [statusId, setStatusId] = useState<number>(initalValus.statusId)
+  const [car, setCar] = useState<string>(initalValus.carId)
+  const [client, setClient] = useState<string | null>(initalValus.clientId)
+  const [statusId, setStatusId] = useState<string>(initalValus.statusId)
   const [step, setStep] = useState(50)
   const [date, setDate] = React.useState<DateRange | undefined>({
     to: initalValus.dateTo,
@@ -82,15 +83,15 @@ const SearchDialog = ({
   })
 
   const [value, setValue] = React.useState(rangeValues)
-  const searchParams = useSearchParams()
-  const pathname = usePathname()
-  const router = useRouter()
+  const [searchParams] = useSearchParams()
+  const pathname = useLocation().pathname
+  const navigate = useNavigate()
   const page = Number(currPage)
 
   function handleReset() {
-    setCar(0)
-    setClient(0)
-    setStatusId(0)
+    setCar("")
+    setClient("")
+    setStatusId("")
     setDate(undefined)
     setValue([0, 0])
   }
@@ -181,7 +182,7 @@ const SearchDialog = ({
       params.set("maxPrice", maxPrice.toString())
     }
 
-    router.push(`${pathname}?${params.toString()}`, { scroll: false })
+    navigate(`${pathname}?${params.toString()}`)
     setOpen(false)
   }
 
@@ -225,7 +226,6 @@ const SearchDialog = ({
               <ServiceStatusCombobox
                 value={statusId}
                 setValue={setStatusId}
-                options={status}
                 className="w-full"
               />
               <p className="text-xs text-muted-foreground">
@@ -262,7 +262,7 @@ const SearchDialog = ({
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
                   <Calendar
-                    initialFocus
+                    // initialFocus
                     mode="range"
                     defaultMonth={date?.from}
                     selected={date}
@@ -274,7 +274,7 @@ const SearchDialog = ({
               <p className="text-xs text-muted-foreground">Search by Date.</p>
             </div>
             <div className="w-full space-y-2">
-              <CarsComboBox value={car} setValue={setCar} options={cars} />
+              <CarsComboBox value={car} setValue={setCar} />
               <p className="text-xs text-muted-foreground">Search by car.</p>
             </div>
             <div className="w-full space-y-2">
@@ -282,7 +282,6 @@ const SearchDialog = ({
                 disabled={!isAdmin}
                 value={client}
                 setValue={setClient}
-                options={clients}
               />
 
               <p className="text-xs text-muted-foreground">

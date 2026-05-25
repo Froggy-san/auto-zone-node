@@ -1,6 +1,6 @@
 import * as HoverCardPrimitive from "@radix-ui/react-hover-card"
-import Image from "next/image"
-import { encode } from "qss"
+
+import qs from "qs"
 import React from "react"
 import {
   AnimatePresence,
@@ -8,8 +8,9 @@ import {
   useMotionValue,
   useSpring,
 } from "framer-motion"
-import Link from "next/link"
+
 import { cn } from "@/lib/utils"
+import { Link } from "react-router"
 
 type LinkPreviewProps = {
   children: React.ReactNode
@@ -37,17 +38,20 @@ export const LinkPreview = ({
 }: LinkPreviewProps) => {
   let src
   if (!isStatic) {
-    const params = encode({
-      url,
-      screenshot: true,
-      meta: false,
-      embed: "screenshot.url",
-      colorScheme: "dark",
-      "viewport.isMobile": true,
-      "viewport.deviceScaleFactor": 1,
-      "viewport.width": width * 3,
-      "viewport.height": height * 3,
-    })
+    const params = qs.stringify(
+      {
+        url,
+        screenshot: true,
+        meta: false,
+        embed: "screenshot.url",
+        colorScheme: "dark",
+        "viewport.isMobile": true,
+        "viewport.deviceScaleFactor": 1,
+        "viewport.width": width * 3,
+        "viewport.height": height * 3,
+      },
+      { encode: true }
+    )
     src = `https://api.microlink.io/?${params}`
   } else {
     src = imageSrc
@@ -123,7 +127,7 @@ export const LinkPreview = ({
                 }}
               >
                 <Link
-                  href={url}
+                  to={url}
                   className="block rounded-2xl border-2 border-transparent bg-accent p-1 shadow hover:border dark:hover:border-neutral-800"
                   style={{ fontSize: 0 }}
                 >

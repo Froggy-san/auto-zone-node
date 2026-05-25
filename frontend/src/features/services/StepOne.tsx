@@ -125,14 +125,14 @@ const StepOne = ({ form, currentStep, isLoading, car }: StepOneProps) => {
         />
 
         <Controller
-          name="user"
+          name="technician"
           control={form.control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid} className="mb-auto">
               <FieldLabel htmlFor={field.name}>Tecnician</FieldLabel>
               <ClientsComboBox
-                setValue={field.onChange}
-                value={field.value}
+                setValue={(value) => field.onChange([value])}
+                value={field.value[0]}
                 disabled={isLoading}
                 adminOnly
               />

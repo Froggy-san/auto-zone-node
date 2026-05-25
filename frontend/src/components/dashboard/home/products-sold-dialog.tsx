@@ -1,4 +1,3 @@
-import { ProductToSell, Service } from "@lib/types"
 import React, { useMemo, useReducer, useState } from "react"
 import {
   Dialog,
@@ -10,18 +9,18 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { Input } from "@components/ui/input"
-import { Switch } from "@components/ui/switch"
-import { Checkbox } from "@components/ui/checkbox"
-import { Label } from "@components/ui/label"
-import { Button } from "@components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Switch } from "@/components/ui/switch"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Label } from "@/components/ui/label"
+import { Button } from "@/components/ui/button"
 import { PackageMinus, PackageSearch, Pencil } from "lucide-react"
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@components/ui/tooltip"
+} from "@/components/ui/tooltip"
 import {
   Accordion,
   AccordionContent,
@@ -29,21 +28,23 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion"
 
-import { LinkPreview } from "@components/link-preview"
-import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import SuccessToastDescription, {
-  ErorrToastDescription,
-} from "@components/toast-items"
-import { deleteProductToSellAction } from "@lib/actions/product-sold-actions"
-import { useToast } from "@hooks/use-toast"
-import Spinner from "@components/Spinner"
-import { DEFAULT_CAR_LOGO, DEFAULT_PRODUCT_PIC } from "@lib/constants"
-import Link from "next/link"
-import { formatCurrency } from "@lib/client-helpers"
+import { LinkPreview } from "@/components/link-preview"
+
+import Spinner from "@/components/Spinner"
+import {
+  BASE_URL,
+  DEFAULT_CAR_LOGO,
+  DEFAULT_PRODUCT_PIC,
+} from "@/lib/constants"
+
+import { formatCurrency } from "@/lib/client-helpers"
 import ServiceDiaDetails from "./service-dia-details"
-import { cn } from "@lib/utils"
-import TagCarousel from "@components/tag-carousel"
+import { cn } from "@/lib/utils"
+import TagCarousel from "@/components/tag-carousel"
 import CurrencyInput from "react-currency-input-field"
+import type { ProductSold, Service } from "@/types"
+import { useLocation, useNavigate, useSearchParams } from "react-router"
+import { toast } from "sonner"
 
 interface ServiceStates {
   priceValue: string
@@ -54,7 +55,7 @@ interface ServiceStates {
   hasReturnedValue: boolean
   checked: boolean
   open: boolean
-  deleteOpen: ProductToSell | null
+  deleteOpen: ProductSold | null
 }
 
 const initalState = {
@@ -106,7 +107,7 @@ type Open = {
 }
 type DeleteOpen = {
   type: "delete-open"
-  payload: ProductToSell | null
+  payload: ProductSold | null
 }
 type Reset = {
   type: "reset"
@@ -192,10 +193,10 @@ const ProductSoldDialog = ({
     dispatch,
   ] = useReducer(reducer, initalState)
 
-  const pathname = usePathname()
-  const router = useRouter()
-  const searchParam = useSearchParams()
-  const soldProducts = service.productsToSell
+  const pathname = useLocation().pathname
+  const navigate = useNavigate()
+  const [searchParam] = useSearchParams()
+  const soldProducts = service.productsSold
 
   function handleOpenChange() {
     dispatch({ type: "reset" })
@@ -205,7 +206,7 @@ const ProductSoldDialog = ({
   function handleOpenEdit(filter: string) {
     const params = new URLSearchParams(searchParam)
     params.set("editSold", filter)
-    router.replace(`${pathname}?${params.toString()}`, { scroll: false })
+    navigate(`${pathname}?${params.toString()}`, { replace: false })
   }
 
   //   const [priceValue, setPriceValue] = useState("");
@@ -233,7 +234,8 @@ const ProductSoldDialog = ({
       filterValue = filterValue && product.pricePerUnit === Number(priceValue)
 
     if (Number(discountValue))
-      filterValue = filterValue && product.discount === Number(discountValue)
+      filterValue =
+        filterValue && product.discountPerUnit === Number(discountValue)
 
     if (Number(countValue))
       filterValue = filterValue && product.count === Number(countValue)
@@ -266,7 +268,7 @@ const ProductSoldDialog = ({
     return productsSold.reduce(
       (acc, item) => {
         acc.units += item.count
-        acc.totalDiscount += item.discount
+        acc.totalDiscount += item.discountPerUnit
         acc.totalPriceBeforeDiscount += item.pricePerUnit * item.count
         acc.totalPriceAfterDiscount += item.totalPriceAfterDiscount
         return acc
@@ -284,7 +286,7 @@ const ProductSoldDialog = ({
     return returnedPro.reduce(
       (acc, item) => {
         acc.units += item.count
-        acc.totalDiscount += item.discount
+        acc.totalDiscount += item.discountPerUnit
         acc.totalPriceBeforeDiscount += item.pricePerUnit * item.count
         acc.totalPriceAfterDiscount += item.totalPriceAfterDiscount
         return acc
@@ -323,7 +325,7 @@ const ProductSoldDialog = ({
         >
           Show
         </Button>
-        <DialogContent className="flex max-h-[81vh] max-w-[900px] flex-col overflow-y-auto !rounded-none border-none p-4 !pb-0 sm:overflow-y-visible sm:p-6 lg:!rounded-lg">
+        <DialogContent className="flex max-h-[81vh] !max-w-[900px] flex-col overflow-y-auto !rounded-none border-none p-4 !pb-0 sm:overflow-y-visible sm:p-6 lg:!rounded-lg">
           <DialogHeader className="invisible hidden">
             <DialogTitle>{`'s phome numbers`}</DialogTitle>
             <DialogDescription className="hidden">
@@ -543,7 +545,7 @@ const ProductSoldDialog = ({
             ) : null}
           </div>
           {/* </main> */}
-          <div className="sm: sticky bottom-0 left-0 space-y-3 bg-background pt-4 pb-6 sm:static sm:pt-0">
+          <div className="sm: sticky bottom-0 left-0 space-y-3 bg-popover pt-4 pb-6 sm:static sm:pt-0">
             <DialogClose asChild>
               <Button size="sm" className="w-full" variant="secondary">
                 Close
@@ -558,7 +560,7 @@ const ProductSoldDialog = ({
       <DeleteProSold
         deleteOpen={deleteOpen ? true : false}
         proSold={deleteOpen}
-        serviceId={service.id}
+        serviceId={service._id}
         total={total}
         handleClose={() => {
           dispatch({ type: "delete-open", payload: null })
@@ -577,14 +579,13 @@ function DeleteProSold({
   serviceId,
 }: {
   deleteOpen: boolean
-  proSold: ProductToSell | null
+  proSold: ProductSold | null
   handleClose: () => void
   total: number
-  serviceId: number
+  serviceId: string
 }) {
   const [isDeleting, setIsDeleting] = useState(false)
   const [shouldUpdateStock, setShouldUpdateStock] = useState(true)
-  const { toast } = useToast()
 
   return (
     <Dialog open={deleteOpen} onOpenChange={handleClose}>
@@ -622,31 +623,19 @@ function DeleteProSold({
               setIsDeleting(true)
               try {
                 if (proSold) {
-                  const { error } = await deleteProductToSellAction({
-                    proSold,
-                    serviceId,
-                    totalPrice: total - proSold.totalPriceAfterDiscount,
-                    shouldUpdateStock,
-                  })
-                  if (error) throw new Error(error)
+                  // const { error } = await deleteProductToSellAction({
+                  //   proSold,
+                  //   serviceId,
+                  //   totalPrice: total - proSold.totalPriceAfterDiscount,
+                  //   shouldUpdateStock,
+                  // })
+                  // if (error) throw new Error(error)
                 }
                 setIsDeleting(false)
                 handleClose()
-                toast({
-                  className: "bg-primary  text-primary-foreground",
-                  title: `Data deleted!.`,
-                  description: (
-                    <SuccessToastDescription
-                      message={`Sold product receipt has been deleted.`}
-                    />
-                  ),
-                })
+                toast.success("Product sold entry has been deleted")
               } catch (error: any) {
-                toast({
-                  variant: "destructive",
-                  title: "Faild to delete client's data.",
-                  description: <ErorrToastDescription error={error.message} />,
-                })
+                toast.error("Failed to delete product entry")
               }
             }}
           >
@@ -659,7 +648,7 @@ function DeleteProSold({
 }
 
 interface ProItem {
-  product: ProductToSell
+  product: ProductSold
   returned?: boolean
   isAdmin: boolean
   dispatch: React.Dispatch<Action>
@@ -681,7 +670,7 @@ function ProItem({
   return (
     <li
       className={cn(
-        "inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium whitespace-nowrap shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50",
+        "inline-flex items-center justify-center rounded-md border border-input bg-secondary px-4 py-2 text-sm font-medium whitespace-nowrap shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50",
         {
           "border-none bg-accent hover:bg-muted-foreground/30 dark:bg-card/25 dark:hover:bg-card/10":
             returned,
@@ -691,7 +680,7 @@ function ProItem({
       <LinkPreview
         url={`/products/${product.product.id}`}
         isStatic
-        imageSrc={image || DEFAULT_PRODUCT_PIC}
+        imageSrc={`${BASE_URL}${image}` || DEFAULT_PRODUCT_PIC}
       >
         <div
           //   href={`/products/${product.product.id}`}
@@ -716,7 +705,7 @@ function ProItem({
             {" "}
             Discount per unit:{" "}
             <span className="text-xs text-muted-foreground">{` ${formatCurrency(
-              product.discount
+              product.discountPerUnit
             )}`}</span>
           </div>
 

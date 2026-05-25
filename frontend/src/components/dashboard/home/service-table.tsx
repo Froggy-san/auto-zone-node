@@ -1,4 +1,4 @@
-import React, { SetStateAction, useEffect, useMemo, useState } from "react"
+import React, { type SetStateAction, useEffect, useMemo, useState } from "react"
 import {
   Table,
   TableBody,
@@ -9,15 +9,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import {
-  CarItem,
-  Category,
-  CategoryProps,
-  ClientWithPhoneNumbers,
-  Service,
-  ServiceStatus,
-} from "@lib/types"
-import { Button } from "@components/ui/button"
+
+import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -58,59 +51,54 @@ import {
   Trash2,
   UserRoundMinus,
 } from "lucide-react"
-import { useToast } from "@hooks/use-toast"
-import SuccessToastDescription, {
-  ErorrToastDescription,
-} from "@components/toast-items"
-import Spinner from "@components/Spinner"
+
+import Spinner from "@/components/Spinner"
 import { FaArrowUpWideShort } from "react-icons/fa6"
 
-import { deleteClientByIdAction } from "@lib/actions/clientActions"
-import {
-  useParams,
-  usePathname,
-  useRouter,
-  useSearchParams,
-} from "next/navigation"
-
 // import StatusBadge from "../status-badge";
-const StatusBadge = dynamic(() => import("../status-badge"), {
-  loading: () => <Spinner className="h-fit w-fit" size={12} />,
-  ssr: false,
-})
+// const StatusBadge = dynamic(() => import("../status-badge"), {
+//   loading: () => <Spinner className="h-fit w-fit" size={12} />,
+//   ssr: false,
+// })
 import ServiceFeesDialog from "./service-Fee-dialog"
 import ProductSoldDialog from "./products-sold-dialog"
 import CarDialog from "./car-dialog"
 import ClientDialog from "./client-dialog"
-import {
-  deleteServiceAction,
-  editServiceAction,
-} from "@lib/actions/serviceActions"
+// import {
+//   deleteServiceAction,
+//   editServiceAction,
+// } from "@lib/actions/serviceActions"
 import EditServiceForm from "./edit-service-form"
-import { formatCurrency } from "@lib/client-helpers"
-import NoteDialog from "@components/garage/note-dialog"
-import dynamic from "next/dynamic"
+import { formatCurrency } from "@/lib/client-helpers"
+import NoteDialog from "@/components/garage/note-dialog"
+
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@components/ui/tooltip"
-import StatsRow from "./stats-row"
-import SearchDialog from "./search-dialog"
-import { AnimatePresence, motion } from "framer-motion"
-import downloadAsPdf from "@lib/services/download-pdf"
+} from "@/components/ui/tooltip"
+// import StatsRow from "./stats-row"
+// import SearchDialog from "./search-dialog"
+
+import downloadAsPdf from "@/lib/services/download-pdf"
 import ServiceSelectControls from "./service-select-controls"
 import { useQueryClient } from "@tanstack/react-query"
-import { Priority } from "@components/priority-select"
-import { Checkbox } from "@components/ui/checkbox"
-import { Label } from "@components/ui/label"
+import { Priority } from "@/components/priority-select"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Label } from "@/components/ui/label"
+import type { Car, Category, Service, ServiceStatus, User } from "@/types"
+import StatusBadge from "../status-badge"
+import { useLocation, useNavigate, useSearchParams } from "react-router"
+import { updateService } from "@/services/servicesApi"
+import { toast } from "sonner"
+import SearchDialog from "./search-dialog"
 interface Props {
   isClientPage?: boolean
   isAdmin: boolean
-  categories: CategoryProps[]
-  cars: CarItem[]
-  clients: ClientWithPhoneNumbers[]
+  categories: Category[]
+  // cars: Car[]
+  // clients: User[]
   status: ServiceStatus[]
   currPage: string
   services: Service[]
@@ -131,8 +119,8 @@ const ServiceTable = ({
   categories,
   services,
   currPage,
-  cars,
-  clients,
+  // cars,
+  // clients,
   dateFrom,
   dateTo,
   carId,
@@ -144,34 +132,38 @@ const ServiceTable = ({
   pageNumber,
   className,
 }: Props) => {
-  const [loadingIds, setLoadingIds] = useState<number[]>([])
-  const [selected, setSelected] = useState<number[]>([])
+  const [loadingIds, setLoadingIds] = useState<string[]>([])
+  const [selected, setSelected] = useState<string[]>([])
   if (!services)
     return <p>Something went wrong while getting the services&apos;s data</p>
   const currPageSize = services.length
 
   const nonCanceledService = services.filter(
-    (serv) => serv.serviceStatuses.name != "Canceled"
+    (serv) => serv.serviceStatus.name != "Canceled"
   )
 
   const fees = nonCanceledService
-    .flatMap((service) => service.servicesFee)
+    .flatMap((service) => service.serviceFees)
     .filter((fee) => !fee.isReturned)
   const soldProducts = nonCanceledService
-    .flatMap((service) => service.productsToSell)
+    .flatMap((service) => service.productsSold)
     .filter((pro) => !pro.isReturned)
 
-  const totalFees = fees.reduce((acc, item) => {
-    acc += item.totalPriceAfterDiscount
+  const totalFees = useMemo(() => {
+    return fees.reduce((acc, item) => {
+      acc += item.totalPriceAfterDiscount
 
-    return acc
-  }, 0)
+      return acc
+    }, 0)
+  }, [fees])
 
-  const totalSoldProducts = soldProducts.reduce((acc, item) => {
-    acc += item.totalPriceAfterDiscount
+  const totalSoldProducts = useMemo(() => {
+    return soldProducts.reduce((acc, item) => {
+      acc += item.totalPriceAfterDiscount
 
-    return acc
-  }, 0)
+      return acc
+    }, 0)
+  }, [soldProducts])
 
   const totals = totalFees + totalSoldProducts
   return (
@@ -188,8 +180,8 @@ const ServiceTable = ({
 
         <SearchDialog
           isAdmin={isAdmin}
-          cars={cars}
-          clients={clients}
+          // cars={cars}
+          // clients={clients}
           status={status || []}
           carId={carId}
           clientId={clientId}
@@ -227,7 +219,7 @@ const ServiceTable = ({
               ? services.map((service) => (
                   <Row
                     key={service.id}
-                    isLoading={loadingIds.includes(service.id)}
+                    isLoading={loadingIds.includes(service._id)}
                     selected={selected}
                     setSelected={setSelected}
                     isClientPage={isClientPage}
@@ -235,8 +227,8 @@ const ServiceTable = ({
                     categories={categories}
                     status={status}
                     service={service}
-                    cars={cars}
-                    clients={clients}
+                    // cars={cars}
+                    // clients={clients}
                     currPage={currPage}
                     currPageSize={currPageSize}
                   />
@@ -262,7 +254,7 @@ const ServiceTable = ({
                 {formatCurrency(totals)}
               </TableCell>
             </TableRow>
-            <StatsRow
+            {/* <StatsRow
               carId={carId}
               clientId={clientId}
               dateTo={dateTo}
@@ -270,7 +262,7 @@ const ServiceTable = ({
               serviceStatusId={serviceStatusId}
               maxPrice={maxPrice}
               minPrice={minPrice}
-            />
+            /> */}
           </TableFooter>
         </Table>
       </div>
@@ -285,34 +277,34 @@ function Row({
   isAdmin,
   categories,
   status,
-  clients,
-  cars,
+  // clients,
+  // cars,
   service,
   currPage,
   currPageSize,
   isLoading: loading,
 }: {
   isLoading: boolean
-  selected: number[]
-  setSelected: React.Dispatch<React.SetStateAction<number[]>>
+  selected: string[]
+  setSelected: React.Dispatch<React.SetStateAction<string[]>>
   isClientPage?: boolean
   isAdmin: boolean
-  categories: CategoryProps[]
-  clients: ClientWithPhoneNumbers[]
-  cars: CarItem[]
+  categories: Category[]
+  // clients: User[]
+  // cars: Car[]
   status: ServiceStatus[]
   currPage: string
   service: Service
   currPageSize: number
 }) {
   const total = useMemo(() => {
-    const totalFees = service.servicesFee
+    const totalFees = service.serviceFees
       .filter((fee) => !fee.isReturned)
       .reduce((sum, curr) => {
         sum += curr.totalPriceAfterDiscount
         return sum
       }, 0)
-    const totalSold = service.productsToSell
+    const totalSold = service.productsSold
       .filter((pro) => !pro.isReturned)
       .reduce((sum, curr) => {
         sum += curr.totalPriceAfterDiscount
@@ -336,7 +328,7 @@ function Row({
         <TableCell className="font-medium"> {service.id}</TableCell>
 
         <TableCell className="whitespace-nowrap">
-          {service.created_at}
+          {String(service.createdAt)}
         </TableCell>
 
         <TableCell>
@@ -348,7 +340,7 @@ function Row({
         </TableCell>
 
         <TableCell>
-          <StatusBadge status={service.serviceStatuses} />
+          <StatusBadge status={service.serviceStatus} />
         </TableCell>
 
         <TableCell>
@@ -380,8 +372,8 @@ function Row({
               loading={loading}
               isClientPage={isClientPage}
               isAdmin={isAdmin}
-              cars={cars}
-              clients={clients}
+              // cars={cars}
+              // clients={clients}
               status={status}
               service={service}
               currPage={currPage}
@@ -429,14 +421,14 @@ function TableActions({
   service,
   currPageSize,
   currPage,
-  cars,
-  clients,
+  // cars,
+  // clients,
 }: {
   loading: boolean
   isClientPage?: boolean
   isAdmin?: boolean
-  cars: CarItem[]
-  clients: ClientWithPhoneNumbers[]
+  // cars: Car[]
+  // clients: User[]
   status: ServiceStatus[]
   currPage: string
   service: Service
@@ -448,70 +440,48 @@ function TableActions({
   // const [open, setOpen] = useState(false);
   // const [chosenStatus, setChosenStatus] = useState<number>(service.status.id);
   const [isLoading, setIsLoading] = useState(false)
-  const { toast } = useToast()
-  const searchParam = useSearchParams()
-  const pathname = usePathname()
-  const router = useRouter()
+
+  const [searchParam] = useSearchParams()
+  const pathname = useLocation().pathname
+  const navigate = useNavigate()
   const params = new URLSearchParams(searchParam)
   const currLoading = isLoading || loading
 
-  const handleChangePriority = async (
-    priority: "Low" | "Medium" | "High" | string
-  ) => {
+  const handleChangePriority = async (priority: "low" | "medium" | "high") => {
     setIsLoading(true)
     try {
-      await editServiceAction({
-        priority,
-        id: service.id,
-      })
+      await updateService(
+        {
+          priority,
+        },
+        service.id
+      )
 
       setIsLoading(false)
       // handleClose();
-      toast({
-        className: "bg-primary  text-primary-foreground",
-        title: `Data updated!.`,
-        description: (
-          <SuccessToastDescription
-            message={`Service priority has been uptated.'`}
-          />
-        ),
-      })
+      toast.success(`Updated service's priority to ${priority}`)
     } catch (error: any) {
       setIsLoading(false)
-      toast({
-        variant: "destructive",
-        title: "Faild to update the service priority.",
-        description: <ErorrToastDescription error={error.message} />,
-      })
+      toast.error(`Failed to update service's priority to ${priority}`)
     }
   }
 
-  const handleChangeStatus = async (id: number) => {
+  const handleChangeStatus = async (id: string) => {
     setIsLoading(true)
     try {
-      await editServiceAction({
-        serviceStatusId: id,
-        id: service.id,
-      })
+      await updateService(
+        {
+          serviceStatus: id,
+        },
+        service.id
+      )
 
       setIsLoading(false)
       // handleClose();
-      toast({
-        className: "bg-primary  text-primary-foreground",
-        title: `Data updated!.`,
-        description: (
-          <SuccessToastDescription
-            message={`Service status has been uptated.'`}
-          />
-        ),
-      })
+      toast.success(`Updated service's status`)
     } catch (error: any) {
       setIsLoading(false)
-      toast({
-        variant: "destructive",
-        title: "Faild to update the service status.",
-        description: <ErorrToastDescription error={error.message} />,
-      })
+      toast.error("Failed to update service status")
     }
   }
 
@@ -519,23 +489,11 @@ function TableActions({
     setIsLoading(true)
     try {
       await downloadAsPdf([service.id])
-      toast({
-        className: "bg-primary  text-primary-foreground",
-        title: `Done.`,
-        description: (
-          <SuccessToastDescription
-            message={`Receipt data is ready to be downloaded as a PDF.`}
-          />
-        ),
-      })
+      toast.success("PDF downloaded")
     } catch (error: any) {
       console.error(error)
 
-      toast({
-        variant: "destructive",
-        title: "Failed to download.",
-        description: <ErorrToastDescription error={error.message} />,
-      })
+      toast.error("Failed to download PDF")
     } finally {
       setIsLoading(false)
     }
@@ -631,9 +589,7 @@ function TableActions({
                 className="gap-2"
                 onClick={() => {
                   params.set("addFeeId", service.id.toString())
-                  router.push(`${pathname}?${params.toString()}`, {
-                    scroll: false,
-                  })
+                  navigate(`${pathname}?${params.toString()}`)
                 }}
               >
                 <HandPlatter className="h-4 w-4" /> Add more service fees{" "}
@@ -643,9 +599,7 @@ function TableActions({
                 onClick={() => {
                   const params = new URLSearchParams(searchParam)
                   params.set("addSoldId", service.id.toString())
-                  router.push(`${pathname}?${params.toString()}`, {
-                    scroll: false,
-                  })
+                  navigate(`${pathname}?${params.toString()}`)
                 }}
               >
                 <PackagePlus className="h-4 w-4" /> Add more sold products
@@ -670,7 +624,7 @@ function TableActions({
                       onClick={async () => {
                         if (service.priority?.toLocaleLowerCase() === "high")
                           return
-                        await handleChangePriority("High")
+                        await handleChangePriority("high")
                       }}
                     >
                       <Priority priority="high" />
@@ -685,7 +639,7 @@ function TableActions({
                       onClick={async () => {
                         if (service.priority?.toLocaleLowerCase() === "medium")
                           return
-                        await handleChangePriority("Medium")
+                        await handleChangePriority("medium")
                       }}
                     >
                       <Priority priority="medium" />
@@ -699,7 +653,7 @@ function TableActions({
                       onClick={async () => {
                         if (service.priority?.toLocaleLowerCase() === "low")
                           return
-                        await handleChangePriority("Low")
+                        await handleChangePriority("low")
                       }}
                     >
                       <Priority priority="low" />
@@ -741,7 +695,7 @@ function TableActions({
                         className="justify-between gap-2"
                         onClick={async () => {
                           // setChosenStatus(status.id)
-                          if (status.id === service.serviceStatuses.id) return
+                          if (status.id === service.serviceStatus._id) return
                           await handleChangeStatus(status.id)
                         }}
                       >
@@ -750,7 +704,7 @@ function TableActions({
                           status={status}
                           className="py-[.1rem]"
                         />
-                        {service.serviceStatuses.id === status.id && (
+                        {service.serviceStatus._id === status.id && (
                           <Check className="h-3 w-3" />
                         )}
                       </DropdownMenuItem>
@@ -786,8 +740,8 @@ function TableActions({
         />  */}
 
           <EditServiceForm
-            cars={cars}
-            clients={clients}
+            // cars={cars}
+            // clients={clients}
             open={open === "edit"}
             setIsLoading={setIsLoading}
             setOpen={setOpen}
@@ -806,7 +760,7 @@ function TableActions({
           />
 
           <NoteDialog
-            description={`Note related to a car with the plate number '${service.cars.plateNumber}' belonging to '${service.clients.name}', with a service date of '2024-11-06.'`}
+            description={`Note related to a car with the plate number '${service.car.plateNumber}' belonging to '${service.user.username}', with a service date of '2024-11-06.'`}
             className="hidden"
             open={open === "note"}
             onOpenChange={() => setOpen("")}
@@ -860,10 +814,10 @@ function DeleteService({
   pageSize: number
 }) {
   const [checked, setChecked] = useState(true)
-  const { toast } = useToast()
-  const searchParam = useSearchParams()
-  const router = useRouter()
-  const pathname = usePathname()
+
+  const [searchParam] = useSearchParams()
+  const navigate = useNavigate()
+  const pathname = useLocation().pathname
   const queryClient = useQueryClient()
 
   function checkIfLastItem() {
@@ -881,7 +835,7 @@ function DeleteService({
       if (Number(currPage) > 1) {
         params.set("page", String(Number(currPage) - 1))
       }
-      router.push(`${pathname}?${params.toString()}`, { scroll: false })
+      navigate(`${pathname}?${params.toString()}`)
     }
   }
 
@@ -902,7 +856,7 @@ function DeleteService({
         <DialogHeader>
           <DialogTitle>Delete service receipt.</DialogTitle>
           <DialogDescription>
-            {`You are about to delete a receipt dated '${service.created_at}', issued to the client '${service.clients.name}', along with all its associated data.`}
+            {`You are about to delete a receipt dated '${service.createdAt}', issued to the client '${service.user.username}', along with all its associated data.`}
           </DialogDescription>
         </DialogHeader>
         <div className="flex items-center gap-2">
@@ -930,13 +884,13 @@ function DeleteService({
               setIsDeleting(true)
               try {
                 const productsIds = Array.from(
-                  new Set(service.productsToSell.map((p) => p.productId))
+                  new Set(service.productsSold.map((p) => p.product))
                 )
 
                 const productsToRestock = checked
                   ? productsIds.map((id) =>
-                      service.productsToSell
-                        .filter((product) => product.productId === id)
+                      service.productsSold
+                        .filter((product) => product.product === id)
                         .reduce(
                           (acc, currPro) => {
                             acc.quantity += currPro.count
@@ -947,31 +901,19 @@ function DeleteService({
                     )
                   : undefined
 
-                const { error } = await deleteServiceAction(
-                  service.id.toString(),
-                  productsToRestock
-                )
-                if (error) throw new Error(error)
+                // const { error } = await deleteServiceAction(
+                //   service.id.toString(),
+                //   productsToRestock
+                // )
+                // if (error) throw new Error(error)
                 checkIfLastItem()
                 setIsDeleting(false)
                 handleClose()
                 queryClient.removeQueries({ queryKey: ["servicesStats"] })
-                toast({
-                  className: "bg-primary  text-primary-foreground",
-                  title: `Data deleted!.`,
-                  description: (
-                    <SuccessToastDescription
-                      message={`Service data has been deleted.`}
-                    />
-                  ),
-                })
+                toast.success("Service has been deleted")
               } catch (error: any) {
                 setIsDeleting(false)
-                toast({
-                  variant: "destructive",
-                  title: "Faild to delete Service data",
-                  description: <ErorrToastDescription error={error.message} />,
-                })
+                toast.error("Failed to delete service")
               }
             }}
           >
@@ -1006,8 +948,6 @@ function DeleteDialog({
   service: Service
   pageSize: number
 }) {
-  const { toast } = useToast()
-
   //   const proTodelete = productBoughtId
   //     ? proBought.productsBought.find((pro) => pro.id === productBoughtId)
   //     : null;
@@ -1036,7 +976,7 @@ function DeleteDialog({
         <DialogHeader>
           <DialogTitle>Delete service.</DialogTitle>
           <DialogDescription>
-            {`You are about to delete a service receipt dated '${service.created_at}', isussed to the cutomer '${service.clients.name}', along with all it's related data.`}
+            {`You are about to delete a service receipt dated '${service.createdAt}', isussed to the cutomer '${service.user.username}', along with all it's related data.`}
           </DialogDescription>
         </DialogHeader>
 
@@ -1055,27 +995,15 @@ function DeleteDialog({
               try {
                 setIsDeleting(true)
                 // if (proTodelete)
-                await deleteServiceAction(service.id.toString())
+                // await deleteServiceAction(service.id.toString())
                 // checkIfLastItem();
                 setIsDeleting(false)
                 setOpen(null)
                 setMainDialong(true)
                 // handleClose();
-                toast({
-                  className: "bg-primary  text-primary-foreground",
-                  title: `Data deleted!`,
-                  description: (
-                    <SuccessToastDescription
-                      message={`Service data has been deleted`}
-                    />
-                  ),
-                })
+                toast.success("service has been deleted")
               } catch (error: any) {
-                toast({
-                  variant: "destructive",
-                  title: "Faild to delete client's data",
-                  description: <ErorrToastDescription error={error.message} />,
-                })
+                toast.error("Failed to delete service")
               }
               setIsDeleting(false)
             }}

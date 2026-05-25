@@ -76,7 +76,7 @@ const CarDetails = () => {
   // }
 
   const clientOtherCars: CarList[] = car?.relatedCars || []
-  console.log(clientOtherCars, "OTHER CARS")
+
   const client = car.user
   return (
     <main className="mx-auto min-h-screen max-w-[2200px]">

@@ -1,7 +1,7 @@
-import { Service } from "@lib/types"
-import { cn } from "@lib/utils"
-import Link from "next/link"
+import { cn } from "@/lib/utils"
+import type { Service } from "@/types"
 import React from "react"
+import { Link } from "react-router"
 
 const ServiceDiaDetails = ({
   service,
@@ -12,8 +12,8 @@ const ServiceDiaDetails = ({
   isAdmin: boolean
   className?: string
 }) => {
-  const plateNumber = service.cars.plateNumber
-  const client = service.clients
+  const plateNumber = service.car.plateNumber
+  const client = service.user
 
   return (
     <div
@@ -24,25 +24,25 @@ const ServiceDiaDetails = ({
     >
       {isAdmin ? (
         <>
-          <Link href={`/customers?name=${client.name}`}>
-            Client: <span>{client.name}</span>
+          <Link to={`/customers?name=${client.username}`}>
+            Client: <span>{client.username}</span>
           </Link>
-          <Link href={`/garage?plateNumber=${plateNumber}&page=1`}>
-            Plate num: <span>{service.cars.plateNumber}</span>
+          <Link to={`/garage?plateNumber=${plateNumber}&page=1`}>
+            Plate num: <span>{service.car.plateNumber}</span>
           </Link>
         </>
       ) : (
         <>
           <div>
-            Client: <span>{client.name}</span>
+            Client: <span>{client.username}</span>
           </div>
           <div>
-            Plate num: <span>{service.cars.plateNumber}</span>
+            Plate num: <span>{service.car.plateNumber}</span>
           </div>
         </>
       )}
       <div>
-        Date: <span>{service.created_at}</span>
+        Date: <span>{`${service.createdAt}`}</span>
       </div>
     </div>
   )

@@ -53,7 +53,6 @@ export default function useProducts(props?: Filters) {
     if (props?.priceFrom) queryObj.listPrice = { $gte: Number(props.priceFrom) }
     if (props?.priceTo) queryObj.listPrice = { $lte: Number(props.priceTo) }
 
-    console.log(queryObj, "QUERY")
     // Clean out undefined parameters completely so they don't pollute the URL string
     return Object.fromEntries(
       Object.entries(queryObj).filter(

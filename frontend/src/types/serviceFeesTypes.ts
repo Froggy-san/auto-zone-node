@@ -1,13 +1,16 @@
-export interface ServiceFee {
+import type { ServiceFeeSchema } from "@/schemas/serviceFee.schema"
+import type z from "zod"
+import type { Category } from "./category"
+
+export interface ServiceFee extends Omit<
+  z.infer<typeof ServiceFeeSchema>,
+  "category"
+> {
   id: string
   _id: string
-  price: number
-  discount: number
-  totalPriceAfterDiscount: number
-  isReturned: boolean
-  note: string
+  category: Category
   service: string
-  category: string
+  totalPriceAfterDiscount: number
   createdAt: Date
   updatedAt: Date
 }

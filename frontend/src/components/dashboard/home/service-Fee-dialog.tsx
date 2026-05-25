@@ -1,4 +1,3 @@
-import { Category, CategoryProps, Service, ServiceFee } from "@lib/types"
 import React, { useMemo, useReducer, useState } from "react"
 import {
   Dialog,
@@ -10,25 +9,20 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { Input } from "@components/ui/input"
-import { Switch } from "@components/ui/switch"
-import { Checkbox } from "@components/ui/checkbox"
-import { Label } from "@components/ui/label"
-import { Button } from "@components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Switch } from "@/components/ui/switch"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Label } from "@/components/ui/label"
+import { Button } from "@/components/ui/button"
 import { HandPlatter, PackageMinus, Pencil } from "lucide-react"
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@components/ui/tooltip"
-import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import SuccessToastDescription, {
-  ErorrToastDescription,
-} from "@components/toast-items"
-import { useToast } from "@hooks/use-toast"
-import Spinner from "@components/Spinner"
-import { deleteServiceFeeAction } from "@lib/actions/serviceFeeAction"
+} from "@/components/ui/tooltip"
+
+import Spinner from "@/components/Spinner"
 
 import {
   Accordion,
@@ -36,10 +30,14 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
-import { formatCurrency } from "@lib/client-helpers"
-import { cn } from "@lib/utils"
-import TagCarousel from "@components/tag-carousel"
+import { formatCurrency } from "@/lib/client-helpers"
+import { cn } from "@/lib/utils"
+import TagCarousel from "@/components/tag-carousel"
 import ServiceDiaDetails from "./service-dia-details"
+import type { Category, Service, ServiceFee } from "@/types"
+import { useLocation, useNavigate, useSearchParams } from "react-router"
+import { deleteServiceFee } from "@/services/serviceFees"
+import { toast } from "sonner"
 
 interface ServiceStates {
   priceValue: string
@@ -149,7 +147,7 @@ function ServiceFeesDialog({
 }: {
   isAdmin: boolean
   service: Service
-  categories: CategoryProps[]
+  categories: Category[]
   total: number
 }) {
   const [
@@ -165,11 +163,11 @@ function ServiceFeesDialog({
     dispatch,
   ] = useReducer(reducer, initalState)
 
-  const pathname = usePathname()
-  const router = useRouter()
-  const searchParam = useSearchParams()
+  const pathname = useLocation().pathname
+  const navigate = useNavigate()
+  const [searchParam] = useSearchParams()
 
-  let servicesArr = service.servicesFee
+  let servicesArr = service.serviceFees
 
   servicesArr = servicesArr.filter((service) => {
     let filterValue = true
@@ -199,7 +197,7 @@ function ServiceFeesDialog({
   function handleOpenEdit(filter: string) {
     const params = new URLSearchParams(searchParam)
     params.set("editFee", filter)
-    router.push(`${pathname}?${params.toString()}`, { scroll: false })
+    navigate(`${pathname}?${params.toString()}`)
   }
 
   function handleOpenChange() {
@@ -231,7 +229,7 @@ function ServiceFeesDialog({
     )
   }, [returnedFees])
 
-  if (!service.servicesFee.length)
+  if (!service.serviceFees.length)
     return (
       <TooltipProvider delayDuration={500}>
         <Tooltip>
@@ -257,7 +255,7 @@ function ServiceFeesDialog({
           Show
         </Button>
 
-        <DialogContent className="flex max-h-[81vh] max-w-[900px] flex-col overflow-y-auto !rounded-none border-none p-4 !pb-0 sm:p-6 lg:!rounded-lg">
+        <DialogContent className="flex max-h-[81vh] !max-w-[900px] flex-col overflow-y-auto !rounded-none border-none p-4 !pb-0 sm:p-6 lg:!rounded-lg">
           <DialogHeader className="invisible hidden">
             <DialogTitle>{`'s phome numbers`}</DialogTitle>
             <DialogDescription className="hidden">
@@ -377,10 +375,10 @@ function ServiceFeesDialog({
                     serviceFee={serviceFee}
                     dispatch={dispatch}
                     handleOpenEdit={handleOpenEdit}
-                    category={
-                      categories.find((cat) => cat.id === serviceFee.categoryId)
-                        ?.name || ""
-                    }
+                    // category={
+                    //   categories.find((cat) => cat.id === serviceFee.categoryId)
+                    //     ?.name || ""
+                    // }
                   />
                 ))}
               </ul>
@@ -410,11 +408,11 @@ function ServiceFeesDialog({
                     serviceFee={returnedFees}
                     dispatch={dispatch}
                     handleOpenEdit={handleOpenEdit}
-                    category={
-                      categories.find(
-                        (cat) => cat.id === returnedFees.categoryId
-                      )?.name || ""
-                    }
+                    // category={
+                    //   categories.find(
+                    //     (cat) => cat.id === returnedFees.categoryId
+                    //   )?.name || ""
+                    // }
                   />
                 ))}
                 <Accordion type="single" collapsible>
@@ -448,7 +446,7 @@ function ServiceFeesDialog({
             ) : null}
           </div>
           {/* </main> */}
-          <div className="sticky bottom-0 left-0 space-y-3 bg-background pt-4 pb-6 sm:pt-0">
+          <div className="sticky bottom-0 left-0 space-y-3 bg-popover pt-4 pb-6 sm:pt-0">
             <DialogClose asChild>
               <Button size="sm" className="w-full" variant="secondary">
                 Close
@@ -461,7 +459,7 @@ function ServiceFeesDialog({
       <DeleteFee
         deleteOpen={deleteOpen ? true : false}
         fee={deleteOpen}
-        serviceId={service.id}
+        // serviceId={service.id}
         total={total}
         handleClose={() => {
           dispatch({ type: "delete-open", payload: null })
@@ -476,17 +474,17 @@ function DeleteFee({
   deleteOpen,
   fee,
   handleClose,
-  serviceId,
+  // serviceId,
   total,
 }: {
   deleteOpen: boolean
   fee: ServiceFee | null
   handleClose: () => void
-  serviceId: number
+  // serviceId: number
   total: number
 }) {
   const [isDeleting, setIsDeleting] = useState(false)
-  const { toast } = useToast()
+
   const serviceTotalAfterDelete = fee ? total - fee.totalPriceAfterDiscount : 0
   return (
     <Dialog open={deleteOpen} onOpenChange={handleClose}>
@@ -512,31 +510,19 @@ function DeleteFee({
               setIsDeleting(true)
               try {
                 if (fee) {
-                  const { error } = await deleteServiceFeeAction(
-                    String(fee.id),
-                    serviceTotalAfterDelete,
-                    serviceId
-                  )
+                  // const { error } = await deleteServiceFeeAction(
+                  //   String(fee.id),
+                  //   serviceTotalAfterDelete,
+                  //   serviceId
+                  // )
 
-                  if (error) throw new Error(error)
+                  await deleteServiceFee(fee.id)
                 }
                 setIsDeleting(false)
                 handleClose()
-                toast({
-                  className: "bg-primary  text-primary-foreground",
-                  title: `Data deleted!.`,
-                  description: (
-                    <SuccessToastDescription
-                      message={`Service fee has been deleted.`}
-                    />
-                  ),
-                })
+                toast.success("Service fee deleted")
               } catch (error: any) {
-                toast({
-                  variant: "destructive",
-                  title: "Faild to delete service fee data.",
-                  description: <ErorrToastDescription error={error.message} />,
-                })
+                toast.error(error.message)
               }
             }}
           >
@@ -552,21 +538,21 @@ function FeesItem({
   returned,
   isAdmin,
   serviceFee,
-  category,
+  // category,
   handleOpenEdit,
   dispatch,
 }: {
   returned?: boolean
   isAdmin: boolean
   serviceFee: ServiceFee
-  category: string
+  // category: string
   handleOpenEdit: (filter: string) => void
   dispatch: React.Dispatch<Action>
 }) {
   return (
     <li
       className={cn(
-        "inline-flex w-full items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium whitespace-nowrap shadow-sm transition-all hover:bg-accent hover:text-accent-foreground focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50",
+        "inline-flex w-full items-center justify-center rounded-md border border-input bg-secondary px-4 py-2 text-sm font-medium whitespace-nowrap shadow-sm transition-all hover:bg-accent hover:text-accent-foreground focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50",
         {
           "border-none bg-accent hover:bg-muted-foreground/30 dark:bg-card/25 dark:hover:bg-card/10":
             returned,
@@ -580,7 +566,9 @@ function FeesItem({
         <div>
           {" "}
           Category:{" "}
-          <span className="text-xs text-muted-foreground">{category}</span>
+          <span className="text-xs text-muted-foreground">
+            {serviceFee.category.name}
+          </span>
         </div>
         <div className=" ">
           Price:{" "}

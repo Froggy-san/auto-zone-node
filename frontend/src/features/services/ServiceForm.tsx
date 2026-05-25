@@ -4,11 +4,17 @@ import { cn } from "@/lib/utils"
 import type { Product, Service } from "@/types"
 import type { Car } from "@/types/carTypes"
 import React, { useCallback, useEffect, useMemo } from "react"
-import { useForm } from "react-hook-form"
+import { Controller, useForm } from "react-hook-form"
 import { CreateServiceSchema } from "@/schemas/service.schema"
 import type z from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { FieldGroup } from "@/components/ui/field"
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field"
 import StepOne from "./StepOne"
 import { AnimatePresence } from "framer-motion"
 import {
@@ -21,8 +27,15 @@ import StepThree from "./StepThree"
 import Spinner from "@/components/Spinner"
 import { formatCurrency } from "@/lib/client-helpers"
 import { motion } from "framer-motion"
-import { ProFormSlideVariants, ProFormTransition } from "@/lib/constants"
+import {
+  ProFormSlideVariants,
+  ProFormTransition,
+  TAX_PER,
+} from "@/lib/constants"
 import { toast } from "sonner"
+import CurrencyInput from "react-currency-input-field"
+import { createService } from "@/services/servicesApi"
+import { useQueryClient } from "@tanstack/react-query"
 interface ServiceFormProps {
   car: Car
   open: boolean
@@ -35,7 +48,6 @@ const firstStep = [
   "technician",
   "odometer",
   "serviceDate",
-  "laborTime",
 ] as const
 const secondStep = ["serviceFees"] as const
 const thirdStep = [
@@ -56,11 +68,13 @@ const ServiceForm = ({
   setOpen,
   serviceToEdit,
 }: ServiceFormProps) => {
+  const [taxRate, setTaxRate] = React.useState(TAX_PER)
   const [isOpen, setIsOpen] = React.useState(false)
   const [[step, direction], setStep] = React.useState<[number, number]>([0, 1])
   const [products, setProducts] = React.useState<(Product | null)[]>([])
   const maxNumOfSteps = 3
-  const client = car.user
+
+  const queryClient = useQueryClient()
   const formRef = React.useRef<HTMLFormElement>(null)
   const handleOpen = () => setIsOpen(true)
   const handleNext = useCallback(
@@ -80,33 +94,32 @@ const ServiceForm = ({
     }
   }
 
+  // !Important: Dispite us initailzing the default values with the serviceToEdit values, the form is actually not ready to edit any service data, it need adjustments before it's ready.
   const defaultValues = {
-    user: serviceToEdit ? serviceToEdit._id : "",
+    user: car.user._id,
     car: car._id,
     serviceStatus: serviceToEdit ? serviceToEdit.serviceStatus._id : "",
     technician: serviceToEdit
       ? serviceToEdit.technician.map((tech) => tech._id)
       : [],
     odometer: serviceToEdit ? serviceToEdit.odometer : "",
-    subTotal: serviceToEdit ? serviceToEdit.subTotal : 0,
-    taxAmount: serviceToEdit ? serviceToEdit.taxAmount : 0,
-    totalDiscount: serviceToEdit ? serviceToEdit.totalDiscount : 0,
-    grandTotal: serviceToEdit ? serviceToEdit.grandTotal : 0,
+    // subTotal: serviceToEdit ? serviceToEdit.subTotal : 0,
+    // taxAmount: serviceToEdit ? serviceToEdit.taxAmount : 0,
+    // totalDiscount: serviceToEdit ? serviceToEdit.totalDiscount : 0,
+    // grandTotal: serviceToEdit ? serviceToEdit.grandTotal : 0,
     amountReceived: serviceToEdit ? serviceToEdit.amountReceived : 0,
     paymentStatus: serviceToEdit ? serviceToEdit.paymentStatus : "unpaid",
     priority: serviceToEdit ? serviceToEdit.priority : "low",
     note: serviceToEdit ? serviceToEdit.note : "",
-    serviceFees: serviceToEdit
-      ? serviceToEdit.serviceFees
-      : [
-          {
-            price: 0,
-            discount: 0,
-            category: "",
-            note: "",
-            isReturned: false,
-          },
-        ],
+    serviceFees: [
+      {
+        price: 0,
+        discount: 0,
+        category: "",
+        note: "",
+        isReturned: false,
+      },
+    ],
     productsSold: serviceToEdit ? serviceToEdit.productsSold : [],
     serviceDate: serviceToEdit
       ? new Date(serviceToEdit.serviceDate)
@@ -122,15 +135,7 @@ const ServiceForm = ({
 
   const formValues = form.watch()
 
-  // useEffect(() => {
-  //   console.log("EFFECT FIRED")
-  //   formValues.serviceFees.forEach((item, index) => {
-  //     if (item.price > item.discount) {
-  //       form.clearErrors(`serviceFees.${index}.discount`)
-  //     }
-  //   })
-  // }, [formValues.serviceFees, form])
-
+  // Calculations --------------
   const totalFees = formValues.serviceFees.reduce(
     (acc, fee) => {
       acc.totalPrice += fee.price
@@ -148,13 +153,30 @@ const ServiceForm = ({
     },
     { totalPrice: 0, totalDiscount: 0, totalCount: 0 }
   )
+  const subTotal = totalFees.totalPrice + totalProductSoldAmounts.totalPrice
+
+  const totalFeesAfterDis = totalFees.totalPrice - totalFees.totalDiscount
+
+  const totalProSoldAfterDis =
+    totalProductSoldAmounts.totalPrice - totalProductSoldAmounts.totalDiscount
+
+  const totalDiscount =
+    totalFees.totalDiscount + totalProductSoldAmounts.totalDiscount
+
+  const totalAmountAfterDis = totalFeesAfterDis + totalProSoldAfterDis
+
+  const taxAmount = totalAmountAfterDis * (taxRate / 100)
+
+  const grandTotal = totalAmountAfterDis + taxAmount
+
+  // Calculations --------------
+
+  // Validation and UI submit button disabling
   const isLoading = form.formState.isSubmitting
-  //   const disabled = !form.formState.isValid
 
   const isInVaild = useMemo(() => {
-    const currentStepFields = stepsFields[step]
     if (step === 0) {
-      return currentStepFields.some((field) => {
+      return firstStep.some((field) => {
         const fieldError = form.formState.errors[field] || !formValues[field]
         return fieldError
       })
@@ -178,10 +200,35 @@ const ServiceForm = ({
 
   const disabled = isLoading || isInVaild
 
-  async function onSubmit(values: z.infer<typeof CreateServiceSchema>) {
+  async function onSubmit({
+    serviceFees,
+    ...values
+  }: z.infer<typeof CreateServiceSchema>) {
     console.log("Form submitted with values:", values)
 
     try {
+      if (subTotal < totalDiscount)
+        throw new Error(
+          "Sub total amount must be bigger than the total discount amount"
+        )
+
+      await createService({
+        ...values,
+
+        taxRate,
+        taxAmount,
+        serviceFees,
+      })
+
+      toast.success(
+        `Service ${serviceToEdit ? "updated" : "created"} successfully!`
+      )
+
+      queryClient.invalidateQueries({ queryKey: ["services"] })
+      queryClient.invalidateQueries({ queryKey: ["services", car._id] })
+      queryClient.invalidateQueries({ queryKey: ["products"] })
+
+      setIsOpen(false)
     } catch (err) {
       console.error("Error submitting form:", err)
       toast.error(
@@ -191,7 +238,12 @@ const ServiceForm = ({
   }
 
   useEffect(() => {
+    formRef.current?.scrollTo(0, 0)
+  }, [step])
+  useEffect(() => {
     form.reset(defaultValues)
+    setStep([0, 1])
+    setProducts([])
   }, [isOpen])
 
   return (
@@ -201,15 +253,43 @@ const ServiceForm = ({
       </Button>
       {/* sm:p-14 pb-0 sm:pb-0 */}
       <DialogComponent.Content className="flex max-h-[85vh] max-w-[1050px] flex-col gap-1 overflow-hidden border border-transparent p-0 sm:rounded-none lg:rounded-lg">
-        <DialogComponent.Header>
-          <DialogComponent.Title className="text-2xl">
-            Service
+        <DialogComponent.Header className="border-b bg-background px-6 pt-6 pb-2 sm:px-14 sm:pt-8 sm:pb-4">
+          <DialogComponent.Title>
+            {" "}
+            {serviceToEdit ? "Update" : "Add"} Service
           </DialogComponent.Title>
           <DialogComponent.Description>
-            You are initiating a service for &lsquo;{client?.username || ""}
-            &lsquo; on the vehicle with plate number &lsquo;
-            {car?.plateNumber || ""}
-            &lsquo;.
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={step}
+                initial={{
+                  y: -15,
+                  opacity: 0,
+                }}
+                animate={{
+                  y: 0,
+                  opacity: 1,
+                }}
+                exit={{
+                  y: 15,
+                  opacity: 0,
+                }}
+                transition={{
+                  ease: "backInOut",
+                }}
+                className="text-center sm:text-left"
+              >
+                {step === 0 &&
+                  "1. Start by filling the basic information about the service."}
+                {step === 1 &&
+                  "2. Now, add the different fees that were part of the service. Each fee represents a specific task or work that was done, along with its price and any discount applied to it."}
+                {step === 2 &&
+                  "3. Finally, add the products that were sold during the service (if any), along with their prices, quantities, and discounts. Then review the calculated totals and submit the form."}
+
+                {step === maxNumOfSteps &&
+                  "Review all the details you entered, including the calculated totals and add the 'Received' amount if any. If everything looks good,  click the submit button to finalize the service record."}
+              </motion.div>
+            </AnimatePresence>
           </DialogComponent.Description>
         </DialogComponent.Header>
 
@@ -269,6 +349,61 @@ const ServiceForm = ({
                   transition={ProFormTransition}
                   className="space-y-7"
                 >
+                  <div className="flex gap-3">
+                    <Controller
+                      name="amountReceived"
+                      control={form.control}
+                      render={({ field, fieldState }) => (
+                        <Field data-invalid={fieldState.invalid}>
+                          <FieldLabel htmlFor={field.name}>Price</FieldLabel>
+                          <CurrencyInput
+                            id={field.name}
+                            name="price"
+                            placeholder="Received amount"
+                            decimalsLimit={2}
+                            prefix="EGP "
+                            decimalSeparator="."
+                            groupSeparator=","
+                            value={field.value || ""}
+                            onValueChange={(formattedValue, name, value) => {
+                              // setFormattedListing(formattedValue || "");
+
+                              field.onChange(Number(value?.value) || 0)
+                            }}
+                            className="input-field"
+                          />
+                          <FieldDescription>
+                            Enter the amount received from the client, if any.
+                          </FieldDescription>
+                          {fieldState.invalid && (
+                            <FieldError errors={[fieldState.error]} />
+                          )}
+                        </Field>
+                      )}
+                    />
+
+                    <div className="flex w-full flex-col gap-3 *:w-full [&>.sr-only]:w-auto">
+                      <FieldLabel htmlFor="tax-rate">Tax Rate</FieldLabel>
+                      <CurrencyInput
+                        id="tax-rate"
+                        name="price"
+                        placeholder="Received amount"
+                        decimalsLimit={2}
+                        prefix="% "
+                        decimalSeparator="."
+                        groupSeparator=","
+                        value={taxRate || ""}
+                        onValueChange={(formattedValue, name, value) => {
+                          // setFormattedListing(formattedValue || "");
+
+                          setTaxRate(Number(value?.value) || 0)
+                        }}
+                        className="input-field"
+                      />
+                      <FieldDescription>Enter tax percentage.</FieldDescription>
+                    </div>
+                  </div>
+
                   <div className="mx-auto max-w-[500px]">
                     <h3 className="text-sm">Total:</h3>
                     <div className="space-y-2 border-t py-2 text-xs text-muted-foreground">
@@ -281,7 +416,7 @@ const ServiceForm = ({
                             </span>
                           </div>
                           <div>
-                            Total products revenue:{" "}
+                            Total products price:{" "}
                             {formatCurrency(totalProductSoldAmounts.totalPrice)}
                           </div>
                           <div>
@@ -294,10 +429,7 @@ const ServiceForm = ({
                             Net products sold:{" "}
                             <span className="dark:text-dashboard-indigo text-indigo-800">
                               {" "}
-                              {formatCurrency(
-                                totalProductSoldAmounts.totalPrice -
-                                  totalProductSoldAmounts.totalDiscount
-                              )}
+                              {formatCurrency(totalProSoldAfterDis)}
                             </span>
                           </div>
                         </div>
@@ -320,22 +452,13 @@ const ServiceForm = ({
                             Net fees:{" "}
                             <span className="dark:text-dashboard-orange text-xs text-orange-400">
                               {" "}
-                              {formatCurrency(
-                                totalFees.totalPrice - totalFees.totalDiscount
-                              )}
+                              {formatCurrency(totalFeesAfterDis)}
                             </span>
                           </div>
                         </div>
                       </div>
                       <div className="border-t pt-1">
-                        <div>
-                          {" "}
-                          Total Revenue:{" "}
-                          {formatCurrency(
-                            totalFees.totalPrice +
-                              totalProductSoldAmounts.totalPrice
-                          )}
-                        </div>
+                        <div> Sub Total: {formatCurrency(subTotal)}</div>
                         <div>
                           {" "}
                           Total discount:{" "}
@@ -344,15 +467,8 @@ const ServiceForm = ({
                               totalProductSoldAmounts.totalDiscount
                           )}
                         </div>
-                        <div>
-                          Net:{" "}
-                          {formatCurrency(
-                            totalProductSoldAmounts.totalPrice +
-                              totalFees.totalPrice -
-                              (totalProductSoldAmounts.totalDiscount +
-                                totalFees.totalDiscount)
-                          )}
-                        </div>
+                        <div> Tax Rate: {taxRate}%</div>
+                        <div>Net: {formatCurrency(grandTotal)}</div>
                       </div>
                     </div>
                   </div>

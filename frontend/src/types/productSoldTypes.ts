@@ -1,7 +1,9 @@
+import type { Product } from "./product"
+
 export interface ProductSold {
   id: string
   _id: string
-  product: string
+  product: Product
   service: string
   pricePerUnit: number
   discountPerUnit: number

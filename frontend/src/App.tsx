@@ -10,6 +10,8 @@ import UserActivity from "./pages/user/UserActivity"
 import UserSettings from "./pages/user/UserSettings"
 import Garage from "./pages/Garage"
 import CarDetails from "./pages/carDetails"
+import Dashboard from "./pages/dashboard/Dashboard"
+import DashboardHome from "./pages/dashboard/DashboardHome"
 
 export function App() {
   return (
@@ -31,10 +33,10 @@ export function App() {
           <Route path="settings" element={<UserSettings />} />{" "}
           {/* domain.com/user/settings */}
         </Route>
-        {/* <Route path="dashboard" element={<Dashboard />}>
-          <Route index element={<Home />} />
-          <Route path="settings" element={<Settings />} />
-        </Route> */}
+        <Route path="dashboard" element={<Dashboard />}>
+          <Route index element={<DashboardHome />} />
+          {/* <Route path="settings" element={<Settings />} /> */}
+        </Route>
       </Routes>
     </BrowserRouter>
   )

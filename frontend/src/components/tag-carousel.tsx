@@ -1,18 +1,8 @@
-import React, {
-  ReactNode,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react"
-import { EmblaOptionsType } from "embla-carousel"
+import { type EmblaOptionsType } from "embla-carousel"
 
 import useEmblaCarousel from "embla-carousel-react"
-import { Category } from "@lib/types"
-import { setWith } from "lodash"
-import { Badge } from "@components/ui/badge"
-import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { cn } from "@lib/utils"
+import { useEffect } from "react"
+import { useLocation, useNavigate, useSearchParams } from "react-router"
 
 type PropType = {
   slides?: number[]
@@ -23,9 +13,9 @@ type PropType = {
 const TagCarousel: React.FC<PropType> = (props) => {
   const { slides, options, children } = props
   const [emblaRef, emblaApi] = useEmblaCarousel(options)
-  const pathname = usePathname()
-  const searchParams = useSearchParams()
-  const router = useRouter()
+  const pathname = useLocation().pathname
+  const [searchParams] = useSearchParams()
+
   const params = new URLSearchParams(searchParams)
   const currCategory = searchParams.get("categoryId") ?? ""
 
