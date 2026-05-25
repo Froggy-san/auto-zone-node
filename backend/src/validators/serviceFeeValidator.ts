@@ -3,9 +3,9 @@ import { objectIdSchema } from "./commen";
 // 1. Define the raw shape without refinements
 const ServiceFeeShape = z.object({
   category: objectIdSchema,
-  service: objectIdSchema,
+  // service: objectIdSchema,
   price: z.coerce.number().positive(),
-  discount: z.coerce.number().positive(),
+  discount: z.coerce.number().default(0),
   totalPriceAfterDiscount: z.coerce.number().positive(),
   isReturned: z.coerce.boolean().default(false),
   note: z.string(),

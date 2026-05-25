@@ -1,1 +1,1 @@
-export const SERVICE_STATUS_DONE_ID = "";
+export const SERVICE_STATUS_DONE_ID = "6a088a4c2189462c9b1d98e0";

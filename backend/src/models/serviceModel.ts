@@ -109,6 +109,18 @@ const ServiceSchema = new Schema<IService>(
   },
 );
 
+ServiceSchema.virtual("serviceFees", {
+  ref: "serviceFees",
+  foreignField: "service",
+  localField: "_id",
+});
+
+ServiceSchema.virtual("productsSold", {
+  ref: "productsSold",
+  foreignField: "service",
+  localField: "_id",
+});
+
 ServiceSchema.pre("save", function () {
   if (this.paymentStatus === "refunded") {
     // If it's already marked as refunded, don't let the payment math overwrite it!

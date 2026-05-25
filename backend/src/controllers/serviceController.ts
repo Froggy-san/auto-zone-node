@@ -12,7 +12,19 @@ import {
 import { IServiceFee, ServiceFee } from "../models/serviceFeeModel";
 import { AppError } from "../utils/appError";
 
-export const getAllServices = getAll(Service);
+export const getAllServices = getAll(Service, [
+  { path: "serviceFees" },
+  {
+    path: "productsSold",
+    populate: {
+      path: "product",
+    },
+  },
+  { path: "technician" },
+  { path: "serviceStatus" },
+  { path: "user" },
+  { path: "car" },
+]);
 
 export const getService = getOne(Service);
 
@@ -22,9 +34,10 @@ import StockLogs, { IStockLog } from "../models/stockLogsModel";
 
 export const createService = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
+    console.log("🧾🧾🧾 A New Service Is Being created 🧾🧾🧾");
     const {
-      serviceFeesData,
-      productsSoldData,
+      serviceFees: serviceFeesData,
+      productsSold: productsSoldData,
       taxRate = 0.1,
       ...rest
     } = req.body;
@@ -44,20 +57,27 @@ export const createService = catchAsync(
       const productSoldIds: mongoose.Types.ObjectId[] =
         productsSoldData?.map((p: any) => p.product) || [];
 
+      console.log("📦📦📦 Searching For Matching Products 📦📦📦");
       const dbProducts = await Product.find({
         _id: { $in: productSoldIds },
       }).session(session);
+      console.log(`📦📦📦 Products found: ${dbProducts.join(", ")} 📦📦📦`);
 
+      console.log(`🔎🔎🔎 Checking For Any Duplicates IDS 🔎🔎🔎`);
       //!important: Even though the user is allowed one entry of each product, some people might want to miss with the site and send multiple entries of the same product. So we want check for any duplicates. This is done becasue we are checking for the stock availablity once for each sold product rather than grouping them.
 
       productSoldIds.forEach((id) => {
         const otherIds = productSoldIds.filter(
           (otherIds) => otherIds.toString() === id.toString(),
         );
-        if (otherIds.length > 1)
+        if (otherIds.length > 1) {
+          console.log(
+            `❗❗❗ Duplicate IDS Were Found: ${otherIds.join(", ")}❗❗❗`,
+          );
           throw new Error(
             `You have enter more than one entry of the same product, You can only select the product one and adjust the amount you need sold from it`,
           );
+        }
       });
 
       // 2. CALCULATE TOTALS FIRST (The "Math Office")
@@ -124,11 +144,12 @@ export const createService = catchAsync(
         };
       });
 
-      const taxAmount = (subTotal - totalDiscount) * taxRate;
+      const taxAmount = (subTotal - totalDiscount) * (taxRate / 100);
       const grandTotal = subTotal - totalDiscount + taxAmount;
 
       // 3. CREATE EVERYTHING IN ONE GO
       // No need for "12" placeholders anymore!
+      console.log(`💉💉💉  Inserting The Service Data  💉💉💉`);
       const [createdService] = await Service.create(
         [
           {
@@ -139,8 +160,9 @@ export const createService = catchAsync(
             grandTotal,
           },
         ],
-        { session },
+        { session, ordered: true },
       );
+      console.log(`💉💉💉  Inserted Service Data: ${createdService}  💉💉💉`);
 
       if (!createdService)
         throw new AppError(
@@ -149,39 +171,66 @@ export const createService = catchAsync(
         );
 
       if (processedProducts?.length) {
+        console.log(`💲💲💲  Inserting Sold Products  💲💲💲`);
         const productsWithServiceId = processedProducts.map((p: IProduct) => ({
           ...p,
           service: createdService._id,
         }));
-        await ProductSold.create(productsWithServiceId, { session });
+        const soldProducts = await ProductSold.create(productsWithServiceId, {
+          session,
+          ordered: true,
+        });
+
+        console.log(`💲💲💲 Inserted Sold Products: ${soldProducts} 💲💲💲`);
 
         // 4. BULK UPDATE STOCK
+        console.log(`📉📉📉 Updating Product Stock 📉📉📉`);
+        console.log(logs, "LOGGSSSSSSSSSSSSSSSSS");
         const bulkOps = logs.map((item: any) => ({
           updateOne: {
             filter: { _id: item.product },
             update: {
-              $inc: { stock: item.count },
+              $inc: { stock: item.change },
               $set: { isAvailable: !item.currentStock },
             },
           },
         }));
-        await Product.bulkWrite(bulkOps, { session });
+        const newStocks = await Product.bulkWrite(bulkOps, {
+          session,
+          ordered: true,
+        });
+
+        console.log(
+          `📉📉📉 Updated Product Stock: ${JSON.stringify(newStocks)} 📉📉📉`,
+        );
       }
 
       if (serviceFeesData?.length) {
         const feesWithServiceId = serviceFeesData.map((f: any) => ({
           ...f,
           service: createdService._id,
+          totalPriceAfterDiscount: f.totalPrice - f.totalDiscount,
         }));
-        await ServiceFee.create(feesWithServiceId, { session });
+        console.log(`💸💸💸 Inserting Service Fees 💸💸💸`);
+        const createdServiceFees = await ServiceFee.create(feesWithServiceId, {
+          session,
+          ordered: true,
+        });
+        console.log(
+          `💸💸💸 Inserted Service Fees: ${createdServiceFees} 💸💸💸`,
+        );
       }
 
       if (logs.length) {
+        console.log(`🧾🧾🧾 Logging Stock Changes 🧾🧾🧾`);
         const stockLogs = logs.map((log) => ({
           ...log,
           referenceId: createdService._id,
         }));
-        await StockLogs.create(stockLogs, { session });
+        console.log(
+          `🧾🧾🧾 Created Stock Logs: ${JSON.stringify(stockLogs)} 🧾🧾🧾`,
+        );
+        await StockLogs.create(stockLogs, { session, ordered: true });
       }
 
       await session.commitTransaction();

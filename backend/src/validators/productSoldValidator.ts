@@ -3,7 +3,7 @@ import { objectIdSchema } from "./commen";
 
 export const ProductSoldShape = z.object({
   product: objectIdSchema,
-  service: objectIdSchema,
+  // service: objectIdSchema,
   pricePerUnit: z.coerce.number().positive(),
   discountPerUnit: z.coerce.number().positive(),
   // totalPriceAfterDiscount: z.coerce.number().positive(),

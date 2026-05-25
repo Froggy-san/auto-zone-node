@@ -227,7 +227,7 @@ export const getCarAndRelated = catchAsync(
 
     if (!car) return next(new AppError(`No car found`, 404));
 
-    const relatedCars = await Car.find({ id: { $ne: car.id } }).populate({
+    const relatedCars = await Car.find({ _id: { $ne: car._id } }).populate({
       path: "carGeneration",
       model: "carGenerations",
       select: "name image",
