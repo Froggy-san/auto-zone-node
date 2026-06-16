@@ -113,8 +113,10 @@ export const getAll = (
   options?: Record<string, any>,
 ) =>
   catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    console.log("QUERY FORM ALL", req.query);
     // 1. Initialize the base query with options
     let baseQuery = Model.find();
+
     if (options) baseQuery = baseQuery.setOptions(options);
 
     // 2. Build features based on that base query
@@ -123,7 +125,7 @@ export const getAll = (
       .limitFields()
       .sort()
       .paginate();
-
+    console.log(features.filtersObj, "FILTER OBJ");
     // 3. IMPORTANT: Apply options to the Count too!
     // We create a count query and apply the same options
     const countQuery = Model.countDocuments(features.filtersObj);

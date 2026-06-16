@@ -87,10 +87,9 @@ export const ServiceStatusCombobox: React.FC<ComboBoxProps> = ({
         >
           {selected ? (
             <div className="flex max-w-full items-center gap-2">
-              Status:{" "}
               <StatusBadge
                 status={selected}
-                className="py-[.1rem] text-wrap"
+                className="py-[.1rem] !text-wrap"
                 key={selected.id}
               />
             </div>

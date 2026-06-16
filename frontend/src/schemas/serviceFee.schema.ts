@@ -4,7 +4,7 @@ import z from "zod"
 const ServiceFeeShape = z.object({
   category: z.string().min(1, { message: "Category is required" }),
   // service: z.string().min(1, { message: "Service description is required" }),
-  price: z.number().positive(),
+  price: z.number().gt(0, "Price must be greater than 0"),
   discount: z.number(),
   // totalPriceAfterDiscount: z.number().positive(),
   isReturned: z.boolean(),

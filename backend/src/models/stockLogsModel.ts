@@ -6,7 +6,10 @@ export type StockChangeReason =
   | "restock"
   | "retail-sale"
   | "adjustment"
-  | "manual-correction";
+  | "manual-correction"
+  | "service-deleted"
+  | "sale-quantity-updated"
+  | "product-sold-deleted";
 
 export interface IStockLog extends Document {
   product: mongoose.Types.ObjectId;
@@ -14,8 +17,8 @@ export interface IStockLog extends Document {
   previousStock: number;
   currentStock: number;
   reason: StockChangeReason;
-  referenceId?: mongoose.Types.ObjectId;
-  user?: mongoose.Types.ObjectId;
+  referenceId: mongoose.Types.ObjectId;
+  user: mongoose.Types.ObjectId;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -35,6 +38,9 @@ const StockLogSchema = new Schema<IStockLog>(
         "restock",
         "adjustment",
         "manual-correction",
+        "service-deleted",
+        "sale-quantity-updated",
+        "product-sold-deleted",
       ],
       required: true,
     },

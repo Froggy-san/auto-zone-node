@@ -36,8 +36,10 @@ import TagCarousel from "@/components/tag-carousel"
 import ServiceDiaDetails from "./service-dia-details"
 import type { Category, Service, ServiceFee } from "@/types"
 import { useLocation, useNavigate, useSearchParams } from "react-router"
-import { deleteServiceFee } from "@/services/serviceFees"
+import { deleteServiceFee } from "@/services/serviceFeesApi"
 import { toast } from "sonner"
+import { useQueryClient } from "@tanstack/react-query"
+import useDeleteServiceFee from "@/features/services/useDeleteServiceFee"
 
 interface ServiceStates {
   priceValue: string
@@ -166,7 +168,7 @@ function ServiceFeesDialog({
   const pathname = useLocation().pathname
   const navigate = useNavigate()
   const [searchParam] = useSearchParams()
-
+  const serviceTaxRate = service.taxRate
   let servicesArr = service.serviceFees
 
   servicesArr = servicesArr.filter((service) => {
@@ -186,7 +188,10 @@ function ServiceFeesDialog({
     )
       filterValue =
         filterValue &&
-        service.totalPriceAfterDiscount === Number(totalPriceAfterDiscountValue)
+        Math.ceil(
+          service.totalPriceAfterDiscount +
+            service.totalPriceAfterDiscount * serviceTaxRate
+        ) === Number(totalPriceAfterDiscountValue)
 
     return filterValue
   })
@@ -213,7 +218,12 @@ function ServiceFeesDialog({
         acc.totalPrice += item.totalPriceAfterDiscount
         return acc
       },
-      { totalPriceBeforeDiscount: 0, totalDiscount: 0, totalPrice: 0 }
+      {
+        totalPriceBeforeDiscount: 0,
+        totalDiscount: 0,
+        totalPrice: 0,
+        serviceTaxRate,
+      }
     )
   }, [fees])
 
@@ -277,13 +287,14 @@ function ServiceFeesDialog({
               <AccordionContent className="pb-0">
                 <div className="flex flex-wrap justify-center gap-2 rounded-md bg-secondary/50 p-2 text-sm xs:gap-3 sm:p-3 dark:bg-card/20">
                   {/* <div className=" flex  flex-col sm:flex-row items-center  gap-3 "> */}
-                  <div className="mb-auto w-[48%] space-y-2 sm:w-[32%]">
+                  <div className="mb-auto w-[48%] sm:w-[32%]">
                     <label className="text-xs" htmlFor="price">
                       Price
                     </label>
                     <Input
                       id="price"
-                      placeholder="Price..."
+                      placeholder="Price.."
+                      className="mt-2"
                       autoFocus
                       value={priceValue}
                       onChange={(e) =>
@@ -291,13 +302,14 @@ function ServiceFeesDialog({
                       }
                     />
                   </div>
-                  <div className="mb-auto w-[48%] space-y-2 sm:w-[32%]">
+                  <div className="mb-auto w-[48%] sm:w-[32%]">
                     <label className="text-xs" htmlFor="discount">
                       Discount
                     </label>
                     <Input
                       id="discount"
-                      placeholder="Discount..."
+                      placeholder="Discount.."
+                      className="mt-2"
                       value={discountValue}
                       onChange={(e) =>
                         dispatch({ type: "discount", payload: e.target.value })
@@ -305,13 +317,14 @@ function ServiceFeesDialog({
                     />
                   </div>
 
-                  <div className="mb-auto w-[48%] space-y-2 sm:w-[32%]">
-                    <label className="text-xs" htmlFor="totalPrice">
-                      Total after discount
+                  <div className="mb-auto w-[48%] !space-y-2 sm:w-[32%]">
+                    <label className="text-xs" htmlFor="grand-total">
+                      Grand total
                     </label>
                     <Input
-                      id="totalPrice"
-                      placeholder="Total price after discount..."
+                      id="grand-total"
+                      placeholder="Grand total.."
+                      className="mt-2"
                       value={totalPriceAfterDiscountValue}
                       onChange={(e) =>
                         dispatch({
@@ -354,14 +367,6 @@ function ServiceFeesDialog({
                 Service Fees.
               </h2>
               <ServiceDiaDetails service={service} isAdmin={isAdmin} />
-              {/* <div className=" text-xs   justify-end flex items-center gap-y-1 gap-x-3 flex-wrap text-muted-foreground  ">
-                <div>
-                  Car plate: <span>{service.cars.plateNumber}</span>
-                </div>
-                <div>
-                  Date: <span>{service.created_at}</span>
-                </div>
-              </div> */}
             </div>
 
             {/* FEES --------------------------------------------------------------- FEES */}
@@ -371,6 +376,7 @@ function ServiceFeesDialog({
                 {fees.map((serviceFee, i) => (
                   <FeesItem
                     key={i}
+                    serviceTaxRate={serviceTaxRate}
                     isAdmin={isAdmin}
                     serviceFee={serviceFee}
                     dispatch={dispatch}
@@ -402,8 +408,9 @@ function ServiceFeesDialog({
                 </h2>
                 {returnedFees.map((returnedFees, i) => (
                   <FeesItem
-                    returned
                     key={i}
+                    returned
+                    serviceTaxRate={serviceTaxRate}
                     isAdmin={isAdmin}
                     serviceFee={returnedFees}
                     dispatch={dispatch}
@@ -420,7 +427,7 @@ function ServiceFeesDialog({
                     <AccordionTrigger>Total returns:</AccordionTrigger>
                     <AccordionContent className="flex flex-wrap items-center gap-x-2 gap-y-2 text-xs">
                       <div className="flex items-center justify-center gap-1 rounded-full bg-chart-1 px-2 py-1 text-[.7rem] transition-opacity hover:opacity-90">
-                        Total Price:
+                        Sub Total:
                         <span>
                           {formatCurrency(
                             totalReturns.totalPriceBeforeDiscount
@@ -428,16 +435,29 @@ function ServiceFeesDialog({
                         </span>
                       </div>
 
-                      <div className="flex items-center justify-center gap-1 rounded-full bg-chart-4 px-2 py-1 text-[.7rem] transition-opacity hover:opacity-90">
-                        Total discount:{" "}
+                      <div className="flex items-center justify-center gap-1 rounded-full bg-chart-2 px-2 py-1 text-[.7rem] transition-opacity hover:opacity-90">
+                        Total Discount:{" "}
                         <span>
                           {formatCurrency(totalReturns.totalDiscount)}
                         </span>
                       </div>
 
-                      <div className="flex items-center justify-center gap-1 rounded-full bg-chart-5 px-2 py-1 text-[.7rem] transition-opacity hover:opacity-90">
-                        Total after discount:{" "}
+                      <div className="flex items-center justify-center gap-1 rounded-full bg-chart-4 px-2 py-1 text-[.7rem] transition-opacity hover:opacity-90">
+                        Net Revenue:{" "}
                         <span>{formatCurrency(totalReturns.totalPrice)}</span>
+                      </div>
+                      <div className="flex items-center justify-center gap-1 rounded-full bg-chart-1 px-2 py-1 text-[.7rem] transition-opacity hover:opacity-90">
+                        Tax Rate:{" "}
+                        <span>{(serviceTaxRate * 100).toFixed()}%</span>
+                      </div>
+                      <div className="flex items-center justify-center gap-1 rounded-full bg-chart-5 px-2 py-1 text-[.7rem] transition-opacity hover:opacity-90">
+                        Grand Total:{" "}
+                        <span>
+                          {formatCurrency(
+                            totalReturns.totalPrice +
+                              totalReturns.totalPrice * serviceTaxRate
+                          )}
+                        </span>
                       </div>
                     </AccordionContent>
                   </AccordionItem>
@@ -483,9 +503,9 @@ function DeleteFee({
   // serviceId: number
   total: number
 }) {
-  const [isDeleting, setIsDeleting] = useState(false)
+  const { mutate: deleteServiceFee, isPending: isDeleting } =
+    useDeleteServiceFee()
 
-  const serviceTotalAfterDelete = fee ? total - fee.totalPriceAfterDiscount : 0
   return (
     <Dialog open={deleteOpen} onOpenChange={handleClose}>
       <DialogContent className="border-none sm:max-w-[425px]">
@@ -506,23 +526,10 @@ function DeleteFee({
             disabled={isDeleting}
             variant="destructive"
             size="sm"
-            onClick={async () => {
-              setIsDeleting(true)
-              try {
-                if (fee) {
-                  // const { error } = await deleteServiceFeeAction(
-                  //   String(fee.id),
-                  //   serviceTotalAfterDelete,
-                  //   serviceId
-                  // )
-
-                  await deleteServiceFee(fee.id)
-                }
-                setIsDeleting(false)
+            onClick={() => {
+              if (fee) {
+                deleteServiceFee(fee.id)
                 handleClose()
-                toast.success("Service fee deleted")
-              } catch (error: any) {
-                toast.error(error.message)
               }
             }}
           >
@@ -539,6 +546,7 @@ function FeesItem({
   isAdmin,
   serviceFee,
   // category,
+  serviceTaxRate,
   handleOpenEdit,
   dispatch,
 }: {
@@ -546,6 +554,7 @@ function FeesItem({
   isAdmin: boolean
   serviceFee: ServiceFee
   // category: string
+  serviceTaxRate: number
   handleOpenEdit: (filter: string) => void
   dispatch: React.Dispatch<Action>
 }) {
@@ -591,12 +600,26 @@ function FeesItem({
           </span>
         </div> */}
         <div>
-          Total after discount:{" "}
+          Subtotal:{" "}
           <span className="text-xs break-all whitespace-normal text-muted-foreground">{` ${formatCurrency(
             serviceFee.totalPriceAfterDiscount
           )}`}</span>
         </div>
-
+        <div>
+          Tax:{" "}
+          <span className="text-xs break-all whitespace-normal text-muted-foreground">
+            {Math.floor(serviceTaxRate * 100)}%
+          </span>
+        </div>
+        <div>
+          Grand total:{" "}
+          <span className="text-xs break-all whitespace-normal text-muted-foreground">{` ${formatCurrency(
+            Math.ceil(
+              serviceFee.totalPriceAfterDiscount +
+                serviceFee.totalPriceAfterDiscount * serviceTaxRate
+            )
+          )}`}</span>
+        </div>
         {isAdmin && (
           <div className="ml-auto flex items-center gap-2">
             <Button
@@ -638,6 +661,7 @@ interface SummaryProps {
   totalPriceBeforeDiscount: number
   totalDiscount: number
   totalPrice: number
+  serviceTaxRate: number
 }
 function Summary({
   totals,
@@ -680,18 +704,39 @@ function Summary({
       <div className="relative">
         <div className="embla__slide">
           {" "}
-          <div className="flex items-center justify-center gap-1 rounded-full bg-chart-4 px-2 py-1 text-[.7rem] text-nowrap break-keep transition-opacity hover:opacity-90">
+          <div className="flex items-center justify-center gap-1 rounded-full bg-chart-2 px-2 py-1 text-[.7rem] text-nowrap break-keep transition-opacity hover:opacity-90">
             Total discount: <span>{formatCurrency(totals.totalDiscount)}</span>
           </div>
         </div>
       </div>
-
+      <div className="relative">
+        <div className="embla__slide">
+          {" "}
+          <div className="flex items-center justify-center gap-1 rounded-full bg-chart-4 px-2 py-1 text-[.7rem] text-nowrap break-keep transition-opacity hover:opacity-90">
+            Subtotal: <span>{formatCurrency(totals.totalPrice)}</span>
+          </div>
+        </div>
+      </div>
+      <div className="relative">
+        <div className="embla__slide">
+          {" "}
+          <div className="flex items-center justify-center gap-1 rounded-full bg-chart-1 px-2 py-1 text-[.7rem] text-nowrap break-keep transition-opacity hover:opacity-90">
+            Tax rate: <span>{Math.floor(totals.serviceTaxRate * 100)}%</span>
+          </div>
+        </div>
+      </div>
       <div className="relative">
         <div className="embla__slide">
           {" "}
           <div className="flex items-center justify-center gap-1 rounded-full bg-chart-5 px-2 py-1 text-[.7rem] text-nowrap transition-opacity hover:opacity-90">
-            Total after discount:{" "}
-            <span>{formatCurrency(totals.totalPrice)}</span>
+            Grand total:{" "}
+            <span>
+              {formatCurrency(
+                Math.ceil(
+                  totals.totalPrice + totals.totalPrice * totals.serviceTaxRate
+                )
+              )}
+            </span>
           </div>
         </div>
       </div>

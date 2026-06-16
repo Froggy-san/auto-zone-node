@@ -3,9 +3,12 @@ export const formatCurrency = (value: number) =>
     value
   )
 
-export function formatNumber(number: string) {
-  if (!number) return
-  // if()
+export function formatNumber(number: number) {
+  if (typeof number !== "number") {
+    console.warn("Invaild number to format:", number)
+    return "Invaild number"
+  }
+  return new Intl.NumberFormat("en-US", { style: "decimal" }).format(number)
 }
 export async function urlToFile(
   url: string,

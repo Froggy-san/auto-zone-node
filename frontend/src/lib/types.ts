@@ -496,6 +496,7 @@ export const PaymentStatusSchema = z.enum([
   "unpaid",
   "paid",
   "pending_arrival",
+  "partially-paid",
   "canceled",
   "disputed",
   "refunded",

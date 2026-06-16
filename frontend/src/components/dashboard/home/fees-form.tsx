@@ -1,89 +1,122 @@
-import React, { useCallback, useEffect, useState } from "react"
+import React, { useCallback, useEffect, useMemo, useState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm, useWatch } from "react-hook-form"
+import { Controller, useForm } from "react-hook-form"
 import { z } from "zod"
 import { Button } from "@/components/ui/button"
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form"
 
-import {
-  ServiceFee,
-  Category,
-  EditServiceFee,
-  ServiceFeeSchema,
-  CategoryProps,
-} from "@lib/types"
+import Spinner from "@/components/Spinner"
 
-import Spinner from "@components/Spinner"
-
-import { useToast } from "@hooks/use-toast"
+import { useToast } from "@/hooks/use-toast"
 import SuccessToastDescription, {
   ErorrToastDescription,
-} from "@components/toast-items"
+} from "@/components/toast-items"
 
-import useObjectCompare from "@hooks/use-compare-objs"
-import DialogComponent from "@components/dialog-component"
-import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { ComboBox } from "@components/combo-box"
-import { Input } from "@components/ui/input"
-import { Textarea } from "@components/ui/textarea"
-import { Switch } from "@components/ui/switch"
-import { Label } from "@components/ui/label"
-import {
-  createServiceFeeAction,
-  editServiceFeeAction,
-} from "@lib/actions/serviceFeeAction"
+import useObjectCompare from "@/hooks/use-compare-objs"
+import DialogComponent from "@/components/dialog-component"
+
+import { ComboBox } from "@/components/combo-box"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Switch } from "@/components/ui/switch"
+import { Label } from "@/components/ui/label"
+
 import CurrencyInput from "react-currency-input-field"
+import type { Category, ServiceFee } from "@/types"
+import { useLocation, useNavigate, useSearchParams } from "react-router"
+import { ServiceFeeSchema } from "@/schemas/serviceFee.schema"
+
+import useServiceFeeById from "@/features/services/useServiceFeeById"
+import useCategories from "@/features/categories/useCategories"
+import ErrorMessage from "@/components/error-message"
+import {
+  Field,
+  FieldContent,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+  FieldTitle,
+} from "@/components/ui/field"
+import { useQueryClient } from "@tanstack/react-query"
+import { toast } from "sonner"
+import useCreateServiceFee from "@/features/services/useCreateServiceFee"
+import useUpdateServiceFee from "@/features/services/useUpdateServiceFee"
 
 const formatCurrency = (value: number) =>
   new Intl.NumberFormat("en", { style: "currency", currency: "egp" }).format(
     value
   )
-const FeesForm = ({
-  open,
-  feesToEdit,
-  addFeeId,
-  categories,
-  service,
-}: {
-  open: boolean
-  feesToEdit: ServiceFee
-  addFeeId?: string
-  categories: CategoryProps[]
-  service: { id: number; totalPrice: number } | null
-}) => {
-  const { toast } = useToast()
-  const router = useRouter()
-  const pathname = usePathname()
-  const searchParams = useSearchParams()
-
-  const defaultValues = {
-    price: feesToEdit?.price || 0,
-    discount: feesToEdit?.discount || 0,
-    isReturned: feesToEdit?.isReturned || false,
-    notes: feesToEdit?.notes || "",
-    categoryId: feesToEdit?.categoryId || 0,
+const FeesForm = (
+  {
+    // open,
+    // feesToEdit,
+    // addFeeId,
+    // categories,
+    // service,
+  }: {
+    // open?: boolean
+    // feesToEdit: ServiceFee
+    // addFeeId?: string
+    // categories: Category[]
+    // service: { id: number; totalPrice: number } | null
   }
+) => {
+  const queryClient = useQueryClient()
+  const navigate = useNavigate()
+  const pathname = useLocation().pathname
+  const [searchParams] = useSearchParams()
+  const { mutateAsync: createServiceFee } = useCreateServiceFee()
+  const { mutateAsync: updateServiceFee } = useUpdateServiceFee()
+
+  const addFeeId = searchParams.get("addFeeId") ?? "" // This is the ID of the service you want to add the service fee to
+  const editFeeId = searchParams.get("editFee") ?? ""
+
+  const isOpen = addFeeId !== "" || editFeeId !== ""
+  const {
+    data: feesToEdit,
+    isLoading: serviceFeeLoading,
+    error: seviceFeeError,
+  } = useServiceFeeById(editFeeId)
+
+  const {
+    categories,
+    isLoading: isCategoriesLoading,
+    error: categoriesError,
+  } = useCategories()
+
+  const isDataLoading = isCategoriesLoading || serviceFeeLoading
+  const isError =
+    categoriesError || seviceFeeError || (!feesToEdit && editFeeId !== "")
+
+  const serviceId = addFeeId || feesToEdit?.service
+  const defaultValues = useMemo(() => {
+    return {
+      price: feesToEdit?.price || 0,
+      discount: feesToEdit?.discount || 0,
+      isReturned: feesToEdit?.isReturned || false,
+      category: feesToEdit?.category._id || "",
+      note: feesToEdit?.note || "",
+    }
+  }, [feesToEdit, addFeeId, editFeeId])
+
   const form = useForm<z.infer<typeof ServiceFeeSchema>>({
     mode: "onChange",
+    shouldUnregister: false,
     resolver: zodResolver(ServiceFeeSchema),
     defaultValues,
   })
 
   const { discount, price } = form.watch()
 
-  const isEqual = useObjectCompare(form.getValues(), defaultValues)
+  // Dynamically determine if we are editing or creating
+  const isEditing = editFeeId !== "" && editFeeId !== undefined
+  const { isValid, isDirty, errors } = form.formState
+  const isSubmitDisabled = isEditing
+    ? !isValid || !isDirty // If editing: disable if invalid OR if nothing changed
+    : !isValid
 
   useEffect(() => {
     form.reset(defaultValues)
-  }, [open])
+  }, [isOpen, feesToEdit])
 
   useEffect(() => {
     if (price > discount) {
@@ -95,103 +128,53 @@ const FeesForm = ({
     const params = new URLSearchParams(searchParams)
     params.delete("editFee")
     params.delete("addFeeId")
-    router.push(`${pathname}?${String(params)}`, { scroll: false })
+    navigate(`${pathname}?${String(params)}`)
     form.reset()
-  }, [open])
+  }, [open, searchParams])
 
   const isLoading = form.formState.isSubmitting
 
-  async function onSubmit({
-    price,
-    discount,
-    categoryId,
-    isReturned,
-    notes,
-  }: EditServiceFee) {
+  async function onSubmit(data: z.infer<typeof ServiceFeeSchema>) {
     try {
       // If the user hasn't changed anything about the form values.
-      if (isEqual) throw new Error("You haven't changed anything.")
-      if (!service)
+      if (isSubmitDisabled) throw new Error("You haven't changed anything.")
+      if (!serviceId)
         throw new Error(`Something went wrong please refresh the page.`)
 
-      const totalPriceAfterDiscount = price - discount
-
-      // In case of adding a new service fee.
       if (addFeeId) {
-        const { error } = await createServiceFeeAction(
-          {
-            price,
-            discount,
-            categoryId,
-            notes,
-            totalPriceAfterDiscount,
-            serviceId: Number(addFeeId),
-          },
-          {
-            id: service.id,
-            totalPrice: service.totalPrice + totalPriceAfterDiscount,
-          }
-        )
-        if (error) throw new Error(error)
+        await createServiceFee({ ...data, service: addFeeId })
       }
       // In the case of editting a serivce fee.
       if (feesToEdit) {
-        const newSerivceTotal =
-          service.totalPrice +
-          totalPriceAfterDiscount -
-          feesToEdit.totalPriceAfterDiscount
-        // Check if the user changed the total price of the fee before updating the total service amount.
-        const isEqual =
-          feesToEdit.totalPriceAfterDiscount === totalPriceAfterDiscount
-        console.log("isEqual", isEqual)
-        const { error } = await editServiceFeeAction(
-          {
-            serviceFee: {
-              price,
-              discount,
-              categoryId,
-              isReturned,
-              notes,
-              totalPriceAfterDiscount: price - discount,
-            },
-            id: feesToEdit.id,
-          },
-          { id: service.id, totalPrice: newSerivceTotal, isEqual }
-        )
+        await updateServiceFee({
+          ...data,
+          service: feesToEdit.service,
+          _id: feesToEdit._id,
+        })
 
-        if (error) throw new Error(error)
+        queryClient.invalidateQueries({
+          queryKey: ["serviceFee", feesToEdit._id],
+        })
       }
 
       // Close the dialog and reset the form values to the default values.
       handleClose()
 
       // Display a toast depending on the actions made.
-      toast({
-        className: "bg-primary  text-primary-foreground",
-        title: "Success!.",
-        description: (
-          <SuccessToastDescription
-            message={
-              addFeeId
-                ? "A new service fee added to the receipt"
-                : "Service fee data has been updated."
-            }
-          />
-        ),
-      })
+      toast.success(
+        addFeeId
+          ? "A new service fee as been added"
+          : "Service fee has been edited successfuly"
+      )
     } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Something went wrong.",
-        description: <ErorrToastDescription error={error.message} />,
-      })
+      toast.error(error.message)
     }
   }
 
   //   if (!feesToEdit) return <p>Something went wrong</p>;
 
   return (
-    <DialogComponent open={open} onOpenChange={handleClose}>
+    <DialogComponent open={isOpen} onOpenChange={handleClose}>
       <DialogComponent.Content className="max-h-[65vh] max-w-[1000px] overflow-y-auto sm:max-h-[76vh] sm:p-14">
         <DialogComponent.Header>
           <DialogComponent.Title>
@@ -199,107 +182,144 @@ const FeesForm = ({
           </DialogComponent.Title>
           <DialogComponent.Description className="hidden"></DialogComponent.Description>
         </DialogComponent.Header>
-        <Form {...form}>
+
+        {isDataLoading ? (
+          <Spinner className="h-[250px]" size={30} />
+        ) : isError ? (
+          <ErrorMessage>
+            {categoriesError?.message ||
+              seviceFeeError?.message ||
+              "Failed to load data"}
+          </ErrorMessage>
+        ) : (
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <div className="flex items-center gap-3">
-              <FormField
-                disabled={isLoading}
-                control={form.control}
+              <Controller
                 name="price"
-                render={({ field }) => (
-                  <FormItem className="mb-auto w-full">
-                    <FormLabel htmlFor="fees-price">Price</FormLabel>
-                    <FormControl>
-                      <CurrencyInput
-                        id="fees-price"
-                        name="price"
-                        placeholder="Price"
-                        decimalsLimit={2} // Max number of decimal places
-                        prefix="EGP " // Currency symbol (e.g., Egyptian Pound)
-                        decimalSeparator="." // Use dot for decimal
-                        groupSeparator="," // Use comma for thousands
-                        value={field.value || ""}
-                        onValueChange={(formattedValue, name, value) => {
-                          // setFormattedListing(formattedValue || "");
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid} className="mb-auto">
+                    <FieldLabel htmlFor={field.name}>Price</FieldLabel>
+                    <CurrencyInput
+                      id="fees-price"
+                      name="price"
+                      placeholder="Price"
+                      decimalsLimit={2} // Max number of decimal places
+                      prefix="EGP " // Currency symbol (e.g., Egyptian Pound)
+                      decimalSeparator="." // Use dot for decimal
+                      groupSeparator="," // Use comma for thousands
+                      value={field.value || ""}
+                      onValueChange={(formattedValue, name, value) => {
+                        // setFormattedListing(formattedValue || "");
 
-                          field.onChange(Number(value?.value) || 0)
-                        }}
-                        className="input-field"
-                      />
-                    </FormControl>
-
-                    <FormMessage />
-                  </FormItem>
+                        field.onChange(Number(value?.value) || 0)
+                        form.trigger("discount")
+                      }}
+                      className="input-field"
+                    />
+                    <FieldDescription>
+                      Enter service fee price.
+                    </FieldDescription>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
                 )}
               />
 
-              <FormField
-                disabled={isLoading}
-                control={form.control}
+              <Controller
                 name="discount"
-                render={({ field }) => (
-                  <FormItem className="mb-auto w-full">
-                    <FormLabel htmlFor="disocunt">Discount</FormLabel>
-                    <FormControl>
-                      <CurrencyInput
-                        id="discount"
-                        name="discount"
-                        placeholder="Discount"
-                        decimalsLimit={2} // Max number of decimal places
-                        prefix="EGP " // Currency symbol (e.g., Egyptian Pound)
-                        decimalSeparator="." // Use dot for decimal
-                        groupSeparator="," // Use comma for thousands
-                        value={field.value || ""}
-                        onValueChange={(formattedValue, name, value) => {
-                          // setFormattedListing(formattedValue || "");
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid} className="mb-auto">
+                    <FieldLabel htmlFor={field.name}>Discount</FieldLabel>
+                    <CurrencyInput
+                      id="fees-discount"
+                      name="discount"
+                      placeholder="Discount"
+                      decimalsLimit={2} // Max number of decimal places
+                      prefix="EGP " // Currency symbol (e.g., Egyptian Pound)
+                      decimalSeparator="." // Use dot for decimal
+                      groupSeparator="," // Use comma for thousands
+                      value={field.value || ""}
+                      onValueChange={(formattedValue, name, value) => {
+                        // setFormattedListing(formattedValue || "");
 
-                          field.onChange(Number(value?.value) || 0)
-                        }}
-                        className="input-field"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
+                        field.onChange(Number(value?.value) || 0)
+                      }}
+                      className="input-field"
+                    />
+                    <FieldDescription>
+                      Enter service fee discount.
+                    </FieldDescription>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
                 )}
               />
             </div>
 
-            <FormField
-              disabled={isLoading}
+            <Controller
+              name="category"
               control={form.control}
-              name="categoryId"
-              render={({ field }) => (
-                <FormItem className="mb-auto w-full">
-                  <FormLabel>Category</FormLabel>
-                  <FormControl>
-                    {categories && (
-                      <ComboBox
-                        value={field.value}
-                        setValue={field.onChange}
-                        options={categories}
-                      />
-                    )}
-                  </FormControl>
-                  <FormDescription>Enter category name.</FormDescription>
-                  <FormMessage />
-                </FormItem>
+              render={({ field, fieldState }) => (
+                <div
+                  className="mb-auto w-full space-y-4"
+                  data-invalid={fieldState.invalid}
+                >
+                  <label className="block text-sm leading-none font-medium">
+                    Category
+                  </label>
+                  {categories && (
+                    <ComboBox
+                      disabled={isLoading}
+                      options={categories}
+                      value={field.value}
+                      setValue={field.onChange}
+                    />
+                  )}
+                  <p className="block text-xs text-muted-foreground">
+                    Select the related category.
+                  </p>
+                  {fieldState.error && (
+                    <p className="block text-sm font-medium text-destructive">
+                      {fieldState.error.message}
+                    </p>
+                  )}
+                </div>
               )}
             />
-            <FormField
-              disabled={isLoading}
+            <Controller
+              name="note"
               control={form.control}
-              name={`notes`}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Notes</FormLabel>
-                  <FormControl>
-                    <Textarea placeholder="note..." {...field} />
-                  </FormControl>
-                  <FormDescription>
-                    Enter any additional detials.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
+              render={({ field, fieldState }) => (
+                <div
+                  className="mt-8 space-y-4"
+                  data-invalid={fieldState.invalid}
+                >
+                  <label
+                    htmlFor={field.name}
+                    className="block text-sm leading-none font-medium"
+                  >
+                    Note
+                  </label>
+                  <Textarea
+                    {...field}
+                    id={field.name}
+                    disabled={isLoading}
+                    placeholder="Add notes..."
+                    aria-invalid={fieldState.invalid}
+                  />
+                  <p className="block text-xs text-muted-foreground">
+                    Enter any additional details.
+                  </p>
+                  {fieldState.error && (
+                    <p className="block text-sm font-medium text-destructive">
+                      {fieldState.error.message}
+                    </p>
+                  )}
+                </div>
               )}
             />
             <div className="flex flex-wrap-reverse items-center justify-between gap-x-4 gap-y-4">
@@ -308,25 +328,26 @@ const FeesForm = ({
               </div>
 
               {!addFeeId ? (
-                <FormField
-                  disabled={isLoading}
-                  control={form.control}
+                <Controller
                   name="isReturned"
+                  control={form.control}
                   render={({ field }) => (
-                    <FormItem className="">
-                      <FormControl>
-                        <div className="flex items-center justify-end space-x-2">
-                          <Switch
-                            id="returned-switch"
-                            checked={field.value}
-                            onClick={() => field.onChange(!field.value)}
-                          />
-                          <Label htmlFor="returned-switch">Is Returned?</Label>
-                        </div>
-                      </FormControl>
-
-                      <FormMessage />
-                    </FormItem>
+                    <FieldLabel htmlFor="switch-notifications" className="mt-8">
+                      <Field orientation="horizontal">
+                        <FieldContent>
+                          <FieldTitle>Is Returned?</FieldTitle>
+                          <FieldDescription>
+                            Mark this service fee as returned.
+                          </FieldDescription>
+                        </FieldContent>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                          id="switch-notifications"
+                          defaultChecked
+                        />
+                      </Field>
+                    </FieldLabel>
                   )}
                 />
               ) : (
@@ -348,7 +369,7 @@ const FeesForm = ({
               <Button
                 type="submit"
                 size="sm"
-                disabled={isLoading || isEqual}
+                disabled={isLoading || isSubmitDisabled}
                 className="w-full sm:w-[unset]"
               >
                 {isLoading ? (
@@ -361,7 +382,7 @@ const FeesForm = ({
               </Button>
             </DialogComponent.Footer>
           </form>
-        </Form>
+        )}
       </DialogComponent.Content>
     </DialogComponent>
   )

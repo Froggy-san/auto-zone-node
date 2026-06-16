@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils"
 import type { Service } from "@/types"
+import { format } from "date-fns"
 import React from "react"
 import { Link } from "react-router"
 
@@ -42,7 +43,7 @@ const ServiceDiaDetails = ({
         </>
       )}
       <div>
-        Date: <span>{`${service.createdAt}`}</span>
+        Date: <span>{`${format(service.serviceDate, "d MMMM yyyy")}`}</span>
       </div>
     </div>
   )

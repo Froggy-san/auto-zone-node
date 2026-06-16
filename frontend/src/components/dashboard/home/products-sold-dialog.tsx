@@ -45,6 +45,8 @@ import CurrencyInput from "react-currency-input-field"
 import type { ProductSold, Service } from "@/types"
 import { useLocation, useNavigate, useSearchParams } from "react-router"
 import { toast } from "sonner"
+import useDeleteServiceFee from "@/features/services/useDeleteServiceFee"
+import useDeleteProSold from "@/features/services/useDeleteProSold"
 
 interface ServiceStates {
   priceValue: string
@@ -197,6 +199,7 @@ const ProductSoldDialog = ({
   const navigate = useNavigate()
   const [searchParam] = useSearchParams()
   const soldProducts = service.productsSold
+  const serviceTaxRate = service.taxRate
 
   function handleOpenChange() {
     dispatch({ type: "reset" })
@@ -240,10 +243,13 @@ const ProductSoldDialog = ({
     if (Number(countValue))
       filterValue = filterValue && product.count === Number(countValue)
 
-    if (Number(totalPriceAfterDiscountValue))
+    if (Number(totalPriceAfterDiscountValue)) {
+      const taxAmount = product.totalPriceAfterDiscount * serviceTaxRate
       filterValue =
         filterValue &&
-        product.totalPriceAfterDiscount === Number(totalPriceAfterDiscountValue)
+        Math.ceil(product.totalPriceAfterDiscount + taxAmount) ===
+          Number(totalPriceAfterDiscountValue)
+    }
 
     return filterValue
   })
@@ -263,12 +269,14 @@ const ProductSoldDialog = ({
   //       totalPriceAfterDiscount: 0,
   //       totalPriceBeforeDiscount: 0,
   //     }
+
   //   );
   const totals = useMemo(() => {
     return productsSold.reduce(
       (acc, item) => {
         acc.units += item.count
-        acc.totalDiscount += item.discountPerUnit
+
+        acc.totalDiscount += item.discountPerUnit * item.count
         acc.totalPriceBeforeDiscount += item.pricePerUnit * item.count
         acc.totalPriceAfterDiscount += item.totalPriceAfterDiscount
         return acc
@@ -278,6 +286,7 @@ const ProductSoldDialog = ({
         totalDiscount: 0,
         totalPriceAfterDiscount: 0,
         totalPriceBeforeDiscount: 0,
+        serviceTaxRate,
       }
     )
   }, [productsSold])
@@ -296,6 +305,7 @@ const ProductSoldDialog = ({
         totalDiscount: 0,
         totalPriceAfterDiscount: 0,
         totalPriceBeforeDiscount: 0,
+        serviceTaxRate,
       }
     )
   }, [returnedPro])
@@ -334,7 +344,7 @@ const ProductSoldDialog = ({
             </DialogDescription>
           </DialogHeader>
 
-          <Accordion type="single" collapsible>
+          <Accordion type="single" collapsible className="shrink-0">
             <AccordionItem value="item-1" className="border-none">
               <div className="relative mx-auto w-[98%]">
                 <AccordionTrigger className="mb-1 flex gap-1 rounded-full bg-secondary/50 px-3 py-2 text-[.7rem] dark:bg-card/20">
@@ -363,7 +373,7 @@ const ProductSoldDialog = ({
                           payload: formattedValue || "",
                         })
                       }}
-                      className="input-field"
+                      className="input-field mt-1"
                     />{" "}
                   </div>
                   <div className="mb-auto w-full space-y-2 xxs:w-[48%] sm:w-[31%] md:w-[32%]">
@@ -385,7 +395,7 @@ const ProductSoldDialog = ({
                           payload: formattedValue || "",
                         })
                       }}
-                      className="input-field"
+                      className="input-field mt-1"
                     />
                   </div>
                   <div className="mb-auto w-full space-y-2 xxs:w-[48%] sm:w-[31%] md:w-[32%]">
@@ -407,12 +417,12 @@ const ProductSoldDialog = ({
                           payload: formattedValue || "",
                         })
                       }}
-                      className="input-field"
+                      className="input-field mt-1"
                     />
                   </div>
                   <div className="mb-auto w-full space-y-2 xxs:w-[48%] sm:w-[31%] md:w-[32%]">
                     <label className="text-xs" htmlFor="totalPrice">
-                      Total price after discount
+                      Grand total
                     </label>
                     <CurrencyInput
                       id="total-price-after-dis"
@@ -429,7 +439,7 @@ const ProductSoldDialog = ({
                           payload: formattedValue || "",
                         })
                       }}
-                      className="input-field"
+                      className="input-field mt-1"
                     />
                   </div>
                   <div className="mb-auto w-full space-y-2 xxs:w-[48%] sm:w-[31%] md:w-[32%]">
@@ -475,27 +485,13 @@ const ProductSoldDialog = ({
               </h2>
 
               <ServiceDiaDetails service={service} isAdmin={isAdmin} />
-              {/* <div className=" text-xs   justify-end flex items-center gap-y-1 gap-x-3 flex-wrap text-muted-foreground  ">
-                <Link
-                  prefetch={false}
-                  href={
-                    isAdmin
-                      ? `/dashboard/customers?name=${service.clients.name}`
-                      : ""
-                  }
-                >
-                  Client: <span>{service.clients.name}</span>
-                </Link>
-                <div>
-                  Date: <span>{service.created_at}</span>
-                </div>
-              </div> */}
             </div>
             {productsSold.length ? (
               <ul className="space-y-4">
                 {productsSold.map((product, i) => (
                   <ProItem
                     key={i}
+                    serviceTaxRate={serviceTaxRate}
                     isAdmin={isAdmin}
                     product={product}
                     dispatch={dispatch}
@@ -522,8 +518,9 @@ const ProductSoldDialog = ({
                 </h2>
                 {returnedPro.map((returnedPro, i) => (
                   <ProItem
-                    returned
                     key={i}
+                    returned
+                    serviceTaxRate={serviceTaxRate}
                     isAdmin={isAdmin}
                     product={returnedPro}
                     dispatch={dispatch}
@@ -584,11 +581,13 @@ function DeleteProSold({
   total: number
   serviceId: string
 }) {
-  const [isDeleting, setIsDeleting] = useState(false)
-  const [shouldUpdateStock, setShouldUpdateStock] = useState(true)
+  const { mutate: deleteProSold, isPending: isDeleting } = useDeleteProSold()
+  const [shouldRestock, setShouldRestock] = useState(true)
+  const isAlreadyReturned =
+    typeof proSold?.isReturned === "boolean" && proSold.isReturned
 
   return (
-    <Dialog open={deleteOpen} onOpenChange={handleClose}>
+    <Dialog open={deleteOpen} onOpenChange={handleClose} key={proSold?._id}>
       <DialogContent className="border-none sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Delete product sold.</DialogTitle>
@@ -596,19 +595,21 @@ function DeleteProSold({
             {`You are about to delete a product receipt along with all its associated data.`}
           </DialogDescription>
         </DialogHeader>
-        <div className="flex items-center gap-3">
-          <Checkbox
-            id="stockUpdate"
-            checked={shouldUpdateStock}
-            onClick={() => setShouldUpdateStock((is) => !is)}
-          />
-          <Label
-            htmlFor="stockUpdate"
-            className="text-xs text-muted-foreground"
-          >
-            Update product stock
-          </Label>
-        </div>
+        {!isAlreadyReturned && (
+          <div className="flex items-center gap-3">
+            <Checkbox
+              id="stockUpdate"
+              checked={shouldRestock}
+              onClick={() => setShouldRestock((is) => !is)}
+            />
+            <Label
+              htmlFor="stockUpdate"
+              className="text-xs text-muted-foreground"
+            >
+              Update product stock
+            </Label>
+          </div>
+        )}
         <DialogFooter className="gap-2 sm:gap-0">
           <DialogClose asChild>
             <Button size="sm" variant="secondary">
@@ -619,23 +620,13 @@ function DeleteProSold({
             disabled={isDeleting}
             variant="destructive"
             size="sm"
-            onClick={async () => {
-              setIsDeleting(true)
-              try {
-                if (proSold) {
-                  // const { error } = await deleteProductToSellAction({
-                  //   proSold,
-                  //   serviceId,
-                  //   totalPrice: total - proSold.totalPriceAfterDiscount,
-                  //   shouldUpdateStock,
-                  // })
-                  // if (error) throw new Error(error)
-                }
-                setIsDeleting(false)
+            onClick={() => {
+              if (proSold) {
+                deleteProSold({
+                  id: proSold._id,
+                  shouldRestock: !isAlreadyReturned ? shouldRestock : false,
+                })
                 handleClose()
-                toast.success("Product sold entry has been deleted")
-              } catch (error: any) {
-                toast.error("Failed to delete product entry")
               }
             }}
           >
@@ -651,6 +642,7 @@ interface ProItem {
   product: ProductSold
   returned?: boolean
   isAdmin: boolean
+  serviceTaxRate: number
   dispatch: React.Dispatch<Action>
   handleOpenEdit: (param: string) => void
 }
@@ -661,6 +653,7 @@ function ProItem({
   isAdmin,
   dispatch,
   handleOpenEdit,
+  serviceTaxRate,
 }: ProItem) {
   const productImages = product.product.productImages
   const image =
@@ -695,6 +688,23 @@ function ProItem({
             Count:{" "}
             <span className="text-xs text-muted-foreground">{` ${product.count}`}</span>
           </div>
+
+          {product.originalPricePerUnit && (
+            <div className="pointer-events-none">
+              Original price per unit:{" "}
+              <span className="text-xs text-muted-foreground">{` ${formatCurrency(
+                product.originalPricePerUnit
+              )}`}</span>{" "}
+            </div>
+          )}
+          {product.originalDiscountPerUnit && (
+            <div className="pointer-events-none">
+              Original discount per unit:{" "}
+              <span className="text-xs text-muted-foreground">{` ${formatCurrency(
+                product.originalDiscountPerUnit
+              )}`}</span>{" "}
+            </div>
+          )}
           <div className="pointer-events-none">
             Price per unit:{" "}
             <span className="text-xs text-muted-foreground">{` ${formatCurrency(
@@ -710,10 +720,26 @@ function ProItem({
           </div>
 
           <div className="pointer-events-none">
-            Total price after discount:{" "}
+            Subtotal:{" "}
             <span className="text-xs break-all whitespace-normal text-muted-foreground">{` ${formatCurrency(
               product.totalPriceAfterDiscount
             )}`}</span>
+          </div>
+          <div className="pointer-events-none">
+            Tax rate:{" "}
+            <span className="text-xs break-all whitespace-normal text-muted-foreground">{` ${Math.floor(serviceTaxRate * 100)}%`}</span>
+          </div>
+
+          <div className="pointer-events-none">
+            Grand total:{" "}
+            <span className="text-xs break-all whitespace-normal text-muted-foreground">
+              {formatCurrency(
+                Math.ceil(
+                  product.totalPriceAfterDiscount +
+                    product.totalPriceAfterDiscount * serviceTaxRate
+                )
+              )}
+            </span>
           </div>
           {isAdmin && product.note.length > 0 && (
             <div className="pointer-events-none break-all whitespace-normal">{`Note: ${product.note}`}</div>
@@ -760,6 +786,7 @@ interface SummaryProps {
   totalDiscount: number
   totalPriceAfterDiscount: number
   totalPriceBeforeDiscount: number
+  serviceTaxRate: number
 }
 
 function Summary({
@@ -815,8 +842,8 @@ function Summary({
       <div className="relative">
         <div className="embla__slide">
           {" "}
-          <div className="flex items-center justify-center gap-1 rounded-full bg-chart-1 px-2 py-1 text-[.7rem] text-nowrap break-keep transition-opacity hover:opacity-90">
-            Total Price:
+          <div className="flex items-center justify-center gap-1 rounded-full bg-chart-2 px-2 py-1 text-[.7rem] text-nowrap break-keep transition-opacity hover:opacity-90">
+            Subtotal:
             <span>{formatCurrency(totals.totalPriceBeforeDiscount)}</span>
           </div>
         </div>
@@ -825,8 +852,18 @@ function Summary({
       <div className="relative">
         <div className="embla__slide">
           {" "}
+          <div className="flex items-center justify-center gap-1 rounded-full bg-chart-3 px-2 py-1 text-[.7rem] text-nowrap break-keep transition-opacity hover:opacity-90">
+            Total Discount: <span>{formatCurrency(totals.totalDiscount)}</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="relative">
+        <div className="embla__slide">
+          {" "}
           <div className="flex items-center justify-center gap-1 rounded-full bg-chart-4 px-2 py-1 text-[.7rem] text-nowrap break-keep transition-opacity hover:opacity-90">
-            Total discount: <span>{formatCurrency(totals.totalDiscount)}</span>
+            Net Revenue:{" "}
+            <span>{formatCurrency(totals.totalPriceAfterDiscount)}</span>
           </div>
         </div>
       </div>
@@ -835,8 +872,15 @@ function Summary({
         <div className="embla__slide">
           {" "}
           <div className="flex items-center justify-center gap-1 rounded-full bg-chart-5 px-2 py-1 text-[.7rem] text-nowrap transition-opacity hover:opacity-90">
-            Total after discount:{" "}
-            <span>{formatCurrency(totals.totalPriceAfterDiscount)}</span>
+            Grand Total:{" "}
+            <span>
+              {formatCurrency(
+                Math.ceil(
+                  totals.totalPriceAfterDiscount +
+                    totals.totalPriceAfterDiscount * totals.serviceTaxRate
+                )
+              )}
+            </span>
           </div>
         </div>
       </div>

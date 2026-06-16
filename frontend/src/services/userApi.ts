@@ -1,6 +1,6 @@
 import { BASE_URL } from "@/lib/constants"
 import type { Car, Provider, Role, User } from "@/types"
-
+import qs from "qs"
 export interface GetUsersProps {
   id: string
   page: string
@@ -32,21 +32,21 @@ export async function getUsers(filters: GetUsersProps): Promise<{
     limit: number
   }
 }> {
-  const searchParams = new URLSearchParams()
-
-  Object.entries(filters).forEach(([key, value]) => {
-    if (value !== undefined && value !== null && value !== "") {
-      searchParams.append(key, value.toString())
-    }
+  const query = qs.stringify(filters || {}, {
+    arrayFormat: "indices",
+    skipNulls: true,
+    encode: true,
   })
+  // Object.entries(filters).forEach(([key, value]) => {
+  //   if (value !== undefined && value !== null && value !== "") {
+  //     searchParams.append(key, value.toString())
+  //   }
+  // })
 
-  const res = await fetch(
-    `${BASE_URL}/api/v1/users?${searchParams.toString()}`,
-    {
-      method: "GET",
-      credentials: "include",
-    }
-  )
+  const res = await fetch(`${BASE_URL}/api/v1/users?${query}`, {
+    method: "GET",
+    credentials: "include",
+  })
   if (!res.ok) {
     const error = await res.json()
 

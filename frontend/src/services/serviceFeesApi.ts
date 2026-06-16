@@ -1,11 +1,10 @@
 import type { ServiceFeeSchema } from "@/schemas/serviceFee.schema"
-import type { Product, ServiceFee } from "@/types"
+import type { ServiceFee } from "@/types"
 import qs from "qs"
 import type z from "zod"
 
 const BASE_URL = import.meta.env.VITE_API_URL
 
-// Update your Filters type definition if you have one, or use Record<string, any>
 export async function getServiceFees(filters?: Record<string, any>): Promise<{
   serviceFees: ServiceFee[]
   pagination: {
@@ -42,8 +41,11 @@ export async function getServiceFees(filters?: Record<string, any>): Promise<{
   return resBody.data
 }
 
+type CreateServiceFee = z.infer<typeof ServiceFeeSchema> & {
+  service: string
+}
 export async function createServiceFee(
-  data: z.infer<typeof ServiceFeeSchema>
+  data: CreateServiceFee
 ): Promise<ServiceFee> {
   const res = await fetch(`${BASE_URL}/api/v1/serviceFees`, {
     method: "POST",
@@ -65,7 +67,7 @@ export async function createServiceFee(
 }
 
 export async function updateServiceFee(
-  serviceFee: ServiceFee
+  serviceFee: CreateServiceFee & { _id: string }
 ): Promise<ServiceFee> {
   const res = await fetch(`${BASE_URL}/api/v1/serviceFees/${serviceFee._id}`, {
     method: "PATCH",
@@ -128,7 +130,7 @@ export const deleteMultipleServiceFees = async (ids: string[]) => {
       headers: {
         "Content-Type": "application/json",
       },
-      // CRITICAL: This is the fetch version of axios's "withCredentials"
+
       credentials: "include",
       body: JSON.stringify({ ids }),
     }

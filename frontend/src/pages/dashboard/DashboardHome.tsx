@@ -1,5 +1,8 @@
 // import EditFeesManagement from "@/components/dashboard/home/edit-fees-management"
 
+import EditSoldForm from "@/components/dashboard/home/edit-sold-form"
+import FeesForm from "@/components/dashboard/home/fees-form"
+// import ProductSoldManagement from "@/components/dashboard/home/product-sold-management"
 import ServiceList from "@/components/dashboard/home/service-list"
 // import ServicePagination from "@/components/dashboard/home/service-pagination"
 // import Spinner from "@/components/Spinner"
@@ -36,19 +39,17 @@ interface SearchParams {
 const DashboardHome = () => {
   const [searchParams, setSearchParams] = useSearchParams()
   const pageNumber = getParam(searchParams, "page", "1")
+  const limit = getParam(searchParams, "limit", "12")
   const dateFrom = getParam(searchParams, "dateFrom", "")
   const dateTo = getParam(searchParams, "dateTo", "")
   const clientId = getParam(searchParams, "clientId", "")
   const serviceStatusId = getParam(searchParams, "serviceStatusId", "")
+  const receivedAmount = getParam(searchParams, "receivedAmount", "")
+  const technician = getParam(searchParams, "technician", "")
   const carId = getParam(searchParams, "carId", "")
   const minPrice = getParam(searchParams, "minPrice", "")
   const maxPrice = getParam(searchParams, "maxPrice", "")
-  const editFee = getParam(searchParams, "editFee", "")
-  const addFeeId = getParam(searchParams, "addFeeId", "")
-  const editSold = getParam(searchParams, "editSold", "")
-  const addSoldId = getParam(searchParams, "addSoldId", "")
 
-  console.log("WWWWWWWWWWW")
   return (
     <main className="relative">
       <h2 className="text-4xl font-semibold">SALES OVERVIEW.</h2>
@@ -59,13 +60,16 @@ const DashboardHome = () => {
         <TodayOrders />
         <Orders /> */}
 
-        {/*    
-          <EditFeesManagement feesId={editFee} addFeeId={addFeeId} /> */}
-
+        {/* <EditFeesManagement feesId={editFee} addFeeId={addFeeId} /> */}
+        <FeesForm />
+        <EditSoldForm />
         {/* <ProductSoldManagement editSold={editSold} addSoldId={addSoldId} /> */}
 
         <ServiceList
           pageNumber={pageNumber}
+          amountReceived={receivedAmount}
+          limit={limit}
+          technician={technician}
           dateTo={dateTo}
           dateFrom={dateFrom}
           clientId={clientId}

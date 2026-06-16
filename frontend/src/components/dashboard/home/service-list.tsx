@@ -27,7 +27,7 @@ interface Props {
   minPrice: string
   maxPrice: string
   amountReceived: string
-  serviceDate: string
+  // serviceDate: string
   technician: string
 }
 const ServiceList = ({
@@ -38,7 +38,8 @@ const ServiceList = ({
   clientId,
   carId,
   amountReceived,
-  serviceDate,
+
+  // serviceDate,
   technician,
   serviceStatusId,
   minPrice,
@@ -63,14 +64,13 @@ const ServiceList = ({
     clientId,
     carId,
     serviceStatusId,
-    serviceDate,
+    // serviceDate,
     maxPrice,
     minPrice,
     technician,
     amountReceived,
   })
 
-  console.log(data, "DDD")
   const {
     categories,
     isLoading: isCategoryLoading,
@@ -104,7 +104,7 @@ const ServiceList = ({
   // const { data: cars, error: carsError } = carsData
   // const { data, error } = servicesData
 
-  if (isLoading) return <Spinner className="mt-16 h-80" />
+  if (isLoading) return <Spinner className="mt-16 h-80" size={30} />
 
   if (!isLoading && error) return <ErrorMessage>{error.message}</ErrorMessage>
 
@@ -132,6 +132,7 @@ const ServiceList = ({
           isAdmin
           // cars={cars?.cars || []}
           // clients={clients?.clients || []}
+          technician={technician}
           categories={categories || []}
           currPage={pageNumber}
           services={data?.data || []}

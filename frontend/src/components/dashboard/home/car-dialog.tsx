@@ -89,6 +89,10 @@ const CarDialog = ({
                   Motor number: {car.motorNumber}
                 </div>
 
+                <div className="line-clamp-2">
+                  Odometer: KM {service.odometer}
+                </div>
+
                 {/* <div className=" line-clamp-2  flex items-center gap-3 flex-wrap">
             Make: <span>{carInfo.carMaker.name}</span>{" "}
             {carInfo.carMaker.logo ? (
@@ -125,6 +129,10 @@ Generation: {carInfo.carModel.name}
 
                 <div className="line-clamp-2">
                   Motor number: {car.motorNumber}
+                </div>
+
+                <div className="line-clamp-2">
+                  Odometer: KM {service.odometer}
                 </div>
 
                 {/* <div className=" line-clamp-2  flex items-center gap-3 flex-wrap">

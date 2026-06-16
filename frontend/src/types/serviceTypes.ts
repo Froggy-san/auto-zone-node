@@ -15,6 +15,7 @@ export interface Service {
   odometer: string
 
   // Financials
+  taxRate: number
   subTotal: number // Sum of all items/fees before discounts/tax
   taxAmount: number // VAT/Sales tax
   totalDiscount: number // Total amount subtracted
@@ -36,4 +37,28 @@ export interface Service {
   // System handled
   createdAt: Date
   updatedAt: Date
+  isReturned: boolean
+}
+
+export interface ServiceStats {
+  grossProfit: number
+  grandLossFromFeesReturnedOrCancelled: number
+  grandLossFromProductsReturnedOrCancelled: number
+  lostRevenueCancelled: number
+  lostRevenueReturned: number
+  pendingCustomerDebt: number
+  servicesCanceledOrReturned: number
+  totalAmountReceived: number
+  totalCashRefunded: number
+  totalDiscount: number
+  totalGlobalFeesDiscount: number
+  totalGlobalFeesGrossPrice: number
+  totalGlobalProductSoldDiscount: number
+  totalGlobalProductSoldGrossPrice: number
+  totalGrand: number
+  grandProductsSold: number
+  grandFees: number
+  totalNetFees: number
+  totalNetProductsSold: number
+  totalTax: number
 }

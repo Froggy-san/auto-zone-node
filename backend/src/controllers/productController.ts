@@ -9,6 +9,107 @@ import { ProductImage } from "../@types";
 import { deleteFiles, processReqQuery } from "../utils/helper";
 import APIFeatures from "../utils/apiFeatures";
 import multer from "multer";
+import mongoose from "mongoose";
+import StockLogs, { IStockLog } from "../models/stockLogsModel";
+
+export async function updateAndLogProductStocks(
+  logs: IStockLog[],
+  session?: mongoose.mongo.ClientSession,
+) {
+  const bulkOps = logs.map((item) => {
+    // 1. Mathematically deduce what the final stock will be
+    // const expectedNewStock = item.currentStock + item.change;
+
+    // 2. Base availability strictly on whether the new total is greater than 0
+    const isAvailable = item.currentStock > 0;
+
+    // 3. Defensive Filtering: If we are reducing stock (change is negative),
+    // ensure the database currently has at least enough stock to fulfill it.
+    const filter: Record<string, any> = { _id: item.product };
+    if (item.change < 0) {
+      filter.stock = { $gte: Math.abs(item.change) };
+    }
+
+    return {
+      updateOne: {
+        filter,
+        update: {
+          $inc: { stock: item.change },
+          $set: { isAvailable },
+        },
+      },
+    };
+  });
+
+  // Run the batch operation safely
+  const updatedStocks = await Product.bulkWrite(bulkOps, {
+    session,
+    ordered: true, // Stops execution early if any item in the array fails safety checks
+  });
+
+  // 4. Safety Check: Verify that every single item requested was actually updated
+  if (updatedStocks.matchedCount !== logs.length) {
+    throw new Error(
+      "Stock update failed. One or more products may be out of stock or could not be found.",
+    );
+  }
+
+  // 5. Log the stock chnages into the database
+  const stockChanges = await StockLogs.create(logs, { session, ordered: true });
+
+  return { updatedStocks, stockChanges };
+}
+
+type UpdateStock = {
+  id: string;
+  change: number;
+  currentStock: number;
+};
+
+export async function updateProductsStock(
+  newStocks: UpdateStock[],
+  session?: mongoose.mongo.ClientSession,
+) {
+  const bulkOps = newStocks.map((item) => {
+    // 1. Mathematically deduce what the final stock will be
+    const expectedNewStock = item.currentStock + item.change;
+
+    // 2. Base availability strictly on whether the new total is greater than 0
+    const isAvailable = expectedNewStock > 0;
+
+    // 3. Defensive Filtering: If we are reducing stock (change is negative),
+    // ensure the database currently has at least enough stock to fulfill it.
+    const filter: Record<string, any> = { _id: item.id };
+    if (item.change < 0) {
+      filter.stock = { $gte: Math.abs(item.change) };
+    }
+
+    return {
+      updateOne: {
+        filter,
+        update: {
+          $inc: { stock: item.change },
+          $set: { isAvailable },
+        },
+      },
+    };
+  });
+
+  // Run the batch operation safely
+  const updatedStocks = await Product.bulkWrite(bulkOps, {
+    session,
+    ordered: true, // Stops execution early if any item in the array fails safety checks
+  });
+
+  // 4. Safety Check: Verify that every single item requested was actually updated
+  if (updatedStocks.matchedCount !== newStocks.length) {
+    throw new Error(
+      "Stock update failed. One or more products may be out of stock or could not be found.",
+    );
+  }
+
+  return updatedStocks;
+}
 
 // export const getProducts = catchAsync(
 //   async (req: Request, res: Response, next: NextFunction) => {
@@ -86,7 +187,7 @@ import multer from "multer";
 export const getProducts = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     // 1. Filtering Logic
-    console.log(req.query, "REQUEST QUERY");
+
     const features = new APIFeatures(Product.find(), req.query)
       .filter()
       .sort()

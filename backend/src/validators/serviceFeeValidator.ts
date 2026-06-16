@@ -6,7 +6,7 @@ const ServiceFeeShape = z.object({
   // service: objectIdSchema,
   price: z.coerce.number().positive(),
   discount: z.coerce.number().default(0),
-  totalPriceAfterDiscount: z.coerce.number().positive(),
+  // totalPriceAfterDiscount: z.coerce.number().positive(),
   isReturned: z.coerce.boolean().default(false),
   note: z.string(),
 });
@@ -21,7 +21,9 @@ export const ServiceFeeSchema = ServiceFeeShape.refine(
 );
 
 export const createServiceFeeSchema = z.object({
-  body: ServiceFeeSchema,
+  body: ServiceFeeSchema.extend({
+    service: objectIdSchema,
+  }),
 });
 
 // 3. Create the "Update" schema using the raw shape's partial

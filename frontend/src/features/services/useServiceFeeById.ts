@@ -1,4 +1,4 @@
-import { getServiceFeeById } from "@/services/serviceFees"
+import { getServiceFeeById } from "@/services/serviceFeesApi"
 import { useQuery } from "@tanstack/react-query"
 
 export default function useServiceFeeById(id?: string) {

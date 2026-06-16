@@ -5,12 +5,14 @@ import { protect, restrictTo } from "../controllers/authController";
 import { paramIdSchema } from "../validators/commen";
 import {
   createProductSoldSchema,
+  deleteProductSoldSchema,
   updateProductSoldSchema,
 } from "../validators/productSoldValidator";
 import {
   createProductSold,
   deleteProductSold,
   getAllProductSold,
+  getProductSold,
   updateProductSold,
 } from "../controllers/productSoldController";
 
@@ -24,7 +26,8 @@ router
   .post(validate(createProductSoldSchema), createProductSold);
 router
   .route("/:id")
+  .get(validate(paramIdSchema), getProductSold)
   .patch(validate(updateProductSoldSchema), updateProductSold)
-  .delete(validate(paramIdSchema), deleteProductSold);
+  .delete(validate(deleteProductSoldSchema), deleteProductSold);
 
 export default router;

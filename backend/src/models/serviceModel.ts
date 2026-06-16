@@ -1,6 +1,7 @@
 import mongoose, { model, Schema } from "mongoose";
 import { SERVICE_STATUS_DONE_ID } from "../constants";
 
+export type PaymentStatus = "unpaid" | "partially-paid" | "paid" | "refunded";
 export interface IService {
   id: string;
 
@@ -13,6 +14,7 @@ export interface IService {
 
   // Financials
   subTotal: number; // Sum of all items/fees before discounts/tax
+  taxRate: number;
   taxAmount: number; // VAT/Sales tax
   totalDiscount: number; // Total amount subtracted
   grandTotal: number; // The final amount the customer sees (subTotal - discount + tax)
@@ -24,10 +26,10 @@ export interface IService {
   completedAt?: Date; // Only set when status becomes 'finished'
 
   // Status & Metadata
-  paymentStatus: "unpaid" | "partially-paid" | "paid" | "refunded";
+  paymentStatus: PaymentStatus;
   priority: "low" | "medium" | "high";
   note: string;
-
+  // isReturned: boolean;  // Removed this property since the service status does the same job and it was causing confusion in the codebase. We can always add it back if we find a use case for it.
   // System handled
   createdAt: Date;
   updatedAt: Date;
@@ -55,8 +57,17 @@ const ServiceSchema = new Schema<IService>(
       type: String,
       required: true,
     },
-    technician: [mongoose.Types.ObjectId],
+    technician: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "users", // 👈 Make sure this matches your exact Model name string!
+      },
+    ],
     subTotal: {
+      type: Number,
+      default: 0,
+    },
+    taxRate: {
       type: Number,
       default: 0,
     },
@@ -96,6 +107,10 @@ const ServiceSchema = new Schema<IService>(
       type: Number,
       default: 0,
     },
+    // isReturned: {
+    //   type: Boolean,
+    //   default: false,
+    // },
     completedAt: {
       type: Date,
       default: Date.now,
@@ -121,28 +136,30 @@ ServiceSchema.virtual("productsSold", {
   localField: "_id",
 });
 
-ServiceSchema.pre("save", function () {
-  if (this.paymentStatus === "refunded") {
-    // If it's already marked as refunded, don't let the payment math overwrite it!
-    return;
-  }
+// ServiceSchema.pre("save", function () {
+//   if (this.paymentStatus === "refunded") {
+//     // If it's already marked as refunded, don't let the payment math overwrite it!
+//     return;
+//   }
+//   if (this.isReturned) {
+//   }
 
-  if (this.amountReceived === 0) {
-    this.paymentStatus = "unpaid";
-  } else if (this.amountReceived >= this.grandTotal) {
-    this.paymentStatus = "paid";
-  } else {
-    this.paymentStatus = "partially-paid";
-  }
+//   if (this.amountReceived === 0) {
+//     this.paymentStatus = "unpaid";
+//   } else if (this.amountReceived >= this.grandTotal) {
+//     this.paymentStatus = "paid";
+//   } else {
+//     this.paymentStatus = "partially-paid";
+//   }
 
-  // Only set completedAt when status becomes 'finished' and it's not already set
-  if (
-    this.isModified("serviceStatus") &&
-    this.serviceStatus.toString() === SERVICE_STATUS_DONE_ID &&
-    !this.completedAt
-  ) {
-    this.completedAt = new Date();
-  }
-});
+//   // Only set completedAt when status becomes 'finished' and it's not already set
+//   if (
+//     this.isModified("serviceStatus") &&
+//     this.serviceStatus.toString() === SERVICE_STATUS_DONE_ID &&
+//     !this.completedAt
+//   ) {
+//     this.completedAt = new Date();
+//   }
+// });
 
 export const Service = model<IService>("services", ServiceSchema);

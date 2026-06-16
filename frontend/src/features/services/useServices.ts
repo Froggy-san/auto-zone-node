@@ -33,8 +33,17 @@ export default function useServices(filters?: Filters) {
       serviceDate: filters.serviceDate,
       technician: filters.technician,
     }
-    if (filters.dateFrom) filterObj.createdAt = { $gte: filters.dateFrom }
-    if (filters.dateTo) filterObj.createdAt = { $lte: filters.dateTo }
+    if (filters.dateFrom) {
+      const fromDate = new Date(filters.dateFrom)
+      filterObj.serviceDate = { $gte: fromDate }
+      if (filters.dateTo) {
+        const toDate = new Date(filters.dateTo)
+        toDate.setHours(23, 59, 59, 999)
+
+        filterObj.serviceDate.$lte = toDate
+      }
+    }
+    // if (filters.dateTo) filterObj.serviceDate = { $lte: filters.dateTo }
     if (filters.minPrice || filters.maxPrice)
       filterObj.grandTotal = {
         $gte: filters.minPrice ? Number(filters.minPrice) : undefined,
@@ -50,7 +59,6 @@ export default function useServices(filters?: Filters) {
     )
   }, [filters])
 
-  console.log(appliedFilters, "APPLIED FILTERS")
   const { data, error, isLoading, isError } = useQuery({
     queryFn: () => getServices(appliedFilters),
     queryKey: ["services", appliedFilters],

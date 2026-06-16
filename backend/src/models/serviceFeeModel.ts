@@ -2,7 +2,6 @@ import mongoose, { model, Schema } from "mongoose";
 
 export interface IServiceFee {
   id: string;
-
   createdAt: Date;
   updatedAt: Date;
   category: mongoose.Types.ObjectId;

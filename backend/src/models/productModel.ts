@@ -64,7 +64,7 @@ const productSchema = new Schema<IProduct>(
     },
     salePrice: {
       type: Number,
-      defualt: 0,
+      default: 0,
       // validate: {
       //   // This only works on .create() and .save()
       //   validator: function (this: any, val: number) {

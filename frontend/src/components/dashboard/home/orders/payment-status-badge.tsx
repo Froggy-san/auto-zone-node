@@ -1,5 +1,6 @@
-import { PaymentStatusSchema } from "@lib/types"
-import { cn } from "@lib/utils"
+import { PaymentStatusSchema } from "@/lib/types"
+import { cn } from "@/lib/utils"
+import { HandCoins } from "lucide-react"
 import { BsExclamationDiamond } from "react-icons/bs"
 import {
   TbCreditCardOff,
@@ -12,6 +13,7 @@ const paymentStatusConfig: Record<
   z.infer<typeof PaymentStatusSchema>,
   {
     label: string
+    value: string
     icon?: React.ElementType
     bgClass: string
     textClass: string
@@ -19,12 +21,14 @@ const paymentStatusConfig: Record<
 > = {
   paid: {
     label: "Paid",
+    value: "paid",
     icon: TbCreditCardPay,
     bgClass: "bg-action-created/15",
     textClass: "text-action-created",
   },
   unpaid: {
     label: "Unpaid",
+    value: "unpaid",
     icon: TbCreditCardOff,
     bgClass: "bg-action-escalated/15",
     textClass: "text-action-escalated",
@@ -33,8 +37,9 @@ const paymentStatusConfig: Record<
   },
   refunded: {
     label: "Refunded",
-    bgClass: "bg-action-reopened/15",
-    textClass: "text-action-reopened",
+    value: "refunded",
+    bgClass: "bg-action-escalated/15",
+    textClass: "text-action-escalated",
     icon: TbCreditCardRefund,
     // bgClass: "bg-action-resolved/15",
     // textClass: "text-action-resolved",
@@ -44,18 +49,29 @@ const paymentStatusConfig: Record<
     // icon: XCircle,
     bgClass: "bg-action-closed/15",
     textClass: "text-action-closed",
+    value: "canceled",
   },
   disputed: {
     label: "Disputed",
+    value: "disputed",
     icon: BsExclamationDiamond,
     bgClass: "bg-action-reopened/15",
     textClass: "text-action-reopened",
   },
   pending_arrival: {
     label: "Pending Arrival",
+    value: "pending_arrival",
     // icon: AlertTriangle,
     bgClass: "bg-action-escalated/15",
     textClass: "text-action-escalated",
+  },
+  "partially-paid": {
+    label: "Partially Paid",
+    value: "partially-paid",
+    icon: HandCoins,
+
+    bgClass: "bg-action-reopened/15",
+    textClass: "text-action-reopened",
   },
   // "message deleted": {
   //   label: "Message Deleted",

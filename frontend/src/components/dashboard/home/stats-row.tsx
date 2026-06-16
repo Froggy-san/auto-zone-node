@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button"
 import { TableCell, TableRow } from "@/components/ui/table"
+import useServicesStats from "@/features/services/useServicesStats"
 import { formatCurrency } from "@/lib/client-helpers"
-import useServicesStats from "@/lib/queries/dashboard/home/useServicesStats"
+
 import { cn } from "@/lib/utils"
 import { RefreshCcw } from "lucide-react"
 
@@ -19,8 +20,8 @@ type Params = {
 
 const StatsRow = (filters: Params) => {
   const navigate = useNavigate()
-  const { data, isLoading, error } = useServicesStats(filters)
-
+  const { data, isLoading, error } = useServicesStats()
+  console.log(data)
   const RefreshButton = (
     <Button size="sm" onClick={() => navigate(0)}>
       <span>Refresh</span> <RefreshCcw className="h-4 w-4" />
@@ -43,45 +44,62 @@ const StatsRow = (filters: Params) => {
 
   //   const { totalProductsSold, totalServicesPerformed } = data;
   return (
-    <TableRow
-      className={cn("bg-secondary hover:bg-secondary/50", {
-        "animate-pulse": isLoading,
-      })}
-    >
-      <TableCell colSpan={5}>Total:</TableCell>
-
-      <TableCell className="max-w-[120px] min-w-[100px] break-all">
-        {data
-          ? formatCurrency(
-              data.totalServicesPerformed.totalPrice -
-                data.totalServicesPerformed.totalDiscount
-            )
-          : null}
-      </TableCell>
-
-      <TableCell className="max-w-[120px] min-w-[100px] break-all">
-        {data
-          ? formatCurrency(
-              data.totalProductsSold.totalPrice -
-                data.totalProductsSold.totalDiscount
-            )
-          : null}
-      </TableCell>
-
-      <TableCell
-        colSpan={3}
-        className="max-w-[120px] min-w-[100px] text-right break-all"
+    <>
+      <TableRow
+        className={cn("bg-secondary hover:bg-secondary/50", {
+          "animate-pulse": isLoading,
+        })}
       >
-        {data
-          ? formatCurrency(
-              data.totalServicesPerformed.totalPrice -
-                data.totalServicesPerformed.totalDiscount +
-                data.totalProductsSold.totalPrice -
-                data.totalProductsSold.totalDiscount
-            )
-          : null}
-      </TableCell>
-    </TableRow>
+        <TableCell colSpan={8}>Total:</TableCell>
+
+        <TableCell className="max-w-[120px] min-w-[100px] break-all">
+          {data ? formatCurrency(data.grandFees) : null}
+        </TableCell>
+
+        <TableCell className="max-w-[120px] min-w-[100px] break-all">
+          {data ? formatCurrency(data.grandProductsSold) : null}
+        </TableCell>
+
+        <TableCell
+          colSpan={3}
+          className="max-w-[120px] min-w-[100px] text-right break-all"
+        >
+          {data ? formatCurrency(data.totalGrand) : null}
+        </TableCell>
+      </TableRow>
+
+      <TableRow
+        className={cn("bg-destructive text-white hover:bg-destructive/85", {
+          "animate-pulse": isLoading,
+        })}
+      >
+        <TableCell colSpan={8}>Losses:</TableCell>
+
+        <TableCell className="max-w-[120px] min-w-[100px] break-all">
+          {data
+            ? formatCurrency(data.grandLossFromFeesReturnedOrCancelled)
+            : null}
+        </TableCell>
+
+        <TableCell className="max-w-[120px] min-w-[100px] break-all">
+          {data
+            ? formatCurrency(data.grandLossFromProductsReturnedOrCancelled)
+            : null}
+        </TableCell>
+
+        <TableCell
+          colSpan={3}
+          className="max-w-[120px] min-w-[100px] text-right break-all"
+        >
+          {data
+            ? formatCurrency(
+                data.grandLossFromProductsReturnedOrCancelled +
+                  data.grandLossFromFeesReturnedOrCancelled
+              )
+            : null}
+        </TableCell>
+      </TableRow>
+    </>
   )
 }
 

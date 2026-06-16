@@ -39,6 +39,7 @@ interface SearchProps {
   maxPrice: string
   serviceStatusId: string
   status: ServiceStatus[]
+  technician: string
   // cars: Car[]
   // clients: Clien[]
   className?: string
@@ -53,6 +54,7 @@ const SearchDialog = ({
   clientId,
   dateTo,
   dateFrom,
+  technician,
   status,
   serviceStatusId,
   minPrice,
@@ -68,6 +70,7 @@ const SearchDialog = ({
       carId: carId || "",
       clientId: clientId || "",
       statusId: serviceStatusId || "",
+      technician: technician || "",
     }
   }, [])
 
@@ -75,6 +78,9 @@ const SearchDialog = ({
   const [open, setOpen] = React.useState(false)
   const [car, setCar] = useState<string>(initalValus.carId)
   const [client, setClient] = useState<string | null>(initalValus.clientId)
+  const [technicianId, setTechnicianId] = useState<string | null>(
+    initalValus.technician
+  )
   const [statusId, setStatusId] = useState<string>(initalValus.statusId)
   const [step, setStep] = useState(50)
   const [date, setDate] = React.useState<DateRange | undefined>({
@@ -92,6 +98,7 @@ const SearchDialog = ({
     setCar("")
     setClient("")
     setStatusId("")
+    setTechnicianId("")
     setDate(undefined)
     setValue([0, 0])
   }
@@ -151,6 +158,12 @@ const SearchDialog = ({
       params.delete("clientId")
     } else {
       params.set("clientId", String(client))
+    }
+
+    if (!technicianId) {
+      params.delete("technician")
+    } else {
+      params.set("technician", String(technicianId))
     }
 
     if (!statusId) {
@@ -288,7 +301,19 @@ const SearchDialog = ({
                 Search by clients.
               </p>
             </div>
+            <div className="w-full space-y-2">
+              <ClientsComboBox
+                adminOnly
+                placeholder="Search by technician.."
+                disabled={!isAdmin}
+                value={technicianId}
+                setValue={setTechnicianId}
+              />
 
+              <p className="text-xs text-muted-foreground">
+                Search by technician.
+              </p>
+            </div>
             <div className="w-full space-y-2 sm:w-[48%]">
               <Input
                 type="text"
@@ -316,12 +341,12 @@ const SearchDialog = ({
                     height: "2px",
                   },
                   "& .MuiSlider-track": {
-                    backgroundColor: "hsl(var(--primary))", // Style the track
+                    backgroundColor: "var(--primary)", // Style the track
                     height: "2px",
                   },
                   "& .MuiSlider-thumb": {
-                    backgroundColor: "hsl(var(--accent))",
-                    border: "solid 1px  hsl(var(--border))",
+                    backgroundColor: "var(--accent)",
+                    border: "solid 1px  var(--border)",
                     "&:hover, &.Mui-active, &.Mui-focusVisible": {
                       boxShadow: "none", // Remove the box shadow on hover, focus, or active state
                       border: "none",
@@ -329,20 +354,20 @@ const SearchDialog = ({
                     },
                   },
                   "& .css-hayzob-JoySlider-thumb::before ": {
-                    backgroundColor: "hsl(var(--accent))",
+                    backgroundColor: "var(--accent)",
                     //   borderColor: "hsl(var(--border))",
-                    border: "solid 1px  hsl(var(--border))",
+                    border: "solid 1px  var(--border)",
                   },
 
                   "& .css-sl4hj6-JoySlider-valueLabel": {
-                    background: "hsl(var(--background))",
-                    color: "hsl(var(--muted-foreground))",
+                    background: "var(--background)",
+                    color: "var(--muted-foreground)",
 
                     outline: "none",
                   },
 
                   "& .css-sl4hj6-JoySlider-valueLabel::before": {
-                    color: "hsl(var(--background))",
+                    color: "var(--background)",
                   },
                 }}
                 getAriaLabel={() => "Temperature range"}

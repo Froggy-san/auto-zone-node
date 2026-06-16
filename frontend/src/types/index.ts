@@ -9,6 +9,7 @@ export * from "./serviceTypes"
 export * from "./serviceStatusTypes"
 export * from "./serviceFeesTypes"
 export * from "./productSoldTypes"
+
 // export * from "./productModel"
 // export * from "./productYear"
 // export * from "./productBrand"

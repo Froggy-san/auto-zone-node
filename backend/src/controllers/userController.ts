@@ -78,7 +78,6 @@ export const updateMe = catchAsync(
 );
 
 export function getMe(req: Request, res: Response, next: NextFunction) {
-  console.log("[/ME-------------]");
   if (!req.user) return next();
 
   req.params.id = req.user.id;

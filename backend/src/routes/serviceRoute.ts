@@ -6,10 +6,12 @@ import {
   createService,
   deleteService,
   getAllServices,
+  getServiceStats,
   updateService,
 } from "../controllers/serviceController";
 import {
   createServiceSchema,
+  deleteServiceSchema,
   updateServiceSchema,
 } from "../validators/serviceValidator";
 
@@ -18,6 +20,8 @@ const router = express.Router();
 router.use(protect);
 router.use(restrictTo("admin"));
 
+router.get("/stats", getServiceStats);
+
 router
   .route("/")
   .get(getAllServices)
@@ -25,6 +29,6 @@ router
 router
   .route("/:id")
   .patch(validate(updateServiceSchema), updateService)
-  .delete(validate(paramIdSchema), deleteService);
+  .delete(validate(deleteServiceSchema), deleteService);
 
 export default router;

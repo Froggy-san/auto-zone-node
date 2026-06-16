@@ -11,39 +11,37 @@ import { Button } from "@/components/ui/button"
 
 import Spinner from "@/components/Spinner"
 
-import useObjectCompare from "@/hooks/use-compare-objs"
 import DialogComponent from "@/components/dialog-component"
 
-import { format } from "date-fns"
-import { CalendarIcon, ReceiptText } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { Calendar } from "@/components/ui/calendar"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
 import { Textarea } from "@/components/ui/textarea"
 import { ServiceStatusCombobox } from "@/components/service-status-combobox"
 // import { editServiceAction } from "@lib/actions/serviceActions"
 import { ClientsComboBox } from "@/components/clients-combobox"
 // import { CarsComboBox } from "@/components/car-combo-box"
-import type { Service, ServiceStatus, User } from "@/types"
+import type { Service, ServiceStatus } from "@/types"
 import { EditServiceSchema } from "@/schemas/service.schema"
 
 import type z from "zod"
 import { toast } from "sonner"
-import { updateService } from "@/services/servicesApi"
+
 import {
   Field,
+  FieldContent,
   FieldDescription,
   FieldError,
   FieldLabel,
+  FieldTitle,
 } from "@/components/ui/field"
 import CurrencyInput from "react-currency-input-field"
 import PrioritySelect from "@/components/priority-select"
 import { Input } from "@/components/ui/input"
 import DatePicker from "@/components/DatePicker"
+import { useQueryClient } from "@tanstack/react-query"
+import { Switch } from "@/components/ui/switch"
+import { AnimatePresence } from "framer-motion"
+import FormErrorMessage from "@/components/form-error-message"
+import { formatCurrency } from "@/lib/client-helpers"
+import useUpdateService from "@/features/services/useUpdateService"
 
 const EditServiceForm = ({
   // clients,
@@ -62,6 +60,7 @@ const EditServiceForm = ({
   service: Service
   status: ServiceStatus[]
 }) => {
+  const { mutateAsync: updateService } = useUpdateService()
   const defaultValues = {
     serviceDate: new Date(service.serviceDate),
     user: service.user._id || "",
@@ -74,6 +73,8 @@ const EditServiceForm = ({
     laborTime: service.laborTime || 0,
     technician: service.technician.map((t) => t._id) || [],
     note: service.note || "",
+
+    // isReturned: service.isReturned,
   }
   const form = useForm<z.infer<typeof EditServiceSchema>>({
     mode: "onChange",
@@ -81,7 +82,8 @@ const EditServiceForm = ({
     defaultValues,
   })
 
-  const isEqual = useObjectCompare(form.getValues(), defaultValues)
+  const isEqual =
+    Object.entries(form.formState.errors).length > 0 || !form.formState.isDirty
   useEffect(() => {
     form.reset(defaultValues)
 
@@ -96,23 +98,16 @@ const EditServiceForm = ({
   const isLoading = form.formState.isSubmitting
 
   async function onSubmit(data: z.infer<typeof EditServiceSchema>) {
-    // format(value, "yyyy-MM-dd")
-    const editedData = {
-      ...data,
-      created_at: data.serviceDate.toISOString(),
-      id: service.id,
-    }
-
     try {
       if (isEqual) throw new Error("You haven't changed anything.")
       setIsLoading(true)
 
-      const { error } = await updateService(editedData, service._id)
-      if (error) throw new Error(error)
+      await updateService({ service: data, id: service._id })
+
       setOpen("")
       toast.success("Serivce details has been updated")
     } catch (error: any) {
-      toast.error("Failedto edit service details")
+      toast.error(error.message)
     } finally {
       setIsLoading(false)
     }
@@ -232,7 +227,54 @@ const EditServiceForm = ({
                 </Field>
               )}
             />
+            <Controller
+              name="amountReceived"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid} className="mb-auto">
+                  <FieldLabel htmlFor={field.name}>Amount Received</FieldLabel>
+                  <CurrencyInput
+                    id={field.name}
+                    name={field.name}
+                    placeholder={field.name}
+                    decimalsLimit={2} // Max number of decimal places
+                    prefix="EGP " // Currency symbol (e.g., Egyptian Pound)
+                    decimalSeparator="." // Use dot for decimal
+                    groupSeparator="," // Use comma for thousands
+                    value={field.value || ""}
+                    onValueChange={(formattedValue, name, value) => {
+                      // setFormattedListing(formattedValue || "");
 
+                      field.onChange(Number(value?.value) || 0)
+                    }}
+                    className="input-field"
+                  />
+
+                  <FieldDescription>
+                    Enter the amount received from the grand total of the
+                    service{" "}
+                    <span className="font-semibold text-green-600">
+                      {formatCurrency(Math.floor(service.grandTotal))}
+                    </span>
+                    .
+                    <AnimatePresence>
+                      {Math.floor(field.value) >
+                        Math.floor(service.grandTotal) && (
+                        <FormErrorMessage className="text-yellow-600">
+                          Amount received shouldn't be greater than the grand
+                          total. But you can proceed anyways.
+                        </FormErrorMessage>
+                      )}
+                    </AnimatePresence>
+                  </FieldDescription>
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
+          </div>
+          <div className="flex flex-col gap-2 space-y-4 sm:flex-row sm:space-y-0">
             <Controller
               name="technician"
               control={form.control}
@@ -255,8 +297,6 @@ const EditServiceForm = ({
                 </Field>
               )}
             />
-          </div>
-          <div className="flex flex-col gap-2 space-y-4 sm:flex-row sm:space-y-0">
             <Controller
               name="laborTime"
               control={form.control}
@@ -333,6 +373,33 @@ const EditServiceForm = ({
               </Field>
             )}
           />
+          {/* <Controller
+            name="isReturned"
+            control={form.control}
+            render={({ field }) => (
+              <FieldLabel htmlFor="switch-notifications" className="mt-8">
+                <Field orientation="horizontal">
+                  <FieldContent>
+                    <FieldTitle>Is Returned?</FieldTitle>
+                    <FieldDescription>
+                      Toggle if the service and it's products have been returned
+                      by the coustomer.
+                      <p className="text-xs text-yellow-600">
+                        This will exclude the service from the revenue report.
+                        And it will restock the products.
+                      </p>
+                    </FieldDescription>
+                  </FieldContent>
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                    id="switch-notifications"
+                    defaultChecked
+                  />
+                </Field>
+              </FieldLabel>
+            )}
+          /> */}
           <DialogComponent.Footer>
             <Button
               onClick={() => setOpen("")}

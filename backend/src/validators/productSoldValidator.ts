@@ -20,7 +20,9 @@ export const productSoldSchema = ProductSoldShape.refine(
   },
 );
 export const createProductSoldSchema = z.object({
-  body: productSoldSchema,
+  body: productSoldSchema.extend({
+    service: objectIdSchema,
+  }),
 });
 
 export const updateProductSoldSchema = createProductSoldSchema
@@ -41,3 +43,12 @@ export const updateProductSoldSchema = createProductSoldSchema
       },
     ),
   });
+
+export const deleteProductSoldSchema = z.object({
+  params: z.object({ id: objectIdSchema }),
+  body: z
+    .object({
+      shouldRestock: z.boolean().default(false),
+    })
+    .optional(),
+});

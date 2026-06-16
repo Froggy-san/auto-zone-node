@@ -8,7 +8,7 @@ export const globalErrorHandler = (
 ) => {
   err.statusCode = err.statusCode || 500;
   err.status = err.status || "error";
-
+  console.log(`📛📛 Error 📛📛: ${err}`);
   // 1. Handle Zod Validation Errors
   if (err.name === "ZodError") {
     return res.status(400).json({
@@ -39,7 +39,6 @@ export const globalErrorHandler = (
     });
   }
 
-  console.log(`📛📛 Error 📛📛: ${err}`);
   // 4. Default Fallback
   res.status(err.statusCode).json({
     status: err.status,

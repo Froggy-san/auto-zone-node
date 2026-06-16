@@ -69,7 +69,7 @@ import ClientDialog from "./client-dialog"
 //   editServiceAction,
 // } from "@lib/actions/serviceActions"
 import EditServiceForm from "./edit-service-form"
-import { formatCurrency } from "@/lib/client-helpers"
+import { formatCurrency, formatNumber } from "@/lib/client-helpers"
 import NoteDialog from "@/components/garage/note-dialog"
 
 import {
@@ -90,15 +90,25 @@ import { Label } from "@/components/ui/label"
 import type { Car, Category, Service, ServiceStatus, User } from "@/types"
 import StatusBadge from "../status-badge"
 import { useLocation, useNavigate, useSearchParams } from "react-router"
-import { updateService } from "@/services/servicesApi"
+
 import { toast } from "sonner"
 import SearchDialog from "./search-dialog"
+import { formatDate } from "date-fns"
+import PaymentStatus from "./orders/payment-status-badge"
+import type { PaymentStatusSchema } from "@/lib/types"
+import type z from "zod"
+import { SER_STATUS_CANCELED, SER_STATUS_RETURNED } from "@/lib/constants"
+import useServicesStats from "@/features/services/useServicesStats"
+import StatsRow from "./stats-row"
+import useDeleteService from "@/features/services/useDeleteService"
+import useUpdateService from "@/features/services/useUpdateService"
 interface Props {
   isClientPage?: boolean
   isAdmin: boolean
   categories: Category[]
   // cars: Car[]
   // clients: User[]
+  technician: string
   status: ServiceStatus[]
   currPage: string
   services: Service[]
@@ -121,6 +131,7 @@ const ServiceTable = ({
   currPage,
   // cars,
   // clients,
+  technician,
   dateFrom,
   dateTo,
   carId,
@@ -134,38 +145,73 @@ const ServiceTable = ({
 }: Props) => {
   const [loadingIds, setLoadingIds] = useState<string[]>([])
   const [selected, setSelected] = useState<string[]>([])
+
   if (!services)
     return <p>Something went wrong while getting the services&apos;s data</p>
   const currPageSize = services.length
 
   const nonCanceledService = services.filter(
-    (serv) => serv.serviceStatus.name != "Canceled"
+    (serv) =>
+      serv.serviceStatus._id !== SER_STATUS_CANCELED &&
+      serv.serviceStatus._id !== SER_STATUS_RETURNED
   )
 
-  const fees = nonCanceledService
-    .flatMap((service) => service.serviceFees)
-    .filter((fee) => !fee.isReturned)
-  const soldProducts = nonCanceledService
-    .flatMap((service) => service.productsSold)
-    .filter((pro) => !pro.isReturned)
+  // console.log(services, "SERVICES")
+  // const fees = nonCanceledService
+  //   .flatMap((service) => service.serviceFees)
+  //   .filter((fee) => !fee.isReturned)
+  // const soldProducts = nonCanceledService
+  //   .flatMap((service) => service.productsSold)
+  //   .filter((pro) => !pro.isReturned)
 
-  const totalFees = useMemo(() => {
-    return fees.reduce((acc, item) => {
-      acc += item.totalPriceAfterDiscount
+  const grandTotals = useMemo(() => {
+    let totalFees = 0
+    let totalSoldProducts = 0
+    let totalReceivedAmount = 0
+    nonCanceledService.forEach((service) => {
+      // Becasue each service can haver it's own tax rate, we need to calulate the totals according to the service tax rate.
+      const serviceTaxRate = service.taxRate
 
-      return acc
-    }, 0)
-  }, [fees])
+      // Calcuate the unreturned fees
+      const fees = service.serviceFees.filter((fee) => !fee.isReturned)
 
-  const totalSoldProducts = useMemo(() => {
-    return soldProducts.reduce((acc, item) => {
-      acc += item.totalPriceAfterDiscount
+      fees.forEach((fee) => {
+        const taxAmount = fee.totalPriceAfterDiscount * serviceTaxRate
+        totalFees += fee.totalPriceAfterDiscount + taxAmount
+      })
 
-      return acc
-    }, 0)
-  }, [soldProducts])
+      // Calculate the unreturned sold products
+      const soldProducts = service.productsSold.filter((p) => !p.isReturned)
+      soldProducts.forEach((soldPro) => {
+        const totalAfterDiscount =
+          (soldPro.pricePerUnit - soldPro.discountPerUnit) * soldPro.count
 
-  const totals = totalFees + totalSoldProducts
+        const taxAmount = totalAfterDiscount * serviceTaxRate
+
+        totalSoldProducts += totalAfterDiscount + taxAmount
+      })
+      totalReceivedAmount += service.amountReceived
+    })
+    return { totalFees, totalSoldProducts, totalReceivedAmount }
+  }, [nonCanceledService])
+
+  // const totalFees = useMemo(() => {
+  //   return fees.reduce((acc, item) => {
+  //     acc += item.totalPriceAfterDiscount
+
+  //     return acc
+  //   }, 0)
+  // }, [fees])
+
+  // const totalSoldProducts = useMemo(() => {
+  //   return soldProducts.reduce((acc, item) => {
+  //     acc += item.totalPriceAfterDiscount
+
+  //     return acc
+  //   }, 0)
+  // }, [soldProducts])
+
+  const totals = grandTotals.totalFees + grandTotals.totalSoldProducts
   return (
     <>
       <div className="flex flex-col-reverse items-center gap-x-2 gap-y-5 break-keep sm:flex-row">
@@ -182,6 +228,7 @@ const ServiceTable = ({
           isAdmin={isAdmin}
           // cars={cars}
           // clients={clients}
+          technician={technician}
           status={status || []}
           carId={carId}
           clientId={clientId}
@@ -205,12 +252,17 @@ const ServiceTable = ({
             <TableRow>
               <TableHead className="min-w-[20px]">ID</TableHead>
               <TableHead>DATE</TableHead>
+              <TableHead>LABOR TIME</TableHead>
               <TableHead>CLIENT</TableHead>
               <TableHead>CAR</TableHead>
               <TableHead>STATUS</TableHead>
+              <TableHead className="">PAYMENT STATUS</TableHead>
+              <TableHead className="">PRIORITY</TableHead>
               <TableHead>FEES</TableHead>
               <TableHead className="whitespace-nowrap">SOLD PRODUCTS</TableHead>
-              <TableHead className="">PRIORITY</TableHead>
+              <TableHead className="whitespace-nowrap">
+                AMOUNT RECEIVED
+              </TableHead>
               <TableHead className="text-right">TOTAL PRICE</TableHead>
             </TableRow>
           </TableHeader>
@@ -237,24 +289,27 @@ const ServiceTable = ({
           </TableBody>
           <TableFooter>
             <TableRow>
-              <TableCell colSpan={5}>Page-Total:</TableCell>
+              <TableCell colSpan={8}>Page-Total:</TableCell>
 
               <TableCell className="max-w-[120px] min-w-[100px]">
-                {formatCurrency(totalFees)}
+                {formatCurrency(Math.ceil(grandTotals.totalFees))}
               </TableCell>
 
               <TableCell className="max-w-[120px] min-w-[100px]">
-                {formatCurrency(totalSoldProducts)}
+                {formatCurrency(Math.ceil(grandTotals.totalSoldProducts))}
+              </TableCell>
+              <TableCell className="max-w-[120px] min-w-[100px]">
+                {formatCurrency(Math.ceil(grandTotals.totalReceivedAmount))}
               </TableCell>
 
               <TableCell
                 colSpan={3}
                 className="max-w-[120px] min-w-[100px] text-right"
               >
-                {formatCurrency(totals)}
+                {formatCurrency(Math.ceil(totals))}
               </TableCell>
             </TableRow>
-            {/* <StatsRow
+            <StatsRow
               carId={carId}
               clientId={clientId}
               dateTo={dateTo}
@@ -262,7 +317,7 @@ const ServiceTable = ({
               serviceStatusId={serviceStatusId}
               maxPrice={maxPrice}
               minPrice={minPrice}
-            /> */}
+            />
           </TableFooter>
         </Table>
       </div>
@@ -297,22 +352,22 @@ function Row({
   service: Service
   currPageSize: number
 }) {
-  const total = useMemo(() => {
-    const totalFees = service.serviceFees
-      .filter((fee) => !fee.isReturned)
-      .reduce((sum, curr) => {
-        sum += curr.totalPriceAfterDiscount
-        return sum
-      }, 0)
-    const totalSold = service.productsSold
-      .filter((pro) => !pro.isReturned)
-      .reduce((sum, curr) => {
-        sum += curr.totalPriceAfterDiscount
-        return sum
-      }, 0)
-    const total = totalSold + totalFees
-    return total
-  }, [service])
+  // const total = useMemo(() => {
+  //   const totalFees = service.serviceFees
+  //     .filter((fee) => !fee.isReturned)
+  //     .reduce((sum, curr) => {
+  //       sum += curr.totalPriceAfterDiscount
+  //       return sum
+  //     }, 0)
+  //   const totalSold = service.productsSold
+  //     .filter((pro) => !pro.isReturned)
+  //     .reduce((sum, curr) => {
+  //       sum += curr.totalPriceAfterDiscount
+  //       return sum
+  //     }, 0)
+  //   const total = totalSold + totalFees
+  //   return total
+  // }, [service])
   const item = selected.some((item) => item === service.id)
   return (
     <>
@@ -325,10 +380,21 @@ function Row({
         }}
         className={` ${item && "bg-accent/60 hover:bg-accent/40"}`}
       >
-        <TableCell className="font-medium"> {service.id}</TableCell>
+        <TableCell
+          className="cursor-pointer font-bold underline-offset-4 hover:underline"
+          onClick={(e) => {
+            e.stopPropagation()
+          }}
+        >
+          {" "}
+          {service.id}
+        </TableCell>
 
         <TableCell className="whitespace-nowrap">
-          {String(service.createdAt)}
+          {formatDate(service.serviceDate, "d MMMM yyyy")}
+        </TableCell>
+        <TableCell className="whitespace-nowrap">
+          Hrs {formatNumber(service.laborTime)}
         </TableCell>
 
         <TableCell>
@@ -342,13 +408,22 @@ function Row({
         <TableCell>
           <StatusBadge status={service.serviceStatus} />
         </TableCell>
-
+        <TableCell>
+          <PaymentStatus
+            status={
+              service.paymentStatus as z.infer<typeof PaymentStatusSchema>
+            }
+          />
+        </TableCell>
+        <TableCell className="relative">
+          <Priority priority={service.priority} />
+        </TableCell>
         <TableCell>
           <ServiceFeesDialog
             isAdmin={isAdmin}
             categories={categories}
             service={service}
-            total={total}
+            total={service.grandTotal}
           />
         </TableCell>
 
@@ -356,17 +431,19 @@ function Row({
           <ProductSoldDialog
             isAdmin={isAdmin}
             service={service}
-            total={total}
+            total={service.grandTotal}
           />
         </TableCell>
-        <TableCell className="relative">
-          <Priority priority={service.priority} />
+        <TableCell className="min-w-[100px]">
+          {formatCurrency(service.amountReceived)}
         </TableCell>
         <TableCell className="text-right font-bold">
           <div className="flex items-center justify-end gap-3">
-            <span className={` ${total === 0 && "text-muted-foreground"}`}>
+            <span
+              className={` ${service.grandTotal === 0 && "text-muted-foreground"}`}
+            >
               {" "}
-              {formatCurrency(total)}{" "}
+              {formatCurrency(Math.ceil(service.grandTotal))}{" "}
             </span>
             <TableActions
               loading={loading}
@@ -441,6 +518,7 @@ function TableActions({
   // const [chosenStatus, setChosenStatus] = useState<number>(service.status.id);
   const [isLoading, setIsLoading] = useState(false)
 
+  const { mutateAsync: updateService } = useUpdateService()
   const [searchParam] = useSearchParams()
   const pathname = useLocation().pathname
   const navigate = useNavigate()
@@ -450,12 +528,12 @@ function TableActions({
   const handleChangePriority = async (priority: "low" | "medium" | "high") => {
     setIsLoading(true)
     try {
-      await updateService(
-        {
+      await updateService({
+        service: {
           priority,
         },
-        service.id
-      )
+        id: service.id,
+      })
 
       setIsLoading(false)
       // handleClose();
@@ -469,12 +547,12 @@ function TableActions({
   const handleChangeStatus = async (id: string) => {
     setIsLoading(true)
     try {
-      await updateService(
-        {
+      await updateService({
+        service: {
           serviceStatus: id,
         },
-        service.id
-      )
+        id: service.id,
+      })
 
       setIsLoading(false)
       // handleClose();
@@ -813,12 +891,12 @@ function DeleteService({
   service: Service
   pageSize: number
 }) {
-  const [checked, setChecked] = useState(true)
+  const [shouldRestock, setShouldRestock] = useState(true)
 
   const [searchParam] = useSearchParams()
   const navigate = useNavigate()
   const pathname = useLocation().pathname
-  const queryClient = useQueryClient()
+  const { mutateAsync: deleteService } = useDeleteService()
 
   function checkIfLastItem() {
     const params = new URLSearchParams(searchParam)
@@ -862,8 +940,8 @@ function DeleteService({
         <div className="flex items-center gap-2">
           {" "}
           <Checkbox
-            checked={checked}
-            onClick={() => setChecked((c) => !c)}
+            checked={shouldRestock}
+            onClick={() => setShouldRestock((c) => !c)}
             id="should-restock"
             name="should-restock"
           />
@@ -883,33 +961,40 @@ function DeleteService({
             onClick={async () => {
               setIsDeleting(true)
               try {
-                const productsIds = Array.from(
-                  new Set(service.productsSold.map((p) => p.product))
-                )
+                // const productsIds = Array.from(
+                //   new Set(service.productsSold.map((p) => p.product))
+                // )
 
-                const productsToRestock = checked
-                  ? productsIds.map((id) =>
-                      service.productsSold
-                        .filter((product) => product.product === id)
-                        .reduce(
-                          (acc, currPro) => {
-                            acc.quantity += currPro.count
-                            return acc
-                          },
-                          { id, quantity: 0 }
-                        )
-                    )
-                  : undefined
+                // const productsToRestock = shouldRestock
+                //   ? productsIds.map((id) =>
+                //       service.productsSold
+                //         .filter((product) => product.product === id)
+                //         .reduce(
+                //           (acc, currPro) => {
+                //             acc.quantity += currPro.count
+                //             return acc
+                //           },
+                //           { id, quantity: 0 }
+                //         )
+                //     )
+                //   : undefined
 
                 // const { error } = await deleteServiceAction(
                 //   service.id.toString(),
                 //   productsToRestock
                 // )
+
                 // if (error) throw new Error(error)
+
+                await deleteService({ id: service._id, shouldRestock })
+                //           await deleteService(service._id, shouldRestock)
+
+                //   queryClient.invalidateQueries({ queryKey: ["services"] })
+                // queryClient.invalidateQueries({ queryKey: ["services-stats"] })
+
                 checkIfLastItem()
                 setIsDeleting(false)
                 handleClose()
-                queryClient.removeQueries({ queryKey: ["servicesStats"] })
                 toast.success("Service has been deleted")
               } catch (error: any) {
                 setIsDeleting(false)

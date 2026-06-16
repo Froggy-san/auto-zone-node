@@ -17,40 +17,18 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 
-import { DEFAULT_CAR_LOGO } from "@/lib/constants"
+import { BASE_URL, DEFAULT_CAR_LOGO } from "@/lib/constants"
 import type { User } from "@/types"
 import useInfiniteUsers from "@/features/users/useInfiniteUsers"
 import useDebounce from "@/hooks/useDebounce"
 import Spinner from "./Spinner"
 import { useInView } from "react-intersection-observer"
 
-// const frameworks = [
-//   {
-//     value: "next.js",
-//     label: "Next.js",
-//   },
-//   {
-//     value: "sveltekit",
-//     label: "SvelteKit",
-//   },
-//   {
-//     value: "nuxt.js",
-//     label: "Nuxt.js",
-//   },
-//   {
-//     value: "remix",
-//     label: "Remix",
-//   },
-//   {
-//     value: "astro",
-//     label: "Astro",
-//   },
-// ];
-
 interface ClientsComboBoxProps {
   setValue: React.Dispatch<React.SetStateAction<string | null>>
   value: string | null
   // options: User[]
+  placeholder?: string
   adminOnly?: boolean
   disabled?: boolean
 }
@@ -59,6 +37,7 @@ export const ClientsComboBox: React.FC<ClientsComboBoxProps> = ({
   setValue,
   value,
   // options,
+  placeholder,
   adminOnly = false,
   disabled,
 }) => {
@@ -67,16 +46,21 @@ export const ClientsComboBox: React.FC<ClientsComboBoxProps> = ({
   const [searchTerm, setSearchTerm] = React.useState("")
   const { ref, inView } = useInView()
 
-  const debouncedValue = useDebounce(searchTerm, 500)
-  const { data, fetchNextPage, isFetchingNextPage, error, isFetching } =
-    useInfiniteUsers({ searchTerm: debouncedValue, adminOnly })
+  const {
+    data,
+    fetchNextPage,
+    isFetchingNextPage,
+    hasNextPage,
+    error,
+    isFetching,
+  } = useInfiniteUsers({ searchTerm, adminOnly })
 
   const options = data?.pages.flatMap((item) => item.data) || []
   // const [value, setValue] = React.useState(0);
   const selected = options.find((option) => option._id === value)
 
   React.useEffect(() => {
-    if (!inView || isFetching) return
+    if (!inView || isFetching || !hasNextPage) return
 
     fetchNextPage()
   }, [inView, isFetching])
@@ -94,7 +78,7 @@ export const ClientsComboBox: React.FC<ClientsComboBoxProps> = ({
           {selected ? (
             <p className="text-left text-wrap">Name: {selected.username}</p>
           ) : (
-            "Select client..."
+            placeholder || "Select client..."
           )}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
@@ -104,10 +88,10 @@ export const ClientsComboBox: React.FC<ClientsComboBoxProps> = ({
           <CommandInput
             value={searchTerm}
             onValueChange={(value) => setSearchTerm(value)}
-            placeholder="Search client..."
+            placeholder={placeholder || "Search client..."}
           />
           <CommandList>
-            <CommandEmpty>No option found.</CommandEmpty>
+            <CommandEmpty>No options found.</CommandEmpty>
             <CommandGroup>
               {options?.map((option) => {
                 const phones = option.phones || []
@@ -129,7 +113,17 @@ export const ClientsComboBox: React.FC<ClientsComboBoxProps> = ({
                         value === option.id ? "opacity-100" : "opacity-0"
                       )}
                     />
-                    <p className="flex-1 break-all">Name: {option.username}</p>
+                    {option.picture && (
+                      <img
+                        src={`${BASE_URL}/${option.picture}`}
+                        alt={option.username}
+                        className="h-7 w-7 rounded-full object-cover"
+                      />
+                    )}
+                    <span className="flex-1 break-all"> {option.username}</span>
+                    {option.role === "admin" && (
+                      <span className="text-[10px] font-semibold">Admin</span>
+                    )}
                   </CommandItem>
                 )
               })}

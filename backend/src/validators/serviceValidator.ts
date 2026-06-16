@@ -22,7 +22,7 @@ export const createServiceSchema = z.object({
     // taxAmount: z.number().positive(),
     // totalDiscount: z.number().positive().default(0),
     // grandTotal: z.number().positive(),
-    taxRate: z.number().positive(),
+    taxRate: z.number().positive().default(0),
     amountReceived: z.number().optional().default(0),
     paymentStatus: z
       .enum(["unpaid", "partially-paid", "paid", "refunded"])
@@ -41,6 +41,7 @@ export const createServiceSchema = z.object({
       message: "Please provide a valid date string",
     }),
     laborTime: z.number(),
+    // isReturned: z.boolean().optional(),  // Removed this property since the service status does the same job and it was causing confusion in the codebase. We can always add it back if we find a use case for it.
   }),
   // .refine((data) => data.grandTotal > data.totalDiscount, {
   //   path: ["totalDiscount"],
@@ -50,5 +51,24 @@ export const createServiceSchema = z.object({
 
 export const updateServiceSchema = createServiceSchema.partial().extend({
   params: z.object({ id: objectIdSchema }),
-  body: createServiceSchema.shape.body.partial(),
+  body: createServiceSchema.shape.body
+    .omit({
+      productsSold: true,
+      serviceFees: true,
+      taxRate: true,
+      amountReceived: true,
+    })
+    .extend({
+      amountReceived: z.number(),
+    })
+    .partial(),
+});
+
+export const deleteServiceSchema = z.object({
+  params: z.object({ id: objectIdSchema }),
+  body: z
+    .object({
+      shouldRestock: z.boolean().default(false),
+    })
+    .optional(),
 });

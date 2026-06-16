@@ -20,7 +20,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-
+import { HiMiniReceiptRefund } from "react-icons/hi2"
+   
 import Spinner from "@/components/Spinner"
 import { Cross2Icon } from "@radix-ui/react-icons"
 import StatusFormDialog from "./insert-data/status-form-dialog"
@@ -36,11 +37,13 @@ import {
 } from "lucide-react"
 import type { ServiceStatus } from "@/types"
 import { toast } from "sonner"
+import { TbReceiptRefund } from "react-icons/tb"
 type Status =
   | "Pending"
   | "InProgress"
   | "Done"
   | "Canceled"
+  | ""
   | string
   | undefined
 const StatusBadge = ({
@@ -89,7 +92,7 @@ const StatusBadge = ({
                   if (controls) setisEditing((is) => !is)
                 }}
                 className={cn(
-                  "flex w-fit items-center justify-center gap-1 rounded-full bg-primary px-2.5 py-[0.15rem] text-center text-xs font-semibold whitespace-nowrap text-primary-foreground transition-all select-none",
+                  "flex w-fit items-center justify-center gap-1 rounded-full bg-primary px-2.5 py-[0.15rem] text-center text-xs font-semibold text-wrap whitespace-nowrap text-primary-foreground transition-all select-none",
 
                   {
                     "bg-dashboard-blue text-dashboard-text-blue":
@@ -100,6 +103,8 @@ const StatusBadge = ({
                       status.name.toLowerCase() === "canceled",
                     "bg-dashboard-green text-dashboard-text-green":
                       status.name.toLowerCase() === "done",
+                    "bg-dashboard-indigo text-dashboard-text-indigo":
+                      status.name.toLowerCase() === "returned",
                   },
                   className
                 )}
@@ -135,6 +140,10 @@ const StatusBadge = ({
                 {status.name.toLocaleLowerCase() == "done" && (
                   // <CircleCheckBig className=" w-4 h-4" />
                   <CircleCheck className="h-4 w-4" />
+                )}
+
+                {status.name.toLowerCase() === "returned" && (
+                  <HiMiniReceiptRefund className="h-4 w-4" />
                 )}
                 {status.name}
                 {controls ? (

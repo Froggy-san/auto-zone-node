@@ -12,6 +12,7 @@ export const CreateServiceSchema = z.object({
     string().min(1, { message: "Technician ID is required" })
   ),
   odometer: z.string().min(1, { message: "Odometer is required" }),
+  taxRate: z.number(),
   // subTotal: z.number().positive(),
   // taxAmount: z.number().positive(),
   // totalDiscount: z.number().positive(),
@@ -46,4 +47,5 @@ export const EditServiceSchema = z.object({
   note: z.string(),
   serviceDate: z.date(),
   laborTime: z.number(),
+  // isReturned: z.boolean(),// Removed this property since the service status does the same job and it was causing confusion in the codebase. We can always add it back if we find a use case for it.
 })

@@ -7,6 +7,7 @@ import {
   createServiceFee,
   deleteServiceFee,
   getAllServiceFees,
+  getServiceFee,
   updateServiceFee,
 } from "../controllers/serviceFeeController";
 import {
@@ -24,6 +25,7 @@ router
   .post(validate(createServiceFeeSchema), createServiceFee);
 router
   .route("/:id")
+  .get(validate(paramIdSchema), getServiceFee)
   .patch(validate(updateServiceFeeSchema), updateServiceFee)
   .delete(validate(paramIdSchema), deleteServiceFee);
 

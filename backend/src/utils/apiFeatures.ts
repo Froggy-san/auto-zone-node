@@ -20,9 +20,9 @@ class APIFeatures {
       (match) => `$${match}`,
     );
     this.filtersObj = JSON.parse(queryStr);
-    console.log(this.filtersObj, "FILTER OBj");
   }
   filter() {
+    console.log(this.filtersObj.$or, "APPLIED FILTERS IN THE CLASS");
     this.query = this.query.find(this.filtersObj);
     return this;
   }

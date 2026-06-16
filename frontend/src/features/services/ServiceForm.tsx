@@ -68,7 +68,6 @@ const ServiceForm = ({
   setOpen,
   serviceToEdit,
 }: ServiceFormProps) => {
-  const [taxRate, setTaxRate] = React.useState(TAX_PER)
   const [isOpen, setIsOpen] = React.useState(false)
   const [[step, direction], setStep] = React.useState<[number, number]>([0, 1])
   const [products, setProducts] = React.useState<(Product | null)[]>([])
@@ -98,11 +97,14 @@ const ServiceForm = ({
   const defaultValues = {
     user: car.user._id,
     car: car._id,
-    serviceStatus: serviceToEdit ? serviceToEdit.serviceStatus._id : "",
+    serviceStatus: serviceToEdit
+      ? serviceToEdit.serviceStatus._id
+      : "6a088a972189462c9b1d98e1",
     technician: serviceToEdit
       ? serviceToEdit.technician.map((tech) => tech._id)
-      : [],
-    odometer: serviceToEdit ? serviceToEdit.odometer : "",
+      : ["69f6a2092502128b46337f4a"],
+    odometer: serviceToEdit ? serviceToEdit.odometer : "3",
+    taxRate: serviceToEdit ? serviceToEdit.taxRate : TAX_PER,
     // subTotal: serviceToEdit ? serviceToEdit.subTotal : 0,
     // taxAmount: serviceToEdit ? serviceToEdit.taxAmount : 0,
     // totalDiscount: serviceToEdit ? serviceToEdit.totalDiscount : 0,
@@ -120,7 +122,7 @@ const ServiceForm = ({
         isReturned: false,
       },
     ],
-    productsSold: serviceToEdit ? serviceToEdit.productsSold : [],
+    productsSold: [],
     serviceDate: serviceToEdit
       ? new Date(serviceToEdit.serviceDate)
       : new Date(),
@@ -165,7 +167,7 @@ const ServiceForm = ({
 
   const totalAmountAfterDis = totalFeesAfterDis + totalProSoldAfterDis
 
-  const taxAmount = totalAmountAfterDis * (taxRate / 100)
+  const taxAmount = totalAmountAfterDis * (formValues.taxRate / 100)
 
   const grandTotal = totalAmountAfterDis + taxAmount
 
@@ -201,7 +203,7 @@ const ServiceForm = ({
   const disabled = isLoading || isInVaild
 
   async function onSubmit({
-    serviceFees,
+    taxRate,
     ...values
   }: z.infer<typeof CreateServiceSchema>) {
     console.log("Form submitted with values:", values)
@@ -215,9 +217,7 @@ const ServiceForm = ({
       await createService({
         ...values,
 
-        taxRate,
-        taxAmount,
-        serviceFees,
+        taxRate: taxRate / 100,
       })
 
       toast.success(
@@ -381,27 +381,37 @@ const ServiceForm = ({
                         </Field>
                       )}
                     />
+                    <Controller
+                      name="taxRate"
+                      control={form.control}
+                      render={({ field, fieldState }) => (
+                        <Field data-invalid={fieldState.invalid}>
+                          <FieldLabel htmlFor={field.name}>Tax Rate</FieldLabel>
+                          <CurrencyInput
+                            id={field.name}
+                            name="price"
+                            placeholder="Received amount"
+                            decimalsLimit={2}
+                            prefix="% "
+                            decimalSeparator="."
+                            groupSeparator=","
+                            value={field.value || ""}
+                            onValueChange={(formattedValue, name, value) => {
+                              // setFormattedListing(formattedValue || "");
 
-                    <div className="flex w-full flex-col gap-3 *:w-full [&>.sr-only]:w-auto">
-                      <FieldLabel htmlFor="tax-rate">Tax Rate</FieldLabel>
-                      <CurrencyInput
-                        id="tax-rate"
-                        name="price"
-                        placeholder="Received amount"
-                        decimalsLimit={2}
-                        prefix="% "
-                        decimalSeparator="."
-                        groupSeparator=","
-                        value={taxRate || ""}
-                        onValueChange={(formattedValue, name, value) => {
-                          // setFormattedListing(formattedValue || "");
-
-                          setTaxRate(Number(value?.value) || 0)
-                        }}
-                        className="input-field"
-                      />
-                      <FieldDescription>Enter tax percentage.</FieldDescription>
-                    </div>
+                              field.onChange(Number(value?.value) || 0)
+                            }}
+                            className="input-field"
+                          />
+                          <FieldDescription>
+                            Enter tax percentage.
+                          </FieldDescription>
+                          {fieldState.invalid && (
+                            <FieldError errors={[fieldState.error]} />
+                          )}
+                        </Field>
+                      )}
+                    />
                   </div>
 
                   <div className="mx-auto max-w-[500px]">
@@ -411,7 +421,7 @@ const ServiceForm = ({
                         <div className="space-y-2">
                           <div>
                             Products amount:{" "}
-                            <span className="dark:after:text-dashboard-indigo relative after:absolute after:-top-1 after:-right-8 after:text-indigo-800 after:content-['units']">
+                            <span className="relative after:absolute after:-top-1 after:-right-8 after:text-indigo-800 after:content-['units'] dark:after:text-dashboard-indigo">
                               {totalProductSoldAmounts.totalCount}
                             </span>
                           </div>
@@ -427,7 +437,7 @@ const ServiceForm = ({
                           </div>
                           <div className="w-fit border-y py-2 text-xs">
                             Net products sold:{" "}
-                            <span className="dark:text-dashboard-indigo text-indigo-800">
+                            <span className="text-indigo-800 dark:text-dashboard-indigo">
                               {" "}
                               {formatCurrency(totalProSoldAfterDis)}
                             </span>
@@ -436,7 +446,7 @@ const ServiceForm = ({
                         <div className="space-y-2">
                           <div>
                             Fees amount:{" "}
-                            <span className="dark:after:text-dashboard-orange relative text-orange-400 after:absolute after:-top-1 after:-right-7 after:content-['fees']">
+                            <span className="relative text-orange-400 after:absolute after:-top-1 after:-right-7 after:content-['fees'] dark:after:text-dashboard-orange">
                               {formValues.serviceFees.length}
                             </span>
                           </div>
@@ -450,7 +460,7 @@ const ServiceForm = ({
                           </div>
                           <div className="w-fit border-y py-2">
                             Net fees:{" "}
-                            <span className="dark:text-dashboard-orange text-xs text-orange-400">
+                            <span className="text-xs text-orange-400 dark:text-dashboard-orange">
                               {" "}
                               {formatCurrency(totalFeesAfterDis)}
                             </span>
@@ -467,8 +477,8 @@ const ServiceForm = ({
                               totalProductSoldAmounts.totalDiscount
                           )}
                         </div>
-                        <div> Tax Rate: {taxRate}%</div>
-                        <div>Net: {formatCurrency(grandTotal)}</div>
+                        <div> Tax Rate: {formValues.taxRate}%</div>
+                        <div>Net: {formatCurrency(Math.ceil(grandTotal))}</div>
                       </div>
                     </div>
                   </div>
