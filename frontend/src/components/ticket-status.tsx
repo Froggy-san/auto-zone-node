@@ -24,7 +24,7 @@ import { useToast } from "@hooks/use-toast"
 import SuccessToastDescription, { ErorrToastDescription } from "./toast-items"
 import { deleteTicketStatusAction } from "@lib/actions/ticket-status-actions"
 import Spinner from "./Spinner"
-import StatusForm from "./dashboard/tickets/status-form"
+import StatusForm from "../features/dashboard/tickets/status-form"
 const TicketStatus = ({
   ticketStatus,
   className,

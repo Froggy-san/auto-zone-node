@@ -1,4 +1,4 @@
-import SideBar, { SideBarMobile } from "@/components/dashboard/side-bar"
+import SideBar, { SideBarMobile } from "@/features/dashboard/side-bar"
 import NavDrawer from "@/components/nav-drawer"
 
 import { ModeToggle } from "@/components/theme-switch"

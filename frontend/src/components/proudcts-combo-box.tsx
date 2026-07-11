@@ -23,6 +23,7 @@ import { useEffect } from "react"
 import { useInView } from "react-intersection-observer"
 import Spinner from "./Spinner"
 import { BASE_URL } from "@/lib/constants"
+import { formatCurrency } from "@/lib/helper"
 
 // import { DEFAULT_PRODUCT_PIC } from "@lib/constants"
 
@@ -33,7 +34,7 @@ interface ComboBoxProps {
   disabled?: boolean
   setProductArr?: React.Dispatch<React.SetStateAction<Product[]>>
   productArr?: Product[]
-  productToSell: {
+  productToSell?: {
     product: string
     pricePerUnit: number
     discountPerUnit: number
@@ -91,16 +92,33 @@ export const ProductsComboBox: React.FC<ComboBoxProps> = ({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-full justify-between"
+          className="h-fit min-h-9 w-full justify-between"
         >
           {selected ? (
-            <div className="flex flex-1 items-center justify-center gap-5 break-all">
-              <p className="text-left text-wrap">
-                Name: {selected.name} / Category : {selected.category.name}{" "}
+            <div className="flex flex-1 items-center justify-center gap-5 p-2 break-all">
+              <div className="flex max-w-[550px] flex-wrap items-center gap-2 text-xs font-semibold">
+                <span className="rounded-2xl bg-dashboard-blue px-1.5 py-0.5 text-dashboard-text-blue">
+                  Name: {selected.name}
+                </span>{" "}
+                <span className="rounded-2xl bg-dashboard-indigo px-1.5 py-0.5 text-dashboard-text-indigo">
+                  {" "}
+                  Category : {selected.category.name}
+                </span>{" "}
+                <span className="rounded-2xl bg-chart-1 px-1.5 py-0.5">
+                  {" "}
+                  Last cost price:{" "}
+                  {formatCurrency(selected.weightedAverageCost)}
+                </span>
+                <span className="rounded-2xl bg-dashboard-orange px-1.5 py-0.5 text-dashboard-text-orange">
+                  List price: {formatCurrency(selected.listPrice)}
+                </span>{" "}
+                <span className="rounded-2xl bg-dashboard-green px-1.5 py-0.5 text-dashboard-text-green">
+                  Sale price: {formatCurrency(selected.salePrice)}
+                </span>
                 <span className="text-xs text-nowrap text-muted-foreground">
                   Stock: {selected.stock}
                 </span>
-              </p>
+              </div>
               <img
                 src={`${BASE_URL}${seletedImg}`}
                 alt="Car logo"
@@ -147,12 +165,12 @@ export const ProductsComboBox: React.FC<ComboBoxProps> = ({
                         const isSameAsCurrent = option._id === value?._id
 
                         setValue(isSameAsCurrent ? null : option)
-                        console.log("Selected Product ID:", option)
+
                         setOpen(false)
                       }}
-                      className="justify-between gap-2"
+                      className="gap-2"
                     >
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-4">
                         {!isSelected && (
                           <Check
                             className={cn(
@@ -167,18 +185,24 @@ export const ProductsComboBox: React.FC<ComboBoxProps> = ({
                         {isSelected && (
                           <span className="h-2 w-2 shrink-0 rounded-full bg-green-500" />
                         )}
-                        <p className="text-left text-wrap">
-                          Name: {option.name} / Category :{" "}
-                          {option.category.name}{" "}
+                        <div className="flex flex-wrap items-center gap-1.5 text-left text-xs font-semibold text-wrap">
+                          <span className="rounded-2xl px-1.5 py-0.5">
+                            Name: {option.name}
+                          </span>{" "}
+                          <span className="rounded-2xl px-1.5 py-0.5">
+                            {" "}
+                            Category : {option.category.name}
+                          </span>{" "}
                           <span className="text-xs text-nowrap text-muted-foreground">
-                            Stock: {option.stock}
+                            Stock:{" "}
+                            <span className="lining-nums">{option.stock}</span>
                           </span>
-                        </p>
+                        </div>
                       </div>
                       <img
                         src={`${BASE_URL}${img}`}
                         alt="Car logo"
-                        className="h-9 w-9 max-w-[100%] rounded-sm object-cover"
+                        className="ml-auto h-9 w-9 max-w-[100%] rounded-sm object-cover"
                       />
                     </CommandItem>
                   )

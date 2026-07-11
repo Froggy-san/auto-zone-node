@@ -1,7 +1,7 @@
 import ErrorMessage from "@components/error-message"
 import { getTicketStatusesAction } from "@lib/actions/ticket-status-actions"
 import React from "react"
-import TicketStatus from "../../ticket-status"
+import TicketStatus from "../../../components/ticket-status"
 import { createClient } from "@utils/supabase/server"
 
 const Statuses = () => {

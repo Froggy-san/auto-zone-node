@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { objectIdSchema, paramIdSchema } from "./commen";
+import { UNITS_OF_MEASUREMENTS } from "../models/productModel";
 
 // 1. Define the sub-schema for the "Table" inside MoreDetails
 const detailTableSchema = z.object({
@@ -21,7 +22,8 @@ export const createProductSchema = z.object({
     description: z.string().optional().default(""),
     listPrice: z.coerce.number().positive(),
     salePrice: z.coerce.number().positive(),
-    constPrice: z.coerce.number().positive().optional(),
+    weightedAverageCost: z.coerce.number().positive().optional(),
+    unitOfMeasurement: z.enum(UNITS_OF_MEASUREMENTS).default("unit"),
     stock: z.coerce.number().int().nonnegative().optional(),
     minStockLevel: z.coerce.number().int().nonnegative().optional(),
     isAvailable: z.coerce.boolean().optional(),

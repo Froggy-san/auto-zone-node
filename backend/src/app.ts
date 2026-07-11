@@ -22,6 +22,7 @@ import productSoldRoueter from "./routes/productSoldRoutes";
 import serviceStatusesRouter from "./routes/serviceStatusRoutes";
 import serviceFeesRouter from "./routes/serviceFeeRoutes";
 import serviceRouter from "./routes/serviceRoute";
+import supplierInvoicesRouter from "./routes/supplierInvoideRoutes";
 import qs from "qs";
 const app = express();
 // Override Express default query parser with explicit, powerful native 'qs' parsing
@@ -87,6 +88,7 @@ app.use("/api/v1/productSold", productSoldRoueter);
 app.use("/api/v1/serviceFees", serviceFeesRouter);
 app.use("/api/v1/serviceStatuses", serviceStatusesRouter);
 app.use("/api/v1/services", serviceRouter);
+app.use("/api/v1/supplierInvoices", supplierInvoicesRouter);
 // 2) HEALTH CHECK ROUTE
 app.get("/health", (req: Request, res: Response) => {
   res.status(200).json({

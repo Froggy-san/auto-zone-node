@@ -2,13 +2,17 @@ import mongoose, { Schema, model, Document, Query } from "mongoose";
 import { MoreDetail, ProductImage } from "../@types";
 import { NextFunction } from "express";
 
+export const UNITS_OF_MEASUREMENTS = ["unit", "kg", "liter"];
+
+export type UnitsOfMeasurement = "unit" | "kg" | "liter";
 export interface IProduct extends Document {
   name: string;
   description: string;
   listPrice: number;
   salePrice: number;
   minStockLevel: number;
-  lastCostPrice: number; // The price you paid in the latest restock
+  weightedAverageCost: number; // Tracks current asset value for margin tracking.
+  unitOfMeasurement: UnitsOfMeasurement;
   stock: number;
   constPrice: number;
   isAvailable: boolean;
@@ -77,7 +81,15 @@ const productSchema = new Schema<IProduct>(
     },
     minStockLevel: { type: Number, default: 2 },
     constPrice: { type: Number, default: 0 },
-    lastCostPrice: Number,
+    weightedAverageCost: {
+      type: Number,
+      default: 0,
+    },
+    unitOfMeasurement: {
+      type: String,
+      enum: UNITS_OF_MEASUREMENTS,
+      default: "unit",
+    },
     stock: {
       type: Number,
       default: 0,

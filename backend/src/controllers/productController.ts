@@ -60,10 +60,11 @@ export async function updateAndLogProductStocks(
   return { updatedStocks, stockChanges };
 }
 
-type UpdateStock = {
+export type UpdateStock = {
   id: string;
   change: number;
   currentStock: number;
+  newWeightedAverageCost?: number;
 };
 
 export async function updateProductsStock(
@@ -72,10 +73,10 @@ export async function updateProductsStock(
 ) {
   const bulkOps = newStocks.map((item) => {
     // 1. Mathematically deduce what the final stock will be
-    const expectedNewStock = item.currentStock + item.change;
+    // const expectedNewStock = item.currentStock + item.change;
 
     // 2. Base availability strictly on whether the new total is greater than 0
-    const isAvailable = expectedNewStock > 0;
+    const isAvailable = item.currentStock > 0;
 
     // 3. Defensive Filtering: If we are reducing stock (change is negative),
     // ensure the database currently has at least enough stock to fulfill it.
@@ -83,13 +84,17 @@ export async function updateProductsStock(
     if (item.change < 0) {
       filter.stock = { $gte: Math.abs(item.change) };
     }
+    const updatedData: Record<string, any> = { isAvailable };
+    if (typeof item.newWeightedAverageCost === "number") {
+      updatedData.weightedAverageCost = item.newWeightedAverageCost;
+    }
 
     return {
       updateOne: {
         filter,
         update: {
           $inc: { stock: item.change },
-          $set: { isAvailable },
+          $set: updatedData,
         },
       },
     };

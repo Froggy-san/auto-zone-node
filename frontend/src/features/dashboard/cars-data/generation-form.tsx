@@ -40,7 +40,7 @@ import {
   EditNameAndNote,
 } from "@lib/types"
 import React, { cloneElement, useCallback, useEffect, useState } from "react"
-import { Button } from "../../ui/button"
+import { Button } from "../../../components/ui/button"
 import useEditGeneration from "@lib/queries/car-generation/useEditGeneration"
 import useCreateGeneration from "@lib/queries/car-generation/useCreateGeneration"
 import { FileUploader } from "@components/file-uploader"

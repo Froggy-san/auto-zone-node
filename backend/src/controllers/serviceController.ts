@@ -51,6 +51,8 @@ interface UpdateTotalsParams {
   discount: number;
   session?: mongoose.mongo.ClientSession;
 }
+// The name of the parameters is a bit misleading, the new pirce and discount are not the new values but the delta values that will be added to the existing values. So if the admin is returning a product, the price and discount will be negative values.
+// ! Please update the nameing of the parameters to be more descriptive and less misleading. For example, instead of price and discount, use deltaPrice and deltaDiscount.
 export async function updateServiceTotals({
   serviceId,
   price,
@@ -182,25 +184,24 @@ export const createService = catchAsync(
       const dbProducts = await Product.find({
         _id: { $in: productSoldIds },
       }).session(session);
+
+      const productMap = new Map(dbProducts.map((p) => [p._id.toString(), p]));
       console.log(`📦📦📦 Products found: ${dbProducts.join(", ")} 📦📦📦`);
 
       console.log(`🔎🔎🔎  Checking For Any Duplicates IDS  🔎🔎🔎`);
       //!important: Even though the user is allowed one entry of each product, some people might want to miss with the site and send multiple entries of the same product. So we want check for any duplicates. This is done becasue we are checking for the stock availablity once for each sold product rather than grouping them.
 
-      productSoldIds.forEach((id) => {
-        const otherIds = productSoldIds.filter(
-          (otherIds) => otherIds.toString() === id.toString(),
-        );
-        if (otherIds.length > 1) {
-          console.log(
-            `❗❗❗  Duplicate IDS Were Found: ${otherIds.join(", ")}  ❗❗❗`,
-          );
-          throw new Error(
-            `You have enter more than one entry of the same product, You can only select the product one and adjust the amount you need sold from it`,
-          );
-        }
-      });
+      const uniqueIds = new Set(productSoldIds.map((id) => id.toString()));
 
+      if (uniqueIds.size !== productSoldIds.length) {
+        throw new Error("Duplicate products detected");
+      }
+
+      // Check if the products ID are vaild inside each product sold entry
+      // If the products fetched from the database are not matching the length of the productsSoldIds then there is a product ID for a non-existing product.
+      if (dbProducts.length !== productSoldIds.length) {
+        throw new AppError("One or more products do not exist", 404);
+      }
       // 2. CALCULATE TOTALS FIRST (The "Math Office")
       let subTotal = 0;
       let totalDiscount = 0;
@@ -216,17 +217,18 @@ export const createService = catchAsync(
 
       // Calculate from Products
       const processedProducts = productsSoldData?.map((p: IProductSold) => {
-        const dbP = dbProducts.find(
-          (db) => db._id.toString() === p.product.toString(),
-        );
+        const dbP = productMap.get(p.product.toString());
 
-        if (!dbP || dbP.stock < p.count) {
+        if (!dbP) {
           throw new AppError(
-            `Not enough stock for ${dbP?.name || "product"}.`,
-            400,
+            "One or more selected products do not exist.",
+            404,
           );
         }
 
+        if (dbP.stock < p.count) {
+          throw new AppError(`Not enough stock for ${dbP.name}.`, 400);
+        }
         const itemSubTotal = p.pricePerUnit * p.count;
         const itemDiscount = p.discountPerUnit * p.count;
 
@@ -327,20 +329,6 @@ export const createService = catchAsync(
           })),
           session,
         );
-
-        // const bulkOps = logs.map((item: any) => ({
-        //   updateOne: {
-        //     filter: { _id: item.product },
-        //     update: {
-        //       $inc: { stock: item.change },
-        //       $set: { isAvailable: !item.currentStock },
-        //     },
-        //   },
-        // }));
-        // const newStocks = await Product.bulkWrite(bulkOps, {
-        //   session,
-        //   ordered: true,
-        // });
 
         console.log(
           `📉📉📉 Updated Product Stock: ${JSON.stringify(newStocks)} 📉📉📉`,
@@ -774,7 +762,6 @@ export const updateService = catchAsync(
         amountReceived,
       );
 
-      console.log("NEW PAYMENT STATUS", paymentStatus);
       const updatedService = await Service.findByIdAndUpdate(
         id,
         { ...body, paymentStatus },

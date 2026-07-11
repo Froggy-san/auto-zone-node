@@ -1,9 +1,9 @@
 // import EditFeesManagement from "@/components/dashboard/home/edit-fees-management"
 
-import EditSoldForm from "@/components/dashboard/home/edit-sold-form"
-import FeesForm from "@/components/dashboard/home/fees-form"
+import EditSoldForm from "@/features/dashboard/home/edit-sold-form"
+import FeesForm from "@/features/dashboard/home/fees-form"
 // import ProductSoldManagement from "@/components/dashboard/home/product-sold-management"
-import ServiceList from "@/components/dashboard/home/service-list"
+import ServiceList from "@/features/dashboard/home/service-list"
 // import ServicePagination from "@/components/dashboard/home/service-pagination"
 // import Spinner from "@/components/Spinner"
 // import React, { Suspense } from "react"

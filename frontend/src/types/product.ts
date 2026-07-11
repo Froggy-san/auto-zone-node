@@ -3,6 +3,10 @@ import type { CarGeneration } from "./carTypes"
 import type { Category } from "./category"
 import type { ProductType } from "./productTypes"
 
+export const UNITS_OF_MEASUREMENTS = ["unit", "kg", "liter"]
+
+export type UnitsOfMeasurement = "unit" | "kg" | "liter"
+
 export interface MoreDetail {
   _id: string
   title: string
@@ -66,6 +70,8 @@ export interface ProductWithDetails {
   _id: string
   name: string
   description: string
+  weightedAverageCost: number
+  unitOfMeasurement: UnitsOfMeasurement
   listPrice: number
   salePrice: number
   stock: number

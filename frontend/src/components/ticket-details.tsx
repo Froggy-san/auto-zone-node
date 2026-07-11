@@ -49,7 +49,7 @@ import { useQueryClient } from "@tanstack/react-query"
 import { Action, TicketDetailStates } from "@lib/ticket-details-types"
 import useCreateMessage from "@lib/queries/tickets/useCreateMessage"
 import ShowTicketHistory from "./show-ticket-history"
-import { ActionBadge } from "./dashboard/tickets/action-badge"
+import { ActionBadge } from "../features/dashboard/tickets/action-badge"
 import { z } from "zod"
 import { useMediaQuery } from "@mui/material"
 type ActionType = z.infer<typeof TicketHistoryAction>

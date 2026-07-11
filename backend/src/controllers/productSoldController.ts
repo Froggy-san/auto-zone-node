@@ -24,7 +24,7 @@ export const getProductSold = getOne(ProductSold, {
 });
 export const createProductSold = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    console.log(req.body, "REASDASDA");
+  
     const user = req.user;
     if (!user)
       return next(
@@ -67,7 +67,6 @@ export const createProductSold = catchAsync(
         { session },
       );
 
-      console.log(createProductSold, "CREATED PRODUCT");
       await StockLogs.create(
         [
           {

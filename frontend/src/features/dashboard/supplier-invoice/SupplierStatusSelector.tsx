@@ -17,8 +17,11 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 
-import StatusBadge from "../features/dashboard/status-badge"
-import useServiceStatuses from "@/features/services/useServiceStatuses"
+import {
+  FULLFILLMENT_STATUS_VALUES,
+  type FulfillmentStatus,
+} from "@/types/supplierInvoiceTypes"
+import SupplierStatusBadge from "./SupplierStatusBadge"
 
 // const frameworks = [
 //   {
@@ -44,14 +47,14 @@ import useServiceStatuses from "@/features/services/useServiceStatuses"
 // ];
 
 interface ComboBoxProps {
-  setValue: React.Dispatch<React.SetStateAction<string>>
-  value: string
+  setValue: React.Dispatch<React.SetStateAction<FulfillmentStatus>>
+  value: FulfillmentStatus
   // options: ServiceStatus[]
   disabled?: boolean
   className?: string
 }
 
-export const ServiceStatusCombobox: React.FC<ComboBoxProps> = ({
+export const SupplierStatusSelector: React.FC<ComboBoxProps> = ({
   setValue,
   value,
   // options,
@@ -59,38 +62,28 @@ export const ServiceStatusCombobox: React.FC<ComboBoxProps> = ({
   disabled,
 }) => {
   const [open, setOpen] = React.useState(false)
-  const { data, isLoading, error } = useServiceStatuses()
+
   // const [value, setValue] = React.useState(0);
-
-  if (!isLoading && error) {
-    return (
-      <div className="text-destructive">Failed to load service statuses</div>
-    )
-  }
-  const options = data?.data || []
-
-  const selected = options.find((option) => option._id === value)
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
-          disabled={disabled || isLoading}
+          disabled={disabled}
           variant="outline"
           role="combobox"
           aria-expanded={open}
           className={cn(
             "w-full justify-between",
-            { "animate-pulse": isLoading },
+
             className
           )}
         >
-          {selected ? (
+          {value ? (
             <div className="flex max-w-full items-center gap-2">
-              <StatusBadge
-                status={selected}
+              <SupplierStatusBadge
+                supplierStatus={value}
                 className="py-[.1rem] !text-wrap"
-                key={selected.id}
               />
             </div>
           ) : (
@@ -105,12 +98,12 @@ export const ServiceStatusCombobox: React.FC<ComboBoxProps> = ({
           <CommandList>
             <CommandEmpty>No option found.</CommandEmpty>
             <CommandGroup>
-              {options?.map((option) => (
+              {FULLFILLMENT_STATUS_VALUES?.map((option) => (
                 <CommandItem
-                  key={option._id}
-                  value={option.name + String(option._id)} // to avoid selecting two or more items that has the same name proprty.
+                  key={option}
+                  value={option} // to avoid selecting two or more items that has the same name proprty.
                   onSelect={() => {
-                    setValue(option._id === value ? "" : option._id)
+                    setValue(option)
                     setOpen(false)
                   }}
                   className="gap-2"
@@ -118,11 +111,14 @@ export const ServiceStatusCombobox: React.FC<ComboBoxProps> = ({
                   <Check
                     className={cn(
                       "mr-2 h-4 w-4",
-                      value === option._id ? "opacity-100" : "opacity-0"
+                      value === option ? "opacity-100" : "opacity-0"
                     )}
                   />
                   <div className="flex items-center gap-2">
-                    <StatusBadge status={option} className="py-[.1rem]" />
+                    <SupplierStatusBadge
+                      supplierStatus={option}
+                      className="py-[.1rem]"
+                    />
                   </div>
                 </CommandItem>
               ))}

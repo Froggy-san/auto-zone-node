@@ -12,6 +12,7 @@ import Garage from "./pages/Garage"
 import CarDetails from "./pages/carDetails"
 import Dashboard from "./pages/dashboard/Dashboard"
 import DashboardHome from "./pages/dashboard/DashboardHome"
+import SupplerInvoices from "./pages/dashboard/SupplierInvoices"
 
 export function App() {
   return (
@@ -35,6 +36,7 @@ export function App() {
         </Route>
         <Route path="dashboard" element={<Dashboard />}>
           <Route index element={<DashboardHome />} />
+          <Route path="supplier-invoices" element={<SupplerInvoices />} />
           {/* <Route path="settings" element={<Settings />} /> */}
         </Route>
       </Routes>

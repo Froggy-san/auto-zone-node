@@ -20,7 +20,7 @@ import {
 import useInfiniteTicketHistory from "@lib/queries/tickets/useInfiniteTicketHistory"
 import { useInView } from "react-intersection-observer"
 import ErrorMessage from "./error-message"
-import TicketHistory from "./dashboard/tickets/ticket-history"
+import TicketHistory from "../features/dashboard/tickets/ticket-history"
 import { GiTumbleweed } from "react-icons/gi"
 import Spinner from "./Spinner"
 import { TbMoodEmptyFilled } from "react-icons/tb"

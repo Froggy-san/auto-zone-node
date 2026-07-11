@@ -1,5 +1,5 @@
 import React from "react"
-import PaginationControl from "../../pagination-controls"
+import PaginationControl from "../../../components/pagination-controls"
 import { getClientsCountAction } from "@lib/actions/clientActions"
 import { getProductBrandsCountAction } from "@lib/actions/productBrandsActions"
 import { getProductsRestockingBillsCountAction } from "@lib/actions/restockingBillActions"

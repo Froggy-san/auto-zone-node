@@ -14,7 +14,7 @@ const FormErrorMessage = React.forwardRef<
   ErrorMessageProps
 >(({ children, className, ...props }, ref) => {
   return (
-    <motion.p
+    <motion.div
       ref={ref}
       initial={{
         height: 0,
@@ -36,7 +36,7 @@ const FormErrorMessage = React.forwardRef<
       {...props}
     >
       {children}
-    </motion.p>
+    </motion.div>
   )
 })
 

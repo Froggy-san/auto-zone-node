@@ -132,8 +132,6 @@ const StepThree = ({
                               return newArr
                             })
                             if (product) {
-                              console.log("Selected Product ID:", product?._id)
-                              console.log("Selected Product Object:", product)
                               if (product) {
                                 form.setValue(
                                   `productsSold.${i}.pricePerUnit`,
@@ -369,7 +367,7 @@ const StepThree = ({
             <div className="space-y-2 border-t border-b py-2 text-xs text-muted-foreground">
               <div>
                 Amount:{" "}
-                <span className="dark:after:text-dashboard-indigo relative after:absolute after:-top-1 after:-right-8 after:text-indigo-800 after:content-['units']">
+                <span className="relative after:absolute after:-top-1 after:-right-8 after:text-indigo-800 after:content-['units'] dark:after:text-dashboard-indigo">
                   {totalProductSoldAmounts.totalCount}
                 </span>
               </div>

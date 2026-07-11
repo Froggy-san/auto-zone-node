@@ -113,31 +113,33 @@ const ProductForm: React.FC<ProductFormProps> = ({
 
   type ProductFormValues = z.infer<typeof ProductsSchema>
 
-  const defaultValues: ProductFormValues = {
-    name: productToEdit?.name || "",
-    category: productToEdit?.category?._id || "",
-    productType: productToEdit?.productType?._id || "",
-    productBrand: productToEdit?.productBrand?._id || "",
-    description: productToEdit?.description || "",
+  const defaultValues: ProductFormValues = useMemo(() => {
+    return {
+      name: productToEdit?.name || "",
+      category: productToEdit?.category?._id || "",
+      productType: productToEdit?.productType?._id || "",
+      productBrand: productToEdit?.productBrand?._id || "",
+      description: productToEdit?.description || "",
 
-    carMaker: productToEdit?.carMaker?._id ?? null,
-    carModel: productToEdit?.carModel?._id ?? null,
+      carMaker: productToEdit?.carMaker?._id ?? null,
+      carModel: productToEdit?.carModel?._id ?? null,
 
-    generations: productToEdit?.generations?.map((gen) => gen._id) ?? [],
+      generations: productToEdit?.generations?.map((gen) => gen._id) ?? [],
 
-    listPrice: productToEdit?.listPrice ?? 0,
-    salePrice: productToEdit?.salePrice ?? 0,
-    stock: productToEdit?.stock ?? 0,
+      listPrice: productToEdit?.listPrice ?? 0,
+      salePrice: productToEdit?.salePrice ?? 0,
+      stock: productToEdit?.stock ?? 0,
 
-    isAvailable: productToEdit?.isAvailable ?? true,
+      isAvailable: productToEdit?.isAvailable ?? true,
 
-    images: [],
+      images: [],
 
-    mainImageName:
-      productToEdit?.productImages?.find((img) => img.isMain)?.filename || "",
+      mainImageName:
+        productToEdit?.productImages?.find((img) => img.isMain)?.filename || "",
 
-    moreDetails: productToEdit?.moreDetails ?? [],
-  }
+      moreDetails: productToEdit?.moreDetails ?? [],
+    }
+  }, [productToEdit])
 
   const form = useForm<ProductFormValues>({
     mode: "onChange",

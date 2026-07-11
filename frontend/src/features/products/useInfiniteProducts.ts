@@ -12,7 +12,7 @@ export default function useInfiniteProducts(searchTerm: string) {
 
   const baseFilters = {
     fields:
-      "_id,id,productImages,stock,listPrice,salePrice,description,isAvailable",
+      "_id,id,productImages,name,stock,weightedAverageCost,unitOfMeasurement,listPrice,salePrice,description,isAvailable",
   }
   const filters = searchTerm
     ? {

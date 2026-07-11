@@ -1,6 +1,7 @@
 import type { FileRejection, FileWithPath } from "react-dropzone"
 import { z } from "zod"
 import { MIN_PASS_LENGTH } from "./constants"
+import { UNITS_OF_MEASUREMENTS } from "@/types"
 
 export function validateEgyptianPhoneNumber(phoneNumber: string) {
   // define the regex
@@ -90,7 +91,8 @@ export const ProductsSchema = z
     category: z.string().min(1, "Product has to have a category."),
     productType: z.string().min(1, "Product has to have a type."),
     productBrand: z.string().min(1, "Product has to have a brand."),
-
+    weightedAverageCost: z.coerce.number().positive(),
+    unitOfMeasurement: z.enum(UNITS_OF_MEASUREMENTS).default("unit"),
     listPrice: z.number().min(5, "Invalid listing price."),
 
     salePrice: z.number().min(0, "Sale price cannot be negative."),

@@ -29,7 +29,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { FileUploader } from "../../file-uploader"
+import { FileUploader } from "../../../components/file-uploader"
 
 import useObjectCompare from "@hooks/use-compare-objs"
 import { useQueryClient } from "@tanstack/react-query"
