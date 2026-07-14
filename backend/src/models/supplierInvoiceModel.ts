@@ -25,19 +25,22 @@ export const SUPPLIER_PAYMENT_STATUS_VALUES: SupplierPaymentStatus[] = [
 ];
 
 export interface IInvoiceItem {
-  product: mongoose.Types.ObjectId; // Link to your product catalog
-  orderedQuantity: number; // Total quantity purchased on paper
-  quantity: number; // Actual quantity currently on your shelves
-
-  costPriceBeforeTax: number; // Raw wholesale cost per unit
-  discountPercentage: number; // e.g., 5 for 5% off this specific part line
-  taxRatePercentage: number; // e.g., 14 for 14% Egyptian VAT
-  netLineTotal: number; // Final calculated cost for this line item
+  _id: mongoose.Types.ObjectId;
+  product: mongoose.Types.ObjectId;
+  orderedQuantity: number;
+  receivedQuantity: number;
+  costPriceBeforeTax: number;
+  discountPercentage: number;
+  taxRatePercentage: number;
+  netLineTotal: number;
 
   newRetailPrice?: number;
   newSalePrice?: number;
   isReturned: boolean;
+  expiresAt?: Date; // Made optional since not all parts have expiry
 }
+
+export type CreateSupplierInvoiceInput = Omit<IInvoiceItem, "_id">;
 
 export interface ISupplierInvoice extends Document {
   createdBy: mongoose.Types.ObjectId;
@@ -54,7 +57,6 @@ export interface ISupplierInvoice extends Document {
   paymentStatus: SupplierPaymentStatus;
   notes?: string;
   createdAt: Date;
-  isReturned: boolean;
   fulfilledAt?: Date;
 }
 
@@ -66,14 +68,15 @@ const invoiceItemSchema = new Schema(
       required: true,
       min: 1,
     },
-    quantity: { type: Number, required: true, min: 1 },
+    receivedQuantity: { type: Number, required: true, min: 0, default: 0 },
     costPriceBeforeTax: { type: Number, required: true },
     discountPercentage: { type: Number, default: 0 }, // Individual line discount
     taxRatePercentage: { type: Number, default: 14 }, // Standard local tax rate (e.g., 14% VAT)
     netLineTotal: { type: Number, required: true },
     isReturned: { type: Boolean, default: false },
+    expiresAt: { type: Date },
   },
-  { _id: false },
+  { _id: true },
 );
 
 const supplierInvoiceSchema = new Schema<ISupplierInvoice>(
@@ -104,10 +107,6 @@ const supplierInvoiceSchema = new Schema<ISupplierInvoice>(
       type: String,
       enum: SUPPLIER_PAYMENT_STATUS_VALUES,
       default: "paid",
-    },
-    isReturned: {
-      type: Boolean,
-      default: false,
     },
     notes: String,
   },

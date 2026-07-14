@@ -9,7 +9,7 @@ const itemSchema = z
   .object({
     product: objectIdSchema,
     orderedQuantity: z.coerce.number().positive(),
-    quantity: z.coerce
+    receivedQuantity: z.coerce
       .number()
       .int()
       .positive("Ordered stock quantities must be greater than zero."),
@@ -20,6 +20,7 @@ const itemSchema = z
     // Optional strategic retail modification selectors
     newRetailPrice: z.coerce.number().positive().optional(),
     newSalePrice: z.coerce.number().positive().min(0).optional(),
+    expiresAt: z.coerce.date().optional(),
   })
   .refine(
     (item) => {

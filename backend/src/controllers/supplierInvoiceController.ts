@@ -1,5 +1,9 @@
 import { NextFunction, Request, Response } from "express";
-import { IInvoiceItem, SupplierInvoice } from "../models/supplierInvoiceModel";
+import {
+  FulfillmentStatus,
+  IInvoiceItem,
+  SupplierInvoice,
+} from "../models/supplierInvoiceModel";
 import { catchAsync } from "../utils/catchAsync";
 import { getAll, getOne } from "../utils/controllerFactory";
 import mongoose from "mongoose";
@@ -19,6 +23,25 @@ import {
   UpdateSupplierInvoiceItemInput,
 } from "../validators/supplierInvoiceValidator";
 
+type AddItemProps = AddSupplierInvoiceItemInput & {
+  netLineTotal: number;
+};
+export function determineSupplierInvoiceFulfillmentStatus(
+  items: AddSupplierInvoiceItemInput[],
+) {
+  // Implementation for determining fulfillment status
+  const totalOrdered = items.reduce((acc, i) => acc + i.orderedQuantity, 0);
+  const totalReceived = items.reduce((acc, i) => acc + i.receivedQuantity, 0);
+
+  if (totalReceived === 0) {
+    return "pending";
+  }
+  if (totalReceived >= totalOrdered) {
+    return "received";
+  }
+  return "partially-received";
+}
+
 export const getAllSupplierInvoices = getAll(SupplierInvoice, {
   path: "items.product",
 });
@@ -31,6 +54,7 @@ export const createSupplierInvoice = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const body: CreateSupplierInvoiceInput = req.body;
 
+    console.log("CREATE SUPPLIER INVOICE BODY:", body);
     const user = req.user;
     if (!user) {
       return next(
@@ -50,18 +74,13 @@ export const createSupplierInvoice = catchAsync(
         i.product.toString(),
       );
 
-      const uniqueProIds = new Set(productsId);
-      if (uniqueProIds.size !== productsId.length) {
-        throw new AppError(
-          "Duplicate product line items detected in this invoice assignment",
-          400,
-        );
-      }
+      const uniqueProIds = Array.from(new Set(productsId));
 
       const dbProducts = await Product.find({
-        _id: { $in: productsId },
+        _id: { $in: uniqueProIds },
       }).session(session);
-      if (dbProducts.length !== productsId.length) {
+
+      if (dbProducts.length !== uniqueProIds.length) {
         throw new AppError(
           "One or more selected products do not exist in your master catalog",
           404,
@@ -78,10 +97,10 @@ export const createSupplierInvoice = catchAsync(
 
       const productsStockUpdates: any[] = [];
       const logs: any[] = [];
-      const items: IInvoiceItem[] = [];
+      const items: AddItemProps[] = [];
 
       const totalNumberOfItems = body.items.reduce(
-        (acc, curr) => (acc += curr.quantity),
+        (acc, curr) => (acc += curr.orderedQuantity || 0),
         0,
       );
 
@@ -93,21 +112,28 @@ export const createSupplierInvoice = catchAsync(
         const dbProduct = productsMap.get(item.product.toString());
         if (!dbProduct)
           throw new AppError("Product sync error during loop computation", 404);
-        const itemQty = Number(item.quantity) || 0;
+        const lineOrderedQty = Number(item.orderedQuantity) || 0;
+        const lineReceivedQty = Number(item.receivedQuantity) || 0;
+        if (lineOrderedQty <= 0)
+          throw new AppError("Invalid item quantity", 400);
         // Total cost for this line item row before any discounts/taxes
-        const totalLineGrossPrice = item.costPriceBeforeTax * itemQty;
 
-        const totalLineDiscountAmount =
-          (totalLineGrossPrice * (item.discountPercentage || 0)) / 100;
-
-        // Calculated line tax amount using correct adjusted baseline
-        const totalLineTaxAmount =
-          ((totalLineGrossPrice - totalLineDiscountAmount) *
+        const lineCostPerUnit = item.costPriceBeforeTax;
+        const lineDiscPerUnit =
+          (lineCostPerUnit * (item.discountPercentage || 0)) / 100;
+        const lineTaxPerUnit =
+          ((lineCostPerUnit - lineDiscPerUnit) *
             (item.taxRatePercentage || 0)) /
           100;
 
+        const totalLineGrossPrice = lineCostPerUnit * lineOrderedQty;
+
+        const totalLineDiscountAmount = lineDiscPerUnit * lineOrderedQty;
+
+        // Calculated line tax amount using correct adjusted baseline
+        const totalLineTaxAmount = lineTaxPerUnit * lineOrderedQty;
         // Calculate the absolute isolated net total for just this single line item
-        const totalLineShippingAndFees = item.quantity * shippingCostPerUnit;
+        const totalLineShippingAndFees = lineOrderedQty * shippingCostPerUnit;
         const absoluteNetLineTotal =
           totalLineGrossPrice -
           totalLineDiscountAmount +
@@ -117,7 +143,7 @@ export const createSupplierInvoice = catchAsync(
         //  Calculate the netLineTotal for each item and push it to the items to be saved in the invoice
         items.push({
           ...item,
-          product: dbProduct._id,
+          product: dbProduct._id.toString(),
           netLineTotal: Number(absoluteNetLineTotal.toFixed(2)),
         });
 
@@ -127,24 +153,36 @@ export const createSupplierInvoice = catchAsync(
         totalTax += totalLineTaxAmount;
         grandTotal += absoluteNetLineTotal;
 
+        // 4. Calculate Inventory Costs (Only pool values for stock that is actually received)
+        const totalLineGrossPriceRec = lineCostPerUnit * lineReceivedQty;
+        const totalLineDiscountAmountRec = lineDiscPerUnit * lineReceivedQty;
+        const totalLineTaxAmountRec = lineTaxPerUnit * lineReceivedQty;
+        const totalLineShippingRec = lineReceivedQty * shippingCostPerUnit;
+
+        const absoluteNetLineTotalRec =
+          totalLineGrossPriceRec -
+          totalLineDiscountAmountRec +
+          totalLineTaxAmountRec +
+          totalLineShippingRec;
+
         // Fixed Math: Deduced target item's landed unit price accurately
-        const exactUnitLandedCost = absoluteNetLineTotal / item.quantity;
+        // const exactUnitLandedCost = absoluteNetLineTotal / item.quantity;
 
         // Determine the new WAC = 'weighted average cost'
-        const currentTotalStock = dbProduct.stock + itemQty;
+        const currentTotalStock = dbProduct.stock + lineReceivedQty;
         const wac =
           currentTotalStock > 0
             ? (dbProduct.weightedAverageCost * dbProduct.stock +
-                absoluteNetLineTotal) /
+                absoluteNetLineTotalRec) /
               currentTotalStock
             : dbProduct.weightedAverageCost;
         // Formulate Bulk Write Payload
         const updatePayload: Record<string, any> = {
-          $inc: { stock: item.quantity },
+          $inc: { stock: lineReceivedQty },
           $set: {
             weightedAverageCost: Number(wac.toFixed(2)), // Fixed typo from lastConstPrice
 
-            isAvailable: true,
+            isAvailable: currentTotalStock > 0,
           },
         };
 
@@ -156,22 +194,23 @@ export const createSupplierInvoice = catchAsync(
           updatePayload.$set.salePrice = item.newSalePrice;
         }
 
-        productsStockUpdates.push({
-          updateOne: {
-            filter: { _id: dbProduct._id },
-            update: updatePayload,
-          },
-        });
-
         // Stage Ledger Entries
-        logs.push({
-          product: dbProduct._id,
-          change: item.quantity,
-          previousStock: dbProduct.stock,
-          currentStock: dbProduct.stock + item.quantity,
-          reason: "restock",
-          user: user._id,
-        });
+        if (lineReceivedQty > 0) {
+          productsStockUpdates.push({
+            updateOne: {
+              filter: { _id: dbProduct._id },
+              update: updatePayload,
+            },
+          });
+          logs.push({
+            product: dbProduct._id,
+            change: lineReceivedQty,
+            previousStock: dbProduct.stock,
+            currentStock: currentTotalStock,
+            reason: "restock",
+            user: user._id,
+          });
+        }
       });
 
       const paymentStatus = determinePaymentStatus(
@@ -179,6 +218,8 @@ export const createSupplierInvoice = catchAsync(
         body.amountPaid || 0,
       );
 
+      const fulfillmentStatus =
+        determineSupplierInvoiceFulfillmentStatus(items);
       // 4. Save Invoice to Database
       const [createdInvoice] = await SupplierInvoice.create(
         [
@@ -191,26 +232,28 @@ export const createSupplierInvoice = catchAsync(
             grandTotal: Number(grandTotal.toFixed(2)),
             paymentStatus,
             createdBy: user._id,
+            fulfillmentStatus,
             fulfilledAt:
-              body.fulfillmentStatus === "received" ? new Date() : undefined,
+              fulfillmentStatus === "received" ? new Date() : undefined,
           },
         ],
         { session },
       );
 
+      const totalReceivedQty = items.reduce(
+        (acc, i) => (acc += i.receivedQuantity),
+        0,
+      );
       if (!createdInvoice)
         throw new AppError("Failed to create supplier invoice record", 400);
-      if (
-        body.fulfillmentStatus === "received" ||
-        body.fulfillmentStatus === "partially-received"
-      ) {
-        // 5. Fire Atomic Updates
+
+      // 6. Write to Catalog and History Log only if physical goods were processed
+      if (productsStockUpdates.length > 0) {
         await Product.bulkWrite(productsStockUpdates, {
           session,
           ordered: true,
         });
 
-        // Append reference ID to inventory ledger objects
         const finalizedLogs = logs.map((log) => ({
           ...log,
           referenceId: createdInvoice._id,
@@ -273,19 +316,23 @@ export const updateSupplierInvoice = catchAsync(
       const targetFulfillmentStatus =
         body.fulfillmentStatus || supplierInvoice.fulfillmentStatus;
 
-      const isAlreadyReturnedOrCanceled = ["returned", "canceled"].includes(
-        currentFulfillmentStatus,
-      );
-      const isEnteringReturnedOrCanceled = ["returned", "canceled"].includes(
-        targetFulfillmentStatus,
-      );
+      const isAlreadyReturnedOrCanceledOrPending = [
+        "returned",
+        "canceled",
+        "pending",
+      ].includes(currentFulfillmentStatus);
+      const isEnteringReturnedOrCanceledOrPending = [
+        "returned",
+        "canceled",
+        "pending",
+      ].includes(targetFulfillmentStatus);
       const isStatusChanged =
         targetFulfillmentStatus !== currentFulfillmentStatus;
 
       // Extract raw shipping metrics
       const oldShippingAndFees = supplierInvoice.shippingAndFees || 0;
       // If entering a cancellation/return state, active shipping charges drop to 0
-      const newShippingAndFees = isEnteringReturnedOrCanceled
+      const newShippingAndFees = isEnteringReturnedOrCanceledOrPending
         ? 0
         : typeof body.shippingAndFees === "number"
           ? body.shippingAndFees
@@ -319,7 +366,7 @@ export const updateSupplierInvoice = catchAsync(
 
       // Process every line item cleanly in a single execution loop
       const finalItems = supplierInvoice.items.map((invoiceItem) => {
-        const itemCopy = { ...invoiceItem };
+        const itemCopy = invoiceItem;
         const db = productMap.get(itemCopy.product.toString());
         if (!db)
           throw new AppError(
@@ -334,16 +381,24 @@ export const updateSupplierInvoice = catchAsync(
         let reason = "restock";
 
         if (isStatusChanged) {
-          if (isAlreadyReturnedOrCanceled && !isEnteringReturnedOrCanceled) {
+          if (
+            isAlreadyReturnedOrCanceledOrPending &&
+            !isEnteringReturnedOrCanceledOrPending
+          ) {
             stockChange = itemQty; // Unreturned: Re-adding items to warehouse
             itemCopy.isReturned = false;
           } else if (
-            !isAlreadyReturnedOrCanceled &&
-            isEnteringReturnedOrCanceled
+            !isAlreadyReturnedOrCanceledOrPending &&
+            isEnteringReturnedOrCanceledOrPending
           ) {
             stockChange = -itemQty; // Returned/Canceled: Deducting items from warehouse
-            reason = "supplier-return";
-            itemCopy.isReturned = true;
+            reason =
+              targetFulfillmentStatus === "pending"
+                ? "supplier-pending"
+                : "supplier-return"; // should we add a reason for when the status is changed to pending?
+            itemCopy.isReturned = ["returned", "canceled"].includes(
+              targetFulfillmentStatus,
+            );
           }
         }
 
@@ -372,24 +427,16 @@ export const updateSupplierInvoice = catchAsync(
         // Step 3: Recalculate Product Weighted Average Cost (WAC)
         let finalWac = db.weightedAverageCost;
 
-        if (stockChange !== 0) {
-          // Status change takes mathematical precedence
-          if (isEnteringReturnedOrCanceled) {
-            if (newStock > 0) {
-              finalWac =
-                (db.weightedAverageCost * db.stock - itemCopy.netLineTotal) /
-                newStock;
-            } else {
-              finalWac = 0;
-            }
-          } else {
-            if (newStock > 0) {
-              finalWac =
-                (db.weightedAverageCost * db.stock + itemCopy.netLineTotal) /
-                newStock;
-            }
-          }
+        if (stockChange > 0) {
+          finalWac =
+            newStock > 0
+              ? (db.weightedAverageCost * db.stock + itemCopy.netLineTotal) /
+                newStock
+              : 0;
+        } else if (stockChange < 0) {
+          finalWac = newStock > 0 ? db.weightedAverageCost : 0;
         } else if (
+          !isEnteringReturnedOrCanceledOrPending &&
           deltaShipping !== 0 &&
           !itemCopy.isReturned &&
           db.stock > 0
@@ -465,7 +512,7 @@ export const updateSupplierInvoice = catchAsync(
 
       if (isStatusChanged && targetFulfillmentStatus === "received") {
         updatePayload.fulfilledAt = new Date();
-      } else if (isEnteringReturnedOrCanceled) {
+      } else if (isEnteringReturnedOrCanceledOrPending) {
         updatePayload.fulfilledAt = null;
       }
 
@@ -854,11 +901,18 @@ export const deleteSupplerInvoice = catchAsync(
           "Failed to find the supplier invoice you want delete",
           404,
         );
+      const isLive = ["recevied", "partially-received"].includes(
+        supplierInvoice.fulfillmentStatus,
+      );
 
       const items = supplierInvoice.items.filter((i) => !i.isReturned);
 
       const itemsIds = items.map((i) => i.product.toString());
       const uniqueIds = new Set(itemsIds);
+
+      if (uniqueIds.size !== itemsIds.length) {
+        throw new Error("Duplicate products detected");
+      }
 
       const totalUnitsBought = items.reduce(
         (acc, item) => (acc += item.quantity),
@@ -870,7 +924,7 @@ export const deleteSupplerInvoice = catchAsync(
           ? supplierInvoice.shippingAndFees / totalUnitsBought
           : 0;
 
-      if (shouldRemoveStock && items.length) {
+      if (isLive && shouldRemoveStock && items.length) {
         const dbProducts = await Product.find({
           _id: { $in: itemsIds },
         }).session(session);
@@ -880,9 +934,6 @@ export const deleteSupplerInvoice = catchAsync(
             404,
           );
 
-        if (uniqueIds.size !== itemsIds.length) {
-          throw new Error("Duplicate products detected");
-        }
         const productMap = new Map(
           dbProducts.map((p) => [p._id.toString(), p]),
         );
@@ -893,8 +944,6 @@ export const deleteSupplerInvoice = catchAsync(
           const db = productMap.get(i.product.toString());
           if (!db)
             throw new AppError("One of the bought products doesn't exist", 404);
-
-          const currentStock = db.stock - i.quantity;
 
           const itemQty = i.quantity;
           const itemTotalCostBeforeTax = i.costPriceBeforeTax * itemQty;
@@ -912,14 +961,12 @@ export const deleteSupplerInvoice = catchAsync(
             totalLineShippingCost;
 
           let finalCalculatedWac = db.weightedAverageCost;
+          const newStock = db.stock - itemQty;
 
+          // Following the same logic above should we not recalculate the WAC of each deleted product entry? we just should set it to 0 if it is going to be negative or NaN ?
           // Reversing/Subtracting inventory value safely
-          if (currentStock > 0) {
-            finalCalculatedWac =
-              (db.weightedAverageCost * db.stock - totalItemCost) /
-              currentStock;
-          } else {
-            finalCalculatedWac = 0; // Guard against division by zero if stock hits absolute zero
+          if (newStock <= 0) {
+            finalCalculatedWac = 0;
           }
 
           // FIXED: Clamp calculation boundary array against breaking below zero
@@ -929,14 +976,14 @@ export const deleteSupplerInvoice = catchAsync(
           productStockUpdates.push({
             id: db._id.toString(),
             change: -i.quantity,
-            currentStock: currentStock,
+            currentStock: newStock,
             newWeightedAverageCost: Number(finalCalculatedWac.toFixed(2)),
           });
           return {
             product: db._id.toString(),
             previousStock: db.stock,
             change: -i.quantity,
-            currentStock,
+            currentStock: newStock,
             user: user._id,
             referenceId: supplierInvoice._id,
             reason: "supplier-delete",

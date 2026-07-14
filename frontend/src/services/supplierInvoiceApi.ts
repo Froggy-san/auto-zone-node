@@ -58,11 +58,12 @@ export async function getSupplierInvoicesById(
 export async function createSupplierInvoice(
   data: CreateSupplierInvoiceInput
 ): Promise<SupplierInvoice> {
+  console.log("Creating supplier invoice with data:", data) // Log the data being sent
   const res = await fetch(`${BASE_URL}/api/v1/supplierInvoices`, {
     method: "POST",
     credentials: "include",
     headers: {
-      "Content-Type": "applecation/json",
+      "Content-Type": "application/json",
     },
     body: JSON.stringify(data),
   })
